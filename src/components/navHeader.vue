@@ -16,7 +16,7 @@ import { useRouter } from 'vue-router'
 import { routes } from "../routes"
 
 const router = useRouter()
-const activeIndex = ref("0")
+const activeIndex = ref(`${routes.length-1}`)
 
-onMounted(() => router.push(routes[0].path))
+onMounted(() => router.push(routes[routes.length-1].path))
 </script>

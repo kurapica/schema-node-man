@@ -6,6 +6,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import 'element-plus/dist/index.css'
 import { routes } from './routes'
 import Markdown from './components/markdown.vue'
+import './schema'
 
 const app = createApp(App)
 
