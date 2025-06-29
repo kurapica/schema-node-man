@@ -14,9 +14,22 @@
 import { onMounted, ref } from "vue"
 import { useRouter } from 'vue-router'
 import { routes } from "../routes"
+import { isNull } from "schema-node"
 
 const router = useRouter()
-const activeIndex = ref(`${routes.length-1}`)
+const activeIndex = ref("0")
 
-onMounted(() => router.push(routes[routes.length-1].path))
+onMounted(() => {
+    const path = router.currentRoute.value.fullPath
+    if (!isNull(path))
+    {
+        const index = routes.findIndex(r => r.path === path)
+        if(!isNull(index))
+        {
+            activeIndex.value = `${index}`
+            return
+        }
+    }
+    router.push(routes[0].path)
+})
 </script>

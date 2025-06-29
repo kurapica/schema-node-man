@@ -7,6 +7,7 @@ import 'element-plus/dist/index.css'
 import { routes } from './routes'
 import Markdown from './components/markdown.vue'
 import './schema'
+import "@/assets/example/schema"
 
 const app = createApp(App)
 

@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 import SchemaView from "schema-node-vue-view"
-import { ref } from "vue";
+import { ref } from "vue"
 
 const data = ref({})
 </script>
