@@ -1,4 +1,4 @@
-import { EnumValueType } from "schema-node"
+import { EnumValueType, NS_SYSTEM_BOOL } from "schema-node"
 import { ExpressionType, RelationType, NS_SYSTEM_INT, NS_SYSTEM_STRING, NS_SYSTEM_DATE, registerSchema, SchemaType, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
@@ -31,6 +31,35 @@ registerSchema([
                 {
                     value: 5,
                     name: "化学"
+                }
+            ]
+        }
+    },
+    {
+        name: "frontend.gpa",
+        type: SchemaType.Enum,
+        enum: {
+            type: EnumValueType.Int,
+            values: [
+                {
+                    value: 5,
+                    name: "优秀"
+                },
+                {
+                    value: 4,
+                    name: "良好"
+                },
+                {
+                    value: 3,
+                    name: "合格"
+                },
+                {
+                    value: 2,
+                    name: "及格"
+                },
+                {
+                    value: 1,
+                    name: "不及格"
                 }
             ]
         }
@@ -127,6 +156,12 @@ registerSchema([
                     displayOnly: true,
                 } as IStructScalarFieldConfig,
                 {
+                    name: "gpa",
+                    type: NS_SYSTEM_BOOL,
+                    display: "使用绩点",
+                    default: false
+                },
+                {
                     name: "scores",
                     type: "frontend.scores",
                     display: "成绩单",
@@ -151,7 +186,7 @@ registerSchema([
                 },
                 {
                     field: "scores.subject",
-                    type: RelationType.EnumWhiteList,
+                    type: RelationType.WhiteList,
                     func: "system.conv.assign",
                     args: [
                         {
@@ -161,7 +196,7 @@ registerSchema([
                 },
                 {
                     field: "scores.subject",
-                    type: RelationType.EnumBlackList,
+                    type: RelationType.BlackList,
                     func: "system.collection.getfields",
                     args: [
                         {
@@ -169,6 +204,22 @@ registerSchema([
                         },
                         {
                             value: "subject"
+                        }
+                    ]
+                },
+                {
+                    field: "scores.score",
+                    type: RelationType.Type,
+                    func: "system.logic.cond",
+                    args: [
+                        {
+                            name: "gpa"
+                        },
+                        {
+                            value: "frontend.gpa"
+                        },
+                        {
+                            value: NS_SYSTEM_INT
                         }
                     ]
                 },
