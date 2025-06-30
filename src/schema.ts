@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ITSELF, EnumValueType, ExpressionType, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaType, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ITSELF, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getScalarValueType, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaType, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
     //#region scalar type
@@ -158,8 +158,8 @@ registerSchema([
                     name: _LS("schema.relationtype.default"),
                 },
                 {
-                    value: RelationType.EnumRoot,
-                    name: _LS("schema.relationtype.enumroot"),
+                    value: RelationType.Root,
+                    name: _LS("schema.relationtype.root"),
                 },
                 {
                     value: RelationType.BlackList,
@@ -573,61 +573,186 @@ registerSchema([
     {
         name: "schema.structfldfuncargs",
         type: SchemaType.Array,
-        desc: "函数参数申明列表",
+        desc: _LS("schema.structfldfuncargs"),
         array: {
             element: "schema.structfldfuncarg",
         },
     },
     {
-        name: "system.structfieldtype",
+        name: "schema.notscalartype",
+        type: SchemaType.Function,
+        desc: "Whether the type not a scalar type",
+        func: {
+            return : NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: (type: string) => {
+                const schema = getCachedSchema(type)
+                return schema?.type !== SchemaType.Scalar
+            }
+        }
+    },
+    {
+        name: "schema.notenumtype",
+        type: SchemaType.Function,
+        desc: "Whether the type not an enum type",
+        func: {
+            return : NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: (type: string) => {
+                const schema = getCachedSchema(type)
+                return schema?.type !== SchemaType.Enum
+            }
+        }
+    },
+    {
+        name: "schema.notscalarenumtype",
+        type: SchemaType.Function,
+        desc: "Whether the type not scalar or enum type",
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: (type: string) => {
+                const schema = getCachedSchema(type)
+                return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
+            }
+        }
+    },
+    {
+        name: "schema.notcascadeenumtype",
+        type: SchemaType.Function,
+        desc: "Whether the type not a cascade enum type",
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args:[
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: (type: string) => {
+                const schema = getCachedSchema(type)
+                return schema?.type !== SchemaType.Enum || !schema.enum?.cascade || schema.enum.cascade.length <= 1
+            }
+        }
+    },
+    {
+        name: "schema.notflagsenumtype",
+        type: SchemaType.Function,
+        desc: "Whether the type not a flags enum type",
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: (type: string) => {
+                const schema = getCachedSchema(type)
+                return schema?.type !== SchemaType.Enum || schema.enum?.type !== EnumValueType.Flags
+            }
+        }
+    },
+    {
+        name: "schema.getenumcascadewhitelist",
+        type: SchemaType.Function,
+        desc: "Gets the enum cascade white list",
+        func: {
+            return: NS_SYSTEM_ARRAY,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: (type: string) => {
+                const schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1) {
+                    return schema.enum.cascade.map((item: string, i: number) => ({
+                        value: i,
+                        label: item.trim()
+                    }))
+                }
+                return null
+            }
+        }
+    },
+    {
+        name: "schema.structfieldtype",
         type: SchemaType.Struct,
-        desc: _LS("system.structfieldtype"),
+        desc: _LS("schema.structfieldtype"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
                     type: "schema.varname",
-                    display: _LS("system.structfieldtype.name"),
+                    display: _LS("schema.structfieldtype.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "type",
                     require: true,
                     type: "schema.valuetype",
-                    display: _LS("system.structfieldtype.type"),
+                    display: _LS("schema.structfieldtype.type"),
                 },
                 {
+                    name: "display",
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.structfieldtype.display"),
+                    upLimit: 64,
+                } as IStructScalarFieldConfig,
+                {
+                    name: "desc",
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.structfieldtype.desc"),
+                    upLimit: 255,
+                } as IStructScalarFieldConfig,
+                {
                     name: "require",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_BOOL,
-                    display: "必填",
+                    display: _LS("schema.structfieldtype.require"),
                 },
                 {
                     name: "immutable",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_BOOL,
-                    display: "不允许修改",
+                    display: _LS("schema.structfieldtype.immutable"),
+                },
+                {
+                    name: "readonly",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.structfieldtype.readonly"),
                 },
                 {
                     name: "invisible",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_BOOL,
-                    display: "不显示",
+                    display: _LS("schema.structfieldtype.invisible"),
                 },
                 {
                     name: "displayOnly",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_BOOL,
-                    display: "仅显示用",
+                    display: _LS("schema.structfieldtype.displayonly"),
                 },
                 {
                     name: "unit",
@@ -635,226 +760,187 @@ registerSchema([
                     immutable: false,
                     displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "字面量单位",
-                    upLimit: 16,
-                },
-                {
-                    name: "display",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_STRING,
-                    display: "中文名",
-                    upLimit: 64,
-                },
-                {
-                    name: "desc",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_STRING,
-                    display: "描述",
-                    upLimit: 255,
-                },
+                    display: _LS("schema.structfieldtype.unit"),
+                    upLimit: 32,
+                } as IStructScalarFieldConfig,
                 {
                     name: "default",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "默认值",
+                    display: _LS("schema.structfieldtype.default"),
                 },
+
+                // scalar config
                 {
-                    name: "enumCascade",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_INT,
-                    display: "级联枚举值限制层级",
-                },
-                {
-                    name: "enumRoot",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_STRING,
-                    display: "枚举值根值",
-                },
-                {
-                    name: "enumWhiteList",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
+                    name: "whiteList",
                     type: NS_SYSTEM_STRINGS,
-                    display: "枚举值白名单",
+                    display: _LS("schema.structfieldtype.whitelist"),
                 },
                 {
-                    name: "enumBlackList",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
+                    name: "blackList",
                     type: NS_SYSTEM_STRINGS,
-                    display: "枚举值黑名单",
-                },
-                {
-                    name: "enumAnyLevel",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: "枚举值任意级可选",
-                },
-                {
-                    name: "enumSingleFlag",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: "单选标志位",
-                    relations: [
-                        {
-                            relationType: RelationType.Invisible,
-                            func: "system.datadict.notflagenum",
-                            funcArgs: [
-                                {
-                                    name: "type"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    name: "asSuggest",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: "白名单仅作为推荐",
-                },
-                {
-                    name: "useOriginForUplimit",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: "计算上限时计入原始值",
+                    display: _LS("schema.structfieldtype.blacklist"),
                 },
                 {
                     name: "lowLimit",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "下限值",
+                    display: _LS("schema.structfieldtype.lowlimit"),
                 },
                 {
                     name: "upLimit",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "上限值",
+                    display: _LS("schema.structfieldtype.uplimit"),
                 },
                 {
-                    name: "valid",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    enumRoot: NS_SYSTEM_BOOL,
-                    type: "schema.functype",
-                    display: "校验函数",
+                    name: "asSuggest",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.structfieldtype.assuggest"),
                 },
                 {
-                    name: "validArgs",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.structfldfuncargs",
-                    display: "校验函数参数",
+                    name: "useOriginForUplimit",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.structfieldtype.useoriginforuplimit"),
+                },
+
+                // enum config
+                {
+                    name: "cascade",
+                    type: NS_SYSTEM_INT,
+                    display: _LS("schema.structfieldtype.cascade"),
                 },
                 {
-                    name: "validError",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
+                    name: "root",
                     type: NS_SYSTEM_STRING,
-                    display: "校验错误消息",
+                    display: _LS("schema.structfieldtype.root"),
                 },
                 {
-                    name: "relations",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.structfieldselfrelationinfos",
-                    display: "字段关联",
+                    name: "anyLevel",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.structfieldtype.anylevel"),
+                },
+                {
+                    name: "singleFlag",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.structfieldtype.singleflag"),
                 },
             ],
             relations: [
-                // 验证
                 {
-                    field: "valid",
-                    relationType: RelationType.Invisible,
-                    func: "system.logic.isnull",
-                    funcArgs: [
+                    field: "whiteList",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalarenumtype",
+                    args: [
                         {
                             name: "type"
                         }
                     ]
                 },
                 {
-                    field: "validArgs",
-                    relationType: RelationType.Invisible,
-                    func: "system.logic.isnull",
-                    funcArgs: [
-                        {
-                            name: "valid"
-                        }
-                    ]
-                },
-                {
-                    field: "validError",
-                    relationType: RelationType.Invisible,
-                    func: "system.logic.isnull",
-                    funcArgs: [
-                        {
-                            name: "valid"
-                        }
-                    ]
-                },
-                // 关联
-                {
-                    field: "relations.func",
-                    relationType: RelationType.EnumRoot,
-                    func: "system.datadict.getrelationfuncroot",
-                    funcArgs: [
-                        {
-                            name: "type"
-                        },
-                        {
-                            name: "relations.relationType"
-                        }
-                    ]
-                },
-                {
-                    field: "relations.relationType",
-                    relationType: RelationType.EnumWhiteList,
-                    func: "system.datadict.getrealtionwhitelist",
-                    funcArgs: [
+                    field: "blackList",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalarenumtype",
+                    args: [
                         {
                             name: "type"
                         }
                     ]
                 },
                 {
-                    field: "relations.relationType",
-                    relationType: RelationType.EnumBlackList,
-                    func: "system.collection.arraymap",
-                    funcArgs: [
+                    field: "lowLimit",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalartype",
+                    args: [
                         {
-                            name: "relations"
-                        },
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "upLimit",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalartype",
+                    args: [
                         {
-                            value: "relationType"
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "asSuggest",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalartype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "useOriginForUplimit",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalartype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "cascade",
+                    type: RelationType.Invisible,
+                    func: "schema.notcascadeenumtype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "cascade",
+                    type: RelationType.WhiteList,
+                    func: "schema.getenumcascadewhitelist",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "root",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalarenumtype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "root",
+                    type: RelationType.Type,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "anyLevel",
+                    type: RelationType.Invisible,
+                    func: "schema.notcascadeenumtype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "singleFlag",
+                    type: RelationType.Invisible,
+                    func: "schema.notflagsenumtype",
+                    args: [
+                        {
+                            name: "type"
                         }
                     ]
                 }
@@ -862,25 +948,24 @@ registerSchema([
         }
     },
     {
-        name: "system.structfieldtypes",
+        name: "schema.structfieldtypes",
         type: SchemaType.Array,
-        desc: "结构体类型字段列表",
+        desc: _LS("schema.structfieldtypes"),
         array: {
-            base: "system.structfieldtype",
+            element: "schema.structfieldtype",
             primary: ["name"],
-            valid: ""
         },
     },
     {
-        name: "system.datadict.getstructindexfields",
+        name: "schema.getstructindexfields",
         type: SchemaType.Function,
-        desc: "获取结构体字段可用索引",
-        function: {
-            retType: NS_SYSTEM_STRINGS,
+        desc: "get indexable struct field names",
+        func: {
+            return: NS_SYSTEM_STRINGS,
             args: [
                 {
                     name: "fields",
-                    type: "system.structfieldtypes"
+                    type: "schema.structfieldtypes"
                 }
             ],
             exps: [],
@@ -888,8 +973,7 @@ registerSchema([
                 const indexes: string[] = []
 
                 for (let i = 0; i < fields.length; i++) {
-                    const type = fields[i].type
-                    if (await isIndexType(type, fields[i].upLimit ? parseInt(fields[i].upLimit) : undefined)) {
+                    if (await isStructFieldIndexable(fields[i] as IStructFieldConfig)) {
                         indexes.push(fields[i].name)
                     }
                 }
@@ -899,15 +983,15 @@ registerSchema([
         }
     },
     {
-        name: "system.datadict.getrelationfuncroot",
+        name: "schema.getrelationfuncreturn",
         type: SchemaType.Function,
-        desc: "获取函数关联用函数返回值类型",
-        function: {
-            retType: NS_SYSTEM_STRING,
+        desc: "Gets the return type of the relation function",
+        func: {
+            return: "system.valuetype",
             args: [
                 {
                     name: "fieldType",
-                    type: NS_SYSTEM_STRING
+                    type: "system.valuetype"
                 },
                 {
                     name: "relationType",
@@ -917,46 +1001,36 @@ registerSchema([
             exps: [],
             func: async (fieldType: string, relationType: any) => {
                 switch (relationType) {
-                    // 默认值
                     case RelationType.Default:
                     case RelationType.Assign:
                     case RelationType.InitOnly:
+                    case RelationType.Root:
                         return fieldType
 
-                    // 根枚举值
-                    case RelationType.EnumRoot:
-                        return fieldType
-
-                    // 白名单 X 黑名单
                     case RelationType.WhiteList:
                     case RelationType.BlackList:
-                        const typeInfo = await queryDataTypeInfo(fieldType)
-                        return typeInfo?.type === SchemaType.Enum ? typeInfo.enum?.arrayType
-                            : typeInfo?.type === SchemaType.Scalar ? typeInfo?.scalar?.arrayType
-                                : "system.array"
+                        return await getArraySchema(fieldType, true) || NS_SYSTEM_ARRAY
 
-                    // 下限 X 上限
                     case RelationType.LowLimit:
                     case RelationType.Uplimit:
-                        if (await canbeUseAs(NS_SYSTEM_STRING, fieldType)) // 字符串类，使用长度限制
+                        if (await isSchemaCanBeUseAs(NS_SYSTEM_STRING, fieldType))
                             return NS_SYSTEM_INT
                         return fieldType
 
-                    // 不可见 X 不可用 X 仅建议
                     case RelationType.Invisible:
                     case RelationType.Disable:
-                    case RelationType.AsSuggest:
+                    case RelationType.Type:
                         return NS_SYSTEM_BOOL
                 }
             }
         }
     },
     {
-        name: "system.datadict.getrealtionwhitelist",
+        name: "schema.getrelationwhitelist",
         type: SchemaType.Function,
-        desc: "获取指定类型的关系白名单",
-        function: {
-            retType: "system.ints",
+        desc: "Gets the whitelist of the relations",
+        func: {
+            return: NS_SYSTEM_STRINGS,
             args: [
                 {
                     name: "fieldType",
@@ -966,31 +1040,31 @@ registerSchema([
             exps: [],
             func: async (fieldType: string) => {
                 if (!fieldType) return []
-                const typeInfo = fieldType ? await queryDataTypeInfo(fieldType) : null
+                const typeInfo = fieldType ? await getSchema(fieldType) : null
                 if (typeInfo?.type === SchemaType.Scalar) {
                     return [
                         RelationType.Default,
-                        RelationType.EnumWhiteList,
+                        RelationType.WhiteList,
                         RelationType.LowLimit,
                         RelationType.Uplimit,
                         RelationType.Invisible,
                         RelationType.Disable,
                         RelationType.Assign,
-                        RelationType.AsSuggest,
                         RelationType.InitOnly,
+                        RelationType.Type
                     ]
                 }
                 else if (typeInfo?.type === SchemaType.Enum) {
                     return [
                         RelationType.Default,
-                        RelationType.EnumRoot,
-                        RelationType.EnumCascade,
-                        RelationType.EnumWhiteList,
-                        RelationType.EnumBlackList,
+                        RelationType.Root,
+                        RelationType.WhiteList,
+                        RelationType.BlackList,
                         RelationType.Invisible,
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.InitOnly,
+                        RelationType.Type
                     ]
                 }
                 else if (typeInfo?.type === SchemaType.Struct) {
@@ -998,27 +1072,29 @@ registerSchema([
                         RelationType.Invisible,
                         RelationType.Disable,
                         RelationType.Assign,
+                        RelationType.Type
                     ]
                 }
                 return [
                     RelationType.Default,
-                    RelationType.EnumRoot,
-                    RelationType.EnumWhiteList,
-                    RelationType.EnumBlackList,
+                    RelationType.Root,
+                    RelationType.WhiteList,
+                    RelationType.BlackList,
                     RelationType.Invisible,
                     RelationType.Disable,
                     RelationType.Assign,
                     RelationType.InitOnly,
+                    RelationType.Type
                 ]
             }
         }
     },
     {
-        name: "system.datadict.getstructfieldtype",
+        name: "schema.getstructfieldtype",
         type: SchemaType.Function,
-        desc: "获取字段类型",
-        function: {
-            retType: NS_SYSTEM_STRING,
+        desc: "Gets the struct field type",
+        func: {
+            return: "schema.valuetype",
             args: [
                 {
                     name: "field",
@@ -1026,7 +1102,7 @@ registerSchema([
                 },
                 {
                     name: "fields",
-                    type: "system.structfieldtypes"
+                    type: "schema.structfieldtypes"
                 }
             ],
             exps: [],
@@ -1037,13 +1113,13 @@ registerSchema([
                 for (let i = 1; i < paths.length; i++) {
                     if (!tarField) return null
 
-                    let typeInfo = await queryDataTypeInfo(tarField.type)
-                    if (typeInfo?.type === SchemaType.Array && typeInfo.array?.base) {
-                        typeInfo = await queryDataTypeInfo(typeInfo.array!.base)
+                    let schema = await getSchema(tarField.type)
+                    if (schema?.type === SchemaType.Array && schema.array?.element) {
+                        schema = await getSchema(schema.array!.element)
                     }
 
-                    if (typeInfo?.type === SchemaType.Struct && typeInfo.struct?.fields) {
-                        tarField = typeInfo.struct.fields.find(p => p.name === paths[i])
+                    if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
+                        tarField = schema.struct.fields.find(p => p.name === paths[i])
                     }
                     else {
                         tarField = null
@@ -1054,35 +1130,15 @@ registerSchema([
         }
     },
     {
-        name: "system.datadict.notflagenum",
+        name: "schema.getstructfieldtypebytype",
         type: SchemaType.Function,
-        desc: "是否标志位枚举",
-        function: {
-            retType: NS_SYSTEM_BOOL,
+        desc: "Get struct field type by give type",
+        func: {
+            return: "system.valuetype",
             args: [
                 {
                     name: "type",
-                    type: NS_SYSTEM_STRING
-                }
-            ],
-            exps: [],
-            func: async (type: string) => {
-                if (!type) return true
-                const typeInfo = type ? await queryDataTypeInfo(type) : null
-                return !(type && typeInfo?.type === SchemaType.Enum && typeInfo?.enum?.flags)
-            }
-        }
-    },
-    {
-        name: "system.datadict.getstructfieldtypebytype",
-        type: SchemaType.Function,
-        desc: "获取字段类型",
-        function: {
-            retType: NS_SYSTEM_STRING,
-            args: [
-                {
-                    name: "type",
-                    type: NS_SYSTEM_STRING
+                    type: "system.valuetype"
                 },
                 {
                     name: "field",
@@ -1094,18 +1150,19 @@ registerSchema([
                 const paths = (field || "").split(".")
                 if (paths.length === 0) return null
 
-                let typeInfo = await queryDataTypeInfo(type)
-                let tarField = typeInfo.struct?.fields.find(p => p.name === paths[0])
+                let schema = await getSchema(type)
+                if (!schema) return null
+                let tarField = schema.struct?.fields.find(p => p.name === paths[0])
                 for (let i = 1; i < paths.length; i++) {
                     if (!tarField) return null
 
-                    typeInfo = await queryDataTypeInfo(tarField.type)
-                    if (typeInfo?.type === SchemaType.Array && typeInfo.array?.base) {
-                        typeInfo = await queryDataTypeInfo(typeInfo.array!.base)
+                    schema = await getSchema(tarField.type)
+                    if (schema?.type === SchemaType.Array && schema.array?.element) {
+                        schema = await getSchema(schema.array!.element)
                     }
 
-                    if (typeInfo?.type === SchemaType.Struct && typeInfo.struct?.fields) {
-                        tarField = typeInfo.struct.fields.find(p => p.name === paths[i])
+                    if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
+                        tarField = schema.struct.fields.find(p => p.name === paths[i])
                     }
                     else {
                         tarField = undefined
@@ -1116,199 +1173,47 @@ registerSchema([
         }
     },
     {
-        name: "system.structfieldselfrelationinfo",
+        name: "schema.structfldrelationinfo",
         type: SchemaType.Struct,
-        desc: "字段数据关联",
-        struct: {
-            fields: [
-                {
-                    name: "relationType",
-                    require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.relationtype",
-                    display: "函数结果用途"
-                },
-                {
-                    name: "func",
-                    require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.functype",
-                    display: "关系函数",
-                },
-                {
-                    name: "funcArgs",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.structfldfuncargs",
-                    display: "函数参数",
-                },
-            ]
-        }
-    },
-    {
-        name: "system.structfieldselfrelationinfos",
-        type: SchemaType.Array,
-        desc: "字段数据关联列表",
-        array: {
-            base: "system.structfieldselfrelationinfo",
-            primary: ["relationType"],
-            valid: ""
-        },
-    },
-    {
-        name: "system.structfieldrelationinfo",
-        type: SchemaType.Struct,
-        desc: "字段数据关联",
+        desc: _LS("schema.structfldrelationinfo"),
         struct: {
             fields: [
                 {
                     name: "field",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.reltarfield",
-                    display: "目标字段",
+                    display: _LS("schema.structfldrelationinfo.field"),
                 },
                 {
                     name: "fieldType",
-                    require: false,
-                    immutable: false,
                     displayOnly: true,
-                    type: NS_SYSTEM_STRING,
-                    display: "字段类型",
+                    type : "schema.valuetype",
+                    display: _LS("schema.structfldrelationinfo.fieldtype"),
                 },
                 {
-                    name: "relationType",
+                    name: "type",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.relationtype",
-                    display: "函数结果用途",
+                    display: _LS("schema.structfldrelationinfo.type"),
                 },
                 {
                     name: "func",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.functype",
-                    display: "关系函数",
+                    display: _LS("schema.structfldrelationinfo.func"),
                 },
                 {
-                    name: "funcArgs",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
+                    name: "args",
                     type: "schema.structfldfuncargs",
-                    display: "函数参数",
-                },
-            ]
-        }
-    },
-    {
-        name: "system.structfieldrelationinfos",
-        type: SchemaType.Array,
-        desc: "字段数据关联列表",
-        array: {
-            base: "system.structfieldrelationinfo",
-            primary: ["field", "relationType"],
-            valid: ""
-        },
-    },
-    {
-        name: "system.structdefinition",
-        type: SchemaType.Struct,
-        desc: "结构体类型定义",
-        struct: {
-            fields: [
-                {
-                    name: "base",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.structtype",
-                    display: "基础结构体类型",
-                },
-                {
-                    name: "fields",
-                    require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.structfieldtypes",
-                    display: "结构体类型字段列表",
-                    upLimit: 128,
-                },
-                {
-                    name: "indexes",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.structindexs",
-                    display: "索引列表",
-                },
-                {
-                    name: "relations",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.structfieldrelationinfos",
-                    display: "字段间关系申明",
-                },
-                {
-                    name: "valid",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    enumRoot: NS_SYSTEM_BOOL,
-                    type: "schema.functype",
-                    display: "数据验证用函数",
+                    display: _LS("schema.structfldrelationinfo.args"),
                 },
             ],
             relations: [
-                // 索引
                 {
-                    field: "indexes.fields",
-                    relationType: RelationType.EnumWhiteList,
-                    func: "system.datadict.getstructindexfields",
-                    funcArgs: [
-                        {
-                            name: "fields"
-                        }
-                    ]
-                },
-                {
-                    field: "indexes.fields",
-                    relationType: RelationType.EnumBlackList,
-                    func: "system.conv.assign",
-                    funcArgs: [
-                        {
-                            name: "indexes.fields"
-                        }
-                    ]
-                },
-                // 关联
-                {
-                    // 关联数据类型
-                    field: "relations.fieldType",
-                    relationType: RelationType.Default,
-                    func: "system.datadict.getstructfieldtype",
-                    funcArgs: [
-                        {
-                            name: "relations.field"
-                        },
-                        {
-                            name: "fields"
-                        }
-                    ]
-                },
-                {
-                    // 关联类型白名单
-                    field: "relations.relationType",
-                    relationType: RelationType.EnumWhiteList,
-                    func: "system.datadict.getrealtionwhitelist",
-                    funcArgs: [
+                    field: "type",
+                    type: RelationType.WhiteList,
+                    func: "schema.getrelationwhitelist",
+                    args: [
                         {
                             name: "relations.fieldType"
                         }
@@ -1316,10 +1221,10 @@ registerSchema([
                 },
                 {
                     // 关联函数返回值类型
-                    field: "relations.func",
-                    relationType: RelationType.EnumRoot,
-                    func: "system.datadict.getrelationfuncroot",
-                    funcArgs: [
+                    field: "func",
+                    type: RelationType.Root,
+                    func: "schema.getrelationfuncreturn",
+                    args: [
                         {
                             name: "relations.fieldType"
                         },
@@ -1328,6 +1233,55 @@ registerSchema([
                         }
                     ]
                 }
+            ]
+        }
+    },
+    {
+        name: "schema.structfldrelationinfos",
+        type: SchemaType.Array,
+        desc: _LS("schema.structfldrelationinfos"),
+        array: {
+            element: "schema.structfldrelationinfo",
+            primary: ["field", "type"],
+        },
+    },
+    {
+        name: "schema.structdefine",
+        type: SchemaType.Struct,
+        desc: _LS("schema.structdefine"),
+        struct: {
+            fields: [
+                {
+                    name: "base",
+                    type: "schema.structtype",
+                    display: _LS("schema.structdefine.base"),
+                },
+                {
+                    name: "fields",
+                    require: true,
+                    type: "schema.structfieldtypes",
+                    display: _LS("schema.structdefine.fields"),
+                },
+                {
+                    name: "relations",
+                    type: "schema.structfldrelationinfos",
+                    display: _LS("schema.structdefine.relations"),
+                },
+            ],
+            relations: [
+                {
+                    field: "relations.fieldType",
+                    type: RelationType.Default,
+                    func: "schema.getstructfieldtype",
+                    args: [
+                        {
+                            name: "relations.field"
+                        },
+                        {
+                            name: "fields"
+                        }
+                    ]
+                },
             ]
         }
     },
@@ -1421,7 +1375,7 @@ registerSchema([
                     require: false,
                     immutable: false,
                     displayOnly: false,
-                    enumRoot: NS_SYSTEM_BOOL,
+                    root: NS_SYSTEM_BOOL,
                     type: "schema.functype",
                     display: "数据验证用函数",
                 },
@@ -1438,7 +1392,7 @@ registerSchema([
                     require: false,
                     immutable: false,
                     displayOnly: false,
-                    type: "system.structfieldrelationinfos",
+                    type: "schema.structfldrelationinfos",
                     display: "字段间关系申明",
                 },
             ],
@@ -1535,7 +1489,7 @@ registerSchema([
                     // 关系
                     field: "relations.fieldType",
                     relationType: RelationType.Default,
-                    func: "system.datadict.getstructfieldtypebytype",
+                    func: "schema.getstructfieldtypebytype",
                     funcArgs: [
                         {
                             name: "base"
@@ -1549,7 +1503,7 @@ registerSchema([
                     // 关联类型白名单
                     field: "relations.relationType",
                     relationType: RelationType.EnumWhiteList,
-                    func: "system.datadict.getrealtionwhitelist",
+                    func: "schema.getrelationwhitelist",
                     funcArgs: [
                         {
                             name: "relations.fieldType"
@@ -1559,8 +1513,8 @@ registerSchema([
                 {
                     // 关联函数返回值类型
                     field: "relations.func",
-                    relationType: RelationType.EnumRoot,
-                    func: "system.datadict.getrelationfuncroot",
+                    type: RelationType.Root,
+                    func: "schema.getrelationfuncreturn",
                     funcArgs: [
                         {
                             name: "relations.fieldType"
@@ -1811,7 +1765,7 @@ registerSchema([
         name: "system.getfunccallenumroot",
         type: SchemaType.Function,
         desc: "基于表达式类型确定函数返回值",
-        function: {
+        func: {
             retType: NS_SYSTEM_STRING,
             args: [
                 {
@@ -1899,7 +1853,7 @@ registerSchema([
                     require: false,
                     immutable: false,
                     displayOnly: false,
-                    type: "system.structdefinition",
+                    type: "schema.structdefine",
                     display: "结构体类型定义",
                 },
                 {
