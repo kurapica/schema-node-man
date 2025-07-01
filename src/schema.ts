@@ -1751,3 +1751,17 @@ registerSchema([
     },
     //#endregion
 ])
+
+// View
+import namespaceView from "./view/namespaceView.vue"
+import { regSchemaTypeView } from "schema-node-vue-view"
+
+regSchemaTypeView("schema.namespace", namespaceView)
+regSchemaTypeView("schema.scalartype", namespaceView)
+regSchemaTypeView("schema.enumtype", namespaceView)
+regSchemaTypeView("schema.structtype", namespaceView)
+regSchemaTypeView("schema.arraytype", namespaceView)
+regSchemaTypeView("schema.functype", namespaceView)
+regSchemaTypeView("schema.scalarenumtype", namespaceView)
+regSchemaTypeView("schema.arrayeletype", namespaceView)
+regSchemaTypeView("schema.valuetype", namespaceView)
