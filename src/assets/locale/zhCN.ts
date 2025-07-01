@@ -50,6 +50,13 @@ importLanguage("zhCN", {
     "schema.enumvaluetype.double": "双精度浮点数",
     "schema.enumvaluetype.flags": "标志位",
 
+    "schema.datacombinetype": "数据合并方式",
+    "schema.datacombinetype.assign": "直接赋值",
+    "schema.datacombinetype.sum": "合计",
+    "schema.datacombinetype.count": "计数",
+    "schema.datacombinetype.min": "最小值",
+    "schema.datacombinetype.max": "最大值",
+
     "schema.scalardefine": "基础结构体类型定义",
     "schema.scalardefine.base": "原始基础数据类型",
     "schema.scalardefine.unit": "字面量单位",
@@ -118,4 +125,47 @@ importLanguage("zhCN", {
     "schema.structdefine.base": "基础类型",
     "schema.structdefine.fields": "字段列表",
     "schema.structdefine.relations": "字段数据关联列表",
+
+    "schema.datacombine": "数据合并规则",
+    "schema.datacombines": "数据合并规则列表",
+
+    "schema.arraydefine": "数组定义",
+    "schema.arraydefine.element": "元素数据类型",
+    "schema.arraydefine.primary": "作为主键的字段列表",
+    "schema.arraydefine.combine": "数据合并规则",
+    "schema.arraydefine.relations": "字段间关系申明",
+
+    "schema.funcarg": "函数参数",
+    "schema.funcarg.name": "名称",
+    "schema.funcarg.type": "类型",
+    "schema.funcarg.nullable": "允许为空",
+    "schema.funcargs": "函数参数列表",
+
+    "schema.funccallarg": "函数调用参数",
+    "schema.funccallarg.name": "表达式",
+    "schema.funccallarg.value": "常量",
+    "schema.funccallargs": "函数调用参数列表",
+
+    "schema.funcexp": "函数表达式配置",
+    "schema.funcexp.name": "表达式名称",
+    "schema.funcexp.type": "调用方式",
+    "schema.funcexp.func": "调用函数",
+    "schema.funcexp.return": "返回类型",
+    "schema.funcexp.args": "调用参数列表",
+    "schema.funcexps": "函数表达式列表",
+
+    "schema.funcdefine": "函数类型定义",
+    "schema.funcdefine.return": "返回值类型",
+    "schema.funcdefine.args": "函数参数列表",
+    "schema.funcdefine.exps": "函数表达式列表",
+
+    "schema.namespacedefine": "命名空间定义",
+    "schema.namespacedefine.name": "名称",
+    "schema.namespacedefine.type": "类型",
+    "schema.namespacedefine.desc": "描述",
+    "schema.namespacedefine.scalar": "基础数据类型定义",
+    "schema.namespacedefine.enum": "枚举类型定义",
+    "schema.namespacedefine.struct": "结构体类型定义",
+    "schema.namespacedefine.array": "数组类型定义",
+    "schema.namespacedefine.func": "函数定义",
 })

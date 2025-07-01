@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ITSELF, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getScalarValueType, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaType, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaType, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
     //#region scalar type
@@ -260,6 +260,36 @@ registerSchema([
                 {
                     value: EnumValueType.Flags,
                     name: _LS("schema.enumvaluetype.flags")
+                },
+            ]
+        }
+    },
+    {
+        name: "schema.datacombinetype",
+        type: SchemaType.Enum,
+        desc: _LS("schema.datacombinetype"),
+        enum: {
+            type: EnumValueType.String,
+            values: [
+                {
+                    value: DataCombineType.Assign,
+                    name: _LS("schema.datacombinetype.assign")
+                },
+                {
+                    value: DataCombineType.Sum,
+                    name: _LS("schema.datacombinetype.sum")
+                },
+                {
+                    value: DataCombineType.Count,
+                    name: _LS("schema.datacombinetype.count")
+                },
+                {
+                    value: DataCombineType.Min,
+                    name: _LS("schema.datacombinetype.min")
+                },
+                {
+                    value: DataCombineType.Max,
+                    name: _LS("schema.datacombinetype.max")
                 },
             ]
         }
@@ -999,8 +1029,8 @@ registerSchema([
                 }
             ],
             exps: [],
-            func: async (fieldType: string, relationType: any) => {
-                switch (relationType) {
+            func: async (fieldType: string, type: any) => {
+                switch (type) {
                     case RelationType.Default:
                     case RelationType.Assign:
                     case RelationType.InitOnly:
@@ -1220,16 +1250,15 @@ registerSchema([
                     ]
                 },
                 {
-                    // 关联函数返回值类型
                     field: "func",
                     type: RelationType.Root,
                     func: "schema.getrelationfuncreturn",
                     args: [
                         {
-                            name: "relations.fieldType"
+                            name: "fieldType"
                         },
                         {
-                            name: "relations.relationType"
+                            name: "type"
                         }
                     ]
                 }
@@ -1287,111 +1316,76 @@ registerSchema([
     },
     //#endregion
 
-    //#region Array类型定义
+    //#region array definition
     {
-        name: "system.datadict.isnotstructtype",
+        name: "schema.notstructtype",
         type: SchemaType.Function,
-        desc: "不是结构体类型",
-        function: {
-            retType: "system.boolean",
+        desc: "Whether the type is not a struct",
+        func: {
+            return: NS_SYSTEM_BOOL,
             args: [
                 {
-                    name: "base",
-                    type: NS_SYSTEM_STRING
+                    name: "type",
+                    type: "schema.valuetype"
                 }
             ],
             exps: [],
-            func: async (base: string) => {
-                if (!base) return true
-                const dataTypeInfo = await queryDataTypeInfo(base)
-                return dataTypeInfo.type !== SchemaType.Struct
+            func: async (type: string) => {
+                if (!type) return true
+                const schema = await getSchema(type)
+                return schema?.type !== SchemaType.Struct
             }
         }
     },
     {
-        name: "system.datadict.getarrayindexfields",
-        type: SchemaType.Function,
-        desc: "获取数组可用索引",
-        function: {
-            retType: NS_SYSTEM_STRINGS,
-            args: [
-                {
-                    name: "base",
-                    type: NS_SYSTEM_STRING
-                }
-            ],
-            exps: [],
-            func: async (base: string) => {
-                if (!base) return []
-                const dataTypeInfo = await queryDataTypeInfo(base)
-                if (dataTypeInfo.type !== SchemaType.Struct) return []
-
-                const indexes: string[] = []
-                const fields = dataTypeInfo.struct?.fields || []
-
-                for (let i = 0; i < fields.length; i++) {
-                    const type = fields[i].type
-                    if (await isIndexType(type, fields[i].upLimit ? parseInt(fields[i].upLimit) : undefined)) {
-                        indexes.push(fields[i].name)
-                    }
-                }
-
-                return indexes
-            }
-        }
-    },
-    {
-        name: "system.arraydefinition",
+        name: "schema.datacombine",
         type: SchemaType.Struct,
-        desc: "数组类型定义",
+        desc: _LS("schema.datacombine"),
         struct: {
             fields: [
                 {
-                    name: "base",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
+                    name: "field",
+                    type: NS_SYSTEM_STRING
+                },
+                {
+                    name: "type",
+                    type: "schema.datacombinetype"
+                }
+            ]
+        }
+    },
+    {
+        name: "schema.datacombines",
+        type: SchemaType.Array,
+        desc: _LS("schema.datacombines"),
+        array: {
+            element: "schema.datacombine",
+            primary: ["field"]
+        }
+    },
+    {
+        name: "schema.arraydefine",
+        type: SchemaType.Struct,
+        desc: _LS("schema.arraydefine"),
+        struct: {
+            fields: [
+                {
+                    name: "element",
                     type: "schema.arrayeletype",
-                    display: "元素数据类型",
+                    display: _LS("schema.arraydefine.element"),
                 },
                 {
                     name: "primary",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRINGS,
-                    display: "作为主键的字段列表",
+                    display: _LS("schema.arraydefine.primary"),
                 },
                 {
-                    name: "indexes",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.structindexs",
-                    display: "索引列表",
-                },
-                {
-                    name: "valid",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    root: NS_SYSTEM_BOOL,
-                    type: "schema.functype",
-                    display: "数据验证用函数",
-                },
-                {
-                    name: "joinMethods",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.categoryFieldjoinsettings",
-                    display: "结果聚合配置",
+                    name: "combine",
+                    type: "schema.datacombines",
+                    display: _LS("schema.datacombines"),
                 },
                 {
                     name: "relations",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.structfldrelationinfos",
                     display: "字段间关系申明",
                 },
@@ -1399,100 +1393,61 @@ registerSchema([
             relations: [
                 {
                     field: "primary",
-                    relationType: RelationType.Invisible,
-                    func: "system.datadict.isnotstructtype",
-                    funcArgs: [
+                    type: RelationType.Invisible,
+                    func: "schema.notstructtype",
+                    args: [
                         {
-                            name: "base"
-                        }
-                    ]
-                },
-                {
-                    field: "indexes",
-                    relationType: RelationType.Invisible,
-                    func: "system.datadict.isnotstructtype",
-                    funcArgs: [
-                        {
-                            name: "base"
+                            name: "element"
                         }
                     ]
                 },
                 {
                     field: "primary",
-                    relationType: RelationType.EnumWhiteList,
-                    func: "system.datadict.getarrayindexfields",
-                    funcArgs: [
+                    type: RelationType.WhiteList,
+                    func: "schema.getstructindexfields",
+                    args: [
                         {
-                            name: "base"
-                        }
-                    ]
-                },
-                {
-                    field: "indexes.fields",
-                    relationType: RelationType.EnumWhiteList,
-                    func: "system.datadict.getarrayindexfields",
-                    funcArgs: [
-                        {
-                            name: "base"
+                            name: "element"
                         }
                     ]
                 },
                 {
                     field: "primary",
-                    relationType: RelationType.EnumBlackList,
+                    type: RelationType.BlackList,
                     func: "system.conv.assign",
-                    funcArgs: [
+                    args: [
                         {
                             name: "primary"
                         }
                     ]
                 },
                 {
-                    field: "indexes.fields",
-                    relationType: RelationType.EnumBlackList,
-                    func: "system.conv.assign",
-                    funcArgs: [
+                    field: "combine",
+                    type: RelationType.Invisible,
+                    func: "schema.notstructtype",
+                    args: [
                         {
-                            name: "indexes.fields"
-                        },
-                        {
-                            value: "name"
+                            name: "element"
                         }
                     ]
                 },
                 {
-                    // 聚合配置仅结果节点可用
-                    field: "joinMethods",
-                    relationType: RelationType.Invisible,
-                    func: "system.datadict.isnotstructtype",
-                    funcArgs: [
+                    field: "combine.field",
+                    type: RelationType.WhiteList,
+                    func: "schema.getstructindexfields",
+                    args: [
                         {
-                            name: "base"
+                            name: "element"
                         }
                     ]
                 },
                 {
-                    // 聚合配置可用字段
-                    field: "joinMethods.field",
-                    relationType: RelationType.EnumWhiteList,
-                    func: "system.datadict.categorygetjoinfields",
-                    funcArgs: [
-                        {
-                            value: "",
-                        },
-                        {
-                            name: "base"
-                        }
-                    ]
-                },
-                {
-                    // 关系
                     field: "relations.fieldType",
-                    relationType: RelationType.Default,
+                    type: RelationType.Default,
                     func: "schema.getstructfieldtypebytype",
-                    funcArgs: [
+                    args: [
                         {
-                            name: "base"
+                            name: "element"
                         },
                         {
                             name: "relations.field"
@@ -1500,27 +1455,25 @@ registerSchema([
                     ]
                 },
                 {
-                    // 关联类型白名单
-                    field: "relations.relationType",
-                    relationType: RelationType.EnumWhiteList,
+                    field: "relations.type",
+                    type: RelationType.WhiteList,
                     func: "schema.getrelationwhitelist",
-                    funcArgs: [
+                    args: [
                         {
                             name: "relations.fieldType"
                         }
                     ]
                 },
                 {
-                    // 关联函数返回值类型
                     field: "relations.func",
                     type: RelationType.Root,
                     func: "schema.getrelationfuncreturn",
-                    funcArgs: [
+                    args: [
                         {
                             name: "relations.fieldType"
                         },
                         {
-                            name: "relations.relationType"
+                            name: "relations.type"
                         }
                     ]
                 }
@@ -1529,356 +1482,210 @@ registerSchema([
     },
     //#endregion
 
-    //#region Function类型定义
+    //#region function definition
     {
-        name: "system.funcargument",
+        name: "schema.funcarg",
         type: SchemaType.Struct,
-        desc: "函数参数配置",
+        desc: _LS("schema.funcarg"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "名称",
+                    display: _LS("schema.funcarg.name"),
                     upLimit: 32,
-                },
+                } as IStructScalarFieldConfig,
                 {
                     name: "type",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.valuetype",
-                    display: "类型",
+                    display: _LS("schema.funcarg.type"),
                 },
                 {
                     name: "nullable",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_BOOL,
-                    display: "允许为空",
-                },
-                {
-                    name: "desc",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: NS_SYSTEM_STRING,
-                    display: "描述",
-                },
+                    display: _LS("schema.funcarg.nullable"),
+                }
             ]
         }
     },
     {
-        name: "system.funcarguments",
+        name: "schema.funcargs",
         type: SchemaType.Array,
-        desc: "函数参数配置列表",
+        desc: _LS("schema.funcargs"),
         array: {
-            base: "system.funcargument",
-            primary: [],
-            valid: ""
+            element: "schema.funcarg",
         },
     },
     {
-        name: "system.funccallargument",
+        name: "schema.funccallarg",
         type: SchemaType.Struct,
-        desc: "函数调用参数",
+        desc: _LS("schema.funccallarg"),
         struct: {
             fields: [
                 {
                     name: "name",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "表达式",
+                    display: _LS("schema.funccallarg.name"),
                     upLimit: 32,
-                },
+                } as IStructScalarFieldConfig,
                 {
                     name: "value",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.anyvalue",
-                    display: "常量",
+                    display: _LS("schema.funccallarg.value"),
                 },
             ]
         }
     },
     {
-        name: "system.funccallarguments",
+        name: "schema.funccallargs",
         type: SchemaType.Array,
-        desc: "函数调用参数列表",
+        desc: _LS("schema.funccallargs"),
         array: {
-            base: "system.funccallargument",
-            primary: [],
-            valid: ""
+            element: "schema.funccallarg",
         },
     },
     {
-        name: "system.funcexpression",
+        name: "schema.funcexp",
         type: SchemaType.Struct,
-        desc: "函数表达式配置",
+        desc: _LS("schema.funcexp"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "表达式名称",
+                    display: _LS("schema.funcexp.name"),
                     upLimit: 32,
-                },
+                } as IStructScalarFieldConfig,
                 {
-                    name: "callType",
-                    require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.exptype",
-                    default: "" + ExpressionType.Call,
-                    display: "调用方式",
-                },
-                {
-                    name: "callFunc",
-                    require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.functype",
-                    display: "调用函数",
-                },
-                {
-                    name: "type",
+                    name: "return",
                     require: false,
                     displayOnly: false,
                     type: "schema.valuetype",
-                    display: "返回类型",
+                    display: _LS("schema.funcexp.return"),
+                },
+                {
+                    name: "type",
+                    require: true,
+                    type: "schema.exptype",
+                    default: ExpressionType.Call,
+                    display: _LS("schema.funcexp.type"),
+                },
+                {
+                    name: "func",
+                    require: true,
+                    type: "schema.functype",
+                    display: _LS("schema.funcexp.func"),
                 },
                 {
                     name: "args",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.funccallarguments",
-                    display: "调用参数列表",
+                    type: "schema.funccallargs",
+                    display: _LS("schema.funcexp.args"),
                 }
             ],
             relations: [
-                /*{
-                  field: "args",
-                  relationType: RelationType.Invisible,
-                  func: "system.logic.isnull",
-                  funcArgs: [
-                    {
-                      name: "callFunc"
-                    }
-                  ]
-                }*/
             ]
         }
     },
     {
-        name: "system.funcexpressions",
+        name: "schema.funcexps",
         type: SchemaType.Array,
-        desc: "函数表达式列表",
+        desc: "",
         array: {
-            base: "system.funcexpression",
+            element: "schema.funcexp",
             primary: ["name"],
-            valid: ""
         },
     },
     {
-        name: "system.funcdefinition",
+        name: "schema.funcdefine",
         type: SchemaType.Struct,
-        desc: "函数类型定义",
+        desc: _LS("schema.funcdefine"),
         struct: {
             fields: [
                 {
-                    name: "retType",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
+                    name: "return",
                     type: "schema.valuetype",
-                    display: "返回值类型",
-                    upLimit: 128,
+                    display: _LS("schema.funcdefine.return")
                 },
                 {
                     name: "args",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.funcarguments",
-                    display: "函数参数列表",
+                    type: "schema.funcargs",
+                    display: _LS("schema.funcdefine.args")
                 },
                 {
                     name: "exps",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.funcexpressions",
-                    display: "函数表达式列表",
+                    type: "schema.funcexps",
+                    display: _LS("schema.funcdefine.exps")
                 },
             ],
-            relations: [
-                /*{
-                  field: "exps.args.name",
-                  relationType: RelationType.EnumWhiteList,
-                  func: "system.getfunccallexpnamelist",
-                  funcArgs: [
-                    {
-                      name: "args",
-                    },
-                    {
-                      name: "exps",
-                    }
-                  ]
-                }*/
-            ]
-        }
-    },
-    // 函数
-    {
-        name: "system.getfunccallexpnamelist",
-        type: SchemaType.Function,
-        function: {
-            retType: NS_SYSTEM_STRINGS,
-            args: [
-                {
-                    name: "args",
-                    type: "system.funcarguments"
-                },
-                {
-                    name: "exps",
-                    type: "system.funcexpressions"
-                }
-            ],
-            exps: [],
-            func: (args: any[], exps: any[]) => {
-                return [...args.map(a => a.name), ...exps.map(e => e.name)]
-            }
-        }
-    },
-    {
-        name: "system.getfunccallenumroot",
-        type: SchemaType.Function,
-        desc: "基于表达式类型确定函数返回值",
-        func: {
-            retType: NS_SYSTEM_STRING,
-            args: [
-                {
-                    name: "callType",
-                    type: "schema.exptype",
-                },
-                {
-                    name: "type",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                }
-            ],
-            exps: [],
-            func: async (callType: ExpressionType, type?: string) => {
-                if (isNull(type)) return ""
-
-                switch (callType) {
-                    case ExpressionType.Map:
-                    case ExpressionType.Filter:
-                        {
-                            const typeInfo = await queryDataTypeInfo(type!)
-                            return typeInfo?.type === SchemaType.Array && typeInfo.array?.base || type
-                        }
-
-                    default:
-                        return type
-                }
-            }
         }
     },
     //#endregion
 
-    //#region 命名空间
+    //#region namespace defintion
     {
-        name: "system.namespacedefinition",
+        name: "schema.namespacedefine",
         type: SchemaType.Struct,
-        desc: "命名空间定义",
+        desc: _LS("schema.namespacedefine"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.namespaceinput",
-                    display: "名称",
-                    upLimit: 128,
+                    display: _LS("schema.namespacedefine.name"),
                 },
                 {
                     name: "type",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.schematype",
-                    display: "类型",
-                    default: "" + SchemaType.Namspace,
+                    display: _LS("schema.namespacedefine.type"),
+                    default: SchemaType.Namespace,
                 },
                 {
                     name: "desc",
                     require: true,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
-                    display: "描述",
+                    display: _LS("schema.namespacedefine.desc"),
                     upLimit: 128,
-                },
+                } as IStructScalarFieldConfig,
                 {
                     name: "scalar",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.scalardefine",
-                    display: "基础数据类型定义",
+                    display: _LS("schema.namespacedefine.scalar"),
                 },
                 {
                     name: "enum",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "schema.enumdefine", ",
-          display : "枚举类型定义",
+                    type: "schema.enumdefine", 
+                    display: _LS("schema.namespacedefine.enum"),
                 },
                 {
                     name: "struct",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: "schema.structdefine",
-                    display: "结构体类型定义",
+                    display: _LS("schema.namespacedefine.struct"),
                 },
                 {
                     name: "array",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.arraydefinition",
-                    display: "数组类型定义",
+                    type: "schema.arraydefine",
+                    display: _LS("schema.namespacedefine.array"),
                 },
                 {
-                    name: "function",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
-                    type: "system.funcdefinition",
-                    display: "函数定义",
+                    name: "func",
+                    type: "schema.funcdefine",
+                    display: _LS("schema.namespacedefine.func"),
                 },
             ],
             relations: [
                 {
                     field: "scalar",
-                    relationType: RelationType.Invisible,
+                    type: RelationType.Invisible,
                     func: "system.logic.notequal",
-                    funcArgs: [
+                    args: [
                         {
                             name: "type"
                         },
@@ -1889,9 +1696,9 @@ registerSchema([
                 },
                 {
                     field: "enum",
-                    relationType: RelationType.Invisible,
+                    type: RelationType.Invisible,
                     func: "system.logic.notequal",
-                    funcArgs: [
+                    args: [
                         {
                             name: "type"
                         },
@@ -1902,9 +1709,9 @@ registerSchema([
                 },
                 {
                     field: "struct",
-                    relationType: RelationType.Invisible,
+                    type: RelationType.Invisible,
                     func: "system.logic.notequal",
-                    funcArgs: [
+                    args: [
                         {
                             name: "type"
                         },
@@ -1915,9 +1722,9 @@ registerSchema([
                 },
                 {
                     field: "array",
-                    relationType: RelationType.Invisible,
+                    type: RelationType.Invisible,
                     func: "system.logic.notequal",
-                    funcArgs: [
+                    args: [
                         {
                             name: "type"
                         },
@@ -1927,10 +1734,10 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "function",
-                    relationType: RelationType.Invisible,
+                    field: "func",
+                    type: RelationType.Invisible,
                     func: "system.logic.notequal",
-                    funcArgs: [
+                    args: [
                         {
                             name: "type"
                         },
@@ -1943,5 +1750,4 @@ registerSchema([
         }
     },
     //#endregion
-
 ])

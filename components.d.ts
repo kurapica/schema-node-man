@@ -20,6 +20,7 @@ declare module 'vue' {
     NavHeader: typeof import('./src/components/navHeader.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Schema: typeof import('./src/components/schema.vue')['default']
     Tryit: typeof import('./src/components/tryit.vue')['default']
   }
 }
