@@ -168,4 +168,7 @@ importLanguage("zhCN", {
     "schema.namespacedefine.struct": "结构体类型定义",
     "schema.namespacedefine.array": "数组类型定义",
     "schema.namespacedefine.func": "函数定义",
+
+    "schema.designer.keyword": "关键字",
+    "schema.designer.reset": "重置",
 })

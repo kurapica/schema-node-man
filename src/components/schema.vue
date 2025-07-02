@@ -1,6 +1,6 @@
 <template>
     <el-container class="main">
-        <el-header style="height: fit-content;">
+        <el-header style="height: fit-content; width: 100%;">
             <el-form 
                 :model="state" 
                 style="display: flex;"
@@ -14,6 +14,23 @@
                         display: _L['schema.namespace']
                     }"
                 ></schema-view>
+                <schema-view
+                    v-model="state.type"
+                    in-form
+                    :config="{
+                        type: 'schema.schematype',
+                        display: _L['schema.schematype']
+                    }"
+                ></schema-view>
+                <schema-view
+                    v-model="state.keyword"
+                    in-form
+                    :config="{
+                        type: 'system.string',
+                        display: _L['schema.designer.keyword']
+                    }"
+                ></schema-view>
+                <el-button type="primary" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
             </el-form>
         </el-header>
     </el-container>
@@ -29,4 +46,10 @@ const state = reactive({
     type: null,
     keyword: ""
 })
+
+const reset = () => {
+    state.namespace = ""
+    state.type = null
+    state.keyword = ""
+}
 </script>

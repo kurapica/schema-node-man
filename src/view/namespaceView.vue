@@ -1,10 +1,10 @@
 <template>
-    <span v-if="scalarNode.readonly && plainText"
+    <span v-if="state.readonly && plainText"
         :style="{ 'width': '100%', 'color': 'green', 'text-align': plainText === true ? 'center' : plainText }">
-        {{ scalarNode.display }}
+        {{ state.display }}
     </span>
     <el-cascader v-else
-        v-model="scalarNode.data" 
+        v-model="data" 
         style="width: 100%" 
         :options="root.children" 
         :props="{
@@ -14,14 +14,14 @@
             lazyLoad: lazyLoad
         }" 
         :placeholder="scalarNode.inputPlaceHolder"
-        :disabled="disabled || scalarNode.readonly || scalarNode.rule?.disable" :clearable="!scalarNode.require"
+        :disabled="state.disable" :clearable="!state.require"
         v-bind="$attrs"
     ></el-cascader>
 </template>
 
 <script lang="ts" setup>
 import { EnumValueType, getSchema, isSchemaCanBeUseAs, SchemaType, type INodeSchema, type ScalarNode } from "schema-node"
-import { onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
+import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 
 //#region Inner type
 interface ICascaderOptionInfo {
@@ -36,6 +36,25 @@ interface ICascaderOptionInfo {
 const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()
 const scalarNode = toRaw(props.node)
 const type = scalarNode.config.type
+
+// display state
+const state = reactive<{
+    data?: any,
+    display?: any,
+    disable?: boolean,
+    require?: boolean,
+    readonly?: boolean,
+}>({})
+
+// Data
+const data = computed({
+    get (): any {
+        return state.data
+    },
+    set(value: any) {
+        scalarNode.data = value
+    }
+})
 
 // cascader root
 const root = reactive<ICascaderOptionInfo>({
@@ -109,7 +128,7 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
             value: v.name,
             type: v.type,
             label: `${v.desc || v.name}`,
-            leaf: v.type !== SchemaType.Namespace || (nsOnly && !v.schemas?.length),
+            leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex(s => s.type === SchemaType.Namespace) < 0)),
             children: null
         }
         if (!ele.leaf && v.schemas && scalarNode.data && `${scalarNode.data}`.startsWith(v.name)) {
@@ -178,11 +197,31 @@ const reBuildOptions = async () => {
 }
 
 // change handler
+let dataWatcher: Function | null = null
 let stateHandler: Function | null = null
 
 onMounted(() => {
     let root: any = undefined
+    dataWatcher = scalarNode.subscribe(async() =>  {
+        const data = scalarNode.rawData
+        state.data = data
+        
+        const paths = (data || "").split(".")
+        const display: string[] = []
+        for (let i = 0; i < paths.length; i++) {
+            const name = paths.slice(0, i + 1).join(".")
+            const schema = await getSchema(name)
+            if (!schema) break
+            display.push(`${schema.desc}`)
+        }
+        state.display = display.join("/")
+    }, true)
+
     stateHandler = scalarNode.subscribeState(() => {
+        state.disable = scalarNode.rule.disable
+        state.require = scalarNode.require
+        state.readonly = scalarNode.readonly
+
         const r = scalarNode.rule.root || null
         if (r !== root)
         {
@@ -193,6 +232,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+    if (dataWatcher) dataWatcher()
     if (stateHandler) stateHandler()
 })
 </script>
