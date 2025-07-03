@@ -15,7 +15,7 @@ importLanguage("zhCN", {
     "schema.reltarfield": "关联目标字段",
     
     "schema.schematype": "数据类型",
-    "schema.schematype.ns": "命名空间",
+    "schema.schematype.namespace": "命名空间",
     "schema.schematype.enum": "枚举类型",
     "schema.schematype.scalar": "基础数据类型",
     "schema.schematype.struct": "结构体类型",
@@ -171,4 +171,12 @@ importLanguage("zhCN", {
 
     "schema.designer.keyword": "关键字",
     "schema.designer.reset": "重置",
+    "schema.designer.name": "名称",
+    "schema.designer.desc": "描述",
+    "schema.designer.type": "类型",
+    "schema.designer.oper": "操作",
+    "schema.designer.return": "返回",
+    "schema.designer.edit": "编辑",
+    "schema.designer.delete": "删除",
+    "schema.designer.down": "下级",
 })

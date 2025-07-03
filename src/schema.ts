@@ -121,7 +121,7 @@ registerSchema([
             values: [
                 {
                     value: SchemaType.Namespace,
-                    name: _LS("schema.schematype.ns"),
+                    name: _LS("schema.schematype.namespace"),
                 },
                 {
                     value: SchemaType.Enum,

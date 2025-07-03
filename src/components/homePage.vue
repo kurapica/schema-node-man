@@ -20,7 +20,11 @@ import NavHeader from "./navHeader.vue"
 import { setLanguage, getLanguage } from "schema-node"
 
 const lang = ref(getLanguage())
-const toggle = (l: string) => lang.value = setLanguage(l)
+const toggle = (l: string) => {
+    lang.value = setLanguage(l)
+    localStorage["lang"] = lang.value
+    location.reload()
+}
 </script>
 
 <style lang="css" scoped>

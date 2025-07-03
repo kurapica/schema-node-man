@@ -13,7 +13,7 @@
             lazy: true,
             lazyLoad: lazyLoad
         }" 
-        :placeholder="scalarNode.inputPlaceHolder"
+        :placeholder="scalarNode.selectPlaceHolder"
         :disabled="state.disable" :clearable="!state.require"
         v-bind="$attrs"
     ></el-cascader>
@@ -83,7 +83,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
     // check compatible type
     if (compatibleType.value && namespaceMap.includes(SchemaType.Function)) {
         const funcList = options.filter(r => r.type === SchemaType.Function)
-        const blackList: string[] = []
+        const blackList: string[] = ["schema"]
         for(let i = 0; i < funcList.length; i++)
         {
             const f = await getSchema(funcList[i].value)
@@ -95,7 +95,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         return []
     }
     else {
-        return []
+        return ["schema"]
     }
 }
 
