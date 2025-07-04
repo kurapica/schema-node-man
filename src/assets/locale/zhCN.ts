@@ -179,4 +179,7 @@ importLanguage("zhCN", {
     "schema.designer.edit": "编辑",
     "schema.designer.delete": "删除",
     "schema.designer.down": "下级",
+    "schema.designer.upnamespace": "上级命名空间",
+    "schema.designer.view": "查看",
+    "schema.designer.new": "新建",
 })

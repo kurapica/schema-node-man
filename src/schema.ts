@@ -378,6 +378,7 @@ registerSchema([
                     require: false,
                     immutable: false,
                     displayOnly: false,
+                    default: false,
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.enumvalueinfo.disable"),
                 },
@@ -1637,12 +1638,14 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
+                    immutable: true,
                     type: "schema.namespaceinput",
                     display: _LS("schema.namespacedefine.name"),
                 },
                 {
                     name: "type",
                     require: true,
+                    immutable: true,
                     type: "schema.schematype",
                     display: _LS("schema.namespacedefine.type"),
                     default: SchemaType.Namespace,
@@ -1754,6 +1757,7 @@ registerSchema([
 
 // View
 import namespaceView from "./view/namespaceView.vue"
+import namespaceInputView from "./view/namespaceInputView.vue"
 import { regSchemaTypeView } from "schema-node-vue-view"
 
 regSchemaTypeView("schema.namespace", namespaceView)
@@ -1765,3 +1769,4 @@ regSchemaTypeView("schema.functype", namespaceView)
 regSchemaTypeView("schema.scalarenumtype", namespaceView)
 regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)
+regSchemaTypeView("schema.namespaceinput", namespaceInputView)

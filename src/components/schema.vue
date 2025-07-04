@@ -14,7 +14,8 @@
                     type: 'system.string',
                     display: _L['schema.designer.keyword']
                 }"></schema-view>
-                <el-button type="primary" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
+                <el-button type="info" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
+                <el-button type="primary" @click="addNamespace">{{ _L["schema.designer.new"] }}</el-button>
             </el-form>
         </el-header>
         <el-main>
@@ -36,18 +37,57 @@
                     <template #default="scope">
                         <el-button v-if="scope.row.type === SchemaType.Namespace && scope.row.schemas?.length" type="info"
                             @click="choose(scope.row)">{{ _L["schema.designer.down"] }}</el-button>
+                        <el-button v-else type="info" @click="handleEdit(scope.row, true)">{{ _L["schema.designer.view"] }}</el-button>
+                        <el-button type="info" @click="handleEdit(scope.row, false)">{{ _L["schema.designer.edit"] }}</el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </el-main>
+
+        <el-drawer
+            v-model="showNamespaceEditor"
+            :title="operation"
+            direction="rtl"
+            size="100%"
+            destroy-on-close
+            append-to-body
+            @closed="closeNamespaceEditor"
+            >
+            <el-form
+            v-if="namespaceNode"
+            ref="editorRef"
+            :model="namespaceNode.rawData"
+            label-width="160"
+            label-position="left"
+            style="width: 100%; height: 90%;"
+            >
+                <div class="draw-view">
+                <schema-view
+                    :node="namespaceNode as StructNode"
+                    in-form="expandall"
+                    plain-text="left"
+                ></schema-view>
+                </div>
+                <div class="dialog-footer">
+                <template v-if="namespcaeEditMode === '查看'">
+                    <el-button @click="showNamespaceEditor = false">关闭</el-button>
+                </template>
+                <template v-else>
+                    <el-button type="primary" @click="confirmNameSpace">保存</el-button>
+                    <el-button @click="showNamespaceEditor = false">取消</el-button>
+                </template>
+                </div>
+            </el-form>
+        </el-drawer>
     </el-container>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref } from 'vue'
+import { reactive, watch, ref, computed } from 'vue'
 import schemaView from 'schema-node-vue-view'
 import { _L } from 'schema-node-vue-view'
-import { getSchema, type INodeSchema, SchemaType } from 'schema-node'
+import { deepClone, getSchema, type INodeSchema, SchemaType, StructNode } from 'schema-node'
+import { ElForm } from 'element-plus'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -100,4 +140,53 @@ watch(state, async () => {
         schemas.value = temp
     }
 }, { immediate: true })
+
+//#region Schema Edit
+
+const editorRef = ref<InstanceType<typeof ElForm>>()
+const showNamespaceEditor = ref(false)
+const namespaceNode = ref<StructNode | undefined>(undefined)
+const operation = computed(()=>`${(namespaceNode.value?.readonly ? _L.value['schema.designer.view'] : _L.value['schema.designer.edit'])} ${namespaceNode.value?.rawData.desc || namespaceNode.value?.rawData.name}`)
+
+// 新增命名空间
+const addNamespace = async () => {
+    namespaceNode.value = new StructNode({
+        type: "schema.namespacedefine",
+    }, {})
+    showNamespaceEditor.value = true
+}
+
+// 编辑命名空间
+const handleEdit = async (row: any, readonly?: boolean) => {
+    namespaceNode.value = new StructNode({
+        type: "schema.namespacedefine",
+        readonly
+    }, deepClone(row))
+    namespaceNode.value.resetChanges()
+    showNamespaceEditor.value = true
+};
+
+// 删除命名空间
+const handleDelete = (row: any) => {
+}
+
+// 关闭编辑器
+const closeNamespaceEditor = () => {
+}
+
+// 保存命名空间
+const confirmNameSpace = () => {
+  editorRef.value?.validate(async (valid = true) =>
+  {
+  })
+}
+
+//#endregion
+
 </script>
+
+<style lang="css">
+body{
+    color: black;
+}
+</style>

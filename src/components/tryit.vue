@@ -5,7 +5,7 @@
             type="frontend.person"
             v-model="data"
         ></schema-view>
-        <span>{{ data }}</span>
+        <textarea style="width:72lh;height: 300px;" disabled>{{ data }}</textarea>
     </el-form>
 </template>
 
