@@ -5,7 +5,7 @@
         mode="horizontal"
     >
         <router-link v-for="(item, index) in routes" v-bind:key="item.name" :to="item.path">
-            <el-menu-item :index="`${index}`">{{ item.name }}</el-menu-item>
+            <el-menu-item :index="`${index}`">{{ _L[item.name] }}</el-menu-item>
         </router-link>
     </el-menu>
 </template>
@@ -15,6 +15,7 @@ import { onMounted, ref } from "vue"
 import { useRouter } from 'vue-router'
 import { routes } from "../routes"
 import { isNull } from "schema-node"
+import { _L } from "schema-node-vue-view"
 
 const router = useRouter()
 const activeIndex = ref("0")

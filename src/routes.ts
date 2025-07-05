@@ -1,17 +1,17 @@
 export const routes = [
     {
         path: '/introduce',
-        name: "Introduce",
+        name: "schema.nav.introduce",
         component: () => import('./components/introduce.vue')
     },
-    {
-        path: '/tryit',
-        name: "Try it",
-        component: () => import('./components/tryit.vue')
-    },
+    //{
+    //    path: '/tryit',
+    //    name: "schema.nav.tryit",
+    //    component: () => import('./components/tryit.vue')
+    //},
     {
         path: '/type',
-        name: "Schema Manager",
+        name: "schema.nav.type",
         component: () => import('./components/schema.vue')
     }
 ]

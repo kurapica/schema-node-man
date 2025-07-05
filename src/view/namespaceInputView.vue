@@ -35,7 +35,7 @@ const state = reactive<{
 }>({})
 
 // Data
-const prefix = ref("")
+const prefix = ref(localStorage["schema_new_namespace"] || "")
 const name = ref("")
 
 const refreshData = () => {
@@ -55,7 +55,7 @@ onMounted(() => {
         const data = scalarNode.rawData
         state.data = data
         prefix.value = data ? data.substring(0, data.lastIndexOf(".")) : prefix.value
-        name.value = data.substring(data.lastIndexOf(".") + 1)
+        name.value = data ? data.substring(data.lastIndexOf(".") + 1) : ""
     }, true)
 
     stateHandler = scalarNode.subscribeState(() => {

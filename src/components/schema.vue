@@ -31,63 +31,81 @@
                 <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="240">
                     <template #header>
                         <a href="javascript:void(0)" v-if="state.namespace" @click="goback"
-                            style="text-decoration: underline; color: lightseagreen;">{{ _L["schema.designer.return"] }}</a>
-                        <span v-else>{{ _L["schema.designer.oper"]}}</span>
+                            style="text-decoration: underline; color: lightseagreen;">
+                            {{ _L["schema.designer.return"] }}
+                        </a>
+                        <span v-else>{{ _L["schema.designer.oper"] }}</span>
                     </template>
                     <template #default="scope">
-                        <el-button v-if="scope.row.type === SchemaType.Namespace && scope.row.schemas?.length" type="info"
-                            @click="choose(scope.row)">{{ _L["schema.designer.down"] }}</el-button>
-                        <el-button v-else type="info" @click="handleEdit(scope.row, true)">{{ _L["schema.designer.view"] }}</el-button>
-                        <el-button type="info" @click="handleEdit(scope.row, false)">{{ _L["schema.designer.edit"] }}</el-button>
+                        <el-button v-if="scope.row.type === SchemaType.Namespace"
+                            type="info" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}</el-button>
+                        <el-button v-else type="info" @click="handleEdit(scope.row, true)">
+                            {{ _L["schema.designer.view"] }}
+                        </el-button>
+                        <el-button type="info" @click="handleEdit(scope.row, false)">
+                            {{ _L["schema.designer.edit"] }}
+                        </el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </el-main>
 
-        <el-drawer
-            v-model="showNamespaceEditor"
-            :title="operation"
-            direction="rtl"
-            size="100%"
+        <!-- namespace editor -->
+        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" destroy-on-close
+            append-to-body @closed="closeNamespaceEditor">
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawData" label-width="160"
+                        label-position="left" style="width: 100%; height: 90%;">
+                        <div class="draw-view">
+                            <schema-view
+                                :node="(namespaceNode as StructNode)"
+                                in-form="expandall"
+                                plain-text="left"
+                            ></schema-view>
+                        </div>
+                    </el-form>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <template v-if="namespaceNode?.readonly">
+                        <el-button v-if="tryitTypes.includes(namespaceNode.rawData.type)" type="primary" @click="tryit">{{ _L["schema.designer.tryit"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                    </template>
+                    <template v-else>
+                        <el-button type="primary" @click="confirmNameSpace">{{ _L["schema.designer.save"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                    </template>
+                </el-footer>
+            </el-container>
+        </el-drawer>
+
+        <!-- try it -->
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + (namespaceNode?.data.desc || namespaceNode?.data.name)" direction="rtl" size="100%"
             destroy-on-close
-            append-to-body
-            @closed="closeNamespaceEditor"
-            >
-            <el-form
-            v-if="namespaceNode"
-            ref="editorRef"
-            :model="namespaceNode.rawData"
-            label-width="160"
-            label-position="left"
-            style="width: 100%; height: 90%;"
-            >
-                <div class="draw-view">
-                <schema-view
-                    :node="namespaceNode as StructNode"
-                    in-form="expandall"
-                    plain-text="left"
-                ></schema-view>
-                </div>
-                <div class="dialog-footer">
-                <template v-if="namespcaeEditMode === '查看'">
-                    <el-button @click="showNamespaceEditor = false">关闭</el-button>
-                </template>
-                <template v-else>
-                    <el-button type="primary" @click="confirmNameSpace">保存</el-button>
-                    <el-button @click="showNamespaceEditor = false">取消</el-button>
-                </template>
-                </div>
-            </el-form>
+            append-to-body>
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <tryit-view
+                        :type="tryittype"
+                    ></tryit-view>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <el-button @click="showtryit = false">{{ _L["schema.designer.close"] }}</el-button>
+                </el-footer>
+            </el-container>
         </el-drawer>
     </el-container>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref, computed } from 'vue'
+import { reactive, watch, ref } from 'vue'
 import schemaView from 'schema-node-vue-view'
+import tryitView from './tryit.vue'
 import { _L } from 'schema-node-vue-view'
-import { deepClone, getSchema, type INodeSchema, SchemaType, StructNode } from 'schema-node'
-import { ElForm } from 'element-plus'
+import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull } from 'schema-node'
+import { ElForm, ElMessage } from 'element-plus'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -99,6 +117,8 @@ const schemaTypeOrder = {
     [SchemaType.Function]: 6
 }
 
+const tryitTypes = [ SchemaType.Struct, SchemaType.Array ]
+
 const state = reactive({
     namespace: "",
     type: null,
@@ -106,9 +126,18 @@ const state = reactive({
 })
 
 const reset = () => {
-    state.namespace = ""
-    state.type = null
-    state.keyword = ""
+    if (!isNull(state.keyword))
+    {
+        state.keyword = ""
+    }
+    else if(!isNull(state.type))
+    {
+        state.type = null
+    }
+    else
+    {
+        state.namespace = ""
+    }
 }
 
 const goback = () => {
@@ -120,43 +149,51 @@ const choose = (schema: INodeSchema) => {
     state.namespace = schema.name
 }
 
-watch(state, async () => {
+const refresh = async () => {
     const schema = await getSchema(state.namespace)
     if (schema?.type === SchemaType.Namespace) {
         let temp = [...schema.schemas || []].filter(p => p.name !== "schema")
-        if (state.type)
-        {
+        if (state.type) {
             temp = temp.filter(p => p.type === state.type)
         }
-        if (state.keyword)
-        {
+        if (state.keyword) {
             temp = temp.filter(p => p.name.match(state.keyword) || p.desc && `${p.desc}`.match(state.keyword))
         }
         temp.sort((a, b) => {
             if (schemaTypeOrder[a.type] < schemaTypeOrder[b.type]) return -1
             if (schemaTypeOrder[a.type] < schemaTypeOrder[b.type]) return 1
             return a.name < b.name ? -1 : 1
-        } )
+        })
         schemas.value = temp
     }
-}, { immediate: true })
+}
+
+watch(state, refresh, { immediate: true })
 
 //#region Schema Edit
 
 const editorRef = ref<InstanceType<typeof ElForm>>()
 const showNamespaceEditor = ref(false)
 const namespaceNode = ref<StructNode | undefined>(undefined)
-const operation = computed(()=>`${(namespaceNode.value?.readonly ? _L.value['schema.designer.view'] : _L.value['schema.designer.edit'])} ${namespaceNode.value?.rawData.desc || namespaceNode.value?.rawData.name}`)
+const operation = ref("")
 
-// 新增命名空间
+let namesapceWatchHandler: Function | null = null
+
+// create
 const addNamespace = async () => {
+    localStorage["schema_new_namespace"] = state.namespace
+
     namespaceNode.value = new StructNode({
         type: "schema.namespacedefine",
     }, {})
     showNamespaceEditor.value = true
+
+    namesapceWatchHandler = namespaceNode.value.subscribe(() => {
+        operation.value = _L.value["schema.designer.new"] + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+    }, true)
 }
 
-// 编辑命名空间
+// update
 const handleEdit = async (row: any, readonly?: boolean) => {
     namespaceNode.value = new StructNode({
         type: "schema.namespacedefine",
@@ -164,21 +201,56 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     }, deepClone(row))
     namespaceNode.value.resetChanges()
     showNamespaceEditor.value = true
+
+    if (readonly) {
+        operation.value = _L.value["schema.designer.view"] + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+    }
+    else {
+        namesapceWatchHandler = namespaceNode.value.subscribe(() => {
+            operation.value = _L.value["schema.designer.edit"] + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+        }, true)
+    }
 };
 
-// 删除命名空间
+// delete
 const handleDelete = (row: any) => {
+    if (!isSchemaDeletable(row.name))
+    {
+        ElMessage.error(_L.value["schema.designer.cantdelschema"])
+        return
+    }
+    removeSchema(row.name)
+    return refresh()
 }
 
-// 关闭编辑器
-const closeNamespaceEditor = () => {
-}
-
-// 保存命名空间
+// save
 const confirmNameSpace = () => {
-  editorRef.value?.validate(async (valid = true) =>
-  {
-  })
+    editorRef.value?.validate((valid = true) => {
+        if (!valid || !namespaceNode.value?.valid) return
+        const data = namespaceNode.value.data
+        registerSchema([data])
+        showNamespaceEditor.value = false
+        return refresh()
+    })
+}
+// close
+const closeNamespaceEditor = () => {
+    if (namesapceWatchHandler) namesapceWatchHandler()
+    namespaceNode.value?.dispose()
+    namespaceNode.value = undefined
+}
+
+
+//#endregion
+
+//#region Try it
+
+const showtryit = ref(false)
+const tryittype = ref("")
+
+const tryit = () => {
+    tryittype.value = namespaceNode.value?.rawData.name
+    showtryit.value = true
 }
 
 //#endregion
@@ -186,7 +258,7 @@ const confirmNameSpace = () => {
 </script>
 
 <style lang="css">
-body{
+body {
     color: black;
 }
 </style>

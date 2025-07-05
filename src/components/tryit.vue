@@ -2,7 +2,7 @@
     <el-form label-width="140px">
         <schema-view
             plain-text="left"
-            type="frontend.person"
+            :type="type || 'frontend.person'"
             v-model="data"
         ></schema-view>
         <textarea style="width:72lh;height: 300px;" disabled>{{ data }}</textarea>
@@ -13,5 +13,6 @@
 import SchemaView from "schema-node-vue-view"
 import { ref } from "vue"
 
-const data = ref({})
+defineProps<{ type?: string }>()
+const data = ref(null)
 </script>

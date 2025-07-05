@@ -212,7 +212,7 @@ onMounted(() => {
             const name = paths.slice(0, i + 1).join(".")
             const schema = await getSchema(name)
             if (!schema) break
-            display.push(`${schema.desc}`)
+            display.push(`${schema.desc || paths[i]}`)
         }
         state.display = display.join("/")
     }, true)

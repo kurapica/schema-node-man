@@ -1,6 +1,10 @@
 import { importLanguage } from "schema-node"
 
 importLanguage("zhCN", {
+    "schema.nav.introduce": "介绍",
+    "schema.nav.tryit": "尝试",
+    "schema.nav.type": "类型管理",
+
     "schema.namespace": "命名空间",
     "schema.scalartype": "基础数据类型",
     "schema.enumtype": "枚举类型",
@@ -76,7 +80,7 @@ importLanguage("zhCN", {
 
     "schema.enumdefine": "枚举值定义",
     "schema.enumdefine.type": "枚举值数据类型",
-    "schema.enumdefine.cascade": "级联枚举值",
+    "schema.enumdefine.cascade": "级联枚举名",
     "schema.enumdefine.values": "枚举值列表",
 
     "schema.structindex": "结构体索引",
@@ -182,4 +186,9 @@ importLanguage("zhCN", {
     "schema.designer.upnamespace": "上级命名空间",
     "schema.designer.view": "查看",
     "schema.designer.new": "新建",
+    "schema.designer.cantdelschema": "无法删除使用中的类型",
+    "schema.designer.tryit": "演示",
+    "schema.designer.close": "关闭",
+    "schema.designer.save": "保存",
+    "schema.designer.cancel": "取消",
 })

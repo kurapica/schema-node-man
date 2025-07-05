@@ -856,6 +856,26 @@ registerSchema([
             ],
             relations: [
                 {
+                    field: "default",
+                    type: RelationType.Type,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "default",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalarenumtype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
                     field: "whiteList",
                     type: RelationType.Invisible,
                     func: "schema.notscalarenumtype",
@@ -1040,7 +1060,7 @@ registerSchema([
 
                     case RelationType.WhiteList:
                     case RelationType.BlackList:
-                        return await getArraySchema(fieldType, true) || NS_SYSTEM_ARRAY
+                        return (await getArraySchema(fieldType, true))?.name || NS_SYSTEM_ARRAY
 
                     case RelationType.LowLimit:
                     case RelationType.Uplimit:
@@ -1246,7 +1266,7 @@ registerSchema([
                     func: "schema.getrelationwhitelist",
                     args: [
                         {
-                            name: "relations.fieldType"
+                            name: "fieldType"
                         }
                     ]
                 },
