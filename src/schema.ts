@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaType, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
     //#region scalar type
@@ -1790,3 +1790,96 @@ regSchemaTypeView("schema.scalarenumtype", namespaceView)
 regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)
 regSchemaTypeView("schema.namespaceinput", namespaceInputView)
+
+// Schema storage
+// reload schemas from storage
+export function reloadStorageSchemas()
+{
+    const namelist = localStorage["schema_custom_namelist"]
+    const list = namelist ? JSON.parse(namelist) : null
+    if (!list || !Array.isArray(list)) return
+
+    const schemas: INodeSchema[] = []
+    for(let i = 0; i < list.length; i++)
+    {
+        const data = localStorage[`schema_data_${list[i]}`]
+        const schema = data ? JSON.parse(data) : null
+        if (!schema || typeof(schema) !== "object") continue
+        schemas.push(schema)
+    }
+    registerSchema(schemas)
+}
+
+// save schema to storage
+export function saveStorageSchema(schema: INodeSchema)
+{
+    const namelist = localStorage["schema_custom_namelist"]
+    let list: string[] = namelist ? JSON.parse(namelist) : []
+    const name = schema.name.toLowerCase()
+    if (!Array.isArray(list)) list = []
+    if (!list.includes(name))
+    {
+        list.push(name)
+        list.sort()
+        localStorage["schema_custom_namelist"] = JSON.stringify(list)
+    }
+    localStorage[`schema_data_${name}`] = JSON.stringify({
+        name: schema.name,
+        type: schema.type,
+        desc: schema.desc,
+        scalar: schema.scalar,
+        enum: schema.enum,
+        struct: schema.struct,
+        array: schema.array,
+        func: schema.func,
+    })
+}
+
+// delete schema from storage
+export function removeStorageSchema(name: string | INodeSchema)
+{
+    name = (typeof(name) === "object" ? name.name : name).toLowerCase()
+    delete localStorage[`schema_data_${name}`]
+    const namelist = localStorage["schema_custom_namelist"]
+    let list: string[] = namelist ? JSON.parse(namelist) : []
+    if (Array.isArray(list) && list.includes(name))
+    {
+        const index = list.findIndex(n => n === name)
+        if (index >= 0)
+        {
+            list.splice(index, 1)
+            localStorage["schema_custom_namelist"] = JSON.stringify(list)
+        }
+    }
+}
+
+// clear all stroage schemas
+export function clearAllStorageSchemas()
+{
+    const namelist = localStorage["schema_custom_namelist"]
+    const list = namelist ? JSON.parse(namelist) : null
+    if (!list || !Array.isArray(list)) return
+
+    for(let i = 0; i < list.length; i++)
+    {
+        delete localStorage[`schema_data_${list[i]}`]
+    }
+    delete localStorage["schema_custom_namelist"]
+    location.reload()
+}
+
+// save all custom types to the storage
+export function saveAllCustomSchemaToStroage(root: string = "")
+{
+    const schema = getCachedSchema(root)
+    schema?.schemas?.forEach(s => {
+        if ((s.loadState || 0) & SchemaLoadState.Custom)
+        {
+            saveStorageSchema(s)
+            if (s.type === SchemaType.Namespace)
+            {
+                saveAllCustomSchemaToStroage(s.name)
+            }
+        }
+    })
+}

@@ -16,11 +16,30 @@
                 }"></schema-view>
                 <el-button type="info" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
                 <el-button type="primary" @click="addNamespace">{{ _L["schema.designer.new"] }}</el-button>
+                <!-- download -->
+                <template v-if="!downloading">
+                    <el-button type="success" @click="startDownload">{{ _L["schema.designer.download"] }}</el-button>
+                    <el-upload
+                        style="padding-left:1rem;"
+                        :before-upload="uploadSchema"
+                        :limit="1"
+                        :show-file-list="false">
+                        <el-button type="success">{{ _L["schema.designer.upload"] }}</el-button>
+                    </el-upload>
+                </template>
+                <template v-else>
+                    <el-button type="success" @click="download">{{ _L["schema.designer.confirm"] }}</el-button>
+                    <el-button type="info" @click="downloading = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                </template>
+                <el-button type="danger" @click="clearAllStorageSchemas" style="position: absolute;right: 3rem;">{{ _L["schema.designer.clearcustomschemas"] }}</el-button>
             </el-form>
         </el-header>
         <el-main>
-            <el-table :data="schemas" style="width: 100%; height: 70vh;" :border="true" header-align="left"
-                :header-cell-style="{ background: '#eee' }">
+            <el-table :data="schemas" style="width: 100%; height: 70vh;" :border="true"
+             header-align="left" 
+             :header-cell-style="{ background: '#eee' }"
+             @selection-change="handleSelection">
+                <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
                 <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
                 <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
                 <el-table-column align="center" prop="type" :label="_L['schema.designer.type']" width="150">
@@ -44,6 +63,9 @@
                         </el-button>
                         <el-button type="info" @click="handleEdit(scope.row, false)">
                             {{ _L["schema.designer.edit"] }}
+                        </el-button>
+                        <el-button v-if="isSchemaDeletable(scope.row.name)" type="danger" @click="handleDelete(scope.row)">
+                            {{ _L["schema.designer.delete"] }}
                         </el-button>
                     </template>
                 </el-table-column>
@@ -104,8 +126,9 @@ import { reactive, watch, ref } from 'vue'
 import schemaView from 'schema-node-vue-view'
 import tryitView from './tryit.vue'
 import { _L } from 'schema-node-vue-view'
-import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull } from 'schema-node'
+import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
+import { clearAllStorageSchemas, removeStorageSchema, saveStorageSchema } from '@/schema'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -150,7 +173,7 @@ const choose = (schema: INodeSchema) => {
 }
 
 const refresh = async () => {
-    const schema = await getSchema(state.namespace)
+    const schema = await getSchema(state.namespace || "")
     if (schema?.type === SchemaType.Namespace) {
         let temp = [...schema.schemas || []].filter(p => p.name !== "schema")
         if (state.type) {
@@ -219,6 +242,7 @@ const handleDelete = (row: any) => {
         ElMessage.error(_L.value["schema.designer.cantdelschema"])
         return
     }
+    removeStorageSchema(row.name)
     removeSchema(row.name)
     return refresh()
 }
@@ -229,6 +253,7 @@ const confirmNameSpace = () => {
         if (!valid || !namespaceNode.value?.valid) return
         const data = namespaceNode.value.data
         registerSchema([data])
+        saveStorageSchema(data)
         showNamespaceEditor.value = false
         return refresh()
     })
@@ -251,6 +276,65 @@ const tryittype = ref("")
 const tryit = () => {
     tryittype.value = namespaceNode.value?.rawData.name
     showtryit.value = true
+}
+
+//#endregion
+
+//#region Download
+
+const downloading = ref(false)
+let selections: string[] = []
+
+const startDownload = () => {
+    selections = []
+    downloading.value = true
+}
+
+const handleSelection = (val: any[]) => {
+    selections = val.map((v: any) => v.name)
+}
+
+const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
+{
+    return schema ? {
+        name: schema.name,
+        type: schema.type,
+        desc: `${schema.desc}`,
+        scalar: schema.scalar,
+        enum: schema.enum,
+        struct: schema.struct,
+        array: schema.array,
+        func: schema.func ? { ...schema.func, func: undefined } : undefined,
+        schemas: schema.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson)
+    } : {} as any
+}
+
+const download = () => {
+    if (!selections.length) return
+    const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
+    const content = JSON.stringify(selections.map(getCachedSchema).map(schemaToJson), null, 2)
+
+    // download
+    const blob = new Blob([content], { type: 'application/octet-stream' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+}
+
+const uploadSchema = (file:File)=>{
+    file.text().then(text => {
+        const data = JSON.parse(text)
+        if (Array.isArray(data))
+        {
+            registerSchema(data, SchemaLoadState.Custom)
+            return refresh()
+        }
+    })
+    return false
 }
 
 //#endregion

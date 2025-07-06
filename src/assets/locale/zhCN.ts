@@ -191,4 +191,8 @@ importLanguage("zhCN", {
     "schema.designer.close": "关闭",
     "schema.designer.save": "保存",
     "schema.designer.cancel": "取消",
+    "schema.designer.clearcustomschemas": "清除缓存的自定义类型",
+    "schema.designer.download": "下载",
+    "schema.designer.confirm": "确定",
+    "schema.designer.upload": "上传",
 })

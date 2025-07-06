@@ -8,14 +8,17 @@ import { routes } from './routes'
 import Markdown from './components/markdown.vue'
 import "@/assets/locale/zhCN"
 import "@/schema"
-import "@/assets/example/schema"
 import { setLanguage } from 'schema-node'
+import { reloadStorageSchemas } from '@/schema'
 
 const app = createApp(App)
 
 // language
 if (localStorage["lang"])
     setLanguage(localStorage["lang"])
+
+// schema init
+reloadStorageSchemas()
 
 // Router
 const router = createRouter({

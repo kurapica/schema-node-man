@@ -201,31 +201,45 @@ let dataWatcher: Function | null = null
 let stateHandler: Function | null = null
 
 onMounted(() => {
-    let root: any = undefined
     dataWatcher = scalarNode.subscribe(async() =>  {
         const data = scalarNode.rawData
         state.data = data
         
         const paths = (data || "").split(".")
         const display: string[] = []
+        let option = root
+        let rebuild = false
         for (let i = 0; i < paths.length; i++) {
             const name = paths.slice(0, i + 1).join(".")
-            const schema = await getSchema(name)
-            if (!schema) break
-            display.push(`${schema.desc || paths[i]}`)
+            const match = option?.children?.find(c => c.value === name)
+            if (match)
+            {
+                display.push(match.label)
+                option = match
+            }
+            else
+            {
+                rebuild = true
+                const schema = await getSchema(name)
+                if (!schema) break
+                display.push(`${schema.desc || paths[i]}`)
+            }
         }
         state.display = display.join("/")
+        if (rebuild)
+            await reBuildOptions()
     }, true)
 
+    let ruleRoot: any = undefined
     stateHandler = scalarNode.subscribeState(() => {
         state.disable = scalarNode.rule.disable
         state.require = scalarNode.require
         state.readonly = scalarNode.readonly
 
         const r = scalarNode.rule.root || null
-        if (r !== root)
+        if (r !== ruleRoot)
         {
-            root = r
+            ruleRoot = r
             reBuildOptions()
         }
     }, true)
