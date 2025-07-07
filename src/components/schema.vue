@@ -61,7 +61,7 @@
                         <el-button v-else type="info" @click="handleEdit(scope.row, true)">
                             {{ _L["schema.designer.view"] }}
                         </el-button>
-                        <el-button type="info" @click="handleEdit(scope.row, false)">
+                        <el-button type="info" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
                             {{ _L["schema.designer.edit"] }}
                         </el-button>
                         <el-button v-if="isSchemaDeletable(scope.row.name)" type="danger" @click="handleDelete(scope.row)">
@@ -122,13 +122,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref } from 'vue'
+import { reactive, watch, ref, toRaw } from 'vue'
 import schemaView from 'schema-node-vue-view'
 import tryitView from './tryit.vue'
 import { _L } from 'schema-node-vue-view'
 import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
-import { clearAllStorageSchemas, removeStorageSchema, saveStorageSchema } from '@/schema'
+import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -221,7 +221,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     namespaceNode.value = new StructNode({
         type: "schema.namespacedefine",
         readonly
-    }, deepClone(row))
+    }, deepClone(toRaw(row)))
     namespaceNode.value.resetChanges()
     showNamespaceEditor.value = true
 
@@ -299,20 +299,20 @@ const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
     return schema ? {
         name: schema.name,
         type: schema.type,
-        desc: `${schema.desc}`,
+        desc: `${schema.desc || ""}`,
         scalar: schema.scalar,
         enum: schema.enum,
         struct: schema.struct,
         array: schema.array,
         func: schema.func ? { ...schema.func, func: undefined } : undefined,
-        schemas: schema.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson)
+        schemas: schema.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
     } : {} as any
 }
 
 const download = () => {
     if (!selections.length) return
     const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
-    const content = JSON.stringify(selections.map(getCachedSchema).map(schemaToJson), null, 2)
+    const content = JSON.stringify(selections.map(getCachedSchema).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
 
     // download
     const blob = new Blob([content], { type: 'application/octet-stream' })
@@ -331,6 +331,7 @@ const uploadSchema = (file:File)=>{
         if (Array.isArray(data))
         {
             registerSchema(data, SchemaLoadState.Custom)
+            saveAllCustomSchemaToStroage()
             return refresh()
         }
     })

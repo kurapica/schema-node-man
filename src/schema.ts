@@ -1773,7 +1773,7 @@ registerSchema([
         }
     },
     //#endregion
-])
+], SchemaLoadState.System)
 
 // View
 import namespaceView from "./view/namespaceView.vue"
