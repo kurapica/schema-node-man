@@ -7,6 +7,7 @@ import 'element-plus/dist/index.css'
 import { routes } from './routes'
 import Markdown from './components/markdown.vue'
 import "@/assets/locale/zhCN"
+import "@/assets/locale/enUS"
 import "@/schema"
 import { setLanguage } from 'schema-node'
 import { reloadStorageSchemas } from '@/schema'

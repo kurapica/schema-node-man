@@ -5,6 +5,7 @@ importLanguage("zhCN", {
     "schema.nav.tryit": "尝试",
     "schema.nav.type": "类型管理",
 
+    "schema": "类型定义辅助",
     "schema.namespace": "命名空间",
     "schema.scalartype": "基础数据类型",
     "schema.enumtype": "枚举类型",
@@ -17,6 +18,7 @@ importLanguage("zhCN", {
     "schema.varname": "字段名",
     "schema.namespaceinput": "命名空间录入用",
     "schema.reltarfield": "关联目标字段",
+    "schema.anyvalue": "任意数据",
     
     "schema.schematype": "数据类型",
     "schema.schematype.namespace": "命名空间",
@@ -77,6 +79,9 @@ importLanguage("zhCN", {
     "schema.enumvalueinfo.disable": "停用",
     "schema.enumvalueinfo.hassublist": "有子元素",
     "schema.enumvalueinfos": "枚举字段信息列表",
+    "schema.calcnextflag": "计算下一个标志位",
+    "schema.getenuminfostype": "获取枚举值值列表定义类型",
+    "schema.getenumvaluetype": "获取枚举值值类型",
 
     "schema.enumdefine": "枚举值定义",
     "schema.enumdefine.type": "枚举值数据类型",
@@ -124,6 +129,19 @@ importLanguage("zhCN", {
     "schema.structfldrelationinfo.func": "关系函数",
     "schema.structfldrelationinfo.args": "函数参数",
     "schema.structfldrelationinfos": "字段数据关联列表",
+    "schema.getrelationfuncreturn": "获取关联所需的结果类型",
+    "schema.getstructindexfields": "获取结构体可作为索引的字段列表",
+    "schema.getrelationwhitelist": "获取可用的关联类型",
+    "schema.getstructfieldtype": "获取结构体字段类型",
+    "schema.getstructfieldtypebytype": "基于类型获取结构体字段类型",
+
+    "schema.notscalartype": "非基础数据类型",
+    "schema.notenumtype": "非枚举值类型",
+    "schema.notscalarenumtype": "非基础或枚举值类型",
+    "schema.notcascadeenumtype": "非级联枚举值类型",
+    "schema.notflagsenumtype": "非标志枚举值类型",
+    "schema.notstructtype": "非结构体类型",
+    "schema.getenumcascadewhitelist": "获取级联名称白名单",
 
     "schema.structdefine": "结构体类型定义",
     "schema.structdefine.base": "基础类型",
@@ -191,8 +209,9 @@ importLanguage("zhCN", {
     "schema.designer.close": "关闭",
     "schema.designer.save": "保存",
     "schema.designer.cancel": "取消",
-    "schema.designer.clearcustomschemas": "清除缓存的自定义类型",
+    "schema.designer.clearcustomschemas": "清除缓存类型",
     "schema.designer.download": "下载",
     "schema.designer.confirm": "确定",
     "schema.designer.upload": "上传",
+    "schema.designer.error": "处理失败，请检查数据后重新提交",
 })

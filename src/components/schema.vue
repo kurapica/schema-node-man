@@ -15,7 +15,7 @@
                     display: _L['schema.designer.keyword']
                 }"></schema-view>
                 <el-button type="info" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
-                <el-button type="primary" @click="addNamespace">{{ _L["schema.designer.new"] }}</el-button>
+                <el-button type="primary" @click="handleNew">{{ _L["schema.designer.new"] }}</el-button>
                 <!-- download -->
                 <template v-if="!downloading">
                     <el-button type="success" @click="startDownload">{{ _L["schema.designer.download"] }}</el-button>
@@ -31,7 +31,6 @@
                     <el-button type="success" @click="download">{{ _L["schema.designer.confirm"] }}</el-button>
                     <el-button type="info" @click="downloading = false">{{ _L["schema.designer.cancel"] }}</el-button>
                 </template>
-                <el-button type="danger" @click="clearAllStorageSchemas" style="position: absolute;right: 3rem;">{{ _L["schema.designer.clearcustomschemas"] }}</el-button>
             </el-form>
         </el-header>
         <el-main>
@@ -47,7 +46,7 @@
                         {{ _L['schema.schematype.' + scope.row.type] }}
                     </template>
                 </el-table-column>
-                <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="240">
+                <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="280">
                     <template #header>
                         <a href="javascript:void(0)" v-if="state.namespace" @click="goback"
                             style="text-decoration: underline; color: lightseagreen;">
@@ -71,6 +70,9 @@
                 </el-table-column>
             </el-table>
         </el-main>
+        <el-footer>
+            <el-button type="danger" @click="clearAllStorageSchemas" style="position: absolute;right: 3rem;">{{ _L["schema.designer.clearcustomschemas"] }}</el-button>
+        </el-footer>
 
         <!-- namespace editor -->
         <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" destroy-on-close
@@ -129,6 +131,7 @@ import { _L } from 'schema-node-vue-view'
 import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
+import { getSchemaServerProvider } from '@/schemaServerProvider'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -147,6 +150,23 @@ const state = reactive({
     type: null,
     keyword: ""
 })
+
+if (localStorage["schema_man_search"])
+{
+    try
+    {
+        const search = JSON.parse(localStorage["schema_man_search"])
+        if (search && typeof(search) === "object")
+        {
+            state.namespace = search.namespace || ""
+            state.type = search.type || null
+            state.keyword = search.keyword || ""
+        }
+    }
+    catch{
+        // pass
+    }
+}
 
 const reset = () => {
     if (!isNull(state.keyword))
@@ -173,9 +193,10 @@ const choose = (schema: INodeSchema) => {
 }
 
 const refresh = async () => {
+    localStorage["schema_man_search"] = JSON.stringify(state)
     const schema = await getSchema(state.namespace || "")
     if (schema?.type === SchemaType.Namespace) {
-        let temp = [...schema.schemas || []].filter(p => p.name !== "schema")
+        let temp = [...schema.schemas || []]
         if (state.type) {
             temp = temp.filter(p => p.type === state.type)
         }
@@ -203,7 +224,7 @@ const operation = ref("")
 let namesapceWatchHandler: Function | null = null
 
 // create
-const addNamespace = async () => {
+const handleNew = async () => {
     localStorage["schema_new_namespace"] = state.namespace
 
     namespaceNode.value = new StructNode({
@@ -212,7 +233,7 @@ const addNamespace = async () => {
     showNamespaceEditor.value = true
 
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.new"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
     }, true)
 }
 
@@ -226,21 +247,34 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
         }, true)
     }
-};
+}
 
 // delete
-const handleDelete = (row: any) => {
+const handleDelete = async (row: any) => {
     if (!isSchemaDeletable(row.name))
     {
         ElMessage.error(_L.value["schema.designer.cantdelschema"])
         return
+    }
+    if ((row.loadState || 0) && SchemaLoadState.Server)
+    {
+        const provider = getSchemaServerProvider()
+        if (provider)
+        {
+            const res = await provider.deleteSchema(row.name)
+            if (!res.result)
+            {
+                ElMessage.error(res.message || _L.value["schema.designer.error"])
+                return
+            }
+        }
     }
     removeStorageSchema(row.name)
     removeSchema(row.name)
@@ -248,16 +282,34 @@ const handleDelete = (row: any) => {
 }
 
 // save
-const confirmNameSpace = () => {
-    editorRef.value?.validate((valid = true) => {
-        if (!valid || !namespaceNode.value?.valid) return
-        const data = namespaceNode.value.data
-        registerSchema([data])
-        saveStorageSchema(data)
-        showNamespaceEditor.value = false
-        return refresh()
-    })
+const confirmNameSpace = async () => {
+    await editorRef.value?.validate()
+
+    if (!namespaceNode.value?.valid) return
+    const data = namespaceNode.value.data
+    const schema = getCachedSchema(data.name)
+    
+    if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
+    {
+        const provider = getSchemaServerProvider()
+        if (provider)
+        {
+            const res = await provider.saveSchema(data)
+            if (!res.result)
+            {
+                ElMessage.error(res.message || _L.value["schema.designer.error"])
+                return
+            }
+            data.loadState = SchemaLoadState.Server
+        }
+    }
+
+    registerSchema([data])
+    saveStorageSchema(data)
+    showNamespaceEditor.value = false
+    return refresh()
 }
+
 // close
 const closeNamespaceEditor = () => {
     if (namesapceWatchHandler) namesapceWatchHandler()

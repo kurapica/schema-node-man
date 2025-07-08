@@ -1,6 +1,12 @@
 import { _L, _LS, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
+    {
+        name: "schema",
+        type: SchemaType.Namespace,
+        desc: _LS("schema"),
+    },
+
     //#region scalar type
     {
         name: "schema.namespace",
@@ -403,7 +409,7 @@ registerSchema([
     {
         name: "schema.calcnextflag",
         type: SchemaType.Function,
-        desc: "Gets the next flag value",
+        desc: _LS("schema.calcnextflag"),
         func: {
             return: NS_SYSTEM_INT,
             args: [
@@ -414,6 +420,7 @@ registerSchema([
             ],
             exps: [],
             func: (values: any[]) => {
+                console.log(values.join(","))
                 if (!Array.isArray(values) || values.length == 0) return 0
                 const last = values[values.length - 1]
                 return !last?.value ? 1 : last.value * 2
@@ -444,7 +451,7 @@ registerSchema([
     {
         name: "schema.getenumvaluetype",
         type: SchemaType.Function,
-        desc: "Gets the enum value type based on the enum schema value type",
+        desc: _LS("schema.getenumvaluetype"),
         func: {
             return: "schema.scalartype",
             args: [
@@ -473,7 +480,7 @@ registerSchema([
     {
         name: "schema.getenuminfostype",
         type: SchemaType.Function,
-        desc: "Gets the enum infos type based on the enum schema value type",
+        desc: _LS("schema.getenuminfostype"),
         func: {
             return: "schema.arraytype",
             args: [
@@ -612,7 +619,7 @@ registerSchema([
     {
         name: "schema.notscalartype",
         type: SchemaType.Function,
-        desc: "Whether the type not a scalar type",
+        desc: _LS("schema.notscalartype"),
         func: {
             return : NS_SYSTEM_BOOL,
             args: [
@@ -631,7 +638,7 @@ registerSchema([
     {
         name: "schema.notenumtype",
         type: SchemaType.Function,
-        desc: "Whether the type not an enum type",
+        desc: _LS("schema.notenumtype"),
         func: {
             return : NS_SYSTEM_BOOL,
             args: [
@@ -650,7 +657,7 @@ registerSchema([
     {
         name: "schema.notscalarenumtype",
         type: SchemaType.Function,
-        desc: "Whether the type not scalar or enum type",
+        desc: _LS("schema.notscalarenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -669,7 +676,7 @@ registerSchema([
     {
         name: "schema.notcascadeenumtype",
         type: SchemaType.Function,
-        desc: "Whether the type not a cascade enum type",
+        desc: _LS("schema.notcascadeenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args:[
@@ -688,7 +695,7 @@ registerSchema([
     {
         name: "schema.notflagsenumtype",
         type: SchemaType.Function,
-        desc: "Whether the type not a flags enum type",
+        desc: _LS("schema.notflagsenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -707,7 +714,7 @@ registerSchema([
     {
         name: "schema.getenumcascadewhitelist",
         type: SchemaType.Function,
-        desc: "Gets the enum cascade white list",
+        desc: _LS("schema.getenumcascadewhitelist"),
         func: {
             return: NS_SYSTEM_ARRAY,
             args: [
@@ -1010,7 +1017,7 @@ registerSchema([
     {
         name: "schema.getstructindexfields",
         type: SchemaType.Function,
-        desc: "get indexable struct field names",
+        desc: _LS("schema.getstructindexfields"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
@@ -1036,7 +1043,7 @@ registerSchema([
     {
         name: "schema.getrelationfuncreturn",
         type: SchemaType.Function,
-        desc: "Gets the return type of the relation function",
+        desc: _LS("schema.getrelationfuncreturn"),
         func: {
             return: "system.valuetype",
             args: [
@@ -1079,7 +1086,7 @@ registerSchema([
     {
         name: "schema.getrelationwhitelist",
         type: SchemaType.Function,
-        desc: "Gets the whitelist of the relations",
+        desc: _LS("schema.getrelationwhitelist"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
@@ -1143,7 +1150,7 @@ registerSchema([
     {
         name: "schema.getstructfieldtype",
         type: SchemaType.Function,
-        desc: "Gets the struct field type",
+        desc: _LS("schema.getstructfieldtype"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -1183,7 +1190,7 @@ registerSchema([
     {
         name: "schema.getstructfieldtypebytype",
         type: SchemaType.Function,
-        desc: "Get struct field type by give type",
+        desc: _LS("schema.getstructfieldtypebytype"),
         func: {
             return: "system.valuetype",
             args: [
@@ -1341,7 +1348,7 @@ registerSchema([
     {
         name: "schema.notstructtype",
         type: SchemaType.Function,
-        desc: "Whether the type is not a struct",
+        desc: _LS("schema.notstructtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -1614,7 +1621,7 @@ registerSchema([
     {
         name: "schema.funcexps",
         type: SchemaType.Array,
-        desc: "",
+        desc: _LS("schema.funcexps"),
         array: {
             element: "schema.funcexp",
             primary: ["name"],
