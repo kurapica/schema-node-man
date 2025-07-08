@@ -370,7 +370,6 @@ registerSchema([
                     immutable: true,
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.enumvalueinfo.value"),
-                    upLimit: 64
                 } as IStructScalarFieldConfig,
                 {
                     name: "name",
@@ -420,7 +419,6 @@ registerSchema([
             ],
             exps: [],
             func: (values: any[]) => {
-                console.log(values.join(","))
                 if (!Array.isArray(values) || values.length == 0) return 0
                 const last = values[values.length - 1]
                 return !last?.value ? 1 : last.value * 2
