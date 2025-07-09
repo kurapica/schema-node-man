@@ -77,16 +77,17 @@ importLanguage("enUS", {
     "schema.enumvalueinfo.value": "Value",
     "schema.enumvalueinfo.name": "Name",
     "schema.enumvalueinfo.disable": "Disabled",
+    "schema.enumvalueinfo.sublist": "SubList",
     "schema.enumvalueinfo.hassublist": "Has Sublist",
     "schema.enumvalueinfos": "Enum Value Info List",
     "schema.calcnextflag": "Calculate Next Flag",
     "schema.getenuminfostype": "Get Enum Info Type",
-    "schema.getenumvaluetype": "Get Enum Value Type",
 
     "schema.enumdefine": "Enum Definition",
     "schema.enumdefine.type": "Enum Value Type",
     "schema.enumdefine.cascade": "Cascade Name",
     "schema.enumdefine.values": "Enum Values",
+    "schema.enumdefine.downlevel": "Next",
 
     "schema.structindex": "Struct Index",
     "schema.structindex.fields": "Fields",

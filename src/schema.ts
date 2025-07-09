@@ -380,18 +380,14 @@ registerSchema([
                 },
                 {
                     name: "disable",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     default: false,
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.enumvalueinfo.disable"),
                 },
                 {
-                    name: "hasSubList",
-                    invisible: true,
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.hassublist"),
+                    name: "subList",
+                    type: "schema.enumvalueinfos",
+                    display: _LS("schema.enumvalueinfo.sublist")
                 }
             ]
         },
@@ -406,31 +402,170 @@ registerSchema([
         },
     },
     {
-        name: "schema.calcnextflag",
-        type: SchemaType.Function,
-        desc: _LS("schema.calcnextflag"),
-        func: {
-            return: NS_SYSTEM_INT,
-            args: [
+        name: "schema.enumintvalueinfo",
+        type: SchemaType.Struct,
+        desc: _LS("schema.enumvalueinfo"),
+        struct: {
+            fields: [
                 {
-                    name: "values",
-                    type: NS_SYSTEM_INTS,
+                    name: "value",
+                    require: true,
+                    immutable: true,
+                    type: NS_SYSTEM_INT,
+                    display: _LS("schema.enumvalueinfo.value"),
+                } as IStructScalarFieldConfig,
+                {
+                    name: "name",
+                    require: true,
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.enumvalueinfo.name"),
+                    upLimit: 64
+                },
+                {
+                    name: "disable",
+                    default: false,
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.enumvalueinfo.disable"),
+                },
+                {
+                    name: "subList",
+                    type: "schema.enumintvalueinfos",
+                    display: _LS("schema.enumvalueinfo.sublist")
                 }
-            ],
-            exps: [],
-            func: (values: any[]) => {
-                if (!Array.isArray(values) || values.length == 0) return 0
-                const last = values[values.length - 1]
-                return !last?.value ? 1 : last.value * 2
-            }
-        }
+            ]
+        },
+    },
+    {
+        name: "schema.enumintvalueinfos",
+        type: SchemaType.Array,
+        desc: _LS("schema.enumvalueinfos"),
+        array: {
+            element: "schema.enumintvalueinfo",
+            primary: ["value"],
+        },
+    },
+    {
+        name: "schema.enumfloatvalueinfo",
+        type: SchemaType.Struct,
+        desc: _LS("schema.enumvalueinfo"),
+        struct: {
+            fields: [
+                {
+                    name: "value",
+                    require: true,
+                    immutable: true,
+                    type: NS_SYSTEM_FLOAT,
+                    display: _LS("schema.enumvalueinfo.value"),
+                } as IStructScalarFieldConfig,
+                {
+                    name: "name",
+                    require: true,
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.enumvalueinfo.name"),
+                    upLimit: 64
+                },
+                {
+                    name: "disable",
+                    default: false,
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.enumvalueinfo.disable"),
+                },
+                {
+                    name: "subList",
+                    type: "schema.enumfloatvalueinfos",
+                    display: _LS("schema.enumvalueinfo.sublist")
+                }
+            ]
+        },
+    },
+    {
+        name: "schema.enumfloatvalueinfos",
+        type: SchemaType.Array,
+        desc: _LS("schema.enumvalueinfos"),
+        array: {
+            element: "schema.enumfloatvalueinfo",
+            primary: ["value"],
+        },
+    },
+    {
+        name: "schema.enumdoublevalueinfo",
+        type: SchemaType.Struct,
+        desc: _LS("schema.enumvalueinfo"),
+        struct: {
+            fields: [
+                {
+                    name: "value",
+                    require: true,
+                    immutable: true,
+                    type: NS_SYSTEM_DOUBLE,
+                    display: _LS("schema.enumvalueinfo.value"),
+                } as IStructScalarFieldConfig,
+                {
+                    name: "name",
+                    require: true,
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.enumvalueinfo.name"),
+                    upLimit: 64
+                },
+                {
+                    name: "disable",
+                    default: false,
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.enumvalueinfo.disable"),
+                },
+                {
+                    name: "subList",
+                    type: "schema.enumdoublevalueinfos",
+                    display: _LS("schema.enumvalueinfo.sublist")
+                }
+            ]
+        },
+    },
+    {
+        name: "schema.enumdoublevalueinfos",
+        type: SchemaType.Array,
+        desc: _LS("schema.enumvalueinfos"),
+        array: {
+            element: "schema.enumdoublevalueinfo",
+            primary: ["value"],
+        },
+    },
+    {
+        name: "schema.enumflagvalueinfo",
+        type: SchemaType.Struct,
+        desc: _LS("schema.enumvalueinfo"),
+        struct: {
+            fields: [
+                {
+                    name: "value",
+                    require: true,
+                    immutable: true,
+                    readonly: true,
+                    type: NS_SYSTEM_INT,
+                    display: _LS("schema.enumvalueinfo.value"),
+                } as IStructScalarFieldConfig,
+                {
+                    name: "name",
+                    require: true,
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.enumvalueinfo.name"),
+                    upLimit: 64
+                },
+                {
+                    name: "disable",
+                    default: false,
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.enumvalueinfo.disable"),
+                }
+            ]
+        },
     },
     {
         name: "schema.enumflagsvalueinfos",
         type: SchemaType.Array,
         desc: _LS("schema.enumvalueinfos"),
         array: {
-            element: "schema.enumvalueinfo",
+            element: "schema.enumflagvalueinfo",
             primary: ["value"],
             relations: [
                 {
@@ -447,31 +582,23 @@ registerSchema([
         },
     },
     {
-        name: "schema.getenumvaluetype",
+        name: "schema.calcnextflag",
         type: SchemaType.Function,
-        desc: _LS("schema.getenumvaluetype"),
+        desc: _LS("schema.calcnextflag"),
         func: {
-            return: "schema.scalartype",
+            return: NS_SYSTEM_INT,
             args: [
                 {
-                    name: "type",
-                    type: "schema.enumvaluetype"
+                    name: "values",
+                    type: NS_SYSTEM_INTS,
                 }
             ],
             exps: [],
-            func: (type: EnumValueType) => {
-                switch (type)
-                {
-                    case EnumValueType.String:
-                        return NS_SYSTEM_STRING
-                    case EnumValueType.Int:
-                    case EnumValueType.Flags:
-                        return NS_SYSTEM_INT
-                    case EnumValueType.Float:
-                        return NS_SYSTEM_FLOAT
-                    case EnumValueType.Double:
-                        return NS_SYSTEM_DOUBLE
-                }
+            func: (values: any[]) => {
+                console.log("calcnextflag", values.join(","))
+                if (!Array.isArray(values) || values.length == 0) return 0
+                const last = values[values.length - 1]
+                return !last?.value ? 1 : last.value * 2
             }
         }
     },
@@ -489,7 +616,19 @@ registerSchema([
             ],
             exps: [],
             func: (type: EnumValueType) => {
-                return type === EnumValueType.Flags ? "schema.enumflagsvalueinfos" : "schema.enumvalueinfos"
+                switch (type)
+                {
+                    case EnumValueType.String:
+                        return "schema.enumvalueinfos"
+                    case EnumValueType.Int:
+                        return "schema.enumintvalueinfos"
+                    case EnumValueType.Float:
+                        return "schema.enumfloatvalueinfos"
+                    case EnumValueType.Double:
+                        return "schema.enumdoublevalueinfos"
+                    case EnumValueType.Flags:
+                        return "schema.enumflagsvalueinfos"
+                }
             }
         }
     },
@@ -536,16 +675,6 @@ registerSchema([
                     field: "values",
                     type: RelationType.Type,
                     func: "schema.getenuminfostype",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "values.value",
-                    type: RelationType.Type,
-                    func: "schema.getenumvaluetype",
                     args: [
                         {
                             name: "type"
@@ -792,9 +921,6 @@ registerSchema([
                 },
                 {
                     name: "unit",
-                    require: false,
-                    immutable: false,
-                    displayOnly: false,
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.structfieldtype.unit"),
                     upLimit: 32,
@@ -1783,6 +1909,7 @@ registerSchema([
 // View
 import namespaceView from "./view/namespaceView.vue"
 import namespaceInputView from "./view/namespaceInputView.vue"
+import enumvalueinfosView from "./view/enumvalueinfosView.vue"
 import { regSchemaTypeView } from "schema-node-vue-view"
 
 regSchemaTypeView("schema.namespace", namespaceView)
@@ -1795,6 +1922,12 @@ regSchemaTypeView("schema.scalarenumtype", namespaceView)
 regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)
 regSchemaTypeView("schema.namespaceinput", namespaceInputView)
+
+//regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
+//regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
+//regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
+//regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
+//regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
 
 // Schema storage
 // reload schemas from storage

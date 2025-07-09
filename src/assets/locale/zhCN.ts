@@ -77,16 +77,17 @@ importLanguage("zhCN", {
     "schema.enumvalueinfo.value": "枚举值",
     "schema.enumvalueinfo.name": "枚举名",
     "schema.enumvalueinfo.disable": "停用",
+    "schema.enumvalueinfo.sublist": "子枚举值",
     "schema.enumvalueinfo.hassublist": "有子元素",
     "schema.enumvalueinfos": "枚举字段信息列表",
     "schema.calcnextflag": "计算下一个标志位",
     "schema.getenuminfostype": "获取枚举值值列表定义类型",
-    "schema.getenumvaluetype": "获取枚举值值类型",
 
     "schema.enumdefine": "枚举值定义",
     "schema.enumdefine.type": "枚举值数据类型",
     "schema.enumdefine.cascade": "级联枚举名",
     "schema.enumdefine.values": "枚举值列表",
+    "schema.enumdefine.downlevel": "下级",
 
     "schema.structindex": "结构体索引",
     "schema.structindex.fields": "字段列表",
