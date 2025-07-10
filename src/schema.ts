@@ -383,11 +383,6 @@ registerSchema([
                     default: false,
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.enumvalueinfo.disable"),
-                },
-                {
-                    name: "subList",
-                    type: "schema.enumvalueinfos",
-                    display: _LS("schema.enumvalueinfo.sublist")
                 }
             ]
         },
@@ -426,11 +421,6 @@ registerSchema([
                     default: false,
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.enumvalueinfo.disable"),
-                },
-                {
-                    name: "subList",
-                    type: "schema.enumintvalueinfos",
-                    display: _LS("schema.enumvalueinfo.sublist")
                 }
             ]
         },
@@ -469,11 +459,6 @@ registerSchema([
                     default: false,
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.enumvalueinfo.disable"),
-                },
-                {
-                    name: "subList",
-                    type: "schema.enumfloatvalueinfos",
-                    display: _LS("schema.enumvalueinfo.sublist")
                 }
             ]
         },
@@ -512,11 +497,6 @@ registerSchema([
                     default: false,
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.enumvalueinfo.disable"),
-                },
-                {
-                    name: "subList",
-                    type: "schema.enumdoublevalueinfos",
-                    display: _LS("schema.enumvalueinfo.sublist")
                 }
             ]
         },
@@ -595,7 +575,6 @@ registerSchema([
             ],
             exps: [],
             func: (values: any[]) => {
-                console.log("calcnextflag", values.join(","))
                 if (!Array.isArray(values) || values.length == 0) return 0
                 const last = values[values.length - 1]
                 return !last?.value ? 1 : last.value * 2
@@ -647,7 +626,6 @@ registerSchema([
                 },
                 {
                     name: "cascade",
-                    immutable: true,
                     type: NS_SYSTEM_STRINGS,
                     display: _LS("schema.enumdefine.cascade"),
                 },
@@ -1923,11 +1901,11 @@ regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)
 regSchemaTypeView("schema.namespaceinput", namespaceInputView)
 
-//regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
-//regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
-//regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
-//regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
-//regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
 
 // Schema storage
 // reload schemas from storage

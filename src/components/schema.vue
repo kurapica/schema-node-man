@@ -242,8 +242,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     namespaceNode.value = new StructNode({
         type: "schema.namespacedefine",
         readonly
-    }, deepClone(toRaw(row)))
-    namespaceNode.value.resetChanges()
+    }, JSON.parse(JSON.stringify(toRaw(row))))
     showNamespaceEditor.value = true
 
     if (readonly) {
@@ -286,7 +285,7 @@ const confirmNameSpace = async () => {
     await editorRef.value?.validate()
 
     if (!namespaceNode.value?.valid) return
-    const data = namespaceNode.value.data
+    const data = JSON.parse(JSON.stringify(toRaw(namespaceNode.value.data)))
     const schema = getCachedSchema(data.name)
     
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
