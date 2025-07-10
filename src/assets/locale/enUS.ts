@@ -88,6 +88,7 @@ importLanguage("enUS", {
     "schema.enumdefine.cascade": "Cascade Name",
     "schema.enumdefine.values": "Enum Values",
     "schema.enumdefine.downlevel": "Next",
+    "schema.enumdefine.moveup": "Move up",
 
     "schema.structindex": "Struct Index",
     "schema.structindex.fields": "Fields",

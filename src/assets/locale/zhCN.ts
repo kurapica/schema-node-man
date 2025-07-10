@@ -88,6 +88,7 @@ importLanguage("zhCN", {
     "schema.enumdefine.cascade": "级联枚举名",
     "schema.enumdefine.values": "枚举值列表",
     "schema.enumdefine.downlevel": "下级",
+    "schema.enumdefine.moveup": "上移",
 
     "schema.structindex": "结构体索引",
     "schema.structindex.fields": "字段列表",
