@@ -128,7 +128,7 @@ import { reactive, watch, ref, toRaw } from 'vue'
 import schemaView from 'schema-node-vue-view'
 import tryitView from './tryit.vue'
 import { _L } from 'schema-node-vue-view'
-import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema } from 'schema-node'
+import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
@@ -242,7 +242,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     namespaceNode.value = new StructNode({
         type: "schema.namespacedefine",
         readonly
-    }, JSON.parse(JSON.stringify(toRaw(row))))
+    }, jsonClone(toRaw(row)))
     showNamespaceEditor.value = true
 
     if (readonly) {
@@ -285,7 +285,7 @@ const confirmNameSpace = async () => {
     await editorRef.value?.validate()
 
     if (!namespaceNode.value?.valid) return
-    const data = JSON.parse(JSON.stringify(toRaw(namespaceNode.value.data)))
+    const data = jsonClone(toRaw(namespaceNode.value.data))
     const schema = getCachedSchema(data.name)
     
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))

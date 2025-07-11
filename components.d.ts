@@ -21,6 +21,7 @@ declare module 'vue' {
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
+    ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     HomePage: typeof import('./src/components/homePage.vue')['default']
     Introduce: typeof import('./src/components/introduce.vue')['default']

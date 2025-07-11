@@ -15,14 +15,17 @@
     "process": "^0.11.10",
     "rollup-plugin-copy": "^3.5.0",
     "showdown": "^2.1.0",
+    "sortablejs": "^1.15.6",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1",
     "schema-node": "*",
     "schema-node-vue-view": "*"
   },
   "devDependencies": {
+    "@types/sortablejs": "^1.15.8",
     "@vitejs/plugin-vue": "^5.2.2",
     "@vue/tsconfig": "^0.7.0",
+    "sass-embedded": "^1.89.2",
     "typescript": "~5.7.2",
     "unplugin-auto-import": "^19.1.2",
     "unplugin-vue-components": "^28.5.0",

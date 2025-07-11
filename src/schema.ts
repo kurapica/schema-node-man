@@ -1888,6 +1888,7 @@ registerSchema([
 import namespaceView from "./view/namespaceView.vue"
 import namespaceInputView from "./view/namespaceInputView.vue"
 import enumvalueinfosView from "./view/enumvalueinfosView.vue"
+import structfieldtypesView from "./view/structfieldtypesView.vue"
 import { regSchemaTypeView } from "schema-node-vue-view"
 
 regSchemaTypeView("schema.namespace", namespaceView)
@@ -1906,6 +1907,8 @@ regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
+
+regSchemaTypeView("schema.structfieldtypes", structfieldtypesView)
 
 // Schema storage
 // reload schemas from storage

@@ -149,6 +149,8 @@ importLanguage("zhCN", {
     "schema.structdefine.base": "基础类型",
     "schema.structdefine.fields": "字段列表",
     "schema.structdefine.relations": "字段数据关联列表",
+    "schema.structdefine.confirmflddel": "是否删除{0}字段",
+    "schema.structdefine.anonymous": "指定",
 
     "schema.datacombine": "数据合并规则",
     "schema.datacombines": "数据合并规则列表",

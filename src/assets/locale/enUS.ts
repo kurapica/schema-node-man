@@ -149,6 +149,8 @@ importLanguage("enUS", {
     "schema.structdefine.base": "Base Type",
     "schema.structdefine.fields": "Fields",
     "schema.structdefine.relations": "Field Relations",
+    "schema.structdefine.confirmflddel": "Do you want delte the {0} field",
+    "schema.structdefine.anonymous": "given",
 
     "schema.datacombine": "Data Combine Rule",
     "schema.datacombines": "Data Combine Rule List",
