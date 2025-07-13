@@ -14,13 +14,13 @@
             lazyLoad: lazyLoad
         }" 
         :placeholder="scalarNode.selectPlaceHolder"
-        :disabled="state.disable" :clearable="!state.require"
+        :disabled="state.readonly || state.disable" :clearable="!state.require"
         v-bind="$attrs"
     ></el-cascader>
 </template>
 
 <script lang="ts" setup>
-import { EnumValueType, getSchema, isSchemaCanBeUseAs, SchemaType, type INodeSchema, type ScalarNode } from "schema-node"
+import { getSchema, isSchemaCanBeUseAs, SchemaType, type INodeSchema, type ScalarNode } from "schema-node"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 
 //#region Inner type
@@ -56,6 +56,15 @@ const data = computed({
     }
 })
 
+const schemaTypeOrder = {
+    [SchemaType.Namespace]: 1,
+    [SchemaType.Scalar]: 2,
+    [SchemaType.Enum]: 3,
+    [SchemaType.Struct]: 4,
+    [SchemaType.Array]: 5,
+    [SchemaType.Function]: 6
+}
+
 // cascader root
 const root = reactive<ICascaderOptionInfo>({
     value: "",
@@ -77,7 +86,7 @@ const namespaceMap: any = {
     "schema.scalarenumtype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum],
     "schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
     "schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
-}[type]
+}[type as string]
 
 const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> => {
     // check compatible type
@@ -92,7 +101,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
                 blackList.push(f.name)
             }
         }
-        return []
+        return blackList
     }
     else {
         return []
@@ -104,21 +113,12 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
 
     values = values?.filter(v => namespaceMap.includes(v.type)) || []
 
-    // filter for array element
-    if (type === "schema.arrayeletype") {
-        const filters = []
-        for (let i = 0; i < values.length; i++) {
-            if (values[i].type === SchemaType.Enum) {
-                const enumInfo = await getSchema(values[i].name)
-                if (enumInfo?.enum?.type !== EnumValueType.Flags)
-                    filters.push(values[i])
-            }
-            else {
-                filters.push(values[i])
-            }
-        }
-        values = filters
-    }
+    // sort
+    values.sort((a, b) => {
+        if (schemaTypeOrder[a.type] < schemaTypeOrder[b.type]) return -1
+        if (schemaTypeOrder[a.type] < schemaTypeOrder[b.type]) return 1
+        return a.name < b.name ? -1 : 1
+    })
 
     // generate
     const result: ICascaderOptionInfo[] = []
@@ -156,6 +156,7 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
             ns = ns.children!.find(c => c.value.toLowerCase() === name)!
         }
 
+        console.log("lazy laod", value)
         getSchema(value)
         .then(res => {
             buildOptions([], res?.schemas || []).then(r => {

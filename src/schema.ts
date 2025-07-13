@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
     {
@@ -202,6 +202,18 @@ registerSchema([
                 {
                     value: RelationType.Type,
                     name: _LS("schema.relationtype.type"),
+                },
+                {
+                    value: RelationType.AnyLevel,
+                    name: _LS("schema.relationtype.anylevel")
+                },
+                {
+                    value: RelationType.Cascade,
+                    name: _LS("schema.relationtype.cascade")
+                },
+                {
+                    value: RelationType.SingleFlag,
+                    name: _LS("schema.relationtype.singleflag")
                 }
             ]
         }
@@ -842,6 +854,25 @@ registerSchema([
         }
     },
     {
+        name: "schema.getwhiteblacklisttype",
+        type: SchemaType.Function,
+        desc: _LS("schema.getwhiteblacklisttype"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: async (type: string) => {
+                const arraySchema = await getArraySchema(type)
+                return arraySchema?.name
+            }
+        }
+    },
+    {
         name: "schema.structfieldtype",
         type: SchemaType.Struct,
         desc: _LS("schema.structfieldtype"),
@@ -914,12 +945,14 @@ registerSchema([
                     name: "whiteList",
                     type: NS_SYSTEM_STRINGS,
                     display: _LS("schema.structfieldtype.whitelist"),
-                },
+                    anyLevel: true
+                } as IStructEnumFieldConfig,
                 {
                     name: "blackList",
                     type: NS_SYSTEM_STRINGS,
                     display: _LS("schema.structfieldtype.blacklist"),
-                },
+                    anyLevel: true,
+                } as IStructEnumFieldConfig,
                 {
                     name: "lowLimit",
                     type: NS_SYSTEM_STRING,
@@ -964,6 +997,17 @@ registerSchema([
                 },
             ],
             relations: [
+                // default
+                {
+                    field: "default",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalarenumtype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
                 {
                     field: "default",
                     type: RelationType.Type,
@@ -976,14 +1020,66 @@ registerSchema([
                 },
                 {
                     field: "default",
-                    type: RelationType.Invisible,
-                    func: "schema.notscalarenumtype",
+                    type: RelationType.WhiteList,
+                    func: "system.conv.assign",
                     args: [
                         {
-                            name: "type"
+                            name: "whiteList"
                         }
                     ]
                 },
+                {
+                    field: "default",
+                    type: RelationType.BlackList,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "blackList"
+                        }
+                    ]
+                },
+                {
+                    field: "default",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "root"
+                        }
+                    ]
+                },
+                {
+                    field: "default",
+                    type: RelationType.AnyLevel,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "anyLevel"
+                        }
+                    ]
+                },
+                {
+                    field: "default",
+                    type: RelationType.Cascade,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "cascade"
+                        }
+                    ]
+                },
+                {
+                    field: "default",
+                    type: RelationType.SingleFlag,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "singleFlag"
+                        }
+                    ]
+                },
+
+                // white list
                 {
                     field: "whiteList",
                     type: RelationType.Invisible,
@@ -995,9 +1091,39 @@ registerSchema([
                     ]
                 },
                 {
+                    field: "whiteList",
+                    type: RelationType.Type,
+                    func: "schema.getwhiteblacklisttype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "whiteList",
+                    type: RelationType.BlackList,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "blackList"
+                        }
+                    ]
+                },
+                {
                     field: "blackList",
                     type: RelationType.Invisible,
                     func: "schema.notscalarenumtype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "blackList",
+                    type: RelationType.Type,
+                    func: "schema.getwhiteblacklisttype",
                     args: [
                         {
                             name: "type"
@@ -1067,7 +1193,7 @@ registerSchema([
                 {
                     field: "root",
                     type: RelationType.Invisible,
-                    func: "schema.notscalarenumtype",
+                    func: "schema.notcascadeenumtype",
                     args: [
                         {
                             name: "type"
@@ -1147,11 +1273,11 @@ registerSchema([
         type: SchemaType.Function,
         desc: _LS("schema.getrelationfuncreturn"),
         func: {
-            return: "system.valuetype",
+            return: "schema.valuetype",
             args: [
                 {
                     name: "fieldType",
-                    type: "system.valuetype"
+                    type: "schema.valuetype"
                 },
                 {
                     name: "relationType",
@@ -1177,10 +1303,18 @@ registerSchema([
                             return NS_SYSTEM_INT
                         return fieldType
 
+                    case RelationType.Type:
+                        return "schema.valuetype" 
+
+                    case RelationType.Cascade:
+                        return NS_SYSTEM_INT
+
                     case RelationType.Invisible:
                     case RelationType.Disable:
-                    case RelationType.Type:
+                    case RelationType.AnyLevel:
+                    case RelationType.SingleFlag:
                         return NS_SYSTEM_BOOL
+
                 }
             }
         }
@@ -1204,7 +1338,9 @@ registerSchema([
                 if (typeInfo?.type === SchemaType.Scalar) {
                     return [
                         RelationType.Default,
+                        RelationType.Root,
                         RelationType.WhiteList,
+                        RelationType.BlackList,
                         RelationType.LowLimit,
                         RelationType.Uplimit,
                         RelationType.Invisible,
@@ -1224,7 +1360,10 @@ registerSchema([
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.InitOnly,
-                        RelationType.Type
+                        RelationType.Type,
+                        RelationType.AnyLevel,
+                        RelationType.Cascade,
+                        RelationType.SingleFlag
                     ]
                 }
                 else if (typeInfo?.type === SchemaType.Struct) {
@@ -1244,7 +1383,9 @@ registerSchema([
                     RelationType.Disable,
                     RelationType.Assign,
                     RelationType.InitOnly,
-                    RelationType.Type
+                    RelationType.Type,
+                    RelationType.AnyLevel,
+                    RelationType.Cascade
                 ]
             }
         }
@@ -1294,11 +1435,11 @@ registerSchema([
         type: SchemaType.Function,
         desc: _LS("schema.getstructfieldtypebytype"),
         func: {
-            return: "system.valuetype",
+            return: "schema.valuetype",
             args: [
                 {
                     name: "type",
-                    type: "system.valuetype"
+                    type: "schema.valuetype"
                 },
                 {
                     name: "field",
@@ -1347,6 +1488,7 @@ registerSchema([
                 {
                     name: "fieldType",
                     displayOnly: true,
+                    invisible: true,
                     type : "schema.valuetype",
                     display: _LS("schema.structfldrelationinfo.fieldtype"),
                 },
@@ -1884,32 +2026,6 @@ registerSchema([
     //#endregion
 ], SchemaLoadState.System)
 
-// View
-import namespaceView from "./view/namespaceView.vue"
-import namespaceInputView from "./view/namespaceInputView.vue"
-import enumvalueinfosView from "./view/enumvalueinfosView.vue"
-import structfieldtypesView from "./view/structfieldtypesView.vue"
-import { regSchemaTypeView } from "schema-node-vue-view"
-
-regSchemaTypeView("schema.namespace", namespaceView)
-regSchemaTypeView("schema.scalartype", namespaceView)
-regSchemaTypeView("schema.enumtype", namespaceView)
-regSchemaTypeView("schema.structtype", namespaceView)
-regSchemaTypeView("schema.arraytype", namespaceView)
-regSchemaTypeView("schema.functype", namespaceView)
-regSchemaTypeView("schema.scalarenumtype", namespaceView)
-regSchemaTypeView("schema.arrayeletype", namespaceView)
-regSchemaTypeView("schema.valuetype", namespaceView)
-regSchemaTypeView("schema.namespaceinput", namespaceInputView)
-
-regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
-
-regSchemaTypeView("schema.structfieldtypes", structfieldtypesView)
-
 // Schema storage
 // reload schemas from storage
 export function reloadStorageSchemas()
@@ -2002,3 +2118,33 @@ export function saveAllCustomSchemaToStroage(root: string = "")
         }
     })
 }
+
+// View
+import namespaceView from "./view/namespaceView.vue"
+import namespaceInputView from "./view/namespaceInputView.vue"
+import enumvalueinfosView from "./view/enumvalueinfosView.vue"
+import structfieldtypesView from "./view/structfieldtypesView.vue"
+import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
+import reltarfieldView from "./view/reltarfieldView.vue"
+import { regSchemaTypeView } from "schema-node-vue-view"
+
+regSchemaTypeView("schema.namespace", namespaceView)
+regSchemaTypeView("schema.scalartype", namespaceView)
+regSchemaTypeView("schema.enumtype", namespaceView)
+regSchemaTypeView("schema.structtype", namespaceView)
+regSchemaTypeView("schema.arraytype", namespaceView)
+regSchemaTypeView("schema.functype", namespaceView)
+regSchemaTypeView("schema.scalarenumtype", namespaceView)
+regSchemaTypeView("schema.arrayeletype", namespaceView)
+regSchemaTypeView("schema.valuetype", namespaceView)
+regSchemaTypeView("schema.namespaceinput", namespaceInputView)
+
+regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
+regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
+
+regSchemaTypeView("schema.structfieldtypes", structfieldtypesView)
+regSchemaTypeView("schema.structfldrelationinfos", structfldrelationinfosView)
+regSchemaTypeView("schema.reltarfield", reltarfieldView)

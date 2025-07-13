@@ -1,16 +1,16 @@
 <template>
     <div style="width: 100%;">
         <el-tabs v-if="elTabVis" ref="elTabsRef" class="struct-field-types" v-model="activeCol" :addable="!node.readonly" @edit="handleTabsEdit">
-            <el-tab-pane v-for="(element, i) in elements"
-                :closable="!(node.readonly || element.data.name && noClosable.includes(element.data.name))"
-                :label="element.data.name ? `${element.data.display ? `${element.data.display}(${element.data.name})` : `${element.data.name}`}` : `${i + 1}`"
+            <el-tab-pane v-for="(element, i) in elementDisplay"
+                :closable="!(node.readonly || element.name && noClosable.includes(element.name))"
+                :label="element.display || element.name || _L['schema.structdefine.unkown']"
                 :name="i"></el-tab-pane>
         </el-tabs>
         <schema-view v-if="activeCol >= 0 && activeCol < elements.length"
             :key="elements[activeCol].guid"
             :node="(elements[activeCol] as StructNode)"
             in-form="expand" 
-            plain-text>
+            plain-text="left">
         </schema-view>
     </div>
 </template>
@@ -18,10 +18,11 @@
 <script lang="ts" setup>
 import Sortable from 'sortablejs'
 import { ElTabs } from "element-plus"
-import { onMounted, onUnmounted, ref, toRaw } from 'vue'
+import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import schemaView, { _L } from 'schema-node-vue-view'
 import { _LS, ArrayNode, getSchema, jsonClone, SchemaType, sformat, StructNode } from 'schema-node'
+import type { AnySchemaNode } from 'schema-node'
 
 // tab panel
 const elTabsRef = ref<InstanceType<typeof ElTabs>>()
@@ -29,11 +30,11 @@ const elTabVis = ref(true)
 
 // properties
 const props = defineProps<{ node: ArrayNode }>()
-const arrayNode = toRaw(props.node)
-const elements = ref<StructNode[]>([])
+const arrayNode: ArrayNode = toRaw(props.node)
 
 // display
 const activeCol = ref(0)
+const elements = ref<StructNode[]>([])
 const noClosable = ref<string[]>([])
 
 // add/del
@@ -83,6 +84,7 @@ const regSortable = () => {
 // data change handler
 let dataChangeHandler: Function | null = null
 let baseChangeHandler: Function | null = null
+let elementDisplay = reactive<{ guid: string, name: string, handler: Function, display: string }[]>([])
 onMounted(() => {
     let oldLength = 0
     dataChangeHandler = arrayNode.subscribe((action: any) => {
@@ -91,6 +93,38 @@ onMounted(() => {
         {
             oldLength = currlen
             elements.value = [ ...arrayNode.elements ] as StructNode[]
+            
+            for(let i = 0; i < arrayNode.elements.length; i++)
+            {
+                const ele: AnySchemaNode = arrayNode.elements[i]
+                if (elementDisplay.length > i)
+                {
+                    if (ele.guid === elementDisplay[i].guid) continue
+                    elementDisplay[i].handler()
+                }
+                const view = reactive<{
+                    guid: string,
+                    display: string,
+                    name: string,
+                    handler: Function
+                }>({
+                    guid: ele.guid,
+                    display: "",
+                    name: "",
+                    handler: ():void => {}
+                })
+                view.handler = ele.subscribe(() => {
+                    const { name, display } = ele.rawData
+                    view.name = name
+                    view.display = display
+                }, true)
+                elementDisplay[i] = view
+            }
+            
+            for(let i = elementDisplay.length - 1; i >= arrayNode.elements.length; i--)
+            {
+                elementDisplay.pop()?.handler()
+            }
         }
     }, true)
 
@@ -116,7 +150,7 @@ onMounted(() => {
 
         // rebuild
         arrayNode.data = [
-            ...fields.map(v => data.find((d: any) => d.name === v.name) || jsonClone(v)),
+            ...fields.map((v: any) => data.find((d: any) => d.name === v.name) || jsonClone(v)),
             ...data.filter((v: any) => !v.name || !noClosable.value.includes(v.name))
         ]
     }, true)
@@ -127,6 +161,7 @@ onMounted(() => {
 onUnmounted(() => {
     if (dataChangeHandler) dataChangeHandler()
     if (baseChangeHandler) baseChangeHandler()
+    elementDisplay.forEach(v => v.handler())
     sortble?.destroy()
 })
 

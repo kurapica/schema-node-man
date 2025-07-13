@@ -40,6 +40,9 @@ importLanguage("enUS", {
     "schema.relationtype.assign": "Force Assign",
     "schema.relationtype.initonly": "Init Only",
     "schema.relationtype.type": "Switch Type",
+    "schema.relationtype.anylevel": "Enum Any Level",
+    "schema.relationtype.cascade": "Cascade Limit",    
+    "schema.relationtype.singleflag": "Single Flag Value",
 
     "schema.exptype": "Function Expression Mode",
     "schema.exptype.call": "Direct Call",
@@ -144,13 +147,16 @@ importLanguage("enUS", {
     "schema.notflagsenumtype": "Non-Flags Enum Type",
     "schema.notstructtype": "Non-Struct Type",
     "schema.getenumcascadewhitelist": "Get Cascade Name Whitelist",
+    "schema.getwhiteblacklisttype": "Get white/black list type",
 
     "schema.structdefine": "Struct Definition",
     "schema.structdefine.base": "Base Type",
     "schema.structdefine.fields": "Fields",
     "schema.structdefine.relations": "Field Relations",
-    "schema.structdefine.confirmflddel": "Do you want delte the {0} field",
+    "schema.structdefine.confirmflddel": "Do you want delte the {0} field",    
+    "schema.structdefine.confirmrldel": "Do you want delete the relation",
     "schema.structdefine.anonymous": "given",
+    "schema.structdefine.unkown": "Unkown",
 
     "schema.datacombine": "Data Combine Rule",
     "schema.datacombines": "Data Combine Rule List",
