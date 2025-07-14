@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
     {
@@ -713,6 +713,12 @@ registerSchema([
         struct: {
             fields: [
                 {
+                    name: "type",
+                    type: "schema.valuetype",
+                    displayOnly: true,
+                    display: _LS("schema.structfldfuncarg.type"),
+                },
+                {
                     name: "name",
                     type: "schema.reltarfield",
                     display: _LS("schema.structfldfuncarg.name"),
@@ -721,6 +727,48 @@ registerSchema([
                     name: "value",
                     type: "schema.anyvalue",
                     display: _LS("schema.structfldfuncarg.value"),
+                },
+            ],
+            relations: [
+                {
+                    field: "name",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "name",
+                    type: RelationType.Disable,
+                    func: "system.logic.notnull",
+                    args: [
+                        {
+                            name: "value"
+                        }
+                    ]
+                },
+                {
+                    field: "value",
+                    type: RelationType.Type,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "value",
+                    type: RelationType.Disable,
+                    func: "system.logic.notnull",
+                    args: [
+                        {
+                            name: "name"
+                        }
+                    ]
                 },
             ]
         }
@@ -1250,21 +1298,55 @@ registerSchema([
             return: NS_SYSTEM_STRINGS,
             args: [
                 {
-                    name: "fields",
-                    type: "schema.structfieldtypes"
+                    name: "type",
+                    type: "schema.valuetype"
                 }
             ],
             exps: [],
-            func: async (fields: any[]) => {
+            func: async (type: string) => {
+                const schema = type ? await getSchema(type) : null
                 const indexes: string[] = []
 
-                for (let i = 0; i < fields.length; i++) {
-                    if (await isStructFieldIndexable(fields[i] as IStructFieldConfig)) {
-                        indexes.push(fields[i].name)
+                if (schema?.struct?.fields)
+                {
+                    for (let i = 0; i < schema.struct.fields.length; i++) {
+                        if (await isStructFieldIndexable(schema.struct.fields[i] as IStructFieldConfig)) {
+                            indexes.push(schema.struct.fields[i].name)
+                        }
                     }
                 }
 
                 return indexes
+            }
+        }
+    },
+    {
+        name: "schema.getstructnumbervaluefields",
+        type: SchemaType.Function,
+        desc: _LS("schema.getstructnumbervaluefields"),
+        func: {
+            return: NS_SYSTEM_STRINGS,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: async (type: string) => {
+                const schema = type ? await getSchema(type) : null
+                const values: string[] = []
+
+                if (schema?.struct?.fields)
+                {
+                    for (let i = 0; i < schema.struct.fields.length; i++) {
+                        const field = schema!.struct!.fields[i]
+                        if (await isSchemaCanBeUseAs(field.type, NS_SYSTEM_NUMBER))
+                            values.push(field.name)
+                    }
+                }
+
+                return values
             }
         }
     },
@@ -1295,7 +1377,8 @@ registerSchema([
 
                     case RelationType.WhiteList:
                     case RelationType.BlackList:
-                        return (await getArraySchema(fieldType, true))?.name || NS_SYSTEM_ARRAY
+                        const arraySchema = await getArraySchema(fieldType)
+                        return arraySchema?.name || NS_SYSTEM_ARRAY
 
                     case RelationType.LowLimit:
                     case RelationType.Uplimit:
@@ -1419,6 +1502,11 @@ registerSchema([
                         schema = await getSchema(schema.array!.element)
                     }
 
+                    if (paths[i] === ARRAY_ELEMENT)
+                    {
+                        return schema?.name
+                    }
+
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
                         tarField = schema.struct.fields.find(p => p.name === paths[i])
                     }
@@ -1462,6 +1550,11 @@ registerSchema([
                         schema = await getSchema(schema.array!.element)
                     }
 
+                    if (paths[i] === ARRAY_ELEMENT)
+                    {
+                        return schema?.name
+                    }
+                    
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
                         tarField = schema.struct.fields.find(p => p.name === paths[i])
                     }
@@ -1493,6 +1586,13 @@ registerSchema([
                     display: _LS("schema.structfldrelationinfo.fieldtype"),
                 },
                 {
+                    name: "return",
+                    displayOnly: true,
+                    invisible: true,
+                    type: "schema.valuetype",
+                    display: _LS("schema.structfldrelationinfo.return"),
+                },
+                {
                     name: "type",
                     require: true,
                     type: "schema.relationtype",
@@ -1522,8 +1622,8 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "func",
-                    type: RelationType.Root,
+                    field: "return",
+                    type: RelationType.Default,
                     func: "schema.getrelationfuncreturn",
                     args: [
                         {
@@ -1531,6 +1631,16 @@ registerSchema([
                         },
                         {
                             name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "func",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "return"
                         }
                     ]
                 }
@@ -1617,11 +1727,13 @@ registerSchema([
             fields: [
                 {
                     name: "field",
-                    type: NS_SYSTEM_STRING
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.datacombine.field")
                 },
                 {
                     name: "type",
-                    type: "schema.datacombinetype"
+                    type: "schema.datacombinetype",
+                    display: _LS("schema.datacombine.type")
                 }
             ]
         }
@@ -1654,7 +1766,7 @@ registerSchema([
                 {
                     name: "combine",
                     type: "schema.datacombines",
-                    display: _LS("schema.datacombines"),
+                    display: _LS("schema.arraydefine.combine"),
                 },
                 {
                     name: "relations",
@@ -1674,7 +1786,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "primary",
+                    field: "primary.$ele",
                     type: RelationType.WhiteList,
                     func: "schema.getstructindexfields",
                     args: [
@@ -1684,7 +1796,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "primary",
+                    field: "primary.$ele",
                     type: RelationType.BlackList,
                     func: "system.conv.assign",
                     args: [
@@ -1706,7 +1818,7 @@ registerSchema([
                 {
                     field: "combine.field",
                     type: RelationType.WhiteList,
-                    func: "schema.getstructindexfields",
+                    func: "schema.getstructnumbervaluefields",
                     args: [
                         {
                             name: "element"
@@ -1726,29 +1838,6 @@ registerSchema([
                         }
                     ]
                 },
-                {
-                    field: "relations.type",
-                    type: RelationType.WhiteList,
-                    func: "schema.getrelationwhitelist",
-                    args: [
-                        {
-                            name: "relations.fieldType"
-                        }
-                    ]
-                },
-                {
-                    field: "relations.func",
-                    type: RelationType.Root,
-                    func: "schema.getrelationfuncreturn",
-                    args: [
-                        {
-                            name: "relations.fieldType"
-                        },
-                        {
-                            name: "relations.type"
-                        }
-                    ]
-                }
             ]
         }
     },
@@ -2126,6 +2215,8 @@ import enumvalueinfosView from "./view/enumvalueinfosView.vue"
 import structfieldtypesView from "./view/structfieldtypesView.vue"
 import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import reltarfieldView from "./view/reltarfieldView.vue"
+import structfldfuncargsView from "./view/structfldfuncargsView.vue"
+import funcargsView from "./view/funcargsView.vue"
 import { regSchemaTypeView } from "schema-node-vue-view"
 
 regSchemaTypeView("schema.namespace", namespaceView)
@@ -2148,3 +2239,6 @@ regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.structfieldtypes", structfieldtypesView)
 regSchemaTypeView("schema.structfldrelationinfos", structfldrelationinfosView)
 regSchemaTypeView("schema.reltarfield", reltarfieldView)
+regSchemaTypeView("schema.structfldfuncargs", structfldfuncargsView)
+
+regSchemaTypeView("schema.funcargs", funcargsView)

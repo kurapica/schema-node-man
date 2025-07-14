@@ -128,7 +128,7 @@ import { reactive, watch, ref, toRaw } from 'vue'
 import schemaView from 'schema-node-vue-view'
 import tryitView from './tryit.vue'
 import { _L } from 'schema-node-vue-view'
-import { deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
+import { getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
@@ -347,17 +347,36 @@ const handleSelection = (val: any[]) => {
 
 const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
 {
-    return schema ? {
-        name: schema.name,
-        type: schema.type,
-        desc: `${schema.desc || ""}`,
-        scalar: schema.scalar,
-        enum: schema.enum,
-        struct: schema.struct,
-        array: schema.array,
-        func: schema.func ? { ...schema.func, func: undefined } : undefined,
-        schemas: schema.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
-    } : {} as any
+    const f = schema!
+    const r: INodeSchema = { name: f.name, type: f.type, desc: f.desc }
+
+    switch(f.type)
+    {
+        case SchemaType.Namespace:
+            r.schemas = f.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
+            break
+
+        case SchemaType.Scalar:
+            r.scalar = f.scalar
+            break
+
+        case SchemaType.Enum:
+            r.enum = f.enum
+            break
+
+        case SchemaType.Struct:
+            r.struct = f.struct
+            break
+
+        case SchemaType.Array:
+            r.array = f.array
+            break
+
+        case SchemaType.Function:
+            r.func = { ...f.func!, func: undefined } 
+            break
+    }
+    return r
 }
 
 const download = () => {
@@ -374,6 +393,8 @@ const download = () => {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
+
+    downloading.value = false
 }
 
 const uploadSchema = (file:File)=>{
@@ -396,5 +417,8 @@ const uploadSchema = (file:File)=>{
 <style lang="css">
 body {
     color: black;
+}
+.el-form-item .el-form-item {
+    margin-bottom: 18px;
 }
 </style>

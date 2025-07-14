@@ -20,6 +20,8 @@ importLanguage("enUS", {
     "schema.reltarfield": "Related Target Field",
     "schema.anyvalue": "Any Value",
 
+    "schema.reltarfield.ele": "Array Element",
+
     "schema.schematype": "Data Type",
     "schema.schematype.namespace": "Namespace",
     "schema.schematype.enum": "Enum",
@@ -99,6 +101,7 @@ importLanguage("enUS", {
     "schema.structindexs": "Struct Index List",
 
     "schema.structfldfuncarg": "Struct Field Func Arg",
+    "schema.structfldfuncarg.type": "Arg Type",
     "schema.structfldfuncarg.name": "Field Name",
     "schema.structfldfuncarg.value": "Value",
     "schema.structfldfuncargs": "Struct Field Func Args",
@@ -130,6 +133,7 @@ importLanguage("enUS", {
     "schema.structfldrelationinfo": "Field Relation",
     "schema.structfldrelationinfo.field": "Target Field",
     "schema.structfldrelationinfo.fieldtype": "Field Type",
+    "schema.structfldrelationinfo.return": "Function Return",
     "schema.structfldrelationinfo.type": "Relation Type",
     "schema.structfldrelationinfo.func": "Relation Function",
     "schema.structfldrelationinfo.args": "Function Arguments",
@@ -139,6 +143,7 @@ importLanguage("enUS", {
     "schema.getrelationwhitelist": "Get Available Relation Types",
     "schema.getstructfieldtype": "Get Struct Field Type",
     "schema.getstructfieldtypebytype": "Get Struct Field Type by Type",
+    "schema.getstructnumbervaluefields": "Get Struct Value Fields",
 
     "schema.notscalartype": "Non-Scalar Type",
     "schema.notenumtype": "Non-Enum Type",
@@ -159,6 +164,8 @@ importLanguage("enUS", {
     "schema.structdefine.unkown": "Unkown",
 
     "schema.datacombine": "Data Combine Rule",
+    "schema.datacombine.field": "Field",
+    "schema.datacombine.type": "Combine Rule",
     "schema.datacombines": "Data Combine Rule List",
 
     "schema.arraydefine": "Array Definition",

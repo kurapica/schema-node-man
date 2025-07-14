@@ -156,7 +156,6 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
             ns = ns.children!.find(c => c.value.toLowerCase() === name)!
         }
 
-        console.log("lazy laod", value)
         getSchema(value)
         .then(res => {
             buildOptions([], res?.schemas || []).then(r => {

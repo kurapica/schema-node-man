@@ -19,6 +19,8 @@ importLanguage("zhCN", {
     "schema.namespaceinput": "命名空间录入用",
     "schema.reltarfield": "关联目标字段",
     "schema.anyvalue": "任意数据",
+
+    "schema.reltarfield.ele": "数组元素",
     
     "schema.schematype": "数据类型",
     "schema.schematype.namespace": "命名空间",
@@ -99,6 +101,7 @@ importLanguage("zhCN", {
     "schema.structindexs": "结构体索引列表",
 
     "schema.structfldfuncarg": "结构体字段函数参数",
+    "schema.structfldfuncarg.type": "参数类型",
     "schema.structfldfuncarg.name": "字段名",
     "schema.structfldfuncarg.value": "值",
     "schema.structfldfuncargs": "结构体字段函数参数列表",
@@ -130,6 +133,7 @@ importLanguage("zhCN", {
     "schema.structfldrelationinfo": "字段数据关联",
     "schema.structfldrelationinfo.field": "目标字段",
     "schema.structfldrelationinfo.fieldtype": "字段类型",
+    "schema.structfldrelationinfo.return": "函数返回值",
     "schema.structfldrelationinfo.type": "关系类型",
     "schema.structfldrelationinfo.func": "关系函数",
     "schema.structfldrelationinfo.args": "函数参数",
@@ -139,6 +143,7 @@ importLanguage("zhCN", {
     "schema.getrelationwhitelist": "获取可用的关联类型",
     "schema.getstructfieldtype": "获取结构体字段类型",
     "schema.getstructfieldtypebytype": "基于类型获取结构体字段类型",
+    "schema.getstructnumbervaluefields": "获取结构体数值字段列表",
 
     "schema.notscalartype": "非基础数据类型",
     "schema.notenumtype": "非枚举值类型",
@@ -159,6 +164,8 @@ importLanguage("zhCN", {
     "schema.structdefine.unkown": "未命名",
 
     "schema.datacombine": "数据合并规则",
+    "schema.datacombine.field": "字段",
+    "schema.datacombine.type": "合并规则",
     "schema.datacombines": "数据合并规则列表",
 
     "schema.arraydefine": "数组定义",
@@ -213,7 +220,7 @@ importLanguage("zhCN", {
     "schema.designer.down": "下级",
     "schema.designer.upnamespace": "上级命名空间",
     "schema.designer.view": "查看",
-    "schema.designer.new": "新建",
+    "schema.designer.new": "新增",
     "schema.designer.cantdelschema": "无法删除使用中的类型",
     "schema.designer.tryit": "演示",
     "schema.designer.close": "关闭",
