@@ -53,6 +53,7 @@ importLanguage("enUS", {
     "schema.exptype.first": "First Match",
     "schema.exptype.last": "Last Match",
     "schema.exptype.filter": "Filter",
+    "schema.exptypes": "Exp Call Mode list",
 
     "schema.enumvaluetype": "Enum Value Type",
     "schema.enumvaluetype.string": "String",
@@ -183,6 +184,7 @@ importLanguage("enUS", {
     "schema.funccallarg": "Function Call Argument",
     "schema.funccallarg.name": "Expression",
     "schema.funccallarg.value": "Literal",
+    "schema.funccallarg.display": "Argument",
     "schema.funccallargs": "Function Call Argument List",
 
     "schema.funcexp": "Function Expression Config",
@@ -197,6 +199,8 @@ importLanguage("enUS", {
     "schema.funcdefine.return": "Return Type",
     "schema.funcdefine.args": "Function Arguments",
     "schema.funcdefine.exps": "Function Expression List",
+    "schema.getcalltypewhitelist": "Gets the exp call types",
+    "schema.getfuncroot": "Gets the function return type by call type",
 
     "schema.namespacedefine": "Namespace Definition",
     "schema.namespacedefine.name": "Name",

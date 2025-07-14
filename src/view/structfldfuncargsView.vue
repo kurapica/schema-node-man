@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayNode, EnumRule, getSchema, NS_SYSTEM_STRING, StructNode } from 'schema-node'
+import { ArrayNode, getSchema, NS_SYSTEM_STRING, StructNode } from 'schema-node'
 import { onMounted, onUnmounted, toRaw } from 'vue'
 import { SchemaNodeFormType, tableView } from 'schema-node-vue-view'
 
@@ -18,18 +18,13 @@ const argsNode = toRaw(props.node)
 let returnHandler: Function | undefined = undefined
 let funcHandler: Function | undefined = undefined
 
-let ret: string = ""
-
 onMounted(() => {
     const relationInfo = argsNode.parent as StructNode
     const returnField = relationInfo.getField("return")
     const funcField = relationInfo.getField("func")
-    
-    returnHandler = returnField.subscribe(() => {
-        ret = returnField.rawData
-    }, true)
 
-    funcHandler = funcField.subscribe(async() => {
+    const refresh = async() => {
+        const ret = returnField.rawData
         const func = funcField.rawData
         const schema = func ? await getSchema(func) : null
         const args = schema?.func?.args || []
@@ -43,7 +38,7 @@ onMounted(() => {
 
         if (argsNode.elements.length > args.length)
         {
-            argsNode.delRows(args.length - 1, argsNode.elements.length - args.length)
+            argsNode.delRows(args.length, argsNode.elements.length - args.length)
         }
         else if (argsNode.elements.length < args.length)
         {
@@ -57,7 +52,10 @@ onMounted(() => {
             const aschema = await getSchema(args[i].type, generic)
             row.getField("type").data = aschema?.name || NS_SYSTEM_STRING
         }
-    }, true)
+    }
+    
+    returnHandler = returnField.subscribe(() => refresh)
+    funcHandler = funcField.subscribe(async() =>refresh, true)
 })
 
 onUnmounted(() => {

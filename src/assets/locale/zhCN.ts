@@ -53,6 +53,7 @@ importLanguage("zhCN", {
     "schema.exptype.first": "首先满足",
     "schema.exptype.last": "最后满足",
     "schema.exptype.filter": "过滤",
+    "schema.exptypes": "函数表达式调用方式列表",
 
     "schema.enumvaluetype": "枚举值数据类型",
     "schema.enumvaluetype.string": "字符串",
@@ -183,6 +184,7 @@ importLanguage("zhCN", {
     "schema.funccallarg": "函数调用参数",
     "schema.funccallarg.name": "表达式",
     "schema.funccallarg.value": "常量",
+    "schema.funccallarg.display": "参数名",
     "schema.funccallargs": "函数调用参数列表",
 
     "schema.funcexp": "函数表达式配置",
@@ -197,6 +199,8 @@ importLanguage("zhCN", {
     "schema.funcdefine.return": "返回值类型",
     "schema.funcdefine.args": "函数参数列表",
     "schema.funcdefine.exps": "函数表达式列表",
+    "schema.getcalltypewhitelist": "获取函数调用类型白名单",
+    "schema.getfuncroot": "基于返回值和调用类型获取函数返回值",
 
     "schema.namespacedefine": "命名空间定义",
     "schema.namespacedefine.name": "名称",

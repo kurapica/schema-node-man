@@ -253,6 +253,14 @@ registerSchema([
         }
     },
     {
+        name: "schema.exptypes",
+        type: SchemaType.Array,
+        desc: _L("schema.exptypes"),
+        array: {
+            element: "schema.exptype"
+        }
+    },
+    {
         name: "schema.enumvaluetype",
         type: SchemaType.Enum,
         desc: _LS("schema.enumvaluetype"),
@@ -1387,7 +1395,7 @@ registerSchema([
                         return fieldType
 
                     case RelationType.Type:
-                        return "schema.valuetype" 
+                        return "schema.valuetype"
 
                     case RelationType.Cascade:
                         return NS_SYSTEM_INT
@@ -1554,7 +1562,7 @@ registerSchema([
                     {
                         return schema?.name
                     }
-                    
+
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
                         tarField = schema.struct.fields.find(p => p.name === paths[i])
                     }
@@ -1886,6 +1894,19 @@ registerSchema([
         struct: {
             fields: [
                 {
+                    name: "display",
+                    type: NS_SYSTEM_STRING,
+                    displayOnly: true,
+                    display: _LS("schema.funccallarg.display"),
+                },
+                {
+                    name: "type",
+                    type: "schema.valuetype",
+                    displayOnly: true,
+                    invisible: true,
+                    display: _LS("schema.structfldfuncarg.type"),
+                },
+                {
                     name: "name",
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.funccallarg.name"),
@@ -1895,6 +1916,48 @@ registerSchema([
                     name: "value",
                     type: "schema.anyvalue",
                     display: _LS("schema.funccallarg.value"),
+                },
+            ],
+            relations: [
+                {
+                    field: "name",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "name",
+                    type: RelationType.Disable,
+                    func: "system.logic.notnull",
+                    args: [
+                        {
+                            name: "value"
+                        }
+                    ]
+                },
+                {
+                    field: "value",
+                    type: RelationType.Type,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "value",
+                    type: RelationType.Disable,
+                    func: "system.logic.notnull",
+                    args: [
+                        {
+                            name: "name"
+                        }
+                    ]
                 },
             ]
         }
@@ -1906,6 +1969,75 @@ registerSchema([
         array: {
             element: "schema.funccallarg",
         },
+    },
+    {
+        name: "schema.getcalltypewhitelist",
+        type: SchemaType.Function,
+        desc: _LS("schema.getcalltypewhitelist"),
+        func: {
+            return: "schema.exptypes",
+            args: [
+                {
+                    name: "return",
+                    type: "schema.valuetype"
+                },
+            ],
+            exps: [],
+            func: async (ret: string) => {
+                const schema = ret ? await getSchema(ret) : null
+                if (schema?.type === SchemaType.Array)
+                {
+                    return [
+                        ExpressionType.Call,
+                        ExpressionType.Filter,
+                        ExpressionType.Map
+                    ]
+                }
+                return [
+                    ExpressionType.Call,
+                    ExpressionType.First,
+                    ExpressionType.Last,
+                    ExpressionType.Reduce
+                ]
+            }
+        }
+    },
+    {
+        name: "schema.getfuncroot",
+        type: SchemaType.Function,
+        desc: _LS("schema.getfuncroot"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "return",
+                    type: "schema.valuetype",
+                },
+                {
+                    name: "type",
+                    type: "schema.exptype",
+                }
+            ],
+            exps: [],
+            func: async(ret: string, type: ExpressionType) =>
+            {
+                switch(type)
+                {
+                    case ExpressionType.Call:
+                    case ExpressionType.Reduce:
+                        return ret
+
+                    case ExpressionType.Map:
+                        const schema = ret ? await getSchema(ret) : null
+                        return schema?.array?.element
+
+                    case ExpressionType.Filter:
+                    case ExpressionType.First:
+                    case ExpressionType.Last:
+                        return NS_SYSTEM_BOOL
+                }
+            }
+        }
     },
     {
         name: "schema.funcexp",
@@ -1922,7 +2054,7 @@ registerSchema([
                 } as IStructScalarFieldConfig,
                 {
                     name: "return",
-                    require: false,
+                    require: true,
                     displayOnly: false,
                     type: "schema.valuetype",
                     display: _LS("schema.funcexp.return"),
@@ -1948,6 +2080,29 @@ registerSchema([
                 }
             ],
             relations: [
+                {
+                    field: "type",
+                    type: RelationType.WhiteList,
+                    func: "schema.getcalltypewhitelist",
+                    args: [
+                        {
+                            name: "return"
+                        }
+                    ]
+                },
+                {
+                    field: "func",
+                    type: RelationType.Root,
+                    func: "schema.getfuncroot",
+                    args: [
+                        {
+                            name: "return"
+                        },
+                        {
+                            name: "type"
+                        }
+                    ]
+                }
             ]
         }
     },
@@ -2024,7 +2179,7 @@ registerSchema([
                 },
                 {
                     name: "enum",
-                    type: "schema.enumdefine", 
+                    type: "schema.enumdefine",
                     display: _LS("schema.namespacedefine.enum"),
                 },
                 {
@@ -2216,8 +2371,9 @@ import structfieldtypesView from "./view/structfieldtypesView.vue"
 import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
-import funcargsView from "./view/funcargsView.vue"
+import funcdefineView from "./view/funcdefineView.vue"
 import { regSchemaTypeView } from "schema-node-vue-view"
+import { tr } from "element-plus/es/locales.mjs"
 
 regSchemaTypeView("schema.namespace", namespaceView)
 regSchemaTypeView("schema.scalartype", namespaceView)
@@ -2241,4 +2397,4 @@ regSchemaTypeView("schema.structfldrelationinfos", structfldrelationinfosView)
 regSchemaTypeView("schema.reltarfield", reltarfieldView)
 regSchemaTypeView("schema.structfldfuncargs", structfldfuncargsView)
 
-regSchemaTypeView("schema.funcargs", funcargsView)
+regSchemaTypeView("schema.funcdefine", funcdefineView)
