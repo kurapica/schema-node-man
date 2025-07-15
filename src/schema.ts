@@ -841,7 +841,8 @@ registerSchema([
             ],
             exps: [],
             func: (type: string) => {
-                const schema = getCachedSchema(type)
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
                 return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
             }
         }
@@ -860,8 +861,29 @@ registerSchema([
             ],
             exps: [],
             func: (type: string) => {
-                const schema = getCachedSchema(type)
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
                 return schema?.type !== SchemaType.Enum || !schema.enum?.cascade || schema.enum.cascade.length <= 1
+            }
+        }
+    },
+    {
+        name: "schema.getroottype",
+        type: SchemaType.Function,
+        desc: _LS("schema.getroottype"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: (type: string) => {
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
+                return schema?.name
             }
         }
     },
@@ -898,14 +920,73 @@ registerSchema([
             ],
             exps: [],
             func: (type: string) => {
-                const schema = getCachedSchema(type)
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
                 if (schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1) {
                     return schema.enum.cascade.map((item: string, i: number) => ({
-                        value: i,
+                        value: i + 1,
                         label: item.trim()
                     }))
                 }
                 return null
+            }
+        }
+    },
+    {
+        name: "schema.noenumroot",
+        type: SchemaType.Function,
+        desc: _LS("schema.noenumroot"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                },
+                {
+                    name: "cascade",
+                    type: NS_SYSTEM_INT,
+                    nullable: true
+                }
+            ],
+            exps: [],
+            func: (type: string, cascade?: number) => {                
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
+                if (schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1) {
+                    return cascade === 1
+                }
+                return true
+            }
+        }
+    },
+    {
+        name: "schema.getenumrootcascade",
+        type: SchemaType.Function,
+        desc: _LS("schema.getenumrootcascade"),
+        func: {
+            return: NS_SYSTEM_INT,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                },
+                {
+                    name: "cascade",
+                    type: NS_SYSTEM_INT,
+                    nullable: true
+                }
+            ],
+            exps: [],
+            func: (type: string, cascade?: number) => {
+                if (cascade) return cascade - 1
+                
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
+                if (schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1) {
+                    return schema.enum.cascade.length - 1
+                }
+                return 0
             }
         }
     },
@@ -1040,7 +1121,8 @@ registerSchema([
                     name: "root",
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.structfieldtype.root"),
-                },
+                    anyLevel: true,
+                } as IStructEnumFieldConfig,
                 {
                     name: "anyLevel",
                     type: NS_SYSTEM_BOOL,
@@ -1167,6 +1249,26 @@ registerSchema([
                     ]
                 },
                 {
+                    field: "whiteList",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "root"
+                        }
+                    ]
+                },
+                {
+                    field: "whiteList",
+                    type: RelationType.Cascade,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "cascade"
+                        }
+                    ]
+                },
+                {
                     field: "blackList",
                     type: RelationType.Invisible,
                     func: "schema.notscalarenumtype",
@@ -1183,6 +1285,26 @@ registerSchema([
                     args: [
                         {
                             name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "blackList",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "root"
+                        }
+                    ]
+                },
+                {
+                    field: "blackList",
+                    type: RelationType.Cascade,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "cascade"
                         }
                     ]
                 },
@@ -1249,7 +1371,20 @@ registerSchema([
                 {
                     field: "root",
                     type: RelationType.Invisible,
-                    func: "schema.notcascadeenumtype",
+                    func: "schema.noenumroot",
+                    args: [
+                        {
+                            name: "type",
+                        },
+                        {
+                            name: "cascade"
+                        }
+                    ]
+                },
+                {
+                    field: "root",
+                    type: RelationType.Type,
+                    func: "schema.getroottype",
                     args: [
                         {
                             name: "type"
@@ -1258,11 +1393,14 @@ registerSchema([
                 },
                 {
                     field: "root",
-                    type: RelationType.Type,
-                    func: "system.conv.assign",
+                    type: RelationType.Cascade,
+                    func: "schema.getenumrootcascade",
                     args: [
                         {
-                            name: "type"
+                            name: "type",
+                        },
+                        {
+                            name: "cascade"
                         }
                     ]
                 },
@@ -2373,7 +2511,6 @@ import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import funcdefineView from "./view/funcdefineView.vue"
 import { regSchemaTypeView } from "schema-node-vue-view"
-import { tr } from "element-plus/es/locales.mjs"
 
 regSchemaTypeView("schema.namespace", namespaceView)
 regSchemaTypeView("schema.scalartype", namespaceView)

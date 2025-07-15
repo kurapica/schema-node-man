@@ -30,6 +30,18 @@
                         </div>
                     </el-card>
                     <el-card shadow="hover">
+                        <el-form v-if="argdatas.length >= i && argdatas[i-1].type" :data="argdatas[i-1].data">
+                            <schema-view
+                                :key="argdatas[i-1].key"
+                                :config="{
+                                    type: argdatas[i-1].type,
+                                    display: argdatas[i-1].name,
+                                    anyLevel: true
+                                }"
+                                v-model="argdatas[i-1].data"
+                                in-form="expandall"
+                            ></schema-view>
+                        </el-form>
                     </el-card>
                 </div>
             </div>
@@ -62,6 +74,7 @@
                         </div>
                     </el-card>
                     <el-card shadow="hover">
+                        <pre v-if="result.length >= i">{{ result[i-1] instanceof Date ? result[i-1].toISOString() : result[i-1] }}</pre>
                     </el-card>
                 </div>
             </div>
@@ -70,8 +83,8 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayNode, ExpressionType, getSchema, ScalarNode, StructNode, type INodeSchema } from 'schema-node'
-import { toRaw, reactive, onMounted, onUnmounted } from 'vue'
+import { ArrayNode, callSchemaFunction, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, StructNode, type IFunctionArgumentInfo, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig } from 'schema-node'
+import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L } from 'schema-node-vue-view'
 import schemaView from 'schema-node-vue-view'
 
@@ -88,10 +101,36 @@ const state = reactive({
     explen: 0,
 })
 
+const argdatas: { key: string, name: string, type: string, data: any }[] = reactive([])
+const result = ref<any[]>([])
+
 let stateHandler: Function | undefined = undefined
 let retHandler: Function | undefined = undefined
 let argsHandler: Function | undefined = undefined
 let expsHandler: Function | undefined = undefined
+
+const refreshArgs = async() => {
+    for(let i = 0; i < argsNode.elements.length; i++)
+    {
+        const { name, type } = argsNode.elements[i].rawData
+        if (argdatas.length > i)
+        {
+            argdatas[i].name = name
+            argdatas[i].key = `${name}-${type}`
+            if (type !== argdatas[i].type)
+            {
+                argdatas[i].type = type
+                argdatas[i].data = null
+            }
+        }
+        else
+        {
+            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null })
+        }
+    }
+
+    await refresh()
+}
 
 const refresh = async() => {
     state.return = returnNode.rawData
@@ -123,17 +162,27 @@ const refresh = async() => {
         const ret = e.rawData.return
 
         let funcret = ret
+        let arrayType = ""
+        let arrayEle = ""
+        let isarray = type !== ExpressionType.Call
+        let arrIdx = -1
         switch (type)
         {
             case ExpressionType.Filter:
+                funcret = NS_SYSTEM_BOOL
+                arrayType = ret
+                arrayEle = (await getSchema(ret))!.array!.element
                 break
+
             case ExpressionType.First:
-                break
             case ExpressionType.Last:
+                funcret = NS_SYSTEM_BOOL
+                arrayType = (await getArraySchema(ret))!.name
+                arrayEle = ret
                 break
+                
             case ExpressionType.Map:
-                break
-            case ExpressionType.Reduce:
+                funcret = (await getSchema(ret))!.array!.element
                 break
         }
 
@@ -145,10 +194,74 @@ const refresh = async() => {
         if (fargs.elements.length > farglen) fargs.delRows(farglen, fargs.elements.length - farglen)
         
         const generic = [...(finfo?.func?.generic || [])]
-        if (finfo?.func?.return && /^[tT]\d*$/.test(finfo.func.return))
+        if (funcret && /^[tT]\d*$/.test(funcret))
         {
-            const gidx = finfo.func.return.length > 1 ? parseInt(finfo.func.return.substring(1)) - 1 : 0
+            const gidx = funcret.length > 1 ? parseInt(funcret.substring(1)) - 1 : 0
             if (ret) generic[gidx] = ret
+        }
+
+        // adjust type, white list and etc
+        for(let k = 0; k < farglen; k++)
+        {
+            const farg = fargs.elements[k] as StructNode
+            const display = farg.getField("display")
+            const type = farg.getField("type")
+            const name = farg.getField("name")
+            
+            const carg = finfo!.func!.args[k]
+            display.data = `${carg.nullable ? '' : '* '}${carg.name}`
+            
+            // call argument type
+            let ctype = await getSchema(carg.type, generic)
+            if (!ctype && /^[tT]\d*$/.test(carg.type))
+            {
+                // confirm the generic type
+                const gidx = funcret.length > 1 ? parseInt(funcret.substring(1)) - 1 : 0
+                const n = name.rawData
+                if (n)
+                {
+                    const exp = args.find(a => a.name === n) || exps.find(a => a.name === n)
+                    if (exp)
+                    {
+                        ctype = exp.schema
+                        generic[gidx] = exp.schema.name
+                    }
+                }
+            }
+
+            // type value
+            type.data = ctype?.name || NS_SYSTEM_STRING
+            
+            // name white list
+            const whitelist: string[] = []
+            if (ctype)
+            {
+                for(let j = 0; j < args.length; j++)
+                {
+                    if (await isSchemaCanBeUseAs(args[j].schema.name, ctype.name))
+                    {
+                        whitelist.push(args[j].name)
+                    }
+                }
+                for(let j = 0; j < exps.length; j++)
+                {
+                    if (await isSchemaCanBeUseAs(exps[j].schema.name, ctype.name))
+                    {
+                        whitelist.push(exps[j].name)
+                    }
+                }
+            }
+            else
+            {
+                args.forEach(a => whitelist.push(a.name))
+                exps.forEach(a => whitelist.push(a.name))
+            }
+            if (!isEqual((name.rule as ScalarRule).whiteList, whitelist))
+            {
+                (name.rule as ScalarRule).whiteList = whitelist
+                console.log("whitelist", whitelist)
+                name.notifyState()
+            }
         }
 
         // save
@@ -163,14 +276,76 @@ const refresh = async() => {
     }
 }
 
+// calc
+watch(argdatas, async() => {
+    // check argument
+    let fullfill = true
+    const values: { [key:string]: any} = {}
+
+    for(let i = 0; i < argsNode.elements.length; i++)
+    {
+        const { name, nullable } = argsNode.elements[i].rawData
+        const data = toRaw(argdatas[i].data)
+        if (isNull(name) || (isNull(data) && !nullable))
+        {
+            fullfill = false
+            break
+        }
+        values[name] = data
+    }
+
+    // clear
+    if (!fullfill)
+    {
+        result.value = []
+        return
+    }
+
+    // calc
+    const ret: any = []
+    for(let i = 0; i < expsNode.elements.length; i++)
+    {
+        const exp = expsNode.elements[i].data as IFunctionExpression
+        if (exp.name && exp.func && exp.type)
+        {
+            const callargs: any[] = []
+            if (exp.args?.length)
+            {
+                let value = null
+                for (let j = 0; j < exp.args.length; j++)
+                {
+                    if (exp.args[i].name)
+                    {
+                        value = values[exp.args[i].name!]
+                    }
+                    else
+                    {
+                        value = exp.args[i].value
+                    }
+                }
+                callargs.push(value || null)
+            }
+            let res = await callSchemaFunction(exp.func, callargs)
+            if (isNull(res)) res = null
+            ret[i] = res
+            values[exp.name] = res
+        }
+        else
+        {
+            ret[i] = null
+        }
+    }
+    result.value = ret
+})
+
 onMounted(() => {
     stateHandler = funcNode.subscribeState(() => {
         state.readonly = funcNode.readonly
     }, true)
 
     retHandler = returnNode.subscribe(refresh)
-    argsHandler = argsNode.subscribe(refresh)
-    expsHandler = expsNode.subscribe(refresh, true)
+    expsHandler = expsNode.subscribe(refresh)
+    argsHandler = argsNode.subscribe(refreshArgs, true)
 })
 
 onUnmounted(() => {

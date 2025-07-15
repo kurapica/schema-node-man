@@ -5,7 +5,9 @@
             :type="type || 'frontend.person'"
             v-model="data"
         ></schema-view>
-        <textarea style="width:72lh;height: 300px;" disabled>{{ data }}</textarea>
+        <section style="width: 100%;text-align: center;">
+            <textarea style="width:72lh;height: 300px;" disabled>{{ data }}</textarea>
+        </section>
     </el-form>
 </template>
 
