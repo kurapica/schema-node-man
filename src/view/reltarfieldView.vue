@@ -11,7 +11,7 @@
             emitPath: false,
             checkStrictly: !state.root,
         }" 
-        :placeholder="scalarNode.selectPlaceHolder"
+        :placeholder="getSelectPlaceHolder(scalarNode)"
         :disabled="state.readonly || state.disable" 
         :clearable="!state.require"
         v-bind="$attrs"
@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { ArrayNode, getCachedSchema, isNull, SchemaType, StructNode, ScalarNode, getSchema, isSchemaCanBeUseAs, ARRAY_ELEMENT } from "schema-node"
-import { _L } from "schema-node-vue-view"
+import { _L, getSelectPlaceHolder } from "schema-node-vue-view"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 
 //#region Inner type

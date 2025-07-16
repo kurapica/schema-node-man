@@ -13,14 +13,14 @@
         <el-input
             v-model.trim="name"
             :disabled="state.readonly"
-            :placeholder="node.inputPlaceHolder"
+            :placeholder="getInputPlaceHolder(scalarNode)"
         ></el-input>
     </section>
 </template>
 
 <script setup lang="ts">
 import { type ScalarNode } from 'schema-node'
-import schemaView, { _L } from 'schema-node-vue-view';
+import schemaView, { _L, getInputPlaceHolder } from 'schema-node-vue-view';
 import { ref, onMounted, onUnmounted, reactive, toRaw, watch } from 'vue'
 
 const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()

@@ -23,7 +23,6 @@ const lang = ref(getLanguage())
 const toggle = (l: string) => {
     lang.value = setLanguage(l)
     localStorage["lang"] = lang.value
-    location.reload()
 }
 </script>
 

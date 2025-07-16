@@ -28,7 +28,7 @@ onMounted(() => {
         const func = funcField.rawData
         const schema = func ? await getSchema(func) : null
         const args = schema?.func?.args || []
-        const generic = [...(schema?.func?.generic || [])]
+        const generic = schema?.func?.generic ? (Array.isArray(schema.func.generic) ? [...schema.func.generic] : [ schema.func.generic ]) : []
 
         if (schema?.func?.return && /^[tT]\d*$/.test(schema.func.return))
         {

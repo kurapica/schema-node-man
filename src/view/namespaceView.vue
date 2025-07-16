@@ -13,15 +13,16 @@
             lazy: true,
             lazyLoad: lazyLoad
         }" 
-        :placeholder="scalarNode.selectPlaceHolder"
+        :placeholder="getSelectPlaceHolder(scalarNode)"
         :disabled="state.readonly || state.disable" :clearable="!state.require"
         v-bind="$attrs"
     ></el-cascader>
 </template>
 
 <script lang="ts" setup>
-import { getSchema, isSchemaCanBeUseAs, SchemaType, type INodeSchema, type ScalarNode } from "schema-node"
-import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
+import { getSchema, isSchemaCanBeUseAs, SchemaType, subscribeLanguage, type INodeSchema, type ScalarNode } from "schema-node"
+import { getSelectPlaceHolder } from "schema-node-vue-view"
+import { computed, onMounted, onUnmounted, reactive, toRaw } from "vue"
 
 //#region Inner type
 interface ICascaderOptionInfo {
@@ -73,7 +74,9 @@ const root = reactive<ICascaderOptionInfo>({
     leaf: false,
     children: null
 })
-const compatibleType = ref("") // 兼容类型
+let compatibleType = "" // 兼容类型
+let lowLimit = 0
+let upLimit = 99 
 
 // namespace map
 const namespaceMap: any = {
@@ -90,14 +93,18 @@ const namespaceMap: any = {
 
 const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> => {
     // check compatible type
-    if (compatibleType.value && namespaceMap.includes(SchemaType.Function)) {
+    if (namespaceMap.includes(SchemaType.Function)) {
         const funcList = options.filter(r => r.type === SchemaType.Function)
         const blackList: string[] = []
         for(let i = 0; i < funcList.length; i++)
         {
             const f = await getSchema(funcList[i].value)
             if (f?.type !== SchemaType.Function || !f.func) continue
-            if (!/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType.value)) {
+            if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType)) {
+                blackList.push(f.name)
+            }
+            else if(f.func.args.length < lowLimit || f.func.args.length > upLimit)
+            {
                 blackList.push(f.name)
             }
         }
@@ -177,19 +184,19 @@ const reBuildOptions = async () => {
         const rootType = await getSchema(enumRoot)
         if (!rootType) {
             root.value = ""
-            compatibleType.value = ""
+            compatibleType = ""
         }
         else if (rootType.type === SchemaType.Namespace) {
             root.value = enumRoot
-            compatibleType.value = ""
+            compatibleType = ""
         }
         else {
             root.value = ""
-            compatibleType.value = "" + enumRoot
+            compatibleType = "" + enumRoot
         }
     }
     else {
-        compatibleType.value = ""
+        compatibleType = ""
         root.value = ""
     }
 
@@ -199,6 +206,7 @@ const reBuildOptions = async () => {
 // change handler
 let dataWatcher: Function | null = null
 let stateHandler: Function | null = null
+let langHandler: Function | null = null
 
 onMounted(() => {
     dataWatcher = scalarNode.subscribe(async() =>  {
@@ -230,23 +238,30 @@ onMounted(() => {
             await reBuildOptions()
     }, true)
 
-    let ruleRoot: any = undefined
     stateHandler = scalarNode.subscribeState(() => {
         state.disable = scalarNode.rule.disable
         state.require = scalarNode.require
         state.readonly = scalarNode.readonly
 
         const r = scalarNode.rule.root || null
-        if (r !== ruleRoot)
+        const l = scalarNode.rule.lowLimit || 0
+        const m = scalarNode.rule.upLimit || 99
+        if (r !== compatibleType || lowLimit != l || upLimit != m)
         {
-            ruleRoot = r
+            compatibleType = r
+            lowLimit = l
+            upLimit = m
             reBuildOptions()
         }
     }, true)
+
+    // update display
+    langHandler = subscribeLanguage(reBuildOptions)
 })
 
 onUnmounted(() => {
     if (dataWatcher) dataWatcher()
     if (stateHandler) stateHandler()
+    if (langHandler) langHandler()
 })
 </script>

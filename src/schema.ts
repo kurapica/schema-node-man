@@ -2178,6 +2178,42 @@ registerSchema([
         }
     },
     {
+        name: "schema.getfuncargmaxcount",
+        type: SchemaType.Function,
+        desc: _LS("schema.getfuncargmaxcount"),
+        func: {
+            return: NS_SYSTEM_INT,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.exptype"
+                }
+            ],
+            exps: [],
+            func: (type: ExpressionType) => {
+                return type === ExpressionType.Reduce ? 2 : 99
+            }
+        }
+    },
+    {
+        name: "schema.getfuncargmincount",
+        type: SchemaType.Function,
+        desc: _LS("schema.getfuncargmincount"),
+        func: {
+            return: NS_SYSTEM_INT,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.exptype"
+                }
+            ],
+            exps: [],
+            func: (type: ExpressionType) => {
+                return type === ExpressionType.Reduce ? 2 : 0
+            }
+        }
+    },
+    {
         name: "schema.funcexp",
         type: SchemaType.Struct,
         desc: _LS("schema.funcexp"),
@@ -2236,6 +2272,26 @@ registerSchema([
                         {
                             name: "return"
                         },
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "func",
+                    type: RelationType.Uplimit,
+                    func: "schema.getfuncargmaxcount",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "func",
+                    type: RelationType.LowLimit,
+                    func: "schema.getfuncargmincount",
+                    args: [
                         {
                             name: "type"
                         }

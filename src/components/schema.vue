@@ -4,15 +4,15 @@
             <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
                 <schema-view v-model="state.namespace" in-form :config="{
                     type: 'schema.namespace',
-                    display: _L['schema.namespace']
+                    display: _LS('schema.namespace')
                 }"></schema-view>
                 <schema-view v-model="state.type" in-form :config="{
                     type: 'schema.schematype',
-                    display: _L['schema.schematype']
+                    display: _LS('schema.schematype')
                 }"></schema-view>
                 <schema-view v-model="state.keyword" in-form :config="{
                     type: 'system.string',
-                    display: _L['schema.designer.keyword']
+                    display: _LS('schema.designer.keyword')
                 }"></schema-view>
                 <el-button type="info" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
                 <el-button type="primary" @click="handleNew">{{ _L["schema.designer.new"] }}</el-button>
@@ -128,6 +128,7 @@ import { reactive, watch, ref, toRaw } from 'vue'
 import schemaView from 'schema-node-vue-view'
 import tryitView from './tryit.vue'
 import { _L } from 'schema-node-vue-view'
+import { _LS } from 'schema-node'
 import { getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
