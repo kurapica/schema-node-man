@@ -171,6 +171,7 @@ importLanguage("zhCN", {
 
     "schema.arraydefine": "数组定义",
     "schema.arraydefine.element": "元素数据类型",
+    "schema.arraydefine.single": "作为单一值",
     "schema.arraydefine.primary": "作为主键的字段列表",
     "schema.arraydefine.combine": "数据合并规则",
     "schema.arraydefine.relations": "字段间关系申明",

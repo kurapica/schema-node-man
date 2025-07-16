@@ -1905,6 +1905,11 @@ registerSchema([
                     display: _LS("schema.arraydefine.element"),
                 },
                 {
+                    name: "single",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.arraydefine.single"),
+                },
+                {
                     name: "primary",
                     type: NS_SYSTEM_STRINGS,
                     display: _LS("schema.arraydefine.primary"),

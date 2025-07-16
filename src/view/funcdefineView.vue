@@ -1,11 +1,11 @@
 <template>
     <section style="width: 100%;">
         <schema-view :node="returnNode" in-form="nest" plain-text="left"></schema-view>
+        
         <!-- Arguments -->
         <el-form-item :key="argsNode?.guid" :prop="argsNode?.access">
             <template #label>
-                <span><span v-if="argsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{
-                    argsNode.display }} </span>
+                <span><span v-if="argsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{ argsNode.display }} </span>
             </template>
             <div class="func-arg-list" style="width: 100%;">
                 <template v-if="!state.arglen && !state.readonly">
@@ -14,54 +14,57 @@
                 <div v-for="i in state.arglen" class="func-arg"
                     style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
                     <el-card class="box-card" shadow="hover">
-                        <schema-view v-if="argsNode.elements[i - 1]" :key="argsNode.elements[i - 1].guid" :node="argsNode.elements[i - 1]"
-                            in-form="expand" plain-text="left"></schema-view>
+                        <schema-view v-if="argsNode.elements[i - 1]" 
+                            :key="argsNode.elements[i - 1].guid" 
+                            :node="argsNode.elements[i - 1]"
+                            in-form="expand" plain-text="left"
+                        ></schema-view>
                         <div v-if="!state.readonly" class="bottom clearfix">
-                            <el-button type="primary" @click="argsNode.addRow(i)">{{ _L["schema.designer.new"]
-                            }}</el-button>
-                            <el-button type="danger" style="float: right" @click="argsNode.delRows(i - 1)">{{
-                                _L["schema.designer.delete"] }}</el-button>
+                            <el-button type="primary" @click="argsNode.addRow(i)">{{ _L["schema.designer.new"] }}</el-button>
+                            <el-button type="danger" style="float: right" @click="argsNode.delRows(i - 1)">{{ _L["schema.designer.delete"] }}</el-button>
                         </div>
                     </el-card>
                     <el-card shadow="hover">
                         <el-form v-if="argdatas.length >= i && argdatas[i - 1].type" :data="argdatas[i - 1].data">
-                            <schema-view :key="argdatas[i - 1].key" :config="({
-                                type: argdatas[i - 1].type,
-                                display: argdatas[i - 1].name,
-                                anyLevel: true
-                            } as IStructEnumFieldConfig)" v-model="argdatas[i - 1].data"
-                                in-form="expandall"></schema-view>
+                            <schema-view :key="argdatas[i - 1].key" 
+                                :config="({
+                                    type: argdatas[i - 1].type,
+                                    display: argdatas[i - 1].name,
+                                    anyLevel: true
+                                } as IStructEnumFieldConfig)" 
+                                v-model="argdatas[i - 1].data"
+                                in-form="expandall"
+                            ></schema-view>
                         </el-form>
                     </el-card>
                 </div>
             </div>
         </el-form-item>
+
         <!-- Exps -->
         <el-form-item :key="expsNode?.guid" :prop="expsNode?.access">
             <template #label>
-                <span><span v-if="expsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{
-                    expsNode.display }} </span>
+                <span><span v-if="expsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{ expsNode.display }} </span>
             </template>
             <div class="func-arg-list" style="width: 100%;">
                 <template v-if="!state.arglen && !state.readonly">
                     <el-button type="primary" @click="expsNode.addRow()">{{ _L["schema.designer.new"] }}</el-button>
                 </template>
-                <div v-for="i in state.explen" class="func-arg"
-                    style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
+                <div v-for="i in state.explen" class="func-arg" style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
                     <el-card class="box-card" shadow="hover" :style="{ ['background-color']: color[i-1] || 'white' }">
-                        <schema-view v-if="expsNode.elements[i - 1]" :key="expsNode.elements[i - 1].guid" :node="expsNode.elements[i - 1]"
-                            in-form="expandall" plain-text="left" no-add no-del style="width: 100%;"></schema-view>
+                        <schema-view v-if="expsNode.elements[i - 1]" 
+                            :key="expsNode.elements[i - 1].guid" 
+                            :node="expsNode.elements[i - 1]"
+                            in-form="expandall" plain-text="left" 
+                            no-add no-del style="width: 100%;"
+                        ></schema-view>
                         <div v-if="!state.readonly" class="bottom clearfix">
-                            <el-button type="primary" @click="expsNode.addRow(i)">{{ _L["schema.designer.new"]
-                            }}</el-button>
-                            <el-button type="danger" style="float: right" @click="expsNode.delRows(i - 1)">{{
-                                _L["schema.designer.delete"] }}</el-button>
+                            <el-button type="primary" @click="expsNode.addRow(i)">{{ _L["schema.designer.new"] }}</el-button>
+                            <el-button type="danger" style="float: right" @click="expsNode.delRows(i - 1)">{{ _L["schema.designer.delete"] }}</el-button>
                         </div>
                     </el-card>
                     <el-card shadow="hover">
-                        <pre v-if="result.length >= i">{{ result[i - 1] instanceof Date ? result[i - 1].toISOString() : result[i
-                            - 1]
-                        }}</pre>
+                        <pre v-if="result.length >= i">{{ result[i - 1] instanceof Date ? result[i - 1].toISOString() : result[i - 1] }}</pre>
                     </el-card>
                 </div>
             </div>
@@ -96,6 +99,179 @@ let stateHandler: Function | undefined = undefined
 let retHandler: Function | undefined = undefined
 let argsHandler: Function | undefined = undefined
 let expsHandler: Function | undefined = undefined
+
+const doCaclc = async () => {
+    // check argument
+    let fullfill = true
+    const values: { [key: string]: any } = {}
+    const arraymap: { [key:string]: string } = {}
+
+    for (let i = 0; i < argsNode.elements.length; i++) {
+        const { name, nullable, type } = argsNode.elements[i].rawData
+        const data = toRaw(argdatas[i].data)
+        if (isNull(type) || isNull(name) || (isNull(data) && !nullable)) {
+            fullfill = false
+            break
+        }
+        values[name] = data
+        
+        // record the array type map
+        const schema = await getSchema(type)
+        if (schema?.type === SchemaType.Array)
+        {
+            arraymap[name] = schema.array?.element || ""
+        }
+    }
+
+    // clear
+    if (!fullfill) {
+        result.value = []
+        return
+    }
+
+    // calc
+    const ret: any = []
+    for (let i = 0; i < expsNode.elements.length; i++) {
+        const exp = expsNode.elements[i].data as IFunctionExpression
+        if (exp.name && exp.func && exp.type) {
+            const funcinfo = await getSchema(exp.func)
+            const isarray = exp.type !== ExpressionType.Call
+            let arrIdx = -1
+            const fargs = funcinfo?.func?.args || []
+
+            const callargs: any[] = []
+            if (exp.args?.length) {
+                let value = null
+                for (let j = 0; j < exp.args.length; j++) {
+                    if (exp.args[j].name) {
+                        value = values[exp.args[j].name!]
+
+                        // check array
+                        if (isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!fargs[j].type || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], fargs[j].type)))
+                        {
+                            arrIdx = j
+                        }
+                    }
+                    else {
+                        value = exp.args[j].value
+                    }
+                    callargs.push(!isNull(value) ?  value : null)
+                }
+            }
+
+            let res: any = null
+            switch(exp.type)
+            {
+                case ExpressionType.Call:
+                    res = await callSchemaFunction(exp.func, callargs)
+                    break
+                
+                case ExpressionType.First:
+                    if (arrIdx >= 0)
+                    {
+                        const array = callargs[arrIdx]
+                        if (Array.isArray(array))
+                        {
+                            for(let l = 0; l < array.length; l++)
+                            {
+                                callargs[arrIdx] = array[l]
+                                if (await callSchemaFunction(exp.func, callargs))
+                                {
+                                    res = array[l]
+                                    break
+                                }
+                            }
+                        }
+                    }
+                    break
+
+                case ExpressionType.Last:
+                    if (arrIdx >= 0)
+                    {
+                        const array = callargs[arrIdx]
+                        if (Array.isArray(array))
+                        {
+                            for(let l = array.length - 1; l >= 0; l--)
+                            {
+                                callargs[arrIdx] = array[l]
+                                if (await callSchemaFunction(exp.func, callargs))
+                                {
+                                    res = array[l]
+                                    break
+                                }
+                            }
+                        }
+                    }
+                    break
+                
+                case ExpressionType.Map:
+                    res = []
+                    if (arrIdx >= 0)
+                    {
+                        const array = callargs[arrIdx]
+                        if (Array.isArray(array))
+                        {
+                            for(let l = 0; l < array.length; l++)
+                            {
+                                callargs[arrIdx] = array[l]
+                                res.push(await callSchemaFunction(exp.func, callargs))
+                            }
+                        }
+                    }
+                    break
+
+                case ExpressionType.Filter:
+                    res = []
+                    if (arrIdx >= 0)
+                    {
+                        const array = callargs[arrIdx]
+                        if (Array.isArray(array))
+                        {
+                            for(let l = 0; l < array.length; l++)
+                            {
+                                callargs[arrIdx] = array[l]
+                                if (await callSchemaFunction(exp.func, callargs))
+                                    res.push(array[l])
+                            }
+                        }
+                    }
+                    break
+                
+                case ExpressionType.Reduce:
+                    if (arrIdx >= 0)
+                    {
+                        const array = callargs[arrIdx]
+                        if (Array.isArray(array))
+                        {
+                            let sumIndex = arrIdx == 1 ? 0 : 1
+                            let hasInit = !isNull(callargs[sumIndex])
+                            if (!hasInit) callargs[sumIndex] = array.length ? array[0] : null
+                            for(let s = hasInit ? 1 : 0; s < array.length; s++)
+                            {
+                                callargs[arrIdx] = array[s]
+                                callargs[sumIndex] = await callSchemaFunction(exp.func, callargs)
+                            }
+                            res = callargs[sumIndex]
+                        }
+                    }
+                    break
+            }
+
+            if (isNull(res)) res = null
+            ret[i] = res
+            values[exp.name] = res
+
+            if (Array.isArray(res) && (await getSchema(exp.return))?.type === SchemaType.Array)
+            {
+                arraymap[exp.name] = (await getSchema(exp.return))?.array?.element || ""
+            }
+        }
+        else {
+            ret[i] = null
+        }
+    }
+    result.value = ret
+}
 
 const refreshArgs = async () => {
     for (let i = 0; i < argsNode.elements.length; i++) {
@@ -303,186 +479,15 @@ const refresh = async () => {
         {
             retColor[i] = (i === expcount - 1) ? (lastMatch ? 'LIGHTBLUE' : 'RED') : ''
         }
-        color.value = retColor
     }
+    color.value = retColor
 
     // return check
-    
+    await doCaclc()
 }
 
 // calc
-watch(argdatas, async () => {
-    // check argument
-    let fullfill = true
-    const values: { [key: string]: any } = {}
-    const arraymap: { [key:string]: string } = {}
-
-    for (let i = 0; i < argsNode.elements.length; i++) {
-        const { name, nullable, type } = argsNode.elements[i].rawData
-        const data = toRaw(argdatas[i].data)
-        if (isNull(type) || isNull(name) || (isNull(data) && !nullable)) {
-            fullfill = false
-            break
-        }
-        values[name] = data
-        
-        // record the array type map
-        const schema = await getSchema(type)
-        if (schema?.type === SchemaType.Array)
-        {
-            arraymap[name] = schema.array?.element || ""
-        }
-    }
-
-    // clear
-    if (!fullfill) {
-        result.value = []
-        return
-    }
-
-    // calc
-    const ret: any = []
-    for (let i = 0; i < expsNode.elements.length; i++) {
-        const exp = expsNode.elements[i].data as IFunctionExpression
-        if (exp.name && exp.func && exp.type) {
-            const funcinfo = await getSchema(exp.func)
-            const isarray = exp.type !== ExpressionType.Call
-            let arrIdx = -1
-            const fargs = funcinfo?.func?.args || []
-
-            const callargs: any[] = []
-            if (exp.args?.length) {
-                let value = null
-                for (let j = 0; j < exp.args.length; j++) {
-                    if (exp.args[j].name) {
-                        value = values[exp.args[j].name!]
-
-                        // check array
-                        if (isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!fargs[j].type || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], fargs[j].type)))
-                        {
-                            arrIdx = j
-                        }
-                    }
-                    else {
-                        value = exp.args[j].value
-                    }
-                    callargs.push(!isNull(value) ?  value : null)
-                }
-            }
-
-            let res: any = null
-            switch(exp.type)
-            {
-                case ExpressionType.Call:
-                    res = await callSchemaFunction(exp.func, callargs)
-                    break
-                
-                case ExpressionType.First:
-                    if (arrIdx >= 0)
-                    {
-                        const array = callargs[arrIdx]
-                        if (Array.isArray(array))
-                        {
-                            for(let l = 0; l < array.length; l++)
-                            {
-                                callargs[arrIdx] = array[l]
-                                if (await callSchemaFunction(exp.func, callargs))
-                                {
-                                    res = array[l]
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    break
-
-                case ExpressionType.Last:
-                    if (arrIdx >= 0)
-                    {
-                        const array = callargs[arrIdx]
-                        if (Array.isArray(array))
-                        {
-                            for(let l = array.length - 1; l >= 0; l--)
-                            {
-                                callargs[arrIdx] = array[l]
-                                if (await callSchemaFunction(exp.func, callargs))
-                                {
-                                    res = array[l]
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    break
-                
-                case ExpressionType.Map:
-                    res = []
-                    if (arrIdx >= 0)
-                    {
-                        const array = callargs[arrIdx]
-                        if (Array.isArray(array))
-                        {
-                            for(let l = 0; l < array.length; l++)
-                            {
-                                callargs[arrIdx] = array[l]
-                                res.push(await callSchemaFunction(exp.func, callargs))
-                            }
-                        }
-                    }
-                    break
-
-                case ExpressionType.Filter:
-                    res = []
-                    if (arrIdx >= 0)
-                    {
-                        const array = callargs[arrIdx]
-                        if (Array.isArray(array))
-                        {
-                            for(let l = 0; l < array.length; l++)
-                            {
-                                callargs[arrIdx] = array[l]
-                                if (await callSchemaFunction(exp.func, callargs))
-                                    res.push(array[l])
-                            }
-                        }
-                    }
-                    break
-                
-                case ExpressionType.Reduce:
-                    if (arrIdx >= 0)
-                    {
-                        const array = callargs[arrIdx]
-                        if (Array.isArray(array))
-                        {
-                            let sumIndex = arrIdx == 1 ? 0 : 1
-                            let hasInit = !isNull(callargs[sumIndex])
-                            if (!hasInit) callargs[sumIndex] = array.length ? array[0] : null
-                            for(let s = hasInit ? 1 : 0; s < array.length; s++)
-                            {
-                                callargs[arrIdx] = array[s]
-                                callargs[sumIndex] = await callSchemaFunction(exp.func, callargs)
-                            }
-                            res = callargs[sumIndex]
-                        }
-                    }
-                    break
-            }
-
-            if (isNull(res)) res = null
-            ret[i] = res
-            values[exp.name] = res
-
-            if (Array.isArray(res) && (await getSchema(exp.return))?.type === SchemaType.Array)
-            {
-                arraymap[exp.name] = (await getSchema(exp.return))?.array?.element || ""
-            }
-        }
-        else {
-            ret[i] = null
-        }
-    }
-    result.value = ret
-})
+watch(argdatas, doCaclc)
 
 onMounted(() => {
     stateHandler = funcNode.subscribeState(() => {

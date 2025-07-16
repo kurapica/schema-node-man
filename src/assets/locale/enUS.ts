@@ -171,6 +171,7 @@ importLanguage("enUS", {
 
     "schema.arraydefine": "Array Definition",
     "schema.arraydefine.element": "Element Type",
+    "schema.arraydefine.single": "As Single Value",
     "schema.arraydefine.primary": "Primary Key Fields",
     "schema.arraydefine.combine": "Data Combine Rule",
     "schema.arraydefine.relations": "Field Relationships",
