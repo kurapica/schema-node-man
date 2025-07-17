@@ -22,7 +22,7 @@ onMounted(() => {
     const relationInfo = argsNode.parent as StructNode
     const returnField = relationInfo.getField("return")
     const funcField = relationInfo.getField("func")
-
+    
     const refresh = async() => {
         const ret = returnField.rawData
         const func = funcField.rawData
@@ -54,8 +54,8 @@ onMounted(() => {
         }
     }
     
-    returnHandler = returnField.subscribe(() => refresh)
-    funcHandler = funcField.subscribe(async() =>refresh, true)
+    returnHandler = returnField.subscribe(refresh)
+    funcHandler = funcField.subscribe(refresh, true)
 })
 
 onUnmounted(() => {

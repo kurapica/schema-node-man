@@ -88,6 +88,9 @@ importLanguage("enUS", {
     "schema.enumvalueinfos": "Enum Value Info List",
     "schema.calcnextflag": "Calculate Next Flag",
     "schema.getenuminfostype": "Get Enum Info Type",
+    "schema.getenumrootcascade": "Gets the cascade level for enum root",
+    "schema.getroottype": "Gets the type for root",
+    "schema.noenumroot": "Not enum root",
 
     "schema.enumdefine": "Enum Definition",
     "schema.enumdefine.type": "Enum Value Type",
@@ -202,6 +205,8 @@ importLanguage("enUS", {
     "schema.funcdefine.exps": "Function Expression List",
     "schema.getcalltypewhitelist": "Gets the exp call types",
     "schema.getfuncroot": "Gets the function return type by call type",
+    "schema.getexpvaluetype": "Gets the type for exp value",
+    "schema.hideexpvalue": "Hide the exp value",
 
     "schema.namespacedefine": "Namespace Definition",
     "schema.namespacedefine.name": "Name",
@@ -236,4 +241,11 @@ importLanguage("enUS", {
     "schema.designer.confirm": "Confirm",
     "schema.designer.upload": "Upload",
     "schema.designer.error": "Submit failed. Please check your data.",
+    "schema.designer.showdata": "Show Data",
+    "schema.designer.showform": "Show Form",
+    "schema.designer.tag": "Tag",
+    "schema.designer.returnstruct": "Return Struct",
+
+    "schema.catalog": "Catalog",
+    "schema.catalog.01.intro": "01. Intro",
 });

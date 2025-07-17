@@ -26,15 +26,25 @@
                     </el-card>
                     <el-card shadow="hover">
                         <el-form v-if="argdatas.length >= i && argdatas[i - 1].type" :data="argdatas[i - 1].data">
-                            <schema-view :key="argdatas[i - 1].key" 
-                                :config="({
-                                    type: argdatas[i - 1].type,
-                                    display: argdatas[i - 1].name,
-                                    anyLevel: true
-                                } as IStructEnumFieldConfig)" 
-                                v-model="argdatas[i - 1].data"
-                                in-form="expandall"
-                            ></schema-view>
+                            <template v-if="!argdatas[i - 1].showdata">
+                                <schema-view 
+                                    :key="argdatas[i - 1].key" 
+                                    :config="({
+                                        type: argdatas[i - 1].type,
+                                        display: argdatas[i - 1].name,
+                                        anyLevel: true
+                                    } as IStructEnumFieldConfig)" 
+                                    v-model="argdatas[i - 1].data"
+                                    in-form="expandall"
+                                ></schema-view>
+                                <br/>
+                                <el-button type="info"  class="bottom clearfix" @click="argdatas[i - 1].showdata = true">{{ _L["schema.designer.showdata"] }}</el-button>
+                            </template>
+                            <template v-else>
+                                <pre>{{ argdatas[i - 1].data }}</pre>
+                                <br/>
+                                <el-button type="info"  class="bottom clearfix" @click="argdatas[i - 1].showdata = false">{{ _L["schema.designer.showform"] }}</el-button>
+                            </template>
                         </el-form>
                     </el-card>
                 </div>
@@ -47,7 +57,7 @@
                 <span><span v-if="expsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{ expsNode.display }} </span>
             </template>
             <div class="func-arg-list" style="width: 100%;">
-                <template v-if="!state.arglen && !state.readonly">
+                <template v-if="!state.explen && !state.readonly">
                     <el-button type="primary" @click="expsNode.addRow()">{{ _L["schema.designer.new"] }}</el-button>
                 </template>
                 <div v-for="i in state.explen" class="func-arg" style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
@@ -91,7 +101,7 @@ const state = reactive({
     explen: 0,
 })
 
-const argdatas: { key: string, name: string, type: string, data: any }[] = reactive([])
+const argdatas: { key: string, name: string, type: string, data: any, showdata: boolean }[] = reactive([])
 const result = ref<any[]>([])
 const color = ref<string[]>([])
 
@@ -147,7 +157,14 @@ const doCaclc = async () => {
                         value = values[exp.args[j].name!]
 
                         // check array
-                        if (isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!fargs[j].type || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], fargs[j].type)))
+                        let atype = fargs[j].type
+                        if (/^[tT]\d*$/.test(atype))
+                        {
+                            const gidx = atype.length > 1 ? parseInt(atype.substring(1)) - 1 : 0
+                            atype = (Array.isArray(funcinfo?.func?.generic) ? funcinfo.func.generic[gidx] : gidx === 0 ? funcinfo?.func?.generic : "") || ""
+                        }
+
+                        if (isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!atype || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], atype)))
                         {
                             arrIdx = j
                         }
@@ -285,7 +302,7 @@ const refreshArgs = async () => {
             }
         }
         else {
-            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null })
+            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null, showdata: false })
         }
     }
 

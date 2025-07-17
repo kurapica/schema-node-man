@@ -88,6 +88,9 @@ importLanguage("zhCN", {
     "schema.enumvalueinfos": "枚举字段信息列表",
     "schema.calcnextflag": "计算下一个标志位",
     "schema.getenuminfostype": "获取枚举值值列表定义类型",
+    "schema.getenumrootcascade": "获取枚举值根植的级联层数",
+    "schema.noenumroot": "非枚举值根植",
+    "schema.getroottype": "获取根值类型",
 
     "schema.enumdefine": "枚举值定义",
     "schema.enumdefine.type": "枚举值数据类型",
@@ -202,6 +205,8 @@ importLanguage("zhCN", {
     "schema.funcdefine.exps": "函数表达式列表",
     "schema.getcalltypewhitelist": "获取函数调用类型白名单",
     "schema.getfuncroot": "基于返回值和调用类型获取函数返回值",
+    "schema.getexpvaluetype": "获取表达式值类型",
+    "schema.hideexpvalue": "是否隐藏表达式的值",
 
     "schema.namespacedefine": "命名空间定义",
     "schema.namespacedefine.name": "名称",
@@ -236,4 +241,11 @@ importLanguage("zhCN", {
     "schema.designer.confirm": "确定",
     "schema.designer.upload": "上传",
     "schema.designer.error": "处理失败，请检查数据后重新提交",
+    "schema.designer.showdata": "显示数据",
+    "schema.designer.showform": "显示表单",
+    "schema.designer.tag": "标签",
+    "schema.designer.returnstruct": "返回结构",
+
+    "schema.catalog": "目录",
+    "schema.catalog.01.intro": "01. 简介",
 })

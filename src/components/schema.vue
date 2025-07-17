@@ -60,7 +60,7 @@
                         <el-button v-else type="info" @click="handleEdit(scope.row, true)">
                             {{ _L["schema.designer.view"] }}
                         </el-button>
-                        <el-button type="info" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
+                        <el-button type="success" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
                             {{ _L["schema.designer.edit"] }}
                         </el-button>
                         <el-button v-if="isSchemaDeletable(scope.row.name)" type="danger" @click="handleDelete(scope.row)">

@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
     {
@@ -715,6 +715,52 @@ registerSchema([
         },
     },
     {
+        name: "schema.getexpvaluetype",
+        type: SchemaType.Function,
+        desc: _LS("schema.getexpvaluetype"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: async(type: string) => {
+                let schema = await getSchema(type)
+                if (schema?.type === SchemaType.Array) schema = schema.array?.element ? await getSchema(schema.array.element) : undefined
+                if (schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum) return type
+                return NS_SYSTEM_STRING
+            }
+        }
+    },
+    {
+        name: "schema.hideexpvalue",
+        type: SchemaType.Function,
+        desc: _LS("schema.hideexpvalue"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                },
+                {
+                    name: "name",
+                    type: NS_SYSTEM_STRING
+                }
+            ],
+            exps: [],
+            func: async(type: string, name: string) => {
+                let schema = await getSchema(type)
+                if (schema?.type === SchemaType.Array) schema = schema.array?.element ? await getSchema(schema.array.element) : undefined
+                if (schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum) return !isNull(name)
+                return true
+            }
+        }
+    },
+    {
         name: "schema.structfldfuncarg",
         type: SchemaType.Struct,
         desc: _LS("schema.structfldfuncarg"),
@@ -761,7 +807,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Type,
-                    func: "system.conv.assign",
+                    func: "schema.getexpvaluetype",
                     args: [
                         {
                             name: "type"
@@ -771,8 +817,11 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Disable,
-                    func: "system.logic.notnull",
+                    func: "schema.hideexpvalue",
                     args: [
+                        {
+                            name: "type"
+                        },
                         {
                             name: "name"
                         }
@@ -2085,7 +2134,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Type,
-                    func: "system.conv.assign",
+                    func: "schema.getexpvaluetype",
                     args: [
                         {
                             name: "type"
@@ -2095,8 +2144,11 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Disable,
-                    func: "system.logic.notnull",
+                    func: "schema.hideexpvalue",
                     args: [
+                        {
+                            name: "type"
+                        },
                         {
                             name: "name"
                         }
@@ -2183,42 +2235,6 @@ registerSchema([
         }
     },
     {
-        name: "schema.getfuncargmaxcount",
-        type: SchemaType.Function,
-        desc: _LS("schema.getfuncargmaxcount"),
-        func: {
-            return: NS_SYSTEM_INT,
-            args: [
-                {
-                    name: "type",
-                    type: "schema.exptype"
-                }
-            ],
-            exps: [],
-            func: (type: ExpressionType) => {
-                return type === ExpressionType.Reduce ? 2 : 99
-            }
-        }
-    },
-    {
-        name: "schema.getfuncargmincount",
-        type: SchemaType.Function,
-        desc: _LS("schema.getfuncargmincount"),
-        func: {
-            return: NS_SYSTEM_INT,
-            args: [
-                {
-                    name: "type",
-                    type: "schema.exptype"
-                }
-            ],
-            exps: [],
-            func: (type: ExpressionType) => {
-                return type === ExpressionType.Reduce ? 2 : 0
-            }
-        }
-    },
-    {
         name: "schema.funcexp",
         type: SchemaType.Struct,
         desc: _LS("schema.funcexp"),
@@ -2281,26 +2297,6 @@ registerSchema([
                             name: "type"
                         }
                     ]
-                },
-                {
-                    field: "func",
-                    type: RelationType.Uplimit,
-                    func: "schema.getfuncargmaxcount",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "func",
-                    type: RelationType.LowLimit,
-                    func: "schema.getfuncargmincount",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
                 }
             ]
         }
@@ -2322,6 +2318,8 @@ registerSchema([
             fields: [
                 {
                     name: "return",
+                    require: true,
+                    immutable: true,
                     type: "schema.valuetype",
                     display: _LS("schema.funcdefine.return")
                 },

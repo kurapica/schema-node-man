@@ -4,40 +4,16 @@
 
 <script lang="ts" setup>
 import { marked } from 'marked'
-import { getLanguage, subscribeLanguage } from 'schema-node';
-import { ref, onMounted, useSlots, onUnmounted } from 'vue'
+import { ref, onMounted, useSlots } from 'vue'
 
 const html = ref("")
 const slots = useSlots()
 
-const props = defineProps<{
-    zh?: string,
-    en?: string
-}>()
-
-let langHandler: Function | null = null
 onMounted(() => {
-    if (props.zh || props.en)
-    {
-        langHandler = subscribeLanguage(() => {
-            if (getLanguage().startsWith("zh"))
-            {
-                buildMarkdown(props.zh || "")
-            }
-            else
-            {
-                buildMarkdown(props.en || "")
-            }
-        }, true)
-        return
-    }
-
     const dft =  (slots as any).default as Function
     if (!dft) return
     buildMarkdown((slots as any).default()[0].children as string)
 })
-
-onUnmounted(() => langHandler ? langHandler() : null)
 
 const buildMarkdown = (text: string) => {
     const lines:string[] = text.split("\n")
