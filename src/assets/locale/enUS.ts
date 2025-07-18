@@ -206,6 +206,7 @@ importLanguage("enUS", {
     "schema.getcalltypewhitelist": "Gets the exp call types",
     "schema.getfuncroot": "Gets the function return type by call type",
     "schema.getexpvaluetype": "Gets the type for exp value",
+    "schema.isvaluenotnull": "Check is value not value",
     "schema.hideexpvalue": "Hide the exp value",
 
     "schema.namespacedefine": "Namespace Definition",
@@ -245,6 +246,7 @@ importLanguage("enUS", {
     "schema.designer.showform": "Show Form",
     "schema.designer.tag": "Tag",
     "schema.designer.returnstruct": "Return Struct",
+    "schema.designer.validate": "Validate",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",

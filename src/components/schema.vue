@@ -128,7 +128,7 @@ import { reactive, watch, ref, toRaw } from 'vue'
 import schemaView from 'schema-node-vue-view'
 import tryitView from './tryit.vue'
 import { _L } from 'schema-node-vue-view'
-import { _LS } from 'schema-node'
+import { _LS, deepClone } from 'schema-node'
 import { getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
@@ -283,7 +283,8 @@ const handleDelete = async (row: any) => {
 
 // save
 const confirmNameSpace = async () => {
-    await editorRef.value?.validate()
+    const res = await editorRef.value?.validate()
+    if (!res || !namespaceNode.value?.valid) return
 
     if (!namespaceNode.value?.valid) return
     const data = jsonClone(toRaw(namespaceNode.value.data))
@@ -358,23 +359,23 @@ const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
             break
 
         case SchemaType.Scalar:
-            r.scalar = f.scalar
+            r.scalar = deepClone(f.scalar, true)
             break
 
         case SchemaType.Enum:
-            r.enum = f.enum
+            r.enum = deepClone(f.enum, true)
             break
 
         case SchemaType.Struct:
-            r.struct = f.struct
+            r.struct = deepClone(f.struct, true)
             break
 
         case SchemaType.Array:
-            r.array = f.array
+            r.array = deepClone(f.array, true)
             break
 
         case SchemaType.Function:
-            r.func = { ...f.func!, func: undefined } 
+            r.func = { ...deepClone(f.func!, true), func: undefined } 
             break
     }
     return r

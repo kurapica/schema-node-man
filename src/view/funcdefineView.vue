@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayNode, callSchemaFunction, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig } from 'schema-node'
+import { ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L } from 'schema-node-vue-view'
 import schemaView from 'schema-node-vue-view'
@@ -309,7 +309,7 @@ const refreshArgs = async () => {
     await refresh()
 }
 
-const refresh = async () => {
+const refresh = debounce(async () => {
     const retType = returnNode.rawData
     state.return = retType
     state.arglen = argsNode.elements.length
@@ -501,7 +501,7 @@ const refresh = async () => {
 
     // return check
     await doCaclc()
-}
+}, 1000)
 
 // calc
 watch(argdatas, doCaclc)

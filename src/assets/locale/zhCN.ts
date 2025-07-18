@@ -206,6 +206,7 @@ importLanguage("zhCN", {
     "schema.getcalltypewhitelist": "获取函数调用类型白名单",
     "schema.getfuncroot": "基于返回值和调用类型获取函数返回值",
     "schema.getexpvaluetype": "获取表达式值类型",
+    "schema.isvaluenotnull": "判定值是否非空",
     "schema.hideexpvalue": "是否隐藏表达式的值",
 
     "schema.namespacedefine": "命名空间定义",
@@ -245,6 +246,7 @@ importLanguage("zhCN", {
     "schema.designer.showform": "显示表单",
     "schema.designer.tag": "标签",
     "schema.designer.returnstruct": "返回结构",
+    "schema.designer.validate": "校验",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",

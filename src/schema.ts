@@ -715,6 +715,26 @@ registerSchema([
         },
     },
     {
+        name: "schema.isvaluenotnull",
+        type: SchemaType.Function,
+        desc: _L("schema.isvaluenotnull"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "value",
+                    type: "schema.anyvalue"
+                }
+            ],
+            exps: [],
+            func: (value: any) => {
+                if (Array.isArray(value)) return value.length ? true : false
+                if (value && typeof(value) === "object") return Object.getOwnPropertyNames(value).length ? true : false
+                return !isNull(value)
+            }
+        }
+    },
+    {
         name: "schema.getexpvaluetype",
         type: SchemaType.Function,
         desc: _LS("schema.getexpvaluetype"),
@@ -797,7 +817,7 @@ registerSchema([
                 {
                     field: "name",
                     type: RelationType.Disable,
-                    func: "system.logic.notnull",
+                    func: "schema.isvaluenotnull",
                     args: [
                         {
                             name: "value"
@@ -2124,7 +2144,7 @@ registerSchema([
                 {
                     field: "name",
                     type: RelationType.Disable,
-                    func: "system.logic.notnull",
+                    func: "schema.isvaluenotnull",
                     args: [
                         {
                             name: "value"
