@@ -247,7 +247,16 @@ importLanguage("enUS", {
     "schema.designer.tag": "Tag",
     "schema.designer.returnstruct": "Return Struct",
     "schema.designer.validate": "Validate",
+    "schema.designer.schema": "Type View",
+    "schema.designer.clicktotry": "Click To Try",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",
+    "schema.catalog.02.namespace": "02. Namespace",
+    "schema.catalog.03.scalar": "03. Scalar Value",
+    "schema.catalog.04.enum": "04. Enum",
+    "schema.catalog.05.struct": "05. Struct",
+    "schema.catalog.06.array": "06. Array",
+    "schema.catalog.07.function": "07. Function",
+    "schema.catalog.08.relation": "07. Relation",
 });

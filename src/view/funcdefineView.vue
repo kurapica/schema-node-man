@@ -290,26 +290,7 @@ const doCaclc = async () => {
     result.value = ret
 }
 
-const refreshArgs = async () => {
-    for (let i = 0; i < argsNode.elements.length; i++) {
-        const { name, type } = argsNode.elements[i].rawData
-        if (argdatas.length > i) {
-            argdatas[i].name = name
-            argdatas[i].key = `${name}-${type}`
-            if (type !== argdatas[i].type) {
-                argdatas[i].type = type
-                argdatas[i].data = null
-            }
-        }
-        else {
-            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null, showdata: false })
-        }
-    }
-
-    await refresh()
-}
-
-const refresh = debounce(async () => {
+const refresh = async () => {
     const retType = returnNode.rawData
     state.return = retType
     state.arglen = argsNode.elements.length
@@ -374,6 +355,9 @@ const refresh = debounce(async () => {
                 funcret = (await getSchema(ret))!.array!.element
                 break
         }
+
+        // may be use later
+        if (arrayEle) {}
 
         // args
         const fargs = e.getField("args") as ArrayNode
@@ -501,10 +485,38 @@ const refresh = debounce(async () => {
 
     // return check
     await doCaclc()
-}, 1000)
+}
+
+const soonRefresh = debounce(refresh, 50)
+const delayRefresh = debounce(refresh, 1000)
+
+const refreshArgs = () => {
+    for (let i = 0; i < argsNode.elements.length; i++) {
+        const { name, type } = argsNode.elements[i].rawData
+        if (argdatas.length > i) {
+            argdatas[i].name = name
+            argdatas[i].key = `${name}-${type}`
+            if (type !== argdatas[i].type) {
+                argdatas[i].type = type
+                argdatas[i].data = null
+            }
+        }
+        else {
+            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null, showdata: false })
+        }
+    }
+
+    return soonRefresh()
+}
+
+const soonRefreshArgs = debounce(refreshArgs, 50)
+const delayRefreshArgs = debounce(refreshArgs, 1000)
 
 // calc
 watch(argdatas, doCaclc)
+
+const argsHandlers: { guid: string, name: Function, type: Function }[] = []
+const expsHandlers: { guid: string, name: Function, return: Function, type: Function, func: Function, args: Function }[] = []
 
 onMounted(() => {
     stateHandler = funcNode.subscribeState(() => {
@@ -512,11 +524,98 @@ onMounted(() => {
     }, true)
 
     retHandler = returnNode.subscribe(refresh)
-    expsHandler = expsNode.subscribe(refresh)
-    argsHandler = argsNode.subscribe(refreshArgs, true)
+    argsHandler = argsNode.subscribe((action: string) => {
+        const arglen = argsNode.elements.length
+        if (action !== "swap" && argsHandlers.length === arglen) return
+
+        let changed = false
+
+        // clear
+        for (let i = argsHandlers.length - 1; i >= argsNode.elements.length; i--)
+        {
+            const handler = argsHandlers.pop()
+            handler?.name()
+            handler?.type()
+        }
+
+        // subscribe
+        argsNode.elements.forEach((e, i) => {
+            if (argsHandlers.length > i)
+            {
+                if (argsHandlers[i].guid === e.guid) return
+                argsHandlers[i].name()
+                argsHandlers[i].type()
+            }
+
+            changed = true
+            const n = e as StructNode
+            argsHandlers[i] = {
+                guid: e.guid,
+                name: n.getField("name").subscribe(delayRefreshArgs),
+                type: n.getField("type").subscribe(refreshArgs)
+            }
+        })
+
+        if (changed) return soonRefreshArgs()
+    }, true)
+
+    expsHandler = expsNode.subscribe((action: string) => {
+        const expslen = expsNode.elements.length
+        if (action !== "swap" && expsHandlers.length !== expslen) return
+
+        let changed = false
+
+        // clear
+        for (let i = expsHandlers.length - 1; i >= expslen; i++)
+        {
+            const handler = expsHandlers.pop()
+            handler?.name()
+            handler?.return()
+            handler?.type()
+            handler?.func()
+            handler?.args()
+        }
+
+        // subscribe
+        expsNode.elements.forEach((e, i) => {
+            if (expsHandlers.length > i)
+            {
+                if (expsHandlers[i].guid === e.guid) return
+                expsHandlers[i].name()
+                expsHandlers[i].return()
+                expsHandlers[i].type()
+                expsHandlers[i].func()
+                expsHandlers[i].args()
+            }
+
+            changed = true
+            const n = e as StructNode
+            expsHandlers[i] = {
+                guid: e.guid,
+                name: n.getField("name").subscribe(delayRefresh),
+                return: n.getField("return").subscribe(soonRefresh),
+                type: n.getField("type").subscribe(soonRefresh),
+                func: n.getField("func").subscribe(soonRefresh),
+                args: n.getField("args").subscribe(delayRefresh)
+            }
+        })
+
+        if (changed) return soonRefresh()
+    }, true)
 })
 
 onUnmounted(() => {
+    argsHandlers.forEach(a => {
+        a.name()
+        a.type()
+    })
+    expsHandlers.forEach(a => {
+        a.name()
+        a.return()
+        a.type()
+        a.func()
+        a.args()
+    })
     if (stateHandler) stateHandler()
     if (retHandler) retHandler()
     if (argsHandler) argsHandler()

@@ -53,7 +53,7 @@
         <!-- namespace editor -->
         <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" destroy-on-close
             append-to-body @closed="closeNamespaceEditor">
-            <el-container class="main" style="height: 80vh;">
+            <el-container class="main" style="height: 80vh;color:black">
                 <el-header>
                     <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["schema.designer.edit"] }}</el-button>
                 </el-header>
@@ -89,7 +89,7 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type INodeSchema, type ScalarNode } from "schema-node"
+import { ExpressionType, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
 import { _L, getSelectPlaceHolder } from "schema-node-vue-view"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -98,7 +98,7 @@ import schemaView from "schema-node-vue-view"
 //#region Inner type
 interface ICascaderOptionInfo {
     value: string
-    type: SchemaType
+    type: SchemaTypeValue
     label: string
     leaf: boolean
     loadState: number

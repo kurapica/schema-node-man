@@ -350,7 +350,7 @@ const handleSelection = (val: any[]) => {
 const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
 {
     const f = schema!
-    const r: INodeSchema = { name: f.name, type: f.type, desc: f.desc }
+    const r: INodeSchema = { name: f.name, type: f.type, desc: deepClone(f.desc) }
 
     switch(f.type)
     {

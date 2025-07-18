@@ -11,6 +11,7 @@ import "@/assets/locale/enUS"
 import "@/schema"
 import { setLanguage } from 'schema-node'
 import { reloadStorageSchemas } from '@/schema'
+import "@/assets/example/schema"
 
 const app = createApp(App)
 

@@ -1,5 +1,5 @@
 <template>
-    <el-container style="height: 90vh">
+    <el-container style="height: 86vh">
         <el-aside style="height: 80%;width: 10rem;">
             <div class="outline">{{ _L["schema.catalog"] }}</div>
             <el-tree :data="tree" default-expand-all @node-click="onclick">
@@ -9,13 +9,13 @@
             </el-tree>
         </el-aside>
         <el-main>
-            <section v-for="section in tree" :id="section.id">
+            <section v-for="section in tree" :id="section.id" class="main">
                 <component v-if="section.com?.value" :is="section.com.value"></component>
                 <template v-if="section.children?.length">
-                    <section v-for="section2 in section.children" :id="section2.id">
+                    <section v-for="section2 in section.children" :id="section2.id" class="second">
                         <component v-if="section2.com?.value" :is="section.com.value"></component>
                         <template v-if="section2.children?.length">
-                            <section v-for="section3 in section2.children" :id="section3.id">
+                            <section v-for="section3 in section2.children" :id="section3.id" class="third">
                                 <component v-if="section3.com?.value" :is="section.com.value"></component>
                             </section>
                         </template>
@@ -53,7 +53,14 @@ class SectionNode {
 
 // Document
 const tree: SectionNode[] = [
-    new SectionNode("01.intro")
+    new SectionNode("01.intro"),
+    new SectionNode("02.namespace"),
+    new SectionNode("03.scalar"),
+    new SectionNode("04.enum"),
+    new SectionNode("05.struct"),
+    new SectionNode("06.array"),
+    new SectionNode("07.function"),
+    new SectionNode("08.relation"),
 ]
 
 //#region Utils
@@ -83,7 +90,7 @@ onUnmounted(() => langHandler ? langHandler() : null)
 //#endregion
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .outline {
   line-height: 50px;
   text-align: center;
@@ -91,5 +98,9 @@ onUnmounted(() => langHandler ? langHandler() : null)
   border-bottom: 1px solid #eee;
   font-weight: 600;
   background-color: white;
+}
+
+.main {
+    margin-bottom: 3rem;
 }
 </style>

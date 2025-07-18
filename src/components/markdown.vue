@@ -69,4 +69,8 @@ const buildMarkdown = (text: string) => {
 .markdown{
     text-align: left
 }
+
+.markdown img{
+    max-width: 100%;
+}
 </style>

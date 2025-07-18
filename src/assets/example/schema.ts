@@ -1,242 +1,351 @@
-import { EnumValueType, NS_SYSTEM_BOOL } from "schema-node"
-import { ExpressionType, RelationType, NS_SYSTEM_INT, NS_SYSTEM_STRING, NS_SYSTEM_DATE, registerSchema, SchemaType, type IStructScalarFieldConfig } from "schema-node"
+import {_LS, importLanguage, registerSchema, SchemaLoadState, type IStructScalarFieldConfig } from "schema-node"
 
 registerSchema([
-    {
-        name: "frontend",
-        type: SchemaType.Namespace,
-    },
-    {
-        name: "frontend.subject",
-        type: SchemaType.Enum,
-        enum: {
-            type: EnumValueType.Int,
-            values: [
+  {
+    "name": "test",
+    "type": "namespace",
+    "desc": _LS("test"),
+    "schemas": [
+      {
+        "name": "test.nosubjects",
+        "type": "func",
+        "desc": _LS("test.nosubjects"),
+        "func": {
+          "return": "system.bool",
+          "args": [
+            {
+              "name": "subjects",
+              "type": "test.subjects",
+              "nullable": true
+            }
+          ],
+          "exps": [
+            {
+              "name": "isnull",
+              "return": "system.bool",
+              "type": "call",
+              "func": "system.logic.isnull",
+              "args": [
                 {
-                    value: 1,
-                    name: "语文"
-                },
-                {
-                    value: 2,
-                    name: "数学"
-                },
-                {
-                    value: 3,
-                    name: "物理"
-                },
-                {
-                    value: 4,
-                    name: "政治"
-                },
-                {
-                    value: 5,
-                    name: "化学"
+                  "name": "subjects"
                 }
-            ]
-        }
-    },
-    {
-        name: "frontend.gpa",
-        type: SchemaType.Enum,
-        enum: {
-            type: EnumValueType.Int,
-            values: [
+              ]
+            },
+            {
+              "name": "len",
+              "return": "system.int",
+              "type": "call",
+              "func": "system.collection.arrlen",
+              "args": [
                 {
-                    value: 5,
-                    name: "优秀"
-                },
-                {
-                    value: 4,
-                    name: "良好"
-                },
-                {
-                    value: 3,
-                    name: "合格"
-                },
-                {
-                    value: 2,
-                    name: "及格"
-                },
-                {
-                    value: 1,
-                    name: "不及格"
+                  "name": "subjects",
+                  "value": "[]"
                 }
-            ]
-        }
-    },
-    {
-        name: "frontend.subjects",
-        type: SchemaType.Array,
-        array: {
-            element: "frontend.subject"
-        }
-    },
-    {
-        name: "frontend.calcage",
-        type: SchemaType.Function,
-        func: {
-            args: [
+              ]
+            },
+            {
+              "name": "zerolen",
+              "return": "system.bool",
+              "type": "call",
+              "func": "system.logic.equal",
+              "args": [
                 {
-                    name: "born",
-                    type: NS_SYSTEM_DATE
+                  "name": "len"
+                },
+                {
+                  "value": "0"
                 }
-            ],
-            return: NS_SYSTEM_INT,
-            exps: [
+              ]
+            },
+            {
+              "name": "result",
+              "return": "system.bool",
+              "type": "call",
+              "func": "system.logic.orelse",
+              "args": [
                 {
-                    name: "result",
-                    type: ExpressionType.Call,
-                    func: "system.datetime.getyears",
-                    return: NS_SYSTEM_INT,
-                    args: [
-                        {
-                            name: "born",
-                        }
-                    ]
+                  "name": "isnull"
+                },
+                {
+                  "name": "zerolen"
                 }
-            ],
+              ]
+            }
+          ]
         }
-    },
-    {
-        name: "frontend.score",
-        type: SchemaType.Struct,
-        struct: {
-            fields: [
+      },
+      {
+        "name": "test.person",
+        "type": "struct",
+        "desc": _LS("test.person"),
+        "struct": {
+          "fields": [
+            {
+              "name": "name",
+              "type": "system.string",
+              "display": _LS("test.person.name"),
+              "upLimit": "24",
+              "require": true
+            } as IStructScalarFieldConfig,
+            {
+              "name": "subjects",
+              "type": "test.subjects",
+              "display": _LS("test.person.subjects"),
+              "require": true
+            },
+            {
+              "name": "scores",
+              "type": "test.subjectscores",
+              "display": _LS("test.person.scores"),
+            },
+            {
+              "name": "avg",
+              "type": "system.number",
+              "display": _LS("test.person.avg"),
+              "displayOnly": true
+            }
+          ],
+          "relations": [
+            {
+              "field": "scores",
+              "type": "invisible",
+              "func": "test.nosubjects",
+              "args": [
                 {
-                    name: "subject",
-                    type: "frontend.subject",
-                    display: "功课",
-                } as IStructScalarFieldConfig,
-                {
-                    name: "score",
-                    type: NS_SYSTEM_INT,
-                    display: "成绩",
-                    upLimit: 100,
-                    lowLimit: 0,
-                } as IStructScalarFieldConfig
-            ]
-        }
-    },
-    {
-        name: "frontend.scores",
-        type: SchemaType.Array,
-        array: {
-            element: "frontend.score",
-            primary: ["subject"]
-        }
-    },
-    {
-        name: "frontend.person",
-        type: SchemaType.Struct,
-        struct: {
-            fields: [
-                {
-                    name: "name",
-                    type: NS_SYSTEM_STRING,
-                    display: "名字",
-                    immutable: true,
-                    upLimit: 60,
-                } as IStructScalarFieldConfig,
-                {
-                    name: "born",
-                    type: NS_SYSTEM_DATE,
-                    display: "生日",
-                    lowLimit: "1980-01-01T00:00:00Z",
-                    upLimit: "2024-12-31T23:59:59Z"
-                } as IStructScalarFieldConfig,
-                {
-                    name: "subjects",
-                    type: "frontend.subjects",
-                    display: "功课列表",
-                } as IStructScalarFieldConfig,
-                {
-                    name: "age",
-                    type: NS_SYSTEM_INT,
-                    display: "年龄",
-                    displayOnly: true,
-                } as IStructScalarFieldConfig,
-                {
-                    name: "gpa",
-                    type: NS_SYSTEM_BOOL,
-                    display: "使用绩点",
-                    default: false
-                },
-                {
-                    name: "scores",
-                    type: "frontend.scores",
-                    display: "成绩单",
-                },
-                {
-                    name: "average",
-                    type: "system.number",
-                    display: "平均成绩",
-                    displayOnly: true,
+                  "name": "subjects"
                 }
-            ],
-            relations: [
+              ]
+            },
+            {
+              "field": "scores.subject",
+              "type": "whiteList",
+              "func": "system.conv.assign",
+              "args": [
                 {
-                    field: "age",
-                    type: RelationType.Default,
-                    func: "frontend.calcage",
-                    args: [
-                        {
-                            name: "born"
-                        }
-                    ]
-                },
-                {
-                    field: "scores.subject",
-                    type: RelationType.WhiteList,
-                    func: "system.conv.assign",
-                    args: [
-                        {
-                            name: "subjects"
-                        }
-                    ]
-                },
-                {
-                    field: "scores.subject",
-                    type: RelationType.BlackList,
-                    func: "system.collection.getfields",
-                    args: [
-                        {
-                            name: "scores"
-                        },
-                        {
-                            value: "subject"
-                        }
-                    ]
-                },
-                {
-                    field: "scores.score",
-                    type: RelationType.Type,
-                    func: "system.logic.cond",
-                    args: [
-                        {
-                            name: "gpa"
-                        },
-                        {
-                            value: "frontend.gpa"
-                        },
-                        {
-                            value: NS_SYSTEM_INT
-                        }
-                    ]
-                },
-                {
-                    field: "average",
-                    type: RelationType.Default,
-                    func: "system.collection.averagefields",
-                    args: [
-                        {
-                            name: "scores"
-                        },
-                        {
-                            value: "score"
-                        }
-                    ]
+                  "name": "subjects"
                 }
-            ]
+              ]
+            },
+            {
+              "field": "scores.subject",
+              "type": "blackList",
+              "func": "system.collection.getfields",
+              "args": [
+                {
+                  "name": "scores",
+                  "value": "[]"
+                },
+                {
+                  "value": "subject"
+                }
+              ]
+            },
+            {
+              "field": "avg",
+              "type": "default",
+              "func": "system.collection.averagefields",
+              "args": [
+                {
+                  "name": "scores"
+                },
+                {
+                  "value": "score"
+                }
+              ]
+            }
+          ]
         }
-    }
-])
+      },
+      {
+        "name": "test.persons",
+        "type": "array",
+        "desc": _LS("test.persons"),
+        "array": {
+          element: "test.person",
+          primary: ["name"]
+        }
+      },
+      {
+        "name": "test.subject",
+        "type": "enum",
+        "desc": _LS("test.subject"),
+        "enum": {
+          "type": "int",
+          "cascade": [
+            "category",
+            "subject"
+          ],
+          "values": [
+            {
+              "value": 100,
+              "name": "Language",
+              "disable": false,
+              "subList": [
+                {
+                  "value": 101,
+                  "name": "English",
+                  "disable": false
+                },
+                {
+                  "value": 102,
+                  "name": "Grammar and Vocabulary",
+                  "disable": false
+                },
+                {
+                  "value": 103,
+                  "name": "Speech",
+                  "disable": false
+                },
+                {
+                  "value": 104,
+                  "name": "Creative Writing",
+                  "disable": false
+                }
+              ]
+            },
+            {
+              "value": 200,
+              "name": "Mathematics",
+              "disable": false,
+              "subList": [
+                {
+                  "value": 201,
+                  "name": "Algebra I & II",
+                  "disable": false
+                },
+                {
+                  "value": 202,
+                  "name": "Geometry",
+                  "disable": false
+                },
+                {
+                  "value": 203,
+                  "name": "Trigonometry",
+                  "disable": false
+                },
+                {
+                  "value": 204,
+                  "name": "Calculus",
+                  "disable": false
+                },
+                {
+                  "value": 205,
+                  "name": "Statistics",
+                  "disable": false
+                }
+              ]
+            },
+            {
+              "value": 300,
+              "name": "Science",
+              "disable": false,
+              "subList": [
+                {
+                  "value": 301,
+                  "name": "Biology",
+                  "disable": false
+                },
+                {
+                  "value": 302,
+                  "name": "Chemistry",
+                  "disable": false
+                },
+                {
+                  "value": 303,
+                  "name": "Physics",
+                  "disable": false
+                },
+                {
+                  "value": 304,
+                  "name": "Earth Science",
+                  "disable": false
+                },
+                {
+                  "value": 305,
+                  "name": "Environmental Science",
+                  "disable": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "name": "test.subjects",
+        "type": "array",
+        "desc": _LS("test.subjects"),
+        "array": {
+          "element": "test.subject"
+        }
+      },
+      {
+        "name": "test.subjectscore",
+        "type": "struct",
+        "desc": _LS("test.subjectscore"),
+        "struct": {
+          "fields": [
+            {
+              "name": "subject",
+              "type": "test.subject",
+              "display": _LS("test.subjectscore.subject"),
+              "require": true
+            },
+            {
+              "name": "score",
+              "type": "system.int",
+              "display": _LS("test.subjectscore.score"),
+              "require": true,
+              "lowLimit": "0",
+              "upLimit": "100"
+            } as IStructScalarFieldConfig
+          ]
+        }
+      },
+      {
+        "name": "test.subjectscores",
+        "type": "array",
+        "desc": _LS("test.subjectscores"),
+        "array": {
+          "element": "test.subjectscore",
+          "primary": [
+            "subject"
+          ]
+        }
+      }
+    ]
+  }
+], SchemaLoadState.Custom)
+
+importLanguage("enUS", {
+  "test": "A test namespace",
+  "test.nosubjects": "No subject choosed",
+  "test.person": "A person info",
+  "test.persons": "Person List",
+  "test.subject": "Subject",
+  "test.subjects": "Subjects",
+  "test.subjectscore": "Subect score",
+  "test.subjectscores": "Subject score list",
+  "test.person.name": "Name",
+  "test.person.subjects": "Subjects",
+  "test.person.scores": "Scores",
+  "test.person.avg": "Average",
+  "test.subjectscore.subject": "Subject",
+  "test.subjectscore.score": "Score",
+})
+
+importLanguage("zhCN", {
+  "test": "测试用",
+  "test.nosubjects": "未选中学科",
+  "test.person": "学生成绩信息",
+  "test.persons": "学生列表",
+  "test.subject": "学科",
+  "test.subjects": "学科列表",
+  "test.subjectscore": "学科成绩",
+  "test.subjectscores": "学科成绩列表",
+  "test.person.name": "名字",
+  "test.person.subjects": "学科列表",
+  "test.person.scores": "成绩列表",
+  "test.person.avg": "平均成绩",
+  "test.subjectscore.subject": "学科",
+  "test.subjectscore.score": "成绩",
+})

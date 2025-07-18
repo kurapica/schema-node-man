@@ -1991,7 +1991,7 @@ registerSchema([
                 {
                     name: "relations",
                     type: "schema.structfldrelationinfos",
-                    display: "字段间关系申明",
+                    display: "字段间关联申明",
                 },
             ],
             relations: [
@@ -2270,7 +2270,6 @@ registerSchema([
                 {
                     name: "return",
                     require: true,
-                    displayOnly: false,
                     type: "schema.valuetype",
                     display: _LS("schema.funcexp.return"),
                 },

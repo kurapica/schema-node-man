@@ -247,7 +247,16 @@ importLanguage("zhCN", {
     "schema.designer.tag": "标签",
     "schema.designer.returnstruct": "返回结构",
     "schema.designer.validate": "校验",
+    "schema.designer.schema": "类型",
+    "schema.designer.clicktotry": "点我尝试",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",
+    "schema.catalog.02.namespace": "02. 命名空间",
+    "schema.catalog.03.scalar": "03. 基础数据",
+    "schema.catalog.04.enum": "04. 枚举值",
+    "schema.catalog.05.struct": "05. 结构体",
+    "schema.catalog.06.array": "06. 数组",
+    "schema.catalog.07.function": "07. 函数",
+    "schema.catalog.08.relation": "08. 关联",
 })

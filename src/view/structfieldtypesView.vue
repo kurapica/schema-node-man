@@ -168,10 +168,8 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-:deep {
-    .el-form-item__content {
-        margin-left: 0 !important;
-    }
+:deep(.el-form-item__content) {
+    margin-left: 0 !important;
 }
 
 .require::before {
