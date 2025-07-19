@@ -20,11 +20,11 @@
                 <markdown>
                     本次开源的部分是剥离后端后，仅前端专用的部分，包含两个库，和一个前端类型配置管理器。
 
-                    1. schema-node: 无依赖的类型数据节点系统，基于数据类型生产数据节点，并基于各自的关系实现数据订阅。
+                    1. [schema-node](https://github.com/kurapica/schema-node): 无依赖的类型数据节点系统，基于数据类型生产数据节点，并基于各自的关系实现数据订阅。
 
-                    2. schema-node-vueview: 基于Vue3和ElmentPlus实现的数据节点视图库，我们可以为数据类型注册不同的视图实现，这里提供的是默认实现。
+                    2. [schema-node-vueview](https://github.com/kurapica/schema-node-vueview): 基于Vue3和ElmentPlus实现的数据节点视图库，我们可以为数据类型注册不同的视图实现，这里提供的是默认实现。
 
-                    3. schema-node-man: 前端用类型配置管理器，可以上传，下载自定义类型，可以自动缓存。类型下载后可以配合前两个库在各个项目中使用。
+                    3. [schema-node-man](https://github.com/kurapica/schema-node-man): 前端用类型配置管理器，可以上传，下载自定义类型，可以自动缓存。类型下载后可以配合前两个库在各个项目中使用。
                 </markdown>
             </el-collapse-item>
             <el-collapse-item title="应用和服务器架构-非本次开源内容">
