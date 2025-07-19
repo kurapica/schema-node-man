@@ -25,12 +25,13 @@ onMounted(() => {
     if (!isNull(path))
     {
         const index = routes.findIndex(r => r.path === path)
-        if(!isNull(index))
+        if(!isNull(index) && index >= 0)
         {
             activeIndex.value = `${index}`
             return
         }
     }
-    router.push(routes[0].path)
+    activeIndex.value = `${routes.length - 1}`
+    router.push(routes[routes.length - 1].path)
 })
 </script>
