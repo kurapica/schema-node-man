@@ -21,11 +21,11 @@
                 <markdown>
                     This release includes only the frontend-specific parts with backend dependencies removed. It includes two libraries and one frontend type configuration manager.
 
-                    1. **schema-node**: A dependency-free data node system based on data types. It creates data nodes and enables data subscription based on defined relationships.
+                    1. [schema-node](https://github.com/kurapica/schema-node): A dependency-free data node system based on data types. It creates data nodes and enables data subscription based on defined relationships.
 
-                    2. **schema-node-vueview**: A Vue 3 + Element Plus-based data node view library. Different views can be registered for different data types. This library provides the default implementations.
+                    2. [schema-node-vueview](https://github.com/kurapica/schema-node-vueview): A Vue 3 + Element Plus-based data node view library. Different views can be registered for different data types. This library provides the default implementations.
 
-                    3. **schema-node-man**: A frontend-only type configuration manager. It supports uploading and downloading custom types with automatic caching. Once downloaded, the types can be used with the above two libraries in any project.
+                    3. [schema-node-man](https://github.com/kurapica/schema-node-man): A frontend-only type configuration manager. It supports uploading and downloading custom types with automatic caching. Once downloaded, the types can be used with the above two libraries in any project.
                 </markdown>
             </el-collapse-item>
             <el-collapse-item title="Application and Server Architecture (Not Included in This Release)">
