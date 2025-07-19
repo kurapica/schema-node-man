@@ -35,7 +35,7 @@ const buildMarkdown = (text: string) => {
             prevLine = null
             if(line.startsWith("![") && window.location.href.startsWith("http"))
             {
-                line = line.replace("./assets/", "/src/assets/")
+                line = line.replace("./assets/", "/schema-node-man/assets/")
             }
             lines[i++] = line.trim()
             continue
