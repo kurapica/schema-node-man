@@ -258,5 +258,6 @@ importLanguage("zhCN", {
     "schema.catalog.05.struct": "05. 结构体",
     "schema.catalog.06.array": "06. 数组",
     "schema.catalog.07.function": "07. 函数",
-    "schema.catalog.08.relation": "08. 关联",
+    "schema.catalog.08.usage": "08. 使用",
+    "schema.catalog.09.view": "08. 自定义视图",
 })

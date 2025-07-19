@@ -8,7 +8,7 @@
                 </template>
             </el-tree>
         </el-aside>
-        <el-main>
+        <el-main style="text-align: left;">
             <section v-for="section in tree" :id="section.id" class="main">
                 <component v-if="section.com?.value" :is="section.com.value"></component>
                 <template v-if="section.children?.length">
@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import { generateGuidPart, getLanguage, subscribeLanguage } from 'schema-node'
 import { defineAsyncComponent, onUnmounted, ref, type Ref, type Component, shallowRef } from 'vue'
-import { _L } from 'schema-node-vue-view'
+import { _L } from 'schema-node-vueview'
 
 //#region type
 class SectionNode {
@@ -60,7 +60,8 @@ const tree: SectionNode[] = [
     new SectionNode("05.struct"),
     new SectionNode("06.array"),
     new SectionNode("07.function"),
-    new SectionNode("08.relation"),
+    new SectionNode("08.usage"),
+    new SectionNode("09.view"),
 ]
 
 //#region Utils

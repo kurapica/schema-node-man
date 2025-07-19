@@ -15,7 +15,7 @@ import { onMounted, ref } from "vue"
 import { useRouter } from 'vue-router'
 import { routes } from "../routes"
 import { isNull } from "schema-node"
-import { _L } from "schema-node-vue-view"
+import { _L } from "schema-node-vueview"
 
 const router = useRouter()
 const activeIndex = ref("0")

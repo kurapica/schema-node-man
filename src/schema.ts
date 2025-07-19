@@ -2588,7 +2588,7 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import funcdefineView from "./view/funcdefineView.vue"
-import { regSchemaTypeView } from "schema-node-vue-view"
+import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("schema.namespace", namespaceView)
 regSchemaTypeView("schema.scalartype", namespaceView)

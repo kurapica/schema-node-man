@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { type ScalarNode } from 'schema-node'
-import schemaView, { _L, getInputPlaceHolder } from 'schema-node-vue-view';
+import { schemaView, _L, getInputPlaceHolder } from 'schema-node-vueview';
 import { ref, onMounted, onUnmounted, reactive, toRaw, watch } from 'vue'
 
 const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()

@@ -20,9 +20,13 @@
 
         另外，新输入的枚举值无法输入下级枚举值，请保存后重新打开再进行操作。
 
-        关于多选，对于非标志位枚举值，我们需要创建基于枚举值的数组类型，它会以枚举值多选的形式提供视图。
+        关于特征`3.是否多选`，对于非标志位枚举值，我们需要创建基于枚举值的数组类型，它会以枚举值多选的形式提供视图。
     </markdown>
     <showandtry type="test.subjects"></showandtry>
+    <markdown>
+        如果申明为标志位枚举值，则默认就是多选，除非在结构体使用时，指明是单枚举值。
+    </markdown>
+    <showandtry type="test.role"></showandtry>
 </template>
 
 <script setup lang="ts">

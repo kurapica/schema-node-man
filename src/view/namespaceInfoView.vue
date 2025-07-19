@@ -99,14 +99,14 @@
 </template>
 
 <script lang="ts" setup>
-import { getSchema, NS_SYSTEM_BOOL, NS_SYSTEM_DATE, NS_SYSTEM_FULLDATE, NS_SYSTEM_INT, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_YEAR, NS_SYSTEM_YEARMONTH, SchemaType, type INodeSchema } from 'schema-node'
+import { getSchema, NS_SYSTEM_BOOL, NS_SYSTEM_DATE, NS_SYSTEM_FULLDATE, NS_SYSTEM_INT, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_YEAR, NS_SYSTEM_YEARMONTH, SchemaType, type INodeSchema, type SchemaTypeValue } from 'schema-node'
 import { reactive, watch } from 'vue'
-import { _L } from 'schema-node-vue-view'
+import { _L } from 'schema-node-vueview'
 
 interface ITypeStructInfo {
     label: string
-    type?: SchemaType
-    eleType?: SchemaType
+    type?: SchemaTypeValue
+    eleType?: SchemaTypeValue
     desc?: string
     baseType?: string | null
     useArg?: string

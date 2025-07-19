@@ -125,9 +125,8 @@
 
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
-import schemaView from 'schema-node-vue-view'
+import { _L, schemaView } from 'schema-node-vueview'
 import tryitView from './tryit.vue'
-import { _L } from 'schema-node-vue-view'
 import { _LS, deepClone } from 'schema-node'
 import { getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
@@ -375,7 +374,9 @@ const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
             break
 
         case SchemaType.Function:
-            r.func = { ...deepClone(f.func!, true), func: undefined } 
+            r.func = { ...deepClone(f.func!, true), func: undefined }
+            if (!r.func!.exps) r.func!.exps = []
+            if (!r.func!.args) r.func!.args = []
             break
     }
     return r

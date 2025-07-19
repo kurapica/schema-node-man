@@ -13,7 +13,7 @@
                 </template>
                 <div v-for="i in state.arglen" class="func-arg"
                     style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
-                    <el-card class="box-card" shadow="hover">
+                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: argColor[i-1] || 'white' }">
                         <schema-view v-if="argsNode.elements[i - 1]" 
                             :key="argsNode.elements[i - 1].guid" 
                             :node="argsNode.elements[i - 1]"
@@ -85,8 +85,8 @@
 <script setup lang="ts">
 import { ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
-import { _L } from 'schema-node-vue-view'
-import schemaView from 'schema-node-vue-view'
+import { _L } from 'schema-node-vueview'
+import { schemaView } from 'schema-node-vueview'
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
@@ -103,6 +103,7 @@ const state = reactive({
 
 const argdatas: { key: string, name: string, type: string, data: any, showdata: boolean }[] = reactive([])
 const result = ref<any[]>([])
+const argColor = ref<string[]>([])
 const color = ref<string[]>([])
 
 let stateHandler: Function | undefined = undefined
@@ -357,7 +358,7 @@ const refresh = async () => {
         }
 
         // may be use later
-        if (arrayEle) {}
+        if (arrayType && arrayEle) {}
 
         // args
         const fargs = e.getField("args") as ArrayNode
@@ -490,9 +491,13 @@ const refresh = async () => {
 const soonRefresh = debounce(refresh, 50)
 const delayRefresh = debounce(refresh, 1000)
 
-const refreshArgs = () => {
+const refreshArgs = async () => {
+    const acolor = []
+    const returnType = returnNode.data
+    const schema = returnType ? await getSchema(returnType) : null
+
     for (let i = 0; i < argsNode.elements.length; i++) {
-        const { name, type } = argsNode.elements[i].rawData
+        const { name, type } = argsNode.elements[i].data
         if (argdatas.length > i) {
             argdatas[i].name = name
             argdatas[i].key = `${name}-${type}`
@@ -504,7 +509,18 @@ const refreshArgs = () => {
         else {
             argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null, showdata: false })
         }
+
+        acolor[i] = ""
+        if (schema?.type === SchemaType.Struct && schema.struct?.fields.length)
+        {
+            const fld = schema.struct.fields.find(f => f.name === name)
+            if (fld)
+            {
+                acolor[i] = await isSchemaCanBeUseAs(type, fld.type) ? 'LIGHTBLUE' : 'RED'   
+            }
+        }
     }
+    argColor.value = acolor
 
     return soonRefresh()
 }
@@ -523,7 +539,7 @@ onMounted(() => {
         state.readonly = funcNode.readonly
     }, true)
 
-    retHandler = returnNode.subscribe(refresh)
+    retHandler = returnNode.subscribe(refreshArgs)
     argsHandler = argsNode.subscribe((action: string) => {
         const arglen = argsNode.elements.length
         if (action !== "swap" && argsHandlers.length === arglen) return
@@ -561,7 +577,7 @@ onMounted(() => {
 
     expsHandler = expsNode.subscribe((action: string) => {
         const expslen = expsNode.elements.length
-        if (action !== "swap" && expsHandlers.length !== expslen) return
+        if (action !== "swap" && expsHandlers.length === expslen) return
 
         let changed = false
 

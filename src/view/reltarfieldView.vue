@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { ArrayNode, getCachedSchema, isNull, SchemaType, StructNode, ScalarNode, getSchema, isSchemaCanBeUseAs, ARRAY_ELEMENT } from "schema-node"
-import { _L, getSelectPlaceHolder } from "schema-node-vue-view"
+import { _L, getSelectPlaceHolder } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 
 //#region Inner type

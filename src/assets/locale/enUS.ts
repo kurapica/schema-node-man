@@ -258,5 +258,6 @@ importLanguage("enUS", {
     "schema.catalog.05.struct": "05. Struct",
     "schema.catalog.06.array": "06. Array",
     "schema.catalog.07.function": "07. Function",
-    "schema.catalog.08.relation": "07. Relation",
+    "schema.catalog.08.usage": "08. Usage",
+    "schema.catalog.09.view": "08. Custom View",
 });

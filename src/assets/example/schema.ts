@@ -1,4 +1,6 @@
 import {_LS, importLanguage, registerSchema, SchemaLoadState, type IStructScalarFieldConfig } from "schema-node"
+import waterFallView from "@/view/waterFallView.vue"
+import { regSchemaTypeView } from "schema-node-vueview"
 
 registerSchema([
   {
@@ -6,6 +8,36 @@ registerSchema([
     "type": "namespace",
     "desc": _LS("test"),
     "schemas": [
+      {
+        "name": "test.gpa",
+        "type": "enum",
+        "desc": _LS("test.gpa"),
+        "enum": {
+          "type": "int",
+          "values": [
+            {
+              "value": 4,
+              "name": "A",
+              "disable": false
+            },
+            {
+              "value": 3,
+              "name": "B",
+              "disable": false
+            },
+            {
+              "value": 2,
+              "name": "C",
+              "disable": false
+            },
+            {
+              "value": 1,
+              "name": "D",
+              "disable": false
+            }
+          ]
+        }
+      },
       {
         "name": "test.nosubjects",
         "type": "func",
@@ -94,6 +126,11 @@ registerSchema([
               "require": true
             },
             {
+              "name": "gpa",
+              "type": "system.bool",
+              "display": _LS("test.person.gpa")
+            },
+            {
               "name": "scores",
               "type": "test.subjectscores",
               "display": _LS("test.person.scores"),
@@ -137,6 +174,23 @@ registerSchema([
                 },
                 {
                   "value": "subject"
+                }
+              ]
+            },
+            {
+              "field": "scores.score",
+              "type": "type",
+              "func": "system.logic.cond",
+              "args": [
+                {
+                  "name": "gpa",
+                  "value": true
+                },
+                {
+                  "value": "test.gpa"
+                },
+                {
+                  "value": "system.int"
                 }
               ]
             },
@@ -311,6 +365,55 @@ registerSchema([
             "subject"
           ]
         }
+      },
+      {
+        "name": "test.role",
+        "type": "enum",
+        "desc": _LS("test.role"),
+        "enum": {
+          "type": "flags",
+          "values": [
+            {
+              "value": 0,
+              "name": "None",
+              "disable": false
+            },
+            {
+              "value": 1,
+              "name": "Worker",
+              "disable": false
+            },
+            {
+              "value": 2,
+              "name": "Mananger",
+              "disable": false
+            },
+            {
+              "value": 4,
+              "name": "Admin",
+              "disable": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "test.gensubjectscore",
+        "type": "func",
+        "desc": _LS("test.gensubjectscore"),
+        "func": {
+          "return": "test.subjectscore",
+          "args": [
+            {
+              "name": "subject",
+              "type": "test.subject"
+            },
+            {
+              "name": "score",
+              "type": "system.int"
+            },
+          ],
+          "exps": []
+        }
       }
     ]
   }
@@ -318,6 +421,7 @@ registerSchema([
 
 importLanguage("enUS", {
   "test": "A test namespace",
+  "test.gpa": "Grade Point Average",
   "test.nosubjects": "No subject choosed",
   "test.person": "A person info",
   "test.persons": "Person List",
@@ -327,14 +431,18 @@ importLanguage("enUS", {
   "test.subjectscores": "Subject score list",
   "test.person.name": "Name",
   "test.person.subjects": "Subjects",
+  "test.person.gpa": "Use GPA",
   "test.person.scores": "Scores",
   "test.person.avg": "Average",
   "test.subjectscore.subject": "Subject",
   "test.subjectscore.score": "Score",
+  "test.role": "Role",
+  "test.gensubjectscore": "Combine subject and score",
 })
 
 importLanguage("zhCN", {
   "test": "测试用",
+  "test.gpa": "使用积点",
   "test.nosubjects": "未选中学科",
   "test.person": "学生成绩信息",
   "test.persons": "学生列表",
@@ -344,8 +452,13 @@ importLanguage("zhCN", {
   "test.subjectscores": "学科成绩列表",
   "test.person.name": "名字",
   "test.person.subjects": "学科列表",
+  "test.person.gpa": "使用积点",
   "test.person.scores": "成绩列表",
   "test.person.avg": "平均成绩",
   "test.subjectscore.subject": "学科",
   "test.subjectscore.score": "成绩",
+  "test.role": "角色",
+  "test.gensubjectscore": "组合学科成绩",
 })
+
+regSchemaTypeView("test.persons", waterFallView, "waterfall")

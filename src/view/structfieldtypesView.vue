@@ -20,7 +20,7 @@ import Sortable from 'sortablejs'
 import { ElTabs } from "element-plus"
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import schemaView, { _L } from 'schema-node-vue-view'
+import { schemaView, _L } from 'schema-node-vueview'
 import { _LS, ArrayNode, getSchema, jsonClone, SchemaType, sformat, StructNode } from 'schema-node'
 import type { AnySchemaNode } from 'schema-node'
 

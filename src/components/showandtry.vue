@@ -1,6 +1,6 @@
 <template>
     <section>
-        <el-button @click="showtryit = true">{{ _L["schema.designer.clicktotry"] }}</el-button>
+        <el-button type="success" @click="showtryit = true">{{ _L["schema.designer.clicktotry"] }}</el-button>
         <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit']" direction="rtl" size="100%"
             destroy-on-close
             append-to-body>
@@ -33,7 +33,7 @@
                                 ></schema-view>
                             </div>
                         </el-form>
-                        <tryit v-if="activeTab === 0" :type="type"></tryit>
+                        <tryit v-if="activeTab === 0" :type="type" :skin="skin"></tryit>
                     </template>
                 </el-main>
                 <el-footer>
@@ -47,12 +47,11 @@
 
 <script setup lang="ts">
 import { getSchema, jsonClone, SchemaType, StructNode } from 'schema-node'
-import { _L } from 'schema-node-vue-view'
 import tryit from './tryit.vue'
 import { ref, toRaw, watch } from 'vue'
-import schemaView from 'schema-node-vue-view'
+import { _L, schemaView } from 'schema-node-vueview'
 
-const props = defineProps<{ type: string }>()
+const props = defineProps<{ type: string, skin?: string }>()
 const activeTab = ref(0)
 const schemaNode = ref<StructNode | null>(null)
 const showtryit = ref(false)
@@ -62,7 +61,7 @@ watch(() => props.type, async () => {
     const schema = await getSchema(props.type)
     if (schema)
     {
-        isnamespace.value = schema.type === SchemaType.Namespace
+        isnamespace.value = schema.type === SchemaType.Namespace || schema.type === SchemaType.Function
         schemaNode.value = new StructNode({
             type: "schema.namespacedefine",
             readonly: true

@@ -90,10 +90,10 @@ import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
 import { ExpressionType, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
-import { _L, getSelectPlaceHolder } from "schema-node-vue-view"
+import { _L, getSelectPlaceHolder } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
-import schemaView from "schema-node-vue-view"
+import { schemaView } from "schema-node-vueview"
 
 //#region Inner type
 interface ICascaderOptionInfo {
