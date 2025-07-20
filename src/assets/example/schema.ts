@@ -128,7 +128,8 @@ registerSchema([
             {
               "name": "gpa",
               "type": "system.bool",
-              "display": _LS("test.person.gpa")
+              "display": _LS("test.person.gpa"),
+              "default": false,
             },
             {
               "name": "scores",
