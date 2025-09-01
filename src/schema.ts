@@ -180,7 +180,7 @@ registerSchema([
                     name: _LS("schema.relationtype.lowlimit"),
                 },
                 {
-                    value: RelationType.Uplimit,
+                    value: RelationType.UpLimit,
                     name: _LS("schema.relationtype.uplimit"),
                 },
                 {
@@ -1596,7 +1596,7 @@ registerSchema([
                         return arraySchema?.name || NS_SYSTEM_ARRAY
 
                     case RelationType.LowLimit:
-                    case RelationType.Uplimit:
+                    case RelationType.UpLimit:
                         if (await isSchemaCanBeUseAs(NS_SYSTEM_STRING, fieldType))
                             return NS_SYSTEM_INT
                         return fieldType
@@ -1640,7 +1640,7 @@ registerSchema([
                         RelationType.WhiteList,
                         RelationType.BlackList,
                         RelationType.LowLimit,
-                        RelationType.Uplimit,
+                        RelationType.UpLimit,
                         RelationType.Invisible,
                         RelationType.Disable,
                         RelationType.Assign,
