@@ -56,11 +56,17 @@ const handleTabsEdit = (target: any, action: string) => {
 
 // sort
 let sortble: Sortable | null = null
+let sortbleTime = 0
 const regSortable = () => {
     sortble?.destroy()
     if (arrayNode.readonly) return
 
     const el: any = document.querySelector(".struct-field-types .el-tabs__nav")
+    if (!el) 
+    {
+        sortbleTime = setTimeout(regSortable, 1000)
+        return
+    }
     sortble = Sortable.create(el, {
         draggable: ".el-tabs__item",
         onEnd(params: any) {
@@ -163,6 +169,7 @@ onUnmounted(() => {
     if (baseChangeHandler) baseChangeHandler()
     elementDisplay.forEach(v => v.handler())
     sortble?.destroy()
+    if (sortbleTime) clearTimeout(sortbleTime)
 })
 
 </script>

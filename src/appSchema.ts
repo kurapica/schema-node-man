@@ -1,5 +1,6 @@
-import { _LS, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerSchema, SchemaLoadState, SchemaType, type IStructScalarFieldConfig } from "schema-node";
+import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig } from "schema-node"
 
+// Schema for definition
 registerSchema([
     {
         name: "schema.app",
@@ -15,19 +16,19 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.fieldaccess",
+        name: "schema.app.srcfld",
         type: SchemaType.Scalar,
-        desc: _LS("schema.app.fieldaccess"),
+        desc: _LS("schema.app.srcfld"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
     },
     {
-        name: "schema.app.fieldaccesses",
+        name: "schema.app.srcfldes",
         type: SchemaType.Array,
-        desc: _LS("schema.app.fieldaccesses"),
+        desc: _LS("schema.app.srcfldes"),
         array: {
-            element: "schema.app.fieldaccess"
+            element: "schema.app.srcfld"
         }
     },
     {
@@ -38,7 +39,7 @@ registerSchema([
             fields: [
                 {
                     name: "name",
-                    type: "schema.app.fieldaccess",
+                    type: "schema.app.srcfld",
                     display: _LS("schema.app.fieldvalarg.name")
                 },
                 {
@@ -66,7 +67,7 @@ registerSchema([
                 {
                     name: "field",
                     require: true,
-                    type: "schema.app.fieldaccess",
+                    type: "schema.app.srcfld",
                     display: _LS("schema.app.fieldrelation.field")
                 },
                 {
@@ -136,7 +137,7 @@ registerSchema([
                 },
                 {
                     name: "sourceField",
-                    type: "schema.app.fieldaccess",
+                    type: "schema.app.srcfld",
                     display: _LS("schema.app.field.sourcefld"),
                 },
                 {
@@ -146,7 +147,7 @@ registerSchema([
                 },
                 {
                     name: "args",
-                    type: "schema.app.fieldaccesses",
+                    type: "schema.app.srcfldes",
                     display: _LS("schema.app.field.sourcefld"),
                 },
                 {
@@ -201,3 +202,126 @@ registerSchema([
         }
     }
 ], SchemaLoadState.System)
+
+//#region App Schema storage
+
+// reload schemas from storage
+export function reloadStorageAppSchemas()
+{
+    const namelist = localStorage["schema_custom_applist"]
+    const list = namelist ? JSON.parse(namelist) : null
+    if (!list || !Array.isArray(list)) return
+
+    const schemas: IAppSchema[] = []
+    for(let i = 0; i < list.length; i++)
+    {
+        const data = localStorage[`schema_app_${list[i]}`]
+        const schema = data ? JSON.parse(data) : null
+        if (!schema || typeof(schema) !== "object") continue
+        schemas.push(schema)
+    }
+    registerAppSchema(schemas)
+}
+
+// save schema to storage
+export function saveStorageAppSchema(schema: IAppSchema)
+{
+    schema = getAppCachedSchema(schema.name)! // reload to gets the fields
+    const namelist = localStorage["schema_custom_applist"]
+    let list: string[] = namelist ? JSON.parse(namelist) : []
+    const name = schema.name.toLowerCase()
+    if (!Array.isArray(list)) list = []
+    if (!list.includes(name))
+    {
+        list.push(name)
+        list.sort()
+        localStorage["schema_custom_applist"] = JSON.stringify(list)
+    }
+    localStorage[`schema_app_${name}`] = JSON.stringify({
+        name: schema.name,
+        display: schema.display,
+        desc: schema.desc,
+        fields: schema.fields?.map((f: IAppFieldSchema) => ({
+            name: f.name,
+            type: f.type,
+            display: f.display,
+            desc: f.desc,
+            sourceApp: f.sourceApp,
+            sourceField: f.sourceField,
+            func: f.func,
+            args: f.args ? [...f.args] : undefined,
+            incrUpdate: f.incrUpdate,
+            frontEnd: f.frontEnd,
+            disable: f.disable,
+        })),
+        relations: schema.relations?.map((r: IStructFieldRelation) => ({
+            field: r.field,
+            func: r.func,
+            type: r.type,
+            args: r.args?.map((a: IFunctionCallArgument)  => ({
+                name: a.name,
+                value: a.value
+            }))
+        }))
+    })
+}
+
+// delete schema from storage
+export function removeStorageAppSchema(name: string | IAppSchema)
+{
+    name = (typeof(name) === "object" ? name.name : name).toLowerCase()
+    delete localStorage[`schema_app_${name}`]
+    const namelist = localStorage["schema_custom_applist"]
+    let list: string[] = namelist ? JSON.parse(namelist) : []
+    if (Array.isArray(list) && list.includes(name))
+    {
+        const index = list.findIndex(n => n === name)
+        if (index >= 0)
+        {
+            list.splice(index, 1)
+            localStorage["schema_custom_applist"] = JSON.stringify(list)
+        }
+    }
+}
+
+// clear all stroage schemas
+export function clearAllStorageAppSchemas()
+{
+    const namelist = localStorage["schema_custom_applist"]
+    const list = namelist ? JSON.parse(namelist) : null
+    if (!list || !Array.isArray(list)) return
+
+    for(let i = 0; i < list.length; i++)
+    {
+        delete localStorage[`schema_app_${list[i]}`]
+    }
+    delete localStorage["schema_custom_applist"]
+    location.reload()
+}
+
+// save all custom types to the storage
+export function saveAllCustomAppSchemaToStroage(root: string = "")
+{
+    const schema = getAppCachedSchema(root)
+    schema?.apps?.forEach((s: IAppSchema) => {
+        if ((s.loadState || 0) & SchemaLoadState.Custom)
+        {
+            saveStorageAppSchema(s)
+            if (s.apps?.length)
+            {
+                saveAllCustomAppSchemaToStroage(s.name)
+            }
+        }
+    })
+}
+
+//#endregion
+
+//#region View
+
+import sourceappView from "./view/sourceappView.vue"
+import { regSchemaTypeView } from "schema-node-vueview"
+
+regSchemaTypeView("schema.app.srcapp", sourceappView)
+
+//#endregion

@@ -1,5 +1,6 @@
 import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
+// Schema for definition
 registerSchema([
     {
         name: "schema",
@@ -2486,7 +2487,8 @@ registerSchema([
     //#endregion
 ], SchemaLoadState.System)
 
-// Schema storage
+//#region Schema storage
+
 // reload schemas from storage
 export function reloadStorageSchemas()
 {
@@ -2579,7 +2581,10 @@ export function saveAllCustomSchemaToStroage(root: string = "")
     })
 }
 
-// View
+//#endregion
+
+//#region  View
+
 import namespaceView from "./view/namespaceView.vue"
 import namespaceInputView from "./view/namespaceInputView.vue"
 import enumvalueinfosView from "./view/enumvalueinfosView.vue"
@@ -2613,3 +2618,5 @@ regSchemaTypeView("schema.reltarfield", reltarfieldView)
 regSchemaTypeView("schema.structfldfuncargs", structfldfuncargsView)
 
 regSchemaTypeView("schema.funcdefine", funcdefineView)
+
+//#endregion

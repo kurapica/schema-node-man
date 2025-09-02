@@ -56,7 +56,8 @@
                     </template>
                     <template #default="scope">
                         <el-button v-if="scope.row.type === SchemaType.Namespace"
-                            type="info" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}</el-button>
+                            type="info" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
+                        </el-button>
                         <el-button v-else type="info" @click="handleEdit(scope.row, true)">
                             {{ _L["schema.designer.view"] }}
                         </el-button>
@@ -126,12 +127,11 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import tryitView from './tryit.vue'
-import { _LS, deepClone } from 'schema-node'
-import { getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
+import { _LS, deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
+import tryitView from './tryit.vue'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -306,6 +306,7 @@ const confirmNameSpace = async () => {
 
     registerSchema([data])
     saveStorageSchema(data)
+    closeNamespaceEditor()
     showNamespaceEditor.value = false
     return refresh()
 }
@@ -315,6 +316,7 @@ const closeNamespaceEditor = () => {
     if (namesapceWatchHandler) namesapceWatchHandler()
     namespaceNode.value?.dispose()
     namespaceNode.value = undefined
+    namesapceWatchHandler = null
 }
 
 
