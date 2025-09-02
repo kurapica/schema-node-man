@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getAppSchema, subscribeLanguage, type IAppSchema, type ScalarNode } from "schema-node"
+import { getAppSchema, subscribeAppSchemaChange, subscribeLanguage, type IAppSchema, type ScalarNode } from "schema-node"
 import { _L, getSelectPlaceHolder } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, toRaw } from "vue"
 
@@ -143,7 +143,7 @@ const reBuildOptions = async () => {
 let dataWatcher: Function | null = null
 let stateHandler: Function | null = null
 let langHandler: Function | null = null
-let exptypeHandler: Function | null = null
+let appChangeHandler: Function | null = null
 
 onMounted(() => {
     dataWatcher = scalarNode.subscribe(async() =>  {
@@ -190,11 +190,15 @@ onMounted(() => {
 
     // update display
     langHandler = subscribeLanguage(reBuildOptions)
+
+    // rebuild when app schema changed
+    appChangeHandler = subscribeAppSchemaChange(reBuildOptions)
 })
 
 onUnmounted(() => {
     if (dataWatcher) dataWatcher()
     if (stateHandler) stateHandler()
     if (langHandler) langHandler()
+    if (appChangeHandler) appChangeHandler()
 })
 </script>

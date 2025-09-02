@@ -84,7 +84,7 @@
         <el-drawer v-model="showFieldList" :title="appTitle"  direction="rtl" size="100%" destroy-on-close append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <el-table :data="fields" style="width: 100%; height: 70vh;" :border="true"
+                    <el-table :data="fields" style="width: 100%; height: 65vh;" :border="true"
                         header-align="left" 
                         :header-cell-style="{ background: '#eee' }">
                         <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
@@ -106,12 +106,40 @@
                 </el-main>
                 <el-footer>
                     <br/>
+                    <el-button type="primary" @click="handleFieldNew">{{ _L["schema.designer.new"] }}</el-button>
                     <el-button @click="showFieldList = false">{{ _L["schema.designer.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
 
         <!-- field editor -->
+        <el-drawer v-model="showAppFieldEditor" :title="appFieldOper" direction="rtl" size="100%" destroy-on-close
+            append-to-body @closed="closeFieldEditor">
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawData" label-width="160"
+                        label-position="left" style="width: 100%; height: 90%;">
+                        <div class="draw-view">
+                            <schema-view
+                                :node="(appFieldNode as StructNode)"
+                                in-form="expandall"
+                                plain-text="left"
+                            ></schema-view>
+                        </div>
+                    </el-form>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <template v-if="appFieldNode?.readonly">
+                        <el-button @click="showAppFieldEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                    </template>
+                    <template v-else>
+                        <el-button type="primary" @click="confirmApp">{{ _L["schema.designer.save"] }}</el-button>
+                        <el-button @click="showAppFieldEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                    </template>
+                </el-footer>
+            </el-container>
+        </el-drawer>
     </el-container>
 </template>
 
@@ -219,7 +247,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
 }
 
 // delete
-const handleDelete = async (row: any) => {
+const handleDelete = (row: any) => {
     removeStorageAppSchema(row.name)
     removeAppSchema(row.name)
     return refresh()
@@ -254,8 +282,10 @@ const closeAppEditor = () => {
 const showFieldList = ref(false)
 const fields = ref<IAppFieldSchema[]>([])
 const appTitle = ref("")
+let currApp: string | null = null
 
 const showFields = async(row: any) => {
+    currApp = row.name
     const appSchema = await getAppSchema(row.name)
     appTitle.value = appSchema?.display || appSchema?.name || ""
     fields.value = appSchema?.fields ? [...appSchema.fields] : []
@@ -273,22 +303,73 @@ let appFieldWatchHandler: Function | null = null
 
 // create
 const handleFieldNew = async () => {
+    appFieldNode.value = new StructNode({
+        type: "schema.app.field",
+    }, {})
+    showAppFieldEditor.value = true
 
+    appFieldWatchHandler = appFieldNode.value.subscribe(() => {
+        appFieldOper.value = _L.value["schema.designer.new"] + " " + (appFieldNode.value?.data.display || appFieldNode.value?.data.name || "")
+    }, true)
 }
 
 // update
 const handleFieldEdit = async (row: any, readonly?: boolean) => {
+    appFieldNode.value = new StructNode({
+        type: "schema.app.field",
+        readonly
+    }, jsonClone(toRaw(row)))
+    showAppFieldEditor.value = true
 
+    if (readonly) {
+        appFieldOper.value = _L.value["schema.designer.view"] + " " + (appFieldNode.value?.data.display || appFieldNode.value?.data.name || "")
+    }
+    else {
+        appFieldWatchHandler = appFieldNode.value.subscribe(() => {
+            appFieldOper.value = _L.value["schema.designer.edit"] + " " + (appFieldNode.value?.data.display || appFieldNode.value?.data.name || "")
+        }, true)
+    }
 }
 
 // delete
 const handleFieldDelete = async (row: any) => {
+    const appSchema = await getAppSchema(currApp!)
+    if (!appSchema?.fields) return
 
+    const idx =  appSchema.fields.findIndex(f => f.name === row.name)
+    if (idx! >= 0)
+    {
+        appSchema.fields.splice(idx, 1)
+        saveStorageAppSchema(appSchema)
+        fields.value = appSchema?.fields ? [...appSchema.fields] : []
+    }
 }
 
 // save
 const confirmField = async () => {
-    
+    const res = await fieldEditorRef.value?.validate()
+    if (!res || !appFieldNode.value?.valid) return
+
+    if (!appFieldNode.value?.valid) return
+    const data = jsonClone(toRaw(appFieldNode.value.data))
+    const appSchema = await getAppSchema(currApp!)
+    if (!appSchema) return
+
+    if (!appSchema.fields) appSchema.fields = []
+    const idx =  appSchema.fields.findIndex(f => f.name === data.name)
+    if (idx! >= 0)
+    {
+        appSchema.fields[idx] = data
+    }
+    else
+    {
+        appSchema.fields.push(data)
+    }
+
+    saveStorageAppSchema(appSchema)
+    fields.value = appSchema?.fields ? [...appSchema.fields] : []
+    closeFieldEditor()
+    showAppFieldEditor.value = false
 }
 
 // close

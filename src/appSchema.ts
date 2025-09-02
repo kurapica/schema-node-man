@@ -1,4 +1,4 @@
-import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig } from "schema-node"
+import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -19,6 +19,14 @@ registerSchema([
         name: "schema.app.srcfld",
         type: SchemaType.Scalar,
         desc: _LS("schema.app.srcfld"),
+        scalar: {
+            base: NS_SYSTEM_STRING
+        }
+    },
+    {
+        name: "schema.app.appinput",
+        type: SchemaType.Scalar,
+        desc: _LS("schema.app.appinput"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
@@ -143,12 +151,12 @@ registerSchema([
                 {
                     name: "func",
                     type: "schema.functype",
-                    display: _LS("schema.app.field.sourcefld"),
+                    display: _LS("schema.app.field.func"),
                 },
                 {
                     name: "args",
                     type: "schema.app.srcfldes",
-                    display: _LS("schema.app.field.sourcefld"),
+                    display: _LS("schema.app.field.args"),
                 },
                 {
                     name: "incrUpdate",
@@ -165,7 +173,50 @@ registerSchema([
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.app.field.disable"),
                 },
+            ],
+            relations: [
+                {
+                    field: "sourceField",
+                    type: RelationType.Invisible,
+                    func: "system.logic.isnull",
+                    args: [
+                        {
+                            name: "sourceApp"
+                        }
+                    ]
+                },
+                {
+                    field: "sourceField",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "sourceApp"
+                        }
+                    ]
+                },
             ]
+        }
+    },
+    {
+        name: "schema.app.nofields",
+        type: SchemaType.Function,
+        desc: _LS("schema.app.nofields"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "app",
+                    type: "schema.app.srcapp",
+                    nullable: true,
+                }
+            ],
+            exps: [],
+            func: (app: string) => {
+                if (!app) return true
+                const schema = getCachedSchema(app)
+                return (schema?.hasFields || schema?.fields?.length) ? false : true
+            }
         }
     },
     {
@@ -177,7 +228,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: "schema.varname",
+                    type: "schema.app.appinput",
                     display: _LS("schema.app.app.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
@@ -198,6 +249,18 @@ registerSchema([
                     type: "schema.app.fieldrelations",
                     display: _LS("schema.app.app.relations"),
                 },
+            ],
+            relations: [
+                {
+                    field: "relations",
+                    type: RelationType.Invisible,
+                    func: "schema.app.nofields",
+                    args: [
+                        {
+                            name: "name"
+                        }
+                    ]
+                }
             ]
         }
     }
@@ -320,8 +383,10 @@ export function saveAllCustomAppSchemaToStroage(root: string = "")
 //#region View
 
 import sourceappView from "./view/sourceappView.vue"
+import appInputView from "./view/appInputView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("schema.app.srcapp", sourceappView)
+regSchemaTypeView("schema.app.appinput", appInputView)
 
 //#endregion
