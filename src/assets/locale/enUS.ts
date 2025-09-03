@@ -271,9 +271,11 @@ importLanguage("enUS", {
 
     "schema.app": "App definition namespace",
     "schema.app.srcapp": "App",
-    "schema.app.srcfld": "App field",
+    "schema.app.srcfld": "App Field",
+    "schema.app.accessfld": "Access Field",
     "schema.app.appinput": "App(Input)",
-    "schema.app.srcfldes": "App field list",
+    "schema.app.pushfld": "Push Field",
+    "schema.app.pushflds": "Push Field List",
     "schema.app.fieldvalarg": "Parameter",
     "schema.app.fieldvalarg.name": "App field name",
     "schema.app.fieldvalarg.value": "Constant",

@@ -1,4 +1,4 @@
-import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema, NS_SYSTEM_STRINGS } from "schema-node"
+import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -24,6 +24,22 @@ registerSchema([
         }
     },
     {
+        name: "schema.app.accessfld",
+        type: SchemaType.Scalar,
+        desc: _LS("schema.app.accessfld"),
+        scalar: {
+            base: NS_SYSTEM_STRING
+        }
+    },
+    {
+        name: "schema.app.pushfld",
+        type: SchemaType.Scalar,
+        desc: _LS("schema.app.pushfld"),
+        scalar: {
+            base: "schema.app.accessfld"
+        }
+    },
+    {
         name: "schema.app.appinput",
         type: SchemaType.Scalar,
         desc: _LS("schema.app.appinput"),
@@ -32,11 +48,11 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.srcfldes",
+        name: "schema.app.pushflds",
         type: SchemaType.Array,
-        desc: _LS("schema.app.srcfldes"),
+        desc: _LS("schema.app.pushflds"),
         array: {
-            element: "schema.app.srcfld"
+            element: "schema.app.pushfld"
         }
     },
     {
@@ -46,14 +62,65 @@ registerSchema([
         struct: {
             fields: [
                 {
+                    name: "type",
+                    type: "schema.valuetype",
+                    displayOnly: true,
+                    display: _LS("schema.structfldfuncarg.type"),
+                },
+                {
                     name: "name",
-                    type: "schema.app.srcfld",
+                    type: "schema.app.accessfld",
                     display: _LS("schema.app.fieldvalarg.name")
                 },
                 {
                     name: "value",
                     type: "schema.anyvalue",
                     display: _LS("schema.app.fieldvalarg.value")
+                },
+            ],
+            relations: [
+                {
+                    field: "name",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "name",
+                    type: RelationType.Disable,
+                    func: "schema.isvaluenotnull",
+                    args: [
+                        {
+                            name: "value"
+                        }
+                    ]
+                },
+                {
+                    field: "value",
+                    type: RelationType.Type,
+                    func: "schema.getexpvaluetype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "value",
+                    type: RelationType.Disable,
+                    func: "schema.hideexpvalue",
+                    args: [
+                        {
+                            name: "type"
+                        },
+                        {
+                            name: "name"
+                        }
+                    ]
                 },
             ]
         }
@@ -67,6 +134,49 @@ registerSchema([
         }
     },
     {
+        name: "schema.app.getfieldtype",
+        type: SchemaType.Function,
+        desc: _LS("schema.getfieldtype"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "field",
+                    type: NS_SYSTEM_STRING
+                },
+            ],
+            exps: [],
+            func: async (field: string) => {
+                const appSchema = await getAppSchema(localStorage["schema_curr_app"])
+                const fields = appSchema?.fields || []
+                const paths = (field || "").split(".")
+                if (paths.length === 0) return null
+                let tarField: { type: string } | undefined = (fields || []).find(p => p.name === paths[0])
+                for (let i = 1; i < paths.length; i++) {
+                    if (!tarField) return null
+
+                    let schema = await getSchema(tarField.type)
+                    if (schema?.type === SchemaType.Array && schema.array?.element) {
+                        schema = await getSchema(schema.array!.element)
+                    }
+
+                    if (paths[i] === ARRAY_ELEMENT)
+                    {
+                        return schema?.name
+                    }
+
+                    if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
+                        tarField = schema.struct.fields.find(p => p.name === paths[i])
+                    }
+                    else {
+                        tarField = undefined
+                    }
+                }
+                return tarField?.type
+            }
+        }
+    },
+    {
         name: "schema.app.fieldrelation",
         type: SchemaType.Struct,
         desc: _LS("schema.app.fieldrelation"),
@@ -75,8 +185,22 @@ registerSchema([
                 {
                     name: "field",
                     require: true,
-                    type: "schema.app.srcfld",
+                    type: "schema.app.accessfld",
                     display: _LS("schema.app.fieldrelation.field")
+                },
+                {
+                    name: "fieldType",
+                    displayOnly: true,
+                    invisible: true,
+                    type : "schema.valuetype",
+                    display: _LS("schema.structfldrelationinfo.fieldtype"),
+                },
+                {
+                    name: "return",
+                    displayOnly: true,
+                    invisible: true,
+                    type: "schema.valuetype",
+                    display: _LS("schema.structfldrelationinfo.return"),
                 },
                 {
                     name: "type",
@@ -95,6 +219,51 @@ registerSchema([
                     type: "schema.app.fieldvalargs",
                     display: _LS("schema.app.fieldrelation.args"),
                 },
+            ],
+            relations: [
+                {
+                    field: "fieldType",
+                    type: RelationType.Default,
+                    func: "schema.app.getfieldtype",
+                    args: [
+                        {
+                            name: "field"
+                        }
+                    ]
+                },
+                {
+                    field: "type",
+                    type: RelationType.WhiteList,
+                    func: "schema.getrelationwhitelist",
+                    args: [
+                        {
+                            name: "fieldType"
+                        }
+                    ]
+                },
+                {
+                    field: "return",
+                    type: RelationType.Default,
+                    func: "schema.getrelationfuncreturn",
+                    args: [
+                        {
+                            name: "fieldType"
+                        },
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "func",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "return"
+                        }
+                    ]
+                }
             ]
         }
     },
@@ -110,7 +279,7 @@ registerSchema([
     {
         name: "schema.app.getsourceappblacklist",
         type: SchemaType.Function,
-        desc: _LS("schema.app.nofields"),
+        desc: _LS("schema.app.getsourceappblacklist"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [],
@@ -118,6 +287,34 @@ registerSchema([
             func: () => {
                 const currapp = localStorage["schema_curr_app"]
                 return currapp ? [currapp] : []
+            }
+        }
+    },
+    {
+        name: "schema.app.getsourceappfldinfo",
+        type: SchemaType.Function,
+        desc: _LS("schema.app.getsourceappfldinfo"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "sourceApp",
+                    type: NS_SYSTEM_STRING
+                },
+                {
+                    name: "sourceFld",
+                    type: NS_SYSTEM_STRING
+                },
+                {
+                    name: "info",
+                    type: NS_SYSTEM_STRING
+                }
+            ],
+            exps: [],
+            func: async (app: string, fld: string, info: string) => {
+                const appSchema = await getAppSchema(app)
+                const f = appSchema?.fields?.find(f => f.name === fld)
+                return f ? (f as any)[info] : undefined
             }
         }
     },
@@ -145,13 +342,13 @@ registerSchema([
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.app.field.display"),
                     upLimit: 64,
-                } as IStructScalarFieldConfig,
+                },
                 {
                     name: "desc",
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.app.field.desc"),
                     upLimit: 255,
-                } as IStructScalarFieldConfig,
+                },
                 {
                     name: "sourceApp",
                     type: "schema.app.srcapp",
@@ -163,22 +360,12 @@ registerSchema([
                     display: _LS("schema.app.field.sourcefld"),
                 },
                 {
-                    name: "func",
-                    type: "schema.pushfunctype",
-                    display: _LS("schema.app.field.func"),
-                },
-                {
-                    name: "args",
-                    type: "schema.app.srcfldes",
-                    display: _LS("schema.app.field.args"),
-                },
-                {
                     name: "incrUpdate",
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.app.field.incrupdate"),
                 },
                 {
-                    name: "frontEnd",
+                    name: "frontend",
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.app.field.frontend"),
                 },
@@ -187,8 +374,76 @@ registerSchema([
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.app.field.disable"),
                 },
+                {
+                    name: "func",
+                    type: "schema.pushfunctype",
+                    display: _LS("schema.app.field.func"),
+                },
+                {
+                    name: "args",
+                    type: "schema.app.pushflds",
+                    display: _LS("schema.app.field.args"),
+                },
             ],
             relations: [
+                {
+                    field: "name",
+                    type: RelationType.Default,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "sourceField"
+                        }
+                    ]
+                },
+                {
+                    field: "display",
+                    type: RelationType.Default,
+                    func: "schema.app.getsourceappfldinfo",
+                    args: [
+                        {
+                            name: "sourceApp"
+                        },
+                        {
+                            name: "sourceField"
+                        },
+                        {
+                            value: "display"
+                        }
+                    ]
+                },
+                {
+                    field: "desc",
+                    type: RelationType.Default,
+                    func: "schema.app.getsourceappfldinfo",
+                    args: [
+                        {
+                            name: "sourceApp"
+                        },
+                        {
+                            name: "sourceField"
+                        },
+                        {
+                            value: "desc"
+                        }
+                    ]
+                },
+                {
+                    field: "type",
+                    type: RelationType.Default,
+                    func: "schema.app.getsourceappfldinfo",
+                    args: [
+                        {
+                            name: "sourceApp"
+                        },
+                        {
+                            name: "sourceField"
+                        },
+                        {
+                            value: "type"
+                        }
+                    ]
+                },
                 {
                     field: "sourceApp",
                     type: RelationType.BlackList,
@@ -211,17 +466,7 @@ registerSchema([
                     func: "system.conv.assign",
                     args: [
                         {
-                            name: "sourceApp"
-                        }
-                    ]
-                },
-                {
-                    field: "args",
-                    type: RelationType.Invisible,
-                    func: "system.logic.isnull",
-                    args: [
-                        {
-                            name: "func"
+                            name: "type"
                         }
                     ]
                 },
@@ -232,6 +477,16 @@ registerSchema([
                     args: [
                         {
                             name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "args",
+                    type: RelationType.Invisible,
+                    func: "system.logic.isnull",
+                    args: [
+                        {
+                            name: "func"
                         }
                     ]
                 },
@@ -254,7 +509,7 @@ registerSchema([
             exps: [],
             func: (app: string) => {
                 if (!app) return true
-                const schema = getCachedSchema(app)
+                const schema = getAppCachedSchema(app)
                 return (schema?.hasFields || schema?.fields?.length) ? false : true
             }
         }
@@ -354,7 +609,7 @@ export function saveStorageAppSchema(schema: IAppSchema)
             func: f.func,
             args: f.args ? [...f.args] : undefined,
             incrUpdate: f.incrUpdate,
-            frontEnd: f.frontEnd,
+            frontend: f.frontend,
             disable: f.disable,
         })),
         relations: schema.relations?.map((r: IStructFieldRelation) => ({
@@ -422,13 +677,21 @@ export function saveAllCustomAppSchemaToStroage(root: string = "")
 
 //#region View
 
-import sourceappView from "./view/sourceappView.vue"
+import sourceappView from "./view/appSourceView.vue"
 import appInputView from "./view/appInputView.vue"
-import appfldfuncargsView from "./view/appfldfuncargsView.vue"
+import appsrcfldView from "./view/appSrcfldView.vue"
+import appaccessfldView from "./view/appAccessfldView.vue"
+import appPushfldsView from "./view/appPushfldsView.vue"
+import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
+import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("schema.app.srcapp", sourceappView)
 regSchemaTypeView("schema.app.appinput", appInputView)
-//regSchemaTypeView("schema.app.srcfldes", appfldfuncargsView)
-
+regSchemaTypeView("schema.app.srcfld", appsrcfldView)
+regSchemaTypeView("schema.app.accessfld", appaccessfldView)
+regSchemaTypeView("schema.app.pushfld", appaccessfldView)
+regSchemaTypeView("schema.app.pushflds", appPushfldsView)
+regSchemaTypeView("schema.app.fieldrelations", structfldrelationinfosView)
+regSchemaTypeView("schema.app.fieldvalargs", structfldfuncargsView)
 //#endregion

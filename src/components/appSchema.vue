@@ -22,7 +22,7 @@
                 <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
                 <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
                 <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
-                <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="320">
+                <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="440">
                     <template #header>
                         <a href="javascript:void(0)" v-if="state.app" @click="goback"
                             style="text-decoration: underline; color: lightseagreen;">
@@ -31,6 +31,9 @@
                         <span v-else>{{ _L["schema.designer.oper"] }}</span>
                     </template>
                     <template #default="scope">
+                        <el-button type="info" @click="handleEdit(scope.row, true)">
+                            {{ _L["schema.designer.view"] }}
+                        </el-button>
                         <el-button type="success" @click="handleEdit(scope.row, false)">
                             {{ _L["schema.designer.edit"] }}
                         </el-button>
@@ -254,6 +257,8 @@ const handleNew = async () => {
 
 // update
 const handleEdit = async (row: any, readonly?: boolean) => {
+    localStorage["schema_curr_app"] = row.name
+
     appNode.value = new StructNode({
         type: "schema.app.app",
         readonly
@@ -322,7 +327,7 @@ const fieldRowClassName = (data: any) => {
     if (row.disable) return 'disable-row'
     if (row.sourceApp) return 'ref-row'
     if (row.func) return 'push-row'
-    if (row.frontEnd) return 'frontend-row'
+    if (row.frontend) return 'frontend-row'
     return '';
 }
 
