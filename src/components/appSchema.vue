@@ -31,18 +31,29 @@
                         <span v-else>{{ _L["schema.designer.oper"] }}</span>
                     </template>
                     <template #default="scope">
+                        <el-button type="success" @click="handleEdit(scope.row, false)">
+                            {{ _L["schema.designer.edit"] }}
+                        </el-button>
                         <el-button v-if="!scope.row.hasFields && !scope.row.fields?.length" type="info" @click="choose(scope.row)">
                             {{ _L["schema.designer.down"] }}
                         </el-button>
                         <el-button v-if="!scope.row.hasApps && !scope.row.apps?.length" type="primary" @click="showFields(scope.row)">
                             {{ _L["schema.designer.fields"] }}
                         </el-button>
-                        <el-button type="success" @click="handleEdit(scope.row, false)">
-                            {{ _L["schema.designer.edit"] }}
-                        </el-button>
-                        <el-button v-if="!scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length" type="danger" @click="handleDelete(scope.row)">
-                            {{ _L["schema.designer.delete"] }}
-                        </el-button>
+                        <el-popconfirm
+                            v-if="!scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length" 
+                            :title="_L['schema.designer.confirmdelete']"                            
+                            :confirm-button-text="_L['YES']"
+                            :cancel-button-text="_L['NO']"
+                            :icon="Delete"
+                            @confirm="handleDelete(scope.row)"
+                            >
+                            <template #reference>
+                                <el-button type="danger">
+                                    {{ _L["schema.designer.delete"] }}
+                                </el-button>
+                            </template>
+                        </el-popconfirm>
                     </template>
                 </el-table-column>
             </el-table>
@@ -84,22 +95,34 @@
         <el-drawer v-model="showFieldList" :title="appTitle"  direction="rtl" size="100%" destroy-on-close append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <el-table :data="fields" style="width: 100%; height: 65vh;" :border="true"
+                    <el-table :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
                         header-align="left" 
                         :header-cell-style="{ background: '#eee' }">
                         <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
+                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
                         <el-table-column align="left" prop="type" :label="_L['schema.designer.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{
                                     type: 'schema.valuetype',
                                     readonly: true
-                                }"></schema-view>
+                                }" plain-text="left"></schema-view>
                             </template>
                         </el-table-column>
-                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
                         <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
-                        <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="280">
+                        <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="400">
                             <template #default="scope">
+                                <el-button type="info" @click="handleFieldEdit(scope.row, true)">
+                                    {{ _L["schema.designer.view"] }}
+                                </el-button>
+                                <el-button type="success" @click="handleFieldEdit(scope.row, false)">
+                                    {{ _L["schema.designer.edit"] }}
+                                </el-button>
+                                <el-button v-if="scope.$index > 0" type="warning" @click="moveFieldUp(scope.row)">
+                                    {{ _L["schema.designer.moveup"] }}
+                                </el-button>
+                                <el-button type="danger" @click="handleFieldDelete(scope.row)">
+                                    {{ _L["schema.designer.delete"] }}
+                                </el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -134,7 +157,7 @@
                         <el-button @click="showAppFieldEditor = false">{{ _L["schema.designer.close"] }}</el-button>
                     </template>
                     <template v-else>
-                        <el-button type="primary" @click="confirmApp">{{ _L["schema.designer.save"] }}</el-button>
+                        <el-button type="primary" @click="confirmField">{{ _L["schema.designer.save"] }}</el-button>
                         <el-button @click="showAppFieldEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
                     </template>
                 </el-footer>
@@ -144,6 +167,7 @@
 </template>
 
 <script setup lang="ts">
+import { Delete } from '@element-plus/icons-vue'
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { _LS, type IAppSchema, type IAppFieldSchema, deepClone, getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema } from 'schema-node'
@@ -286,10 +310,20 @@ let currApp: string | null = null
 
 const showFields = async(row: any) => {
     currApp = row.name
+    localStorage["schema_curr_app"] = currApp
     const appSchema = await getAppSchema(row.name)
     appTitle.value = appSchema?.display || appSchema?.name || ""
     fields.value = appSchema?.fields ? [...appSchema.fields] : []
     showFieldList.value = true
+}
+
+const fieldRowClassName = (data: any) => {
+    const { row } = data
+    if (row.disable) return 'disable-row'
+    if (row.sourceApp) return 'ref-row'
+    if (row.func) return 'push-row'
+    if (row.frontEnd) return 'frontend-row'
+    return '';
 }
 
 //#region Field edit
@@ -345,6 +379,22 @@ const handleFieldDelete = async (row: any) => {
     }
 }
 
+// move up
+const moveFieldUp = async (row: any) => {
+    const appSchema = await getAppSchema(currApp!)
+    if (!appSchema?.fields) return
+
+    const idx =  appSchema.fields.findIndex(f => f.name === row.name)
+    if (idx! > 0)
+    {
+        const temp = appSchema.fields[idx - 1]
+        appSchema.fields[idx - 1] = appSchema.fields[idx]
+        appSchema.fields[idx] = temp
+        saveStorageAppSchema(appSchema)
+        fields.value = appSchema?.fields ? [...appSchema.fields] : []
+    }
+}
+
 // save
 const confirmField = async () => {
     const res = await fieldEditorRef.value?.validate()
@@ -392,5 +442,17 @@ body {
 }
 .el-form-item .el-form-item {
     margin-bottom: 18px;
+}
+.el-table .disable-row {
+    background: gray;
+}
+.el-table .ref-row {
+    background: oldlace;
+}
+.el-table .push-row {
+    background: oldlace;
+}
+.el-table .frontend-row{
+    background: lightcyan;
 }
 </style>

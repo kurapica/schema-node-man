@@ -58,6 +58,14 @@ registerSchema([
         }
     },
     {
+        name: "schema.pushfunctype",
+        type: SchemaType.Scalar,
+        desc: _LS("schema.pushfunctype"),
+        scalar: {
+            base: NS_SYSTEM_STRING,
+        }
+    },
+    {
         name: "schema.scalarenumtype",
         type: SchemaType.Scalar,
         desc: _LS("schema.scalarenumtype"),
@@ -2601,6 +2609,7 @@ regSchemaTypeView("schema.enumtype", namespaceView)
 regSchemaTypeView("schema.structtype", namespaceView)
 regSchemaTypeView("schema.arraytype", namespaceView)
 regSchemaTypeView("schema.functype", namespaceView)
+regSchemaTypeView("schema.pushfunctype", namespaceView)
 regSchemaTypeView("schema.scalarenumtype", namespaceView)
 regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)

@@ -1,4 +1,4 @@
-import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema } from "schema-node"
+import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema, NS_SYSTEM_STRINGS } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -108,6 +108,20 @@ registerSchema([
         }
     },
     {
+        name: "schema.app.getsourceappblacklist",
+        type: SchemaType.Function,
+        desc: _LS("schema.app.nofields"),
+        func: {
+            return: NS_SYSTEM_STRINGS,
+            args: [],
+            exps: [],
+            func: () => {
+                const currapp = localStorage["schema_curr_app"]
+                return currapp ? [currapp] : []
+            }
+        }
+    },
+    {
         name: "schema.app.field",
         type: SchemaType.Struct,
         desc: _LS("schema.app.field"),
@@ -150,7 +164,7 @@ registerSchema([
                 },
                 {
                     name: "func",
-                    type: "schema.functype",
+                    type: "schema.pushfunctype",
                     display: _LS("schema.app.field.func"),
                 },
                 {
@@ -176,6 +190,12 @@ registerSchema([
             ],
             relations: [
                 {
+                    field: "sourceApp",
+                    type: RelationType.BlackList,
+                    func: "schema.app.getsourceappblacklist",
+                    args: []
+                },
+                {
                     field: "sourceField",
                     type: RelationType.Invisible,
                     func: "system.logic.isnull",
@@ -192,6 +212,26 @@ registerSchema([
                     args: [
                         {
                             name: "sourceApp"
+                        }
+                    ]
+                },
+                {
+                    field: "args",
+                    type: RelationType.Invisible,
+                    func: "system.logic.isnull",
+                    args: [
+                        {
+                            name: "func"
+                        }
+                    ]
+                },
+                {
+                    field: "func",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "type"
                         }
                     ]
                 },
@@ -384,9 +424,11 @@ export function saveAllCustomAppSchemaToStroage(root: string = "")
 
 import sourceappView from "./view/sourceappView.vue"
 import appInputView from "./view/appInputView.vue"
+import appfldfuncargsView from "./view/appfldfuncargsView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("schema.app.srcapp", sourceappView)
 regSchemaTypeView("schema.app.appinput", appInputView)
+//regSchemaTypeView("schema.app.srcfldes", appfldfuncargsView)
 
 //#endregion

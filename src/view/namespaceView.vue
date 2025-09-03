@@ -89,7 +89,7 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
+import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
 import { _L, getSelectPlaceHolder } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -148,6 +148,7 @@ const root = reactive<ICascaderOptionInfo>({
     children: null
 })
 let compatibleType = "" // 兼容类型
+let otherCompatibleType = "" // 其他兼容类型
 let upLimit = 99
 let lowLimit = 0
 
@@ -159,10 +160,14 @@ const namespaceMap: any = {
     "schema.structtype": [SchemaType.Namespace, SchemaType.Struct],
     "schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
     "schema.functype": [SchemaType.Namespace, SchemaType.Function],
+    "schema.pushfunctype": [SchemaType.Namespace, SchemaType.Function],
     "schema.scalarenumtype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum],
     "schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
     "schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
 }[type as string]
+
+// Push function allow both value type and array type of the value type
+const ispushfunctype = type === "schema.pushfunctype"
 
 // view
 
@@ -243,7 +248,8 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         {
             const f = await getSchema(funcList[i].value)
             if (f?.type !== SchemaType.Function || !f.func) continue
-            if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType)) {
+            if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType) &&
+                (!otherCompatibleType || !await isSchemaCanBeUseAs(f.func.return, otherCompatibleType))) {
                 blackList.push(f.name)
             }
             else if(f.func.args.length < lowLimit || f.func.args.length > upLimit)
@@ -342,6 +348,17 @@ const reBuildOptions = async () => {
     else {
         compatibleType = ""
         root.value = ""
+    }
+
+    if (compatibleType && ispushfunctype)
+    {
+        const ctype = await getSchema(compatibleType)
+        if (ctype?.type === SchemaType.Array)
+            otherCompatibleType = ctype.array?.element || ""
+        else if (ctype)
+            otherCompatibleType = (await getArraySchema(ctype, true))?.name || ""
+        else
+            otherCompatibleType = ""
     }
 
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])

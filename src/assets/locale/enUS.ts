@@ -13,6 +13,7 @@ importLanguage("enUS", {
     "schema.structtype": "Struct Types",
     "schema.arraytype": "Array Types",
     "schema.functype": "Function Types",
+    "schema.pushfunctype": "Push Function Types",
     "schema.scalarenumtype": "Scalar or Enum Type",
     "schema.arrayeletype": "Non-array Data Type",
     "schema.valuetype": "Any Data Type",
@@ -254,6 +255,8 @@ importLanguage("enUS", {
     "schema.designer.fields": "Fields",
     "schema.designer.clearcustomapps": "Clear Cached Apps",
     "schema.designer.upapp": "Up App",
+    "schema.designer.moveup": "Move Up",
+    "schema.designer.confirmdelete": "Continue the delete process?",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",

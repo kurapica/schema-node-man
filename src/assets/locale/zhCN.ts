@@ -13,6 +13,7 @@ importLanguage("zhCN", {
     "schema.structtype": "结构体类型",
     "schema.arraytype": "数组类型",
     "schema.functype": "函数类型",
+    "schema.pushfunctype": "推送函数类型",
     "schema.scalarenumtype": "枚举或基础数据类型",
     "schema.arrayeletype": "非数组数据类型",
     "schema.valuetype": "任意数据类型",
@@ -254,6 +255,8 @@ importLanguage("zhCN", {
     "schema.designer.fields": "字段",
     "schema.designer.clearcustomapps": "清除缓存的应用",
     "schema.designer.upapp": "上级应用",
+    "schema.designer.moveup": "上移",
+    "schema.designer.confirmdelete": "执行删除操作?",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",

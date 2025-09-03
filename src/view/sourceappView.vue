@@ -47,7 +47,7 @@ const state = reactive<{
     display?: any,
     disable?: boolean,
     require?: boolean,
-    readonly?: boolean,
+    readonly?: boolean
 }>({})
 
 // Data
@@ -68,15 +68,17 @@ const root = reactive<ICascaderOptionInfo>({
     loadState: 0,
     children: null
 })
-let compatibleType = "" // 兼容类型
 
 const buildOptions = async (options: ICascaderOptionInfo[], values: IAppSchema[]) => {
+    const blackList = scalarNode.rule.blackList ? scalarNode.rule.blackList as string[] : []
+
     // sort
     values.sort((a, b) => a.name < b.name ? -1 : 1)
 
     // generate
     for (let i = 0; i < values.length; i++) {
         const v = values[i]
+        if (blackList.indexOf(v.name) >= 0) continue
         const ele: ICascaderOptionInfo = {
             value: v.name,
             label: `${v.display || v.name}`,
@@ -180,12 +182,7 @@ onMounted(() => {
         state.require = scalarNode.require
         state.readonly = scalarNode.readonly
 
-        const r = scalarNode.rule.root || null
-        if (r !== compatibleType)
-        {
-            compatibleType = r
-            reBuildOptions()
-        }
+        reBuildOptions()
     }, true)
 
     // update display
