@@ -62,8 +62,15 @@ registerSchema([
         struct: {
             fields: [
                 {
+                    name: "label",
+                    type: NS_SYSTEM_STRING,
+                    displayOnly: true,
+                    display: _LS("schema.funccallarg.display"),
+                },
+                {
                     name: "type",
                     type: "schema.valuetype",
+                    invisible: false,
                     displayOnly: true,
                     display: _LS("schema.structfldfuncarg.type"),
                 },

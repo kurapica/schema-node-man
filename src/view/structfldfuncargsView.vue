@@ -51,6 +51,7 @@ onMounted(() => {
             const row = argsNode.elements[i] as StructNode
             const aschema = await getSchema(args[i].type, generic)
             row.getField("type").data = aschema?.name || NS_SYSTEM_STRING
+            if (row.getField("label")) row.getField("label").data = args[i].name
         }
     }
     
