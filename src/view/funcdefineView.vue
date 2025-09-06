@@ -405,6 +405,9 @@ const refresh = async () => {
                         }
                     }
                 }
+                else if (generic[gidx]) {
+                    ctype = await getSchema(generic[gidx])
+                }
             }
             else if (isarray && arrIdx < 0 && exp && ctype)
             {

@@ -66,6 +66,14 @@ registerSchema([
         }
     },
     {
+        name: "schema.scalarvalidfunc",
+        type: SchemaType.Scalar,
+        desc: _LS("schema.scalarvalidfunc"),
+        scalar: {
+            base: NS_SYSTEM_STRING,
+        },
+    },
+    {
         name: "schema.scalarenumtype",
         type: SchemaType.Scalar,
         desc: _LS("schema.scalarenumtype"),
@@ -223,6 +231,10 @@ registerSchema([
                 {
                     value: RelationType.SingleFlag,
                     name: _LS("schema.relationtype.singleflag")
+                },
+                {
+                    value: RelationType.Validation,
+                    name: _LS("schema.relationtype.validation")
                 }
             ]
         }
@@ -372,15 +384,37 @@ registerSchema([
                     display: _LS("schema.scalardefine.regex"),
                 },
                 {
-                    name: "valid",
-                    type: NS_SYSTEM_STRING,
-                    display: _LS("schema.scalardefine.valid"),
+                    name: "prevalid",
+                    type: "schema.scalarvalidfunc",
+                    display: _LS("schema.scalardefine.prevalid"),
+                } as IStructScalarFieldConfig,
+                {
+                    name: "postvalid",
+                    type: "schema.scalarvalidfunc",
+                    display: _LS("schema.scalardefine.postvalid"),
+                },
+            ],
+            relations: [
+                {
+                    field: "prevalid",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "base"
+                        }
+                    ]
                 },
                 {
-                    name: "conv",
-                    type: NS_SYSTEM_STRING,
-                    display: _LS("schema.scalardefine.conv"),
-                },
+                    field: "postvalid",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "base"
+                        }
+                    ]
+                }
             ]
         },
     },
@@ -1125,6 +1159,12 @@ registerSchema([
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
                 {
+                    name: "error",
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.structfieldtype.error"),
+                    upLimit: 64,
+                } as IStructScalarFieldConfig,
+                {
                     name: "require",
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.structfieldtype.require"),
@@ -1660,7 +1700,8 @@ registerSchema([
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.InitOnly,
-                        RelationType.Type
+                        RelationType.Type,
+                        RelationType.Validation
                     ]
                 }
                 else if (typeInfo?.type === SchemaType.Enum) {
@@ -1676,7 +1717,8 @@ registerSchema([
                         RelationType.Type,
                         RelationType.AnyLevel,
                         RelationType.Cascade,
-                        RelationType.SingleFlag
+                        RelationType.SingleFlag,
+                        RelationType.Validation
                     ]
                 }
                 else if (typeInfo?.type === SchemaType.Struct) {
@@ -1698,7 +1740,8 @@ registerSchema([
                     RelationType.InitOnly,
                     RelationType.Type,
                     RelationType.AnyLevel,
-                    RelationType.Cascade
+                    RelationType.Cascade,
+                    RelationType.Validation
                 ]
             }
         }
@@ -2616,6 +2659,7 @@ regSchemaTypeView("schema.structtype", namespaceView)
 regSchemaTypeView("schema.arraytype", namespaceView)
 regSchemaTypeView("schema.functype", namespaceView)
 regSchemaTypeView("schema.pushfunctype", namespaceView)
+regSchemaTypeView("schema.scalarvalidfunc", namespaceView)
 regSchemaTypeView("schema.scalarenumtype", namespaceView)
 regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)

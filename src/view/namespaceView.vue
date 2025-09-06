@@ -161,6 +161,7 @@ const namespaceMap: any = {
     "schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
     "schema.functype": [SchemaType.Namespace, SchemaType.Function],
     "schema.pushfunctype": [SchemaType.Namespace, SchemaType.Function],
+    "schema.scalarvalidfunc": [SchemaType.Namespace, SchemaType.Function],
     "schema.scalarenumtype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum],
     "schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
     "schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
@@ -168,6 +169,7 @@ const namespaceMap: any = {
 
 // Push function allow both value type and array type of the value type
 const ispushfunctype = type === "schema.pushfunctype"
+const isscalarvalidfunc = type === "schema.scalarvalidfunc"
 
 // view
 
@@ -248,7 +250,15 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         {
             const f = await getSchema(funcList[i].value)
             if (f?.type !== SchemaType.Function || !f.func) continue
-            if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType) &&
+            if (isscalarvalidfunc) {
+                // for scalar value validation only
+                if (f.func.args?.length !== 1 || 
+                    compatibleType && !/^[tT]\d*$/.test(f.func.args[0].type) && !await isSchemaCanBeUseAs(f.func.args[0].type, compatibleType))
+                {
+                    blackList.push(f.name)
+                }
+            }
+            else if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType) &&
                 (!otherCompatibleType || !await isSchemaCanBeUseAs(f.func.return, otherCompatibleType))) {
                 blackList.push(f.name)
             }
