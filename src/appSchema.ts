@@ -497,6 +497,16 @@ registerSchema([
                         }
                     ]
                 },
+                {
+                    field: "frontend",
+                    type: RelationType.Invisible,
+                    func: "system.logic.notnull",
+                    args: [
+                        {
+                            name: "sourceApp"
+                        }
+                    ]
+                },
             ]
         }
     },
