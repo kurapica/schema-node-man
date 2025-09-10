@@ -1,4 +1,4 @@
-import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT } from "schema-node"
+import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, type IStructEnumFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -382,6 +382,16 @@ registerSchema([
                     display: _LS("schema.app.field.disable"),
                 },
                 {
+                    name: "combine",
+                    type: "schema.datacombinetype",
+                    display: _LS("schema.app.field.combine"),
+                },
+                {
+                    name: "combines",
+                    type: "schema.datacombines",
+                    display: _LS("schema.arraydefine.combine"),
+                },
+                {
                     name: "func",
                     type: "schema.pushfunctype",
                     display: _LS("schema.app.field.func"),
@@ -504,6 +514,36 @@ registerSchema([
                     args: [
                         {
                             name: "sourceApp"
+                        }
+                    ]
+                },
+                {
+                    field: "combine",
+                    type: RelationType.Invisible,
+                    func: "schema.notscalarenumtype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "combines",
+                    type: RelationType.Invisible,
+                    func: "schema.notstructarraytype",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
+                },
+                {
+                    field: "combine.field",
+                    type: RelationType.WhiteList,
+                    func: "schema.getstructnumbervaluefields",
+                    args: [
+                        {
+                            name: "type"
                         }
                     ]
                 },

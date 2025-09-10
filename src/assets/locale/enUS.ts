@@ -67,7 +67,8 @@ importLanguage("enUS", {
     "schema.enumvaluetype.flags": "Flags",
 
     "schema.datacombinetype": "Data Combine Method",
-    "schema.datacombinetype.assign": "Assign",
+    "schema.datacombinetype.assign": "Assign, use last value",
+    "schema.datacombinetype.init": "Init, use first value",
     "schema.datacombinetype.sum": "Sum",
     "schema.datacombinetype.count": "Count",
     "schema.datacombinetype.min": "Minimum",
@@ -160,6 +161,7 @@ importLanguage("enUS", {
     "schema.notcascadeenumtype": "Non-Cascade Enum Type",
     "schema.notflagsenumtype": "Non-Flags Enum Type",
     "schema.notstructtype": "Non-Struct Type",
+    "schema.notstructarraytype": "Non-Struct or Struct-Array Type",
     "schema.getenumcascadewhitelist": "Get Cascade Name Whitelist",
     "schema.getwhiteblacklisttype": "Get white/black list type",
 
@@ -301,6 +303,8 @@ importLanguage("enUS", {
     "schema.app.field.incrupdate": "Incremental data",
     "schema.app.field.frontend": "Frontend only",
     "schema.app.field.disable": "Disabled",
+    "schema.app.field.combine": "Data combine rule",
+
     "schema.app.app": "App definition",
     "schema.app.app.name": "App Name",
     "schema.app.app.display": "App display",

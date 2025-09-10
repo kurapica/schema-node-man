@@ -323,6 +323,10 @@ registerSchema([
                     name: _LS("schema.datacombinetype.assign")
                 },
                 {
+                    value: DataCombineType.Init,
+                    name: _LS("schema.datacombinetype.init")
+                },
+                {
                     value: DataCombineType.Sum,
                     name: _LS("schema.datacombinetype.sum")
                 },
@@ -1604,9 +1608,11 @@ registerSchema([
             ],
             exps: [],
             func: async (type: string) => {
-                const schema = type ? await getSchema(type) : null
-                const values: string[] = []
+                let schema = type ? await getSchema(type) : null
+                if (schema?.type === SchemaType.Array && schema.array?.element)
+                    schema = await getSchema(schema.array.element)
 
+                const values: string[] = []
                 if (schema?.struct?.fields)
                 {
                     for (let i = 0; i < schema.struct.fields.length; i++) {
@@ -1993,6 +1999,28 @@ registerSchema([
         }
     },
     {
+        name: "schema.notstructarraytype",
+        type: SchemaType.Function,
+        desc: _LS("schema.notstructarraytype"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: async (type: string) => {
+                if (!type) return true
+                let schema = await getSchema(type)
+                if (schema?.type === SchemaType.Array)
+                    schema = schema.array?.element ? await getSchema(schema.array.element) : undefined
+                return schema?.type !== SchemaType.Struct
+            }
+        }
+    },
+    {
         name: "schema.datacombine",
         type: SchemaType.Struct,
         desc: _LS("schema.datacombine"),
@@ -2049,7 +2077,7 @@ registerSchema([
                 {
                     name: "relations",
                     type: "schema.structfldrelationinfos",
-                    display: "字段间关联申明",
+                    display: _LS("schema.structdefine.relations"),
                 },
             ],
             relations: [

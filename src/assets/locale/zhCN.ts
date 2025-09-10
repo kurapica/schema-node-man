@@ -67,7 +67,8 @@ importLanguage("zhCN", {
     "schema.enumvaluetype.flags": "标志位",
 
     "schema.datacombinetype": "数据合并方式",
-    "schema.datacombinetype.assign": "直接赋值",
+    "schema.datacombinetype.assign": "赋值，取最后一次赋值",
+    "schema.datacombinetype.init": "初始，取第一次赋值",
     "schema.datacombinetype.sum": "合计",
     "schema.datacombinetype.count": "计数",
     "schema.datacombinetype.min": "最小值",
@@ -160,6 +161,7 @@ importLanguage("zhCN", {
     "schema.notcascadeenumtype": "非级联枚举值类型",
     "schema.notflagsenumtype": "非标志枚举值类型",
     "schema.notstructtype": "非结构体类型",
+    "schema.notstructarraytype": "非结构体或结构体数组类型",
     "schema.getenumcascadewhitelist": "获取级联名称白名单",
     "schema.getwhiteblacklisttype": "获取黑白名单类型",
 
@@ -301,6 +303,7 @@ importLanguage("zhCN", {
     "schema.app.field.incrupdate": "增量数据",
     "schema.app.field.frontend": "仅前端用",
     "schema.app.field.disable": "禁用",
+    "schema.app.field.combine": "数据合并规则",
     "schema.app.app": "应用定义",
     "schema.app.app.name": "应用名",
     "schema.app.app.display": "应用展示",
