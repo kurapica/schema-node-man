@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -2664,6 +2664,42 @@ export function saveAllCustomSchemaToStroage(root: string = "")
             }
         }
     })
+}
+
+// export schema
+export function schemaToJson(f: INodeSchema): INodeSchema
+{
+    const r: INodeSchema = { name: f.name, type: f.type, desc: deepClone(f.desc) }
+
+    switch(f.type)
+    {
+        case SchemaType.Namespace:
+            r.schemas = f.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
+            break
+
+        case SchemaType.Scalar:
+            r.scalar = deepClone(f.scalar, true)
+            break
+
+        case SchemaType.Enum:
+            r.enum = deepClone(f.enum, true)
+            break
+
+        case SchemaType.Struct:
+            r.struct = deepClone(f.struct, true)
+            break
+
+        case SchemaType.Array:
+            r.array = deepClone(f.array, true)
+            break
+
+        case SchemaType.Function:
+            r.func = { ...deepClone(f.func!, true), func: undefined }
+            if (!r.func!.exps) r.func!.exps = []
+            if (!r.func!.args) r.func!.args = []
+            break
+    }
+    return r
 }
 
 //#endregion

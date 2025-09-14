@@ -1,4 +1,4 @@
-import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, getCachedSchema, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, type IStructEnumFieldConfig } from "schema-node"
+import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, ScalarNode } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -572,6 +572,43 @@ registerSchema([
         }
     },
     {
+        name: "schema.app.nomainapp",
+        type: SchemaType.Function,
+        desc: _LS("schema.app.nomainapp"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "app",
+                    type: "schema.app.srcapp",
+                    nullable: true,
+                }
+            ],
+            exps: [],
+            func: (app: string) => {
+                if (!app) return true
+                const schema = getAppCachedSchema(app)
+                return !(schema?.fields?.find(f => f.sourceApp))
+            }
+        }
+    },
+    {
+        name: "schema.app.getmainapps",
+        type: SchemaType.Function,
+        desc: _LS("schema.app.getmainapps"),
+        func: {
+            return: NS_SYSTEM_STRINGS,
+            args: [
+                {
+                    name: "app",
+                    type: "schema.app.srcapp",
+                }
+            ],
+            exps: [],
+            func: getMainApps
+        }
+    },
+    {
         name: "schema.app.app",
         type: SchemaType.Struct,
         desc: _LS("schema.app.app"),
@@ -597,12 +634,38 @@ registerSchema([
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
                 {
+                    name: "main",
+                    type: "schema.app.srcapp",
+                    display: _LS("schema.app.app.main"),
+                    desc: _LS("schema.app.app.main.desc"),
+                },
+                {
                     name: "relations",
                     type: "schema.app.fieldrelations",
                     display: _LS("schema.app.app.relations"),
                 },
             ],
             relations: [
+                {
+                    field: "main",
+                    type: RelationType.Invisible,
+                    func: "schema.app.nomainapp",
+                    args: [
+                        {
+                            name: "name"
+                        }
+                    ]
+                },
+                {
+                    field: "main",
+                    type: RelationType.WhiteList,
+                    func: "schema.app.getmainapps",
+                    args: [
+                        {
+                            name: "name"
+                        }
+                    ]
+                },
                 {
                     field: "relations",
                     type: RelationType.Invisible,
@@ -728,6 +791,114 @@ export function saveAllCustomAppSchemaToStroage(root: string = "")
             }
         }
     })
+}
+
+// export app schema
+export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema
+{
+    const r: IAppSchema = { name: f.name, display: f.display, desc: f.desc, main: f.main }
+    const isroot = isNull(types)
+    types ||= []
+
+    if (f.apps?.length)
+    {
+        r.apps = f.apps.map(a => appSchemaToJson(a, types))
+    }
+    else if(f.fields?.length)
+    {
+        r.fields = deepClone(f.fields, true)
+        r.relations = deepClone(f.relations, true)
+
+        r.fields?.forEach(f => { if (!types.includes(f.type)) types.push(f.type) })
+        r.relations?.forEach(r => { if (!types.includes(r.func)) types.push(r.func) })
+    }
+
+    if (isroot && types?.length)
+    {
+        r.types = []
+        types.forEach(t => gatherSchemas(t, r.types!))
+    }
+
+    return r
+}
+
+function gatherSchemas(name: string, types: INodeSchema[])
+{
+    if (types.findIndex(t => t.name === name) >= 0) return
+
+    const access = name.split(".")
+
+    let schemas: INodeSchema[] = types
+    for (let i = 1; i < access.length; i++)
+    {
+        const ns = access.slice(0, i).join(".")
+        const exist: INodeSchema | undefined = schemas?.find(s => s.name === ns)
+        if (exist)
+        {
+            schemas = exist.schemas!
+        }
+        else
+        {
+            const schema = getCachedSchema(ns)
+            if (!schema) return
+            const json: INodeSchema = { name: schema.name, type: schema.type, desc: deepClone(schema.desc), schemas: [] }
+            schemas.push(json)
+            schemas = json.schemas!
+        }
+    }
+    if (schemas.findIndex(s => s.name === name)) return
+
+    const schema = getCachedSchema(name)
+    if (!schema) return
+
+    const r: INodeSchema = { name: schema.name, type: schema.type, desc: deepClone(schema.desc) }
+    schemas.push(r)
+
+    switch (schema.type)
+    {
+        case SchemaType.Scalar:
+        {
+            r.scalar = deepClone(schema.scalar, true)
+
+            break
+        }
+        case SchemaType.Enum:
+        {
+            r.enum = deepClone(schema.enum, true)
+            break
+        }
+        case SchemaType.Struct:
+        {
+            r.struct = deepClone(schema.struct, true)
+            break
+        }
+        case SchemaType.Array:
+        {
+            r.array = deepClone(schema.array, true)
+            break
+        }
+        case SchemaType.Function:
+        {
+            r.func = { ...deepClone(schema.func!, true), func: undefined }
+            if (!r.func!.exps) r.func!.exps = []
+            if (!r.func!.args) r.func!.args = []
+            break
+        }
+    }
+}
+
+// gets all the main apps
+function getMainApps(app: string): string[] {
+    const schema = getAppCachedSchema(app)
+    const result: string[] = []
+    if (!schema?.fields?.length) return result
+    schema.fields.filter(f => f.sourceApp).forEach(f => {
+        if (result.includes(f.sourceApp!)) return
+        result.push(f.sourceApp!)
+        const r = getMainApps(f.sourceApp!).filter(a => !result.includes(a))
+        if (r.length) result.splice(result.length, 0, ...r)
+    })
+    return result
 }
 
 //#endregion

@@ -129,7 +129,7 @@ import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { _LS, deepClone, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
-import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
+import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
 import tryitView from './tryit.vue'
 
@@ -348,46 +348,11 @@ const handleSelection = (val: any[]) => {
     selections = val.map((v: any) => v.name)
 }
 
-const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
-{
-    const f = schema!
-    const r: INodeSchema = { name: f.name, type: f.type, desc: deepClone(f.desc) }
-
-    switch(f.type)
-    {
-        case SchemaType.Namespace:
-            r.schemas = f.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
-            break
-
-        case SchemaType.Scalar:
-            r.scalar = deepClone(f.scalar, true)
-            break
-
-        case SchemaType.Enum:
-            r.enum = deepClone(f.enum, true)
-            break
-
-        case SchemaType.Struct:
-            r.struct = deepClone(f.struct, true)
-            break
-
-        case SchemaType.Array:
-            r.array = deepClone(f.array, true)
-            break
-
-        case SchemaType.Function:
-            r.func = { ...deepClone(f.func!, true), func: undefined }
-            if (!r.func!.exps) r.func!.exps = []
-            if (!r.func!.args) r.func!.args = []
-            break
-    }
-    return r
-}
 
 const download = () => {
     if (!selections.length) return
     const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
-    const content = JSON.stringify(selections.map(getCachedSchema).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
+    const content = JSON.stringify(selections.map(getCachedSchema).map(s => schemaToJson(s!)).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
 
     // download
     const blob = new Blob([content], { type: 'application/octet-stream' })

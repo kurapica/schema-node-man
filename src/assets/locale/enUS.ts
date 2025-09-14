@@ -309,5 +309,9 @@ importLanguage("enUS", {
     "schema.app.app.name": "App Name",
     "schema.app.app.display": "App display",
     "schema.app.app.desc": "App description",
+    "schema.app.app.main": "Main app",
+    "schema.app.app.main.desc": "For distribution lock",
     "schema.app.app.relations": "App field associations list",
+    "schema.app.nomainapp": "No main app",
+    "schema.app.getmainapps": "Get all main apps",
 });

@@ -13,12 +13,28 @@
                 <el-button type="info" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
                 <el-button type="primary" @click="handleNew">{{ _L["schema.designer.new"] }}</el-button>
                 <!-- download -->
+                <template v-if="!downloading">
+                    <el-button type="success" @click="startDownload">{{ _L["schema.designer.download"] }}</el-button>
+                    <el-upload
+                        style="padding-left:1rem;"
+                        :before-upload="uploadSchema"
+                        :limit="1"
+                        :show-file-list="false">
+                        <el-button type="success">{{ _L["schema.designer.upload"] }}</el-button>
+                    </el-upload>
+                </template>
+                <template v-else>
+                    <el-button type="success" @click="download">{{ _L["schema.designer.confirm"] }}</el-button>
+                    <el-button type="info" @click="downloading = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                </template>
             </el-form>
         </el-header>
         <el-main>
             <el-table :data="appSchemas" style="width: 100%; height: 70vh;" :border="true"
                 header-align="left" 
-                :header-cell-style="{ background: '#eee' }">
+                :header-cell-style="{ background: '#eee' }"
+                @selection-change="handleSelection">
+                <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
                 <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
                 <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
                 <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
@@ -113,6 +129,12 @@
                         </el-table-column>
                         <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
                         <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="400">
+                            <template #header>
+                                <a href="javascript:void(0)" @click="handleFieldNew"
+                                    style="text-decoration: underline; color: lightseagreen;">
+                                    {{ _L["schema.designer.new"] }}
+                                </a>
+                            </template>
                             <template #default="scope">
                                 <el-button type="info" @click="handleFieldEdit(scope.row, true)">
                                     {{ _L["schema.designer.view"] }}
@@ -132,7 +154,7 @@
                 </el-main>
                 <el-footer>
                     <br/>
-                    <el-button type="primary" @click="handleFieldNew">{{ _L["schema.designer.new"] }}</el-button>
+                    <el-button v-if="fields.length" type="primary" @click="tryit">{{ _L["schema.designer.tryit"] }}</el-button>
                     <el-button @click="showFieldList = false">{{ _L["schema.designer.close"] }}</el-button>
                 </el-footer>
             </el-container>
@@ -166,6 +188,23 @@
                 </el-footer>
             </el-container>
         </el-drawer>
+
+        <!-- try it -->
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + appTitle" direction="rtl" size="100%"
+            destroy-on-close
+            append-to-body>
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <tryapp v-if="currApp"
+                        :app="currApp"
+                    ></tryapp>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <el-button @click="showtryit = false">{{ _L["schema.designer.close"] }}</el-button>
+                </el-footer>
+            </el-container>
+        </el-drawer>
     </el-container>
 </template>
 
@@ -173,9 +212,10 @@
 import { Delete } from '@element-plus/icons-vue'
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, type IAppSchema, type IAppFieldSchema, deepClone, getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema } from 'schema-node'
+import { _LS, type IAppSchema, type IAppFieldSchema,  getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema } from 'schema-node'
 import { ElForm } from 'element-plus'
-import { clearAllStorageAppSchemas, removeStorageAppSchema, saveStorageAppSchema } from '@/appSchema'
+import { appSchemaToJson, clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '@/appSchema'
+import tryapp from './tryapp.vue'
 
 //#region View
 
@@ -433,9 +473,69 @@ const closeFieldEditor = () => {
     appFieldNode.value?.dispose()
     appFieldNode.value = undefined
     appFieldWatchHandler = null
+    
+    // forece refresh
+    refresh()
 }
 
 //#endregion
+
+//#endregion
+
+//#region Try it
+
+const showtryit = ref(false)
+
+const tryit = () => {
+    showtryit.value = true
+}
+
+//#endregion
+
+//#region Download
+
+const downloading = ref(false)
+let selections: string[] = []
+
+const startDownload = () => {
+    selections = []
+    downloading.value = true
+}
+
+const handleSelection = (val: any[]) => {
+    selections = val.map((v: any) => v.name)
+}
+
+const download = () => {
+    if (!selections.length) return
+    const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
+    const content = JSON.stringify(selections.map(getAppCachedSchema).map(s => appSchemaToJson(s!)), null, 2)
+
+    // download
+    const blob = new Blob([content], { type: 'application/octet-stream' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+
+    downloading.value = false
+}
+
+const uploadSchema = (file:File)=>{
+    file.text().then(text => {
+        const data = JSON.parse(text)
+        if (Array.isArray(data))
+        {
+            registerAppSchema(data, SchemaLoadState.Custom)
+            saveAllCustomAppSchemaToStroage()
+            return refresh()
+        }
+    })
+    return false
+}
 
 //#endregion
 

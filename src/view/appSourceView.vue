@@ -9,7 +9,7 @@
             :options="root.children" 
             :props="{
                 emitPath: false,
-                checkStrictly: true,
+                checkStrictly: state.checkStrictly,
                 lazy: true,
                 lazyLoad: lazyLoad
             }" 
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getAppSchema, subscribeAppSchemaChange, subscribeLanguage, type IAppSchema, type ScalarNode } from "schema-node"
+import { getAppCachedSchema, getAppSchema, isNull, subscribeAppSchemaChange, subscribeLanguage, type IAppSchema, type ScalarNode } from "schema-node"
 import { _L, getSelectPlaceHolder } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, toRaw } from "vue"
 
@@ -47,7 +47,8 @@ const state = reactive<{
     display?: any,
     disable?: boolean,
     require?: boolean,
-    readonly?: boolean
+    readonly?: boolean,
+    checkStrictly?: boolean
 }>({})
 
 // Data
@@ -123,6 +124,49 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
     }
 }
 
+const loadWhiteList = (options: ICascaderOptionInfo[], app: string) => {
+    if (!getAppCachedSchema(app)) return
+
+    const paths = app.split(".").filter(f => !isNull(f))
+    for(let i = 1; i <= paths.length; i++)
+    {
+        const name = paths.slice(0, i).join(".")
+        const v = getAppCachedSchema(name)!
+        const exist = options.find(f => f.value === name)
+        if (i === paths.length)
+        {
+            if (exist) return
+            options.push({
+                value: name,
+                label: `${v.display || v.name}`,
+                loadState: v.loadState || 0,
+                leaf: true,
+                children: null
+            })
+        }
+        else
+        {
+            if (exist)
+            {
+                exist.leaf = false
+                exist.children = []
+                options = exist.children
+            }
+            else
+            {
+                options.push({
+                    value: name,
+                    label: `${v.display || v.name}`,
+                    loadState: v.loadState || 0,
+                    leaf: false,
+                    children: []
+                })
+                options = options[options.length - 1].children!
+            }
+        }
+    }
+}
+
 const reBuildOptions = async () => {
     const enumRoot = scalarNode.rule?.root
     if (enumRoot) {
@@ -138,7 +182,18 @@ const reBuildOptions = async () => {
         root.value = ""
     }
 
-    root.children = await buildOptions([], (await getAppSchema(root.value))?.apps || [])
+    if (scalarNode.rule?.whiteList?.length)
+    {
+        const options: ICascaderOptionInfo[] = []
+        scalarNode.rule.whiteList.forEach(w => loadWhiteList(options, w as string))
+        state.checkStrictly = false
+        root.children = options
+    }
+    else
+    {
+        state.checkStrictly = true
+        root.children = await buildOptions([], (await getAppSchema(root.value))?.apps || [])
+    }
 }
 
 // change handler
