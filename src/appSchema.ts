@@ -1,4 +1,4 @@
-import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, ScalarNode } from "schema-node"
+import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -326,6 +326,61 @@ registerSchema([
         }
     },
     {
+        name: "schema.app.iscombinedisable",
+        type: SchemaType.Function,
+        desc: _LS("schema.app.iscombinedisable"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                },
+                {
+                    name: "func",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                }
+            ],
+            exps: [],
+            func: (type: string, func: string) => {
+                if (!type || !func) return true
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
+                return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
+            }
+        }
+    },
+    {
+        name: "schema.app.iscombinesdisable",
+        type: SchemaType.Function,
+        desc: _LS("schema.app.iscombinesdisable"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "type",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                },
+                {
+                    name: "func",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                }
+            ],
+            exps: [],
+            func: (type: string, func: string) => {
+                if (!type || !func) return true
+                let schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array)
+                    schema = schema.array?.element ? getCachedSchema(schema.array.element) : undefined
+                return schema?.type !== SchemaType.Struct
+            }
+        }
+    },
+    {
         name: "schema.app.field",
         type: SchemaType.Struct,
         desc: _LS("schema.app.field"),
@@ -382,16 +437,6 @@ registerSchema([
                     display: _LS("schema.app.field.disable"),
                 },
                 {
-                    name: "combine",
-                    type: "schema.datacombinetype",
-                    display: _LS("schema.app.field.combine"),
-                },
-                {
-                    name: "combines",
-                    type: "schema.datacombines",
-                    display: _LS("schema.arraydefine.combine"),
-                },
-                {
                     name: "func",
                     type: "schema.pushfunctype",
                     display: _LS("schema.app.field.func"),
@@ -400,6 +445,16 @@ registerSchema([
                     name: "args",
                     type: "schema.app.pushflds",
                     display: _LS("schema.app.field.args"),
+                },
+                {
+                    name: "combine",
+                    type: "schema.datacombinetype",
+                    display: _LS("schema.app.field.combine"),
+                },
+                {
+                    name: "combines",
+                    type: "schema.datacombines",
+                    display: _LS("schema.arraydefine.combine"),
                 },
             ],
             relations: [
@@ -520,25 +575,31 @@ registerSchema([
                 {
                     field: "combine",
                     type: RelationType.Invisible,
-                    func: "schema.notscalarenumtype",
+                    func: "schema.app.iscombinedisable",
                     args: [
                         {
                             name: "type"
+                        },
+                        {
+                            name: "func"
                         }
                     ]
                 },
                 {
                     field: "combines",
                     type: RelationType.Invisible,
-                    func: "schema.notstructarraytype",
+                    func: "schema.app.iscombinesdisable",
                     args: [
                         {
                             name: "type"
+                        },
+                        {
+                            name: "func"
                         }
                     ]
                 },
                 {
-                    field: "combine.field",
+                    field: "combines.field",
                     type: RelationType.WhiteList,
                     func: "schema.getstructnumbervaluefields",
                     args: [
@@ -816,17 +877,19 @@ export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema
     if (isroot && types?.length)
     {
         r.types = []
-        types.forEach(t => gatherSchemas(t, r.types!))
+        types.forEach(t => gatherSchemas(r.types!, t))
     }
 
     return r
 }
 
-function gatherSchemas(name: string, types: INodeSchema[])
+function gatherSchemas(types: INodeSchema[], name?: string)
 {
-    if (types.findIndex(t => t.name === name) >= 0) return
+    if (!name) return
+    const schema = getCachedSchema(name)
+    if (!schema || ((schema.loadState || 0) & SchemaLoadState.System)) return
 
-    const access = name.split(".")
+    const access = name.split(".").filter(n => !isNull(n))
 
     let schemas: INodeSchema[] = types
     for (let i = 1; i < access.length; i++)
@@ -835,7 +898,8 @@ function gatherSchemas(name: string, types: INodeSchema[])
         const exist: INodeSchema | undefined = schemas?.find(s => s.name === ns)
         if (exist)
         {
-            schemas = exist.schemas!
+            exist.schemas ||= []
+            schemas = exist.schemas
         }
         else
         {
@@ -846,10 +910,7 @@ function gatherSchemas(name: string, types: INodeSchema[])
             schemas = json.schemas!
         }
     }
-    if (schemas.findIndex(s => s.name === name)) return
-
-    const schema = getCachedSchema(name)
-    if (!schema) return
+    if (schemas.findIndex(s => s.name === name) >= 0) return
 
     const r: INodeSchema = { name: schema.name, type: schema.type, desc: deepClone(schema.desc) }
     schemas.push(r)
@@ -859,22 +920,30 @@ function gatherSchemas(name: string, types: INodeSchema[])
         case SchemaType.Scalar:
         {
             r.scalar = deepClone(schema.scalar, true)
-
+            gatherSchemas(types, r.scalar?.base)
+            gatherSchemas(types, r.scalar?.prevalid)
+            gatherSchemas(types, r.scalar?.postvalid)
             break
         }
         case SchemaType.Enum:
         {
             r.enum = deepClone(schema.enum, true)
+            if ((schema.loadState || 0) & SchemaLoadState.Server)
+                r.enum!.values = []
             break
         }
         case SchemaType.Struct:
         {
             r.struct = deepClone(schema.struct, true)
+            r.struct?.fields?.forEach(f => gatherSchemas(types, f.type))
+            r.struct?.relations?.forEach(r => gatherSchemas(types, r.func))
             break
         }
         case SchemaType.Array:
         {
             r.array = deepClone(schema.array, true)
+            gatherSchemas(types, r.array?.element)
+            r.array?.relations?.forEach(r => gatherSchemas(types, r.func))
             break
         }
         case SchemaType.Function:
@@ -882,6 +951,10 @@ function gatherSchemas(name: string, types: INodeSchema[])
             r.func = { ...deepClone(schema.func!, true), func: undefined }
             if (!r.func!.exps) r.func!.exps = []
             if (!r.func!.args) r.func!.args = []
+
+            gatherSchemas(types, r.func?.return)
+            r.func?.args?.forEach(a => gatherSchemas(types, a.type))
+            r.func?.exps?.forEach(e => gatherSchemas(types, e.func))
             break
         }
     }

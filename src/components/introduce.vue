@@ -13,10 +13,10 @@
                 <component v-if="section.com?.value" :is="section.com.value"></component>
                 <template v-if="section.children?.length">
                     <section v-for="section2 in section.children" :id="section2.id" class="second">
-                        <component v-if="section2.com?.value" :is="section.com.value"></component>
+                        <component v-if="section2.com?.value" :is="section2.com.value"></component>
                         <template v-if="section2.children?.length">
                             <section v-for="section3 in section2.children" :id="section3.id" class="third">
-                                <component v-if="section3.com?.value" :is="section.com.value"></component>
+                                <component v-if="section3.com?.value" :is="section3.com.value"></component>
                             </section>
                         </template>
                     </section>
@@ -62,6 +62,12 @@ const tree: SectionNode[] = [
     new SectionNode("07.function"),
     new SectionNode("08.usage"),
     new SectionNode("09.view"),
+    new SectionNode("10.app", [
+        new SectionNode("10.app.field"),
+        new SectionNode("10.app.push"),
+        new SectionNode("10.app.ref"),
+        new SectionNode("10.app.main")
+    ])
 ]
 
 //#region Utils

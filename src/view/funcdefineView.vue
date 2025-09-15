@@ -585,7 +585,7 @@ onMounted(() => {
         let changed = false
 
         // clear
-        for (let i = expsHandlers.length - 1; i >= expslen; i++)
+        for (let i = expsHandlers.length - 1; i >= expslen; i--)
         {
             const handler = expsHandlers.pop()
             handler?.name()

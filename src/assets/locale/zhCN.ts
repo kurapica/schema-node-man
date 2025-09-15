@@ -262,6 +262,7 @@ importLanguage("zhCN", {
     "schema.designer.upapp": "上级应用",
     "schema.designer.moveup": "上移",
     "schema.designer.confirmdelete": "执行删除操作?",
+    "schema.designer.app": "应用",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",
@@ -273,6 +274,11 @@ importLanguage("zhCN", {
     "schema.catalog.07.function": "07. 函数",
     "schema.catalog.08.usage": "08. 使用",
     "schema.catalog.09.view": "09. 自定义视图",
+    "schema.catalog.10.app": "10. 应用",
+    "schema.catalog.10.app.field": "1. 应用字段",
+    "schema.catalog.10.app.push": "2. 字段推送",
+    "schema.catalog.10.app.ref": "3. 字段引用",
+    "schema.catalog.10.app.main": "4. 主应用",
 
     "schema.app": "应用定义命名空间",
     "schema.app.srcapp": "应用",

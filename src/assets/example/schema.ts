@@ -1,4 +1,4 @@
-import {_LS, importLanguage, registerSchema, SchemaLoadState, type IStructScalarFieldConfig } from "schema-node"
+import {_LS, importLanguage, registerAppSchema, registerSchema, SchemaLoadState, type IStructScalarFieldConfig } from "schema-node"
 import waterFallView from "@/view/waterFallView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
@@ -420,8 +420,40 @@ registerSchema([
   }
 ], SchemaLoadState.Custom)
 
+registerAppSchema([
+ {
+    "name": "test",
+    "display": _LS("test.app"),
+    "fields": [
+      {
+        "name": "subjects",
+        "type": "test.subjects",
+        "display": _LS("test.subjects")
+      },
+      {
+        "name": "students",
+        "type": "test.persons",
+        "display": _LS("test.persons")
+      }
+    ],
+    "relations": [
+      {
+        "field": "students.subjects",
+        "func": "system.conv.assign",
+        "type": "whiteList",
+        "args": [
+          {
+            "name": "subjects"
+          }
+        ]
+      }
+    ],
+  }
+])
+
 importLanguage("enUS", {
   "test": "A test namespace",
+  "test.app": "A test app",
   "test.gpa": "Grade Point Average",
   "test.nosubjects": "No subject choosed",
   "test.person": "A person info",
@@ -443,6 +475,7 @@ importLanguage("enUS", {
 
 importLanguage("zhCN", {
   "test": "测试用",
+  "test.app": "测试用应用",
   "test.gpa": "使用积点",
   "test.nosubjects": "未选中学科",
   "test.person": "学生成绩信息",

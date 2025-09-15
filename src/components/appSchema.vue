@@ -508,7 +508,7 @@ const handleSelection = (val: any[]) => {
 
 const download = () => {
     if (!selections.length) return
-    const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
+    const name = selections.length > 1 ? "appschema.json" : `${selections[0]}.json` 
     const content = JSON.stringify(selections.map(getAppCachedSchema).map(s => appSchemaToJson(s!)), null, 2)
 
     // download

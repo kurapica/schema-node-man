@@ -958,12 +958,13 @@ registerSchema([
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "schema.valuetype",
+                    nullable: true,
                 }
             ],
             exps: [],
             func: (type: string) => {
-                let schema = getCachedSchema(type)
+                let schema = type ? getCachedSchema(type) : null
                 if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
                 return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
             }
@@ -2007,7 +2008,8 @@ registerSchema([
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "schema.valuetype",
+                    nullable: true
                 }
             ],
             exps: [],

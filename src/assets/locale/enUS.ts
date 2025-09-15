@@ -262,6 +262,7 @@ importLanguage("enUS", {
     "schema.designer.upapp": "Up App",
     "schema.designer.moveup": "Move Up",
     "schema.designer.confirmdelete": "Continue the delete process?",
+    "schema.designer.app": "Application",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",
@@ -273,6 +274,11 @@ importLanguage("enUS", {
     "schema.catalog.07.function": "07. Function",
     "schema.catalog.08.usage": "08. Usage",
     "schema.catalog.09.view": "09. Custom View",
+    "schema.catalog.10.app": "10. Application",
+    "schema.catalog.10.app.field": "1. Field",
+    "schema.catalog.10.app.push": "2. Push",
+    "schema.catalog.10.app.ref": "3. Ref",
+    "schema.catalog.10.app.main": "4. Main App",
 
     "schema.app": "App definition namespace",
     "schema.app.srcapp": "App",

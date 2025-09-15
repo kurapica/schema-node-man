@@ -46,6 +46,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Schema: typeof import('./src/components/schema.vue')['default']
     Showandtry: typeof import('./src/components/showandtry.vue')['default']
+    Showandtryapp: typeof import('./src/components/showandtryapp.vue')['default']
     Tryapp: typeof import('./src/components/tryapp.vue')['default']
     Tryit: typeof import('./src/components/tryit.vue')['default']
   }
