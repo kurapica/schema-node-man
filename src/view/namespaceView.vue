@@ -195,11 +195,11 @@ const handleEdit = async (name: string, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + (namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + (namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
@@ -293,7 +293,7 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
         const ele: ICascaderOptionInfo = {
             value: v.name,
             type: v.type,
-            label: `${v.desc || v.name}`,
+            label: `${v.display || v.name}`,
             loadState: v.loadState || 0,
             leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex(s => s.type === SchemaType.Namespace) < 0)),
             children: null
@@ -421,7 +421,7 @@ onMounted(() => {
                 rebuild = true
                 const schema = await getSchema(name)
                 if (!schema) break
-                display.push(`${schema.desc || paths[i]}`)
+                display.push(`${schema.display || paths[i]}`)
             }
         }
         state.display = display.join("/")

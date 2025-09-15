@@ -219,7 +219,7 @@ importLanguage("zhCN", {
     "schema.namespacedefine": "命名空间定义",
     "schema.namespacedefine.name": "名称",
     "schema.namespacedefine.type": "类型",
-    "schema.namespacedefine.desc": "描述",
+    "schema.namespacedefine.display": "描述",
     "schema.namespacedefine.scalar": "基础数据类型定义",
     "schema.namespacedefine.enum": "枚举类型定义",
     "schema.namespacedefine.struct": "结构体类型定义",

@@ -219,7 +219,7 @@ importLanguage("enUS", {
     "schema.namespacedefine": "Namespace Definition",
     "schema.namespacedefine.name": "Name",
     "schema.namespacedefine.type": "Type",
-    "schema.namespacedefine.desc": "Description",
+    "schema.namespacedefine.display": "Description",
     "schema.namespacedefine.scalar": "Scalar Definitions",
     "schema.namespacedefine.enum": "Enum Definitions",
     "schema.namespacedefine.struct": "Struct Definitions",

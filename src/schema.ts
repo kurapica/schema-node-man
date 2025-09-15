@@ -5,14 +5,14 @@ registerSchema([
     {
         name: "schema",
         type: SchemaType.Namespace,
-        desc: _LS("schema"),
+        display: _LS("schema"),
     },
 
     //#region scalar type
     {
         name: "schema.namespace",
         type: SchemaType.Scalar,
-        desc: _LS("schema.namespace"),
+        display: _LS("schema.namespace"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -20,7 +20,7 @@ registerSchema([
     {
         name: "schema.scalartype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.scalartype"),
+        display: _LS("schema.scalartype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -28,7 +28,7 @@ registerSchema([
     {
         name: "schema.enumtype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.enumtype"),
+        display: _LS("schema.enumtype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -36,7 +36,7 @@ registerSchema([
     {
         name: "schema.structtype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.structtype"),
+        display: _LS("schema.structtype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -44,7 +44,7 @@ registerSchema([
     {
         name: "schema.arraytype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.arraytype"),
+        display: _LS("schema.arraytype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -52,7 +52,7 @@ registerSchema([
     {
         name: "schema.functype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.functype"),
+        display: _LS("schema.functype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -60,7 +60,7 @@ registerSchema([
     {
         name: "schema.pushfunctype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.pushfunctype"),
+        display: _LS("schema.pushfunctype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -68,7 +68,7 @@ registerSchema([
     {
         name: "schema.scalarvalidfunc",
         type: SchemaType.Scalar,
-        desc: _LS("schema.scalarvalidfunc"),
+        display: _LS("schema.scalarvalidfunc"),
         scalar: {
             base: NS_SYSTEM_STRING,
         },
@@ -76,7 +76,7 @@ registerSchema([
     {
         name: "schema.scalarenumtype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.scalarenumtype"),
+        display: _LS("schema.scalarenumtype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -84,7 +84,7 @@ registerSchema([
     {
         name: "schema.arrayeletype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.arrayeletype"),
+        display: _LS("schema.arrayeletype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -92,7 +92,7 @@ registerSchema([
     {
         name: "schema.valuetype",
         type: SchemaType.Scalar,
-        desc: _LS("schema.valuetype"),
+        display: _LS("schema.valuetype"),
         scalar: {
             base: NS_SYSTEM_STRING,
         }
@@ -100,7 +100,7 @@ registerSchema([
     {
         name: "schema.varname",
         type: SchemaType.Scalar,
-        desc: _LS("schema.varname"),
+        display: _LS("schema.varname"),
         scalar: {
             base: NS_SYSTEM_STRING,
             regex: "^[a-zA-Z]\\w*$",
@@ -109,7 +109,7 @@ registerSchema([
     {
         name: "schema.namespaceinput",
         type: SchemaType.Scalar,
-        desc: _LS("schema.namespaceinput"),
+        display: _LS("schema.namespaceinput"),
         scalar: {
             base: NS_SYSTEM_STRING,
             upLimit: 128,
@@ -119,7 +119,7 @@ registerSchema([
     {
         name: "schema.reltarfield",
         type: SchemaType.Scalar,
-        desc: _LS("schema.reltarfield"),
+        display: _LS("schema.reltarfield"),
         scalar: {
             base: NS_SYSTEM_STRING,
             upLimit: 128,
@@ -128,7 +128,7 @@ registerSchema([
     {
         name: "schema.anyvalue",
         type: SchemaType.Scalar,
-        desc: _LS("schema.anyvalue"),
+        display: _LS("schema.anyvalue"),
         scalar: {
         }
     },
@@ -138,7 +138,7 @@ registerSchema([
     {
         name: "schema.schematype",
         type: SchemaType.Enum,
-        desc: _LS("schema.schematype"),
+        display: _LS("schema.schematype"),
         enum: {
             type: EnumValueType.String,
             values: [
@@ -172,7 +172,7 @@ registerSchema([
     {
         name: "schema.relationtype",
         type: SchemaType.Enum,
-        desc: _LS("schema.relationtype"),
+        display: _LS("schema.relationtype"),
         enum: {
             type: EnumValueType.String,
             values: [
@@ -242,7 +242,7 @@ registerSchema([
     {
         name: "schema.exptype",
         type: SchemaType.Enum,
-        desc: _LS("schema.exptype"),
+        display: _LS("schema.exptype"),
         enum: {
             type: EnumValueType.String,
             values: [
@@ -276,7 +276,7 @@ registerSchema([
     {
         name: "schema.exptypes",
         type: SchemaType.Array,
-        desc: _L("schema.exptypes"),
+        display: _L("schema.exptypes"),
         array: {
             element: "schema.exptype"
         }
@@ -284,7 +284,7 @@ registerSchema([
     {
         name: "schema.enumvaluetype",
         type: SchemaType.Enum,
-        desc: _LS("schema.enumvaluetype"),
+        display: _LS("schema.enumvaluetype"),
         enum: {
             type: EnumValueType.String,
             values: [
@@ -314,7 +314,7 @@ registerSchema([
     {
         name: "schema.datacombinetype",
         type: SchemaType.Enum,
-        desc: _LS("schema.datacombinetype"),
+        display: _LS("schema.datacombinetype"),
         enum: {
             type: EnumValueType.String,
             values: [
@@ -351,7 +351,7 @@ registerSchema([
     {
         name: "schema.scalardefine",
         type: SchemaType.Struct,
-        desc: _LS("schema.scalardefine"),
+        display: _LS("schema.scalardefine"),
         struct: {
             fields: [
                 {
@@ -428,7 +428,7 @@ registerSchema([
     {
         name: "schema.enumvalueinfo",
         type: SchemaType.Struct,
-        desc: _LS("schema.enumvalueinfo"),
+        display: _LS("schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -457,7 +457,7 @@ registerSchema([
     {
         name: "schema.enumvalueinfos",
         type: SchemaType.Array,
-        desc: _LS("schema.enumvalueinfos"),
+        display: _LS("schema.enumvalueinfos"),
         array: {
             element: "schema.enumvalueinfo",
             primary: ["value"],
@@ -466,7 +466,7 @@ registerSchema([
     {
         name: "schema.enumintvalueinfo",
         type: SchemaType.Struct,
-        desc: _LS("schema.enumvalueinfo"),
+        display: _LS("schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -495,7 +495,7 @@ registerSchema([
     {
         name: "schema.enumintvalueinfos",
         type: SchemaType.Array,
-        desc: _LS("schema.enumvalueinfos"),
+        display: _LS("schema.enumvalueinfos"),
         array: {
             element: "schema.enumintvalueinfo",
             primary: ["value"],
@@ -504,7 +504,7 @@ registerSchema([
     {
         name: "schema.enumfloatvalueinfo",
         type: SchemaType.Struct,
-        desc: _LS("schema.enumvalueinfo"),
+        display: _LS("schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -533,7 +533,7 @@ registerSchema([
     {
         name: "schema.enumfloatvalueinfos",
         type: SchemaType.Array,
-        desc: _LS("schema.enumvalueinfos"),
+        display: _LS("schema.enumvalueinfos"),
         array: {
             element: "schema.enumfloatvalueinfo",
             primary: ["value"],
@@ -542,7 +542,7 @@ registerSchema([
     {
         name: "schema.enumdoublevalueinfo",
         type: SchemaType.Struct,
-        desc: _LS("schema.enumvalueinfo"),
+        display: _LS("schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -571,7 +571,7 @@ registerSchema([
     {
         name: "schema.enumdoublevalueinfos",
         type: SchemaType.Array,
-        desc: _LS("schema.enumvalueinfos"),
+        display: _LS("schema.enumvalueinfos"),
         array: {
             element: "schema.enumdoublevalueinfo",
             primary: ["value"],
@@ -580,7 +580,7 @@ registerSchema([
     {
         name: "schema.enumflagvalueinfo",
         type: SchemaType.Struct,
-        desc: _LS("schema.enumvalueinfo"),
+        display: _LS("schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -610,7 +610,7 @@ registerSchema([
     {
         name: "schema.enumflagsvalueinfos",
         type: SchemaType.Array,
-        desc: _LS("schema.enumvalueinfos"),
+        display: _LS("schema.enumvalueinfos"),
         array: {
             element: "schema.enumflagvalueinfo",
             primary: ["value"],
@@ -631,7 +631,7 @@ registerSchema([
     {
         name: "schema.calcnextflag",
         type: SchemaType.Function,
-        desc: _LS("schema.calcnextflag"),
+        display: _LS("schema.calcnextflag"),
         func: {
             return: NS_SYSTEM_INT,
             args: [
@@ -651,7 +651,7 @@ registerSchema([
     {
         name: "schema.getenuminfostype",
         type: SchemaType.Function,
-        desc: _LS("schema.getenuminfostype"),
+        display: _LS("schema.getenuminfostype"),
         func: {
             return: "schema.arraytype",
             args: [
@@ -681,7 +681,7 @@ registerSchema([
     {
         name: "schema.enumdefine",
         type: SchemaType.Struct,
-        desc: _LS("schema.enumdefine"),
+        display: _LS("schema.enumdefine"),
         struct: {
             fields: [
                 {
@@ -735,7 +735,7 @@ registerSchema([
     {
         name: "schema.structindex",
         type: SchemaType.Struct,
-        desc: _LS("schema.structindex"),
+        display: _LS("schema.structindex"),
         struct: {
             fields: [
                 {
@@ -756,7 +756,7 @@ registerSchema([
     {
         name: "schema.structindexs",
         type: SchemaType.Array,
-        desc: _LS("schema.structindexs"),
+        display: _LS("schema.structindexs"),
         array: {
             element: "schema.structindex",
         },
@@ -764,7 +764,7 @@ registerSchema([
     {
         name: "schema.isvaluenotnull",
         type: SchemaType.Function,
-        desc: _L("schema.isvaluenotnull"),
+        display: _L("schema.isvaluenotnull"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -784,7 +784,7 @@ registerSchema([
     {
         name: "schema.getexpvaluetype",
         type: SchemaType.Function,
-        desc: _LS("schema.getexpvaluetype"),
+        display: _LS("schema.getexpvaluetype"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -805,7 +805,7 @@ registerSchema([
     {
         name: "schema.hideexpvalue",
         type: SchemaType.Function,
-        desc: _LS("schema.hideexpvalue"),
+        display: _LS("schema.hideexpvalue"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -830,7 +830,7 @@ registerSchema([
     {
         name: "schema.structfldfuncarg",
         type: SchemaType.Struct,
-        desc: _LS("schema.structfldfuncarg"),
+        display: _LS("schema.structfldfuncarg"),
         struct: {
             fields: [
                 {
@@ -906,7 +906,7 @@ registerSchema([
     {
         name: "schema.structfldfuncargs",
         type: SchemaType.Array,
-        desc: _LS("schema.structfldfuncargs"),
+        display: _LS("schema.structfldfuncargs"),
         array: {
             element: "schema.structfldfuncarg",
         },
@@ -914,7 +914,7 @@ registerSchema([
     {
         name: "schema.notscalartype",
         type: SchemaType.Function,
-        desc: _LS("schema.notscalartype"),
+        display: _LS("schema.notscalartype"),
         func: {
             return : NS_SYSTEM_BOOL,
             args: [
@@ -933,7 +933,7 @@ registerSchema([
     {
         name: "schema.notenumtype",
         type: SchemaType.Function,
-        desc: _LS("schema.notenumtype"),
+        display: _LS("schema.notenumtype"),
         func: {
             return : NS_SYSTEM_BOOL,
             args: [
@@ -952,7 +952,7 @@ registerSchema([
     {
         name: "schema.notscalarenumtype",
         type: SchemaType.Function,
-        desc: _LS("schema.notscalarenumtype"),
+        display: _LS("schema.notscalarenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -973,7 +973,7 @@ registerSchema([
     {
         name: "schema.notcascadeenumtype",
         type: SchemaType.Function,
-        desc: _LS("schema.notcascadeenumtype"),
+        display: _LS("schema.notcascadeenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args:[
@@ -993,7 +993,7 @@ registerSchema([
     {
         name: "schema.getroottype",
         type: SchemaType.Function,
-        desc: _LS("schema.getroottype"),
+        display: _LS("schema.getroottype"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -1013,7 +1013,7 @@ registerSchema([
     {
         name: "schema.notflagsenumtype",
         type: SchemaType.Function,
-        desc: _LS("schema.notflagsenumtype"),
+        display: _LS("schema.notflagsenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -1032,7 +1032,7 @@ registerSchema([
     {
         name: "schema.getenumcascadewhitelist",
         type: SchemaType.Function,
-        desc: _LS("schema.getenumcascadewhitelist"),
+        display: _LS("schema.getenumcascadewhitelist"),
         func: {
             return: NS_SYSTEM_ARRAY,
             args: [
@@ -1058,7 +1058,7 @@ registerSchema([
     {
         name: "schema.noenumroot",
         type: SchemaType.Function,
-        desc: _LS("schema.noenumroot"),
+        display: _LS("schema.noenumroot"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -1086,7 +1086,7 @@ registerSchema([
     {
         name: "schema.getenumrootcascade",
         type: SchemaType.Function,
-        desc: _LS("schema.getenumrootcascade"),
+        display: _LS("schema.getenumrootcascade"),
         func: {
             return: NS_SYSTEM_INT,
             args: [
@@ -1116,7 +1116,7 @@ registerSchema([
     {
         name: "schema.getwhiteblacklisttype",
         type: SchemaType.Function,
-        desc: _LS("schema.getwhiteblacklisttype"),
+        display: _LS("schema.getwhiteblacklisttype"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -1135,7 +1135,7 @@ registerSchema([
     {
         name: "schema.structfieldtype",
         type: SchemaType.Struct,
-        desc: _LS("schema.structfieldtype"),
+        display: _LS("schema.structfieldtype"),
         struct: {
             fields: [
                 {
@@ -1235,7 +1235,7 @@ registerSchema([
                     display: _LS("schema.structfieldtype.assuggest"),
                 },
                 {
-                    name: "useOriginForUplimit",
+                    name: "useOriginForUpLimit",
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.structfieldtype.useoriginforuplimit"),
                 },
@@ -1468,7 +1468,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "useOriginForUplimit",
+                    field: "useOriginForUpLimit",
                     type: RelationType.Invisible,
                     func: "schema.notscalartype",
                     args: [
@@ -1559,7 +1559,7 @@ registerSchema([
     {
         name: "schema.structfieldtypes",
         type: SchemaType.Array,
-        desc: _LS("schema.structfieldtypes"),
+        display: _LS("schema.structfieldtypes"),
         array: {
             element: "schema.structfieldtype",
             primary: ["name"],
@@ -1568,7 +1568,7 @@ registerSchema([
     {
         name: "schema.getstructindexfields",
         type: SchemaType.Function,
-        desc: _LS("schema.getstructindexfields"),
+        display: _LS("schema.getstructindexfields"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
@@ -1598,7 +1598,7 @@ registerSchema([
     {
         name: "schema.getstructnumbervaluefields",
         type: SchemaType.Function,
-        desc: _LS("schema.getstructnumbervaluefields"),
+        display: _LS("schema.getstructnumbervaluefields"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
@@ -1630,7 +1630,7 @@ registerSchema([
     {
         name: "schema.getrelationfuncreturn",
         type: SchemaType.Function,
-        desc: _LS("schema.getrelationfuncreturn"),
+        display: _LS("schema.getrelationfuncreturn"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -1682,7 +1682,7 @@ registerSchema([
     {
         name: "schema.getrelationwhitelist",
         type: SchemaType.Function,
-        desc: _LS("schema.getrelationwhitelist"),
+        display: _LS("schema.getrelationwhitelist"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
@@ -1756,7 +1756,7 @@ registerSchema([
     {
         name: "schema.getstructfieldtype",
         type: SchemaType.Function,
-        desc: _LS("schema.getstructfieldtype"),
+        display: _LS("schema.getstructfieldtype"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -1801,7 +1801,7 @@ registerSchema([
     {
         name: "schema.getstructfieldtypebytype",
         type: SchemaType.Function,
-        desc: _LS("schema.getstructfieldtypebytype"),
+        display: _LS("schema.getstructfieldtypebytype"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -1849,7 +1849,7 @@ registerSchema([
     {
         name: "schema.structfldrelationinfo",
         type: SchemaType.Struct,
-        desc: _LS("schema.structfldrelationinfo"),
+        display: _LS("schema.structfldrelationinfo"),
         struct: {
             fields: [
                 {
@@ -1930,7 +1930,7 @@ registerSchema([
     {
         name: "schema.structfldrelationinfos",
         type: SchemaType.Array,
-        desc: _LS("schema.structfldrelationinfos"),
+        display: _LS("schema.structfldrelationinfos"),
         array: {
             element: "schema.structfldrelationinfo",
             primary: ["field", "type"],
@@ -1939,7 +1939,7 @@ registerSchema([
     {
         name: "schema.structdefine",
         type: SchemaType.Struct,
-        desc: _LS("schema.structdefine"),
+        display: _LS("schema.structdefine"),
         struct: {
             fields: [
                 {
@@ -1982,7 +1982,7 @@ registerSchema([
     {
         name: "schema.notstructtype",
         type: SchemaType.Function,
-        desc: _LS("schema.notstructtype"),
+        display: _LS("schema.notstructtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -2002,7 +2002,7 @@ registerSchema([
     {
         name: "schema.notstructarraytype",
         type: SchemaType.Function,
-        desc: _LS("schema.notstructarraytype"),
+        display: _LS("schema.notstructarraytype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -2025,7 +2025,7 @@ registerSchema([
     {
         name: "schema.datacombine",
         type: SchemaType.Struct,
-        desc: _LS("schema.datacombine"),
+        display: _LS("schema.datacombine"),
         struct: {
             fields: [
                 {
@@ -2044,7 +2044,7 @@ registerSchema([
     {
         name: "schema.datacombines",
         type: SchemaType.Array,
-        desc: _LS("schema.datacombines"),
+        display: _LS("schema.datacombines"),
         array: {
             element: "schema.datacombine",
             primary: ["field"]
@@ -2053,7 +2053,7 @@ registerSchema([
     {
         name: "schema.arraydefine",
         type: SchemaType.Struct,
-        desc: _LS("schema.arraydefine"),
+        display: _LS("schema.arraydefine"),
         struct: {
             fields: [
                 {
@@ -2155,7 +2155,7 @@ registerSchema([
     {
         name: "schema.funcarg",
         type: SchemaType.Struct,
-        desc: _LS("schema.funcarg"),
+        display: _LS("schema.funcarg"),
         struct: {
             fields: [
                 {
@@ -2182,7 +2182,7 @@ registerSchema([
     {
         name: "schema.funcargs",
         type: SchemaType.Array,
-        desc: _LS("schema.funcargs"),
+        display: _LS("schema.funcargs"),
         array: {
             element: "schema.funcarg",
         },
@@ -2190,7 +2190,7 @@ registerSchema([
     {
         name: "schema.funccallarg",
         type: SchemaType.Struct,
-        desc: _LS("schema.funccallarg"),
+        display: _LS("schema.funccallarg"),
         struct: {
             fields: [
                 {
@@ -2268,7 +2268,7 @@ registerSchema([
     {
         name: "schema.funccallargs",
         type: SchemaType.Array,
-        desc: _LS("schema.funccallargs"),
+        display: _LS("schema.funccallargs"),
         array: {
             element: "schema.funccallarg",
         },
@@ -2276,7 +2276,7 @@ registerSchema([
     {
         name: "schema.getcalltypewhitelist",
         type: SchemaType.Function,
-        desc: _LS("schema.getcalltypewhitelist"),
+        display: _LS("schema.getcalltypewhitelist"),
         func: {
             return: "schema.exptypes",
             args: [
@@ -2308,7 +2308,7 @@ registerSchema([
     {
         name: "schema.getfuncroot",
         type: SchemaType.Function,
-        desc: _LS("schema.getfuncroot"),
+        display: _LS("schema.getfuncroot"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -2345,7 +2345,7 @@ registerSchema([
     {
         name: "schema.funcexp",
         type: SchemaType.Struct,
-        desc: _LS("schema.funcexp"),
+        display: _LS("schema.funcexp"),
         struct: {
             fields: [
                 {
@@ -2411,7 +2411,7 @@ registerSchema([
     {
         name: "schema.funcexps",
         type: SchemaType.Array,
-        desc: _LS("schema.funcexps"),
+        display: _LS("schema.funcexps"),
         array: {
             element: "schema.funcexp",
             primary: ["name"],
@@ -2420,7 +2420,7 @@ registerSchema([
     {
         name: "schema.funcdefine",
         type: SchemaType.Struct,
-        desc: _LS("schema.funcdefine"),
+        display: _LS("schema.funcdefine"),
         struct: {
             fields: [
                 {
@@ -2451,7 +2451,7 @@ registerSchema([
     {
         name: "schema.namespacedefine",
         type: SchemaType.Struct,
-        desc: _LS("schema.namespacedefine"),
+        display: _LS("schema.namespacedefine"),
         struct: {
             fields: [
                 {
@@ -2470,10 +2470,10 @@ registerSchema([
                     default: SchemaType.Namespace,
                 },
                 {
-                    name: "desc",
+                    name: "display",
                     require: true,
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.namespacedefine.desc"),
+                    display: _LS("schema.namespacedefine.display"),
                     upLimit: 128,
                 } as IStructScalarFieldConfig,
                 {
@@ -2610,7 +2610,7 @@ export function saveStorageSchema(schema: INodeSchema)
     localStorage[`schema_data_${name}`] = JSON.stringify({
         name: schema.name,
         type: schema.type,
-        desc: schema.desc,
+        desc: schema.display,
         scalar: schema.scalar,
         enum: schema.enum,
         struct: schema.struct,
@@ -2671,7 +2671,7 @@ export function saveAllCustomSchemaToStroage(root: string = "")
 // export schema
 export function schemaToJson(f: INodeSchema): INodeSchema
 {
-    const r: INodeSchema = { name: f.name, type: f.type, desc: deepClone(f.desc) }
+    const r: INodeSchema = { name: f.name, type: f.type, display: deepClone(f.display) }
 
     switch(f.type)
     {

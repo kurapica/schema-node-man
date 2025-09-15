@@ -5,12 +5,12 @@ registerSchema([
     {
         name: "schema.app",
         type: SchemaType.Namespace,
-        desc: _LS("schema.app")
+        display: _LS("schema.app")
     },
     {
         name: "schema.app.srcapp",
         type: SchemaType.Scalar,
-        desc: _LS("schema.app.srcapp"),
+        display: _LS("schema.app.srcapp"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
@@ -18,7 +18,7 @@ registerSchema([
     {
         name: "schema.app.srcfld",
         type: SchemaType.Scalar,
-        desc: _LS("schema.app.srcfld"),
+        display: _LS("schema.app.srcfld"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
@@ -26,7 +26,7 @@ registerSchema([
     {
         name: "schema.app.accessfld",
         type: SchemaType.Scalar,
-        desc: _LS("schema.app.accessfld"),
+        display: _LS("schema.app.accessfld"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
@@ -34,7 +34,7 @@ registerSchema([
     {
         name: "schema.app.pushfld",
         type: SchemaType.Scalar,
-        desc: _LS("schema.app.pushfld"),
+        display: _LS("schema.app.pushfld"),
         scalar: {
             base: "schema.app.accessfld"
         }
@@ -42,7 +42,7 @@ registerSchema([
     {
         name: "schema.app.appinput",
         type: SchemaType.Scalar,
-        desc: _LS("schema.app.appinput"),
+        display: _LS("schema.app.appinput"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
@@ -50,7 +50,7 @@ registerSchema([
     {
         name: "schema.app.pushflds",
         type: SchemaType.Array,
-        desc: _LS("schema.app.pushflds"),
+        display: _LS("schema.app.pushflds"),
         array: {
             element: "schema.app.pushfld"
         }
@@ -58,7 +58,7 @@ registerSchema([
     {
         name: "schema.app.fieldvalarg",
         type: SchemaType.Struct,
-        desc: _LS("schema.app.fieldvalarg"),
+        display: _LS("schema.app.fieldvalarg"),
         struct: {
             fields: [
                 {
@@ -135,7 +135,7 @@ registerSchema([
     {
         name: "schema.app.fieldvalargs",
         type: SchemaType.Array,
-        desc: _LS("schema.app.fieldvalargs"),
+        display: _LS("schema.app.fieldvalargs"),
         array: {
             element: "schema.app.fieldvalarg"
         }
@@ -143,7 +143,7 @@ registerSchema([
     {
         name: "schema.app.getfieldtype",
         type: SchemaType.Function,
-        desc: _LS("schema.getfieldtype"),
+        display: _LS("schema.getfieldtype"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -186,7 +186,7 @@ registerSchema([
     {
         name: "schema.app.fieldrelation",
         type: SchemaType.Struct,
-        desc: _LS("schema.app.fieldrelation"),
+        display: _LS("schema.app.fieldrelation"),
         struct: {
             fields: [
                 {
@@ -277,7 +277,7 @@ registerSchema([
     {
         name: "schema.app.fieldrelations",
         type: SchemaType.Array,
-        desc: _LS("schema.app.fieldrelations"),
+        display: _LS("schema.app.fieldrelations"),
         array: {
             element: "schema.app.fieldrelation",
             primary: [ "field", "type" ]
@@ -286,7 +286,7 @@ registerSchema([
     {
         name: "schema.app.getsourceappblacklist",
         type: SchemaType.Function,
-        desc: _LS("schema.app.getsourceappblacklist"),
+        display: _LS("schema.app.getsourceappblacklist"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [],
@@ -300,7 +300,7 @@ registerSchema([
     {
         name: "schema.app.getsourceappfldinfo",
         type: SchemaType.Function,
-        desc: _LS("schema.app.getsourceappfldinfo"),
+        display: _LS("schema.app.getsourceappfldinfo"),
         func: {
             return: "schema.valuetype",
             args: [
@@ -328,7 +328,7 @@ registerSchema([
     {
         name: "schema.app.iscombinedisable",
         type: SchemaType.Function,
-        desc: _LS("schema.app.iscombinedisable"),
+        display: _LS("schema.app.iscombinedisable"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -355,7 +355,7 @@ registerSchema([
     {
         name: "schema.app.iscombinesdisable",
         type: SchemaType.Function,
-        desc: _LS("schema.app.iscombinesdisable"),
+        display: _LS("schema.app.iscombinesdisable"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -383,7 +383,7 @@ registerSchema([
     {
         name: "schema.app.field",
         type: SchemaType.Struct,
-        desc: _LS("schema.app.field"),
+        display: _LS("schema.app.field"),
         struct: {
             fields: [
                 {
@@ -614,7 +614,7 @@ registerSchema([
     {
         name: "schema.app.nofields",
         type: SchemaType.Function,
-        desc: _LS("schema.app.nofields"),
+        display: _LS("schema.app.nofields"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -635,7 +635,7 @@ registerSchema([
     {
         name: "schema.app.nomainapp",
         type: SchemaType.Function,
-        desc: _LS("schema.app.nomainapp"),
+        display: _LS("schema.app.nomainapp"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -656,7 +656,7 @@ registerSchema([
     {
         name: "schema.app.getmainapps",
         type: SchemaType.Function,
-        desc: _LS("schema.app.getmainapps"),
+        display: _LS("schema.app.getmainapps"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
@@ -672,7 +672,7 @@ registerSchema([
     {
         name: "schema.app.app",
         type: SchemaType.Struct,
-        desc: _LS("schema.app.app"),
+        display: _LS("schema.app.app"),
         struct: {
             fields: [
                 {
@@ -905,14 +905,14 @@ function gatherSchemas(types: INodeSchema[], name?: string)
         {
             const schema = getCachedSchema(ns)
             if (!schema) return
-            const json: INodeSchema = { name: schema.name, type: schema.type, desc: deepClone(schema.desc), schemas: [] }
+            const json: INodeSchema = { name: schema.name, type: schema.type, display: deepClone(schema.display), schemas: [] }
             schemas.push(json)
             schemas = json.schemas!
         }
     }
     if (schemas.findIndex(s => s.name === name) >= 0) return
 
-    const r: INodeSchema = { name: schema.name, type: schema.type, desc: deepClone(schema.desc) }
+    const r: INodeSchema = { name: schema.name, type: schema.type, display: deepClone(schema.display) }
     schemas.push(r)
 
     switch (schema.type)

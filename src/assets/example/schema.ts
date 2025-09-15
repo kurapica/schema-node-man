@@ -6,12 +6,12 @@ registerSchema([
   {
     "name": "test",
     "type": "namespace",
-    "desc": _LS("test"),
+    "display": _LS("test"),
     "schemas": [
       {
         "name": "test.gpa",
         "type": "enum",
-        "desc": _LS("test.gpa"),
+        "display": _LS("test.gpa"),
         "enum": {
           "type": "int",
           "values": [
@@ -41,7 +41,7 @@ registerSchema([
       {
         "name": "test.nosubjects",
         "type": "func",
-        "desc": _LS("test.nosubjects"),
+        "display": _LS("test.nosubjects"),
         "func": {
           "return": "system.bool",
           "args": [
@@ -109,7 +109,7 @@ registerSchema([
       {
         "name": "test.person",
         "type": "struct",
-        "desc": _LS("test.person"),
+        "display": _LS("test.person"),
         "struct": {
           "fields": [
             {
@@ -214,7 +214,7 @@ registerSchema([
       {
         "name": "test.persons",
         "type": "array",
-        "desc": _LS("test.persons"),
+        "display": _LS("test.persons"),
         "array": {
           element: "test.person",
           primary: ["name"]
@@ -223,7 +223,7 @@ registerSchema([
       {
         "name": "test.subject",
         "type": "enum",
-        "desc": _LS("test.subject"),
+        "display": _LS("test.subject"),
         "enum": {
           "type": "int",
           "cascade": [
@@ -328,7 +328,7 @@ registerSchema([
       {
         "name": "test.subjects",
         "type": "array",
-        "desc": _LS("test.subjects"),
+        "display": _LS("test.subjects"),
         "array": {
           "element": "test.subject"
         }
@@ -336,7 +336,7 @@ registerSchema([
       {
         "name": "test.subjectscore",
         "type": "struct",
-        "desc": _LS("test.subjectscore"),
+        "display": _LS("test.subjectscore"),
         "struct": {
           "fields": [
             {
@@ -359,7 +359,7 @@ registerSchema([
       {
         "name": "test.subjectscores",
         "type": "array",
-        "desc": _LS("test.subjectscores"),
+        "display": _LS("test.subjectscores"),
         "array": {
           "element": "test.subjectscore",
           "primary": [
@@ -370,7 +370,7 @@ registerSchema([
       {
         "name": "test.role",
         "type": "enum",
-        "desc": _LS("test.role"),
+        "display": _LS("test.role"),
         "enum": {
           "type": "flags",
           "values": [
@@ -400,7 +400,7 @@ registerSchema([
       {
         "name": "test.gensubjectscore",
         "type": "func",
-        "desc": _LS("test.gensubjectscore"),
+        "display": _LS("test.gensubjectscore"),
         "func": {
           "return": "test.subjectscore",
           "args": [
