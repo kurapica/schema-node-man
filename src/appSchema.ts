@@ -921,8 +921,8 @@ function gatherSchemas(types: INodeSchema[], name?: string)
         {
             r.scalar = deepClone(schema.scalar, true)
             gatherSchemas(types, r.scalar?.base)
-            gatherSchemas(types, r.scalar?.prevalid)
-            gatherSchemas(types, r.scalar?.postvalid)
+            gatherSchemas(types, r.scalar?.preValid)
+            gatherSchemas(types, r.scalar?.postValid)
             break
         }
         case SchemaType.Enum:

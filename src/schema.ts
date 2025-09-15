@@ -388,19 +388,19 @@ registerSchema([
                     display: _LS("schema.scalardefine.regex"),
                 },
                 {
-                    name: "prevalid",
+                    name: "preValid",
                     type: "schema.scalarvalidfunc",
                     display: _LS("schema.scalardefine.prevalid"),
                 } as IStructScalarFieldConfig,
                 {
-                    name: "postvalid",
+                    name: "postValid",
                     type: "schema.scalarvalidfunc",
                     display: _LS("schema.scalardefine.postvalid"),
                 },
             ],
             relations: [
                 {
-                    field: "prevalid",
+                    field: "preValid",
                     type: RelationType.Root,
                     func: "system.conv.assign",
                     args: [
@@ -410,7 +410,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "postvalid",
+                    field: "postValid",
                     type: RelationType.Root,
                     func: "system.conv.assign",
                     args: [
@@ -2442,6 +2442,22 @@ registerSchema([
                     type: "schema.funcexps",
                     display: _LS("schema.funcdefine.exps")
                 },
+                {
+                    name: "generic",
+                    type: NS_SYSTEM_STRINGS,
+                    display: _LS("schema.funcdefine.generic"),
+                    invisible: true,
+                },
+                {
+                    name: "server",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.funcdefine.server"),
+                },
+                {
+                    name: "nocache",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.funcdefine.nocache"),
+                }
             ],
         }
     },
