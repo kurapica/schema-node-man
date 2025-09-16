@@ -401,13 +401,13 @@ registerSchema([
                 },
                 {
                     name: "display",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.app.field.display"),
                     upLimit: 64,
                 },
                 {
                     name: "desc",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.app.field.desc"),
                     upLimit: 255,
                 },
@@ -684,13 +684,13 @@ registerSchema([
                 } as IStructScalarFieldConfig,
                 {
                     name: "display",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.app.app.display"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "desc",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.app.app.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,

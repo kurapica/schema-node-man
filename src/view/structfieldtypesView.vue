@@ -3,7 +3,7 @@
         <el-tabs v-if="elTabVis" ref="elTabsRef" class="struct-field-types" v-model="activeCol" :addable="!node.readonly" @edit="handleTabsEdit">
             <el-tab-pane v-for="(element, i) in elementDisplay"
                 :closable="!(node.readonly || element.name && noClosable.includes(element.name))"
-                :label="element.display || element.name || _L['schema.structdefine.unkown']"
+                :label="_L(element.display || element.name || _L['schema.structdefine.unkown'])"
                 :name="i"></el-tab-pane>
         </el-tabs>
         <schema-view v-if="activeCol >= 0 && activeCol < elements.length"
@@ -45,7 +45,7 @@ const handleTabsEdit = (target: any, action: string) => {
     else if (action === "remove") {
         const delRow = arrayNode.elements[target]
         if (!delRow) return
-        ElMessageBox.confirm(sformat(_LS("schema.structdefine.confirmflddel"), delRow.data.display || delRow.data.name || _L.value["schema.structdefine.anonymous"]), _L.value["schema.structdefine.fields"], {
+        ElMessageBox.confirm(sformat("schema.structdefine.confirmflddel", delRow.data.display || delRow.data.name || "schema.structdefine.anonymous"), _L.value["schema.structdefine.fields"], {
             confirmButtonText: _L.value["YES"],
             cancelButtonText: _L.value["NO"]
         }).then(() => {

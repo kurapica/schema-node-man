@@ -8,7 +8,7 @@
         style="width: 100%;min-width: 120px;"
         :disabled="state.readonly || state.disable"
         :clearable="!state.require"
-        :placeholder="getSelectPlaceHolder(scalarNode)">
+        :placeholder="scalarNode.selectPlaceHolder">
         <el-option
             v-for="item in state.whiteList"
             :key="typeof(item) === 'object' ? item.value : item"
@@ -19,8 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getAppSchema, isNull, isSchemaCanBeUseAs, ScalarNode, StructNode, type IAppSchema } from 'schema-node'
-import { getSelectPlaceHolder } from 'schema-node-vueview'
+import { _L, getAppSchema, isNull, isSchemaCanBeUseAs, ScalarNode, StructNode, type IAppSchema } from 'schema-node'
 import { computed, onMounted, onUnmounted, reactive, toRaw } from 'vue'
 
 // Define props
@@ -82,7 +81,7 @@ onMounted(() => {
                 if (!type || await isSchemaCanBeUseAs(f.type, type))
                     whiteList.push({
                         value: f.name,
-                        label: f.display || f.name
+                        label: _L(f.display) || f.name
                     })
             }
             state.whiteList = whiteList

@@ -26,7 +26,7 @@
                 lazy: true,
                 lazyLoad: lazyLoad
             }" 
-            :placeholder="getSelectPlaceHolder(scalarNode)"
+            :placeholder="scalarNode.selectPlaceHolder"
             :disabled="state.readonly || state.disable" :clearable="!state.require"
             v-bind="$attrs">
             <template #default="{ data }">
@@ -89,16 +89,18 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
-import { _L, getSelectPlaceHolder } from "schema-node-vueview"
+import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
+import { _L } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
 import { schemaView } from "schema-node-vueview"
+import { options } from "marked"
 
 //#region Inner type
 interface ICascaderOptionInfo {
     value: string
     type: SchemaTypeValue
+    display?: ILocaleString
     label: string
     leaf: boolean
     loadState: number
@@ -195,11 +197,11 @@ const handleEdit = async (name: string, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
@@ -293,7 +295,8 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
         const ele: ICascaderOptionInfo = {
             value: v.name,
             type: v.type,
-            label: `${v.display || v.name}`,
+            display: v.display,
+            label: _L.value(v.display),
             loadState: v.loadState || 0,
             leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex(s => s.type === SchemaType.Namespace) < 0)),
             children: null
@@ -374,6 +377,13 @@ const reBuildOptions = async () => {
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])
 }
 
+const refreshOptions = (options: ICascaderOptionInfo[]) => {
+    options.forEach(o => {
+        o.label = _L.value(o.display)
+        if (o.children?.length) refreshOptions(o.children)
+    })
+}
+
 // change handler
 let dataWatcher: Function | null = null
 let stateHandler: Function | null = null
@@ -413,7 +423,7 @@ onMounted(() => {
             const match = option?.children?.find(c => c.value === name)
             if (match)
             {
-                display.push(match.label)
+                display.push(_L.value(match.label))
                 option = match
             }
             else
@@ -421,7 +431,7 @@ onMounted(() => {
                 rebuild = true
                 const schema = await getSchema(name)
                 if (!schema) break
-                display.push(`${schema.display || paths[i]}`)
+                display.push(_L.value(schema.display || paths[i]))
             }
         }
         state.display = display.join("/")
@@ -443,7 +453,11 @@ onMounted(() => {
     }, true)
 
     // update display
-    langHandler = subscribeLanguage(reBuildOptions)
+    langHandler = subscribeLanguage(() => {
+        if (!root.children) return
+        refreshOptions(root.children)
+        root.children = [...root.children]
+    })
 })
 
 onUnmounted(() => {

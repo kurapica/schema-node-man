@@ -11,7 +11,7 @@
             emitPath: false,
             checkStrictly: !state.root,
         }" 
-        :placeholder="getSelectPlaceHolder(scalarNode)"
+        :placeholder="scalarNode.selectPlaceHolder"
         :disabled="state.readonly || state.disable" 
         :clearable="!state.require"
         v-bind="$attrs"
@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { getCachedSchema, isNull, SchemaType, ScalarNode, getSchema, isSchemaCanBeUseAs, ARRAY_ELEMENT, getAppSchema } from "schema-node"
-import { _L, getSelectPlaceHolder } from "schema-node-vueview"
+import { _L } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 
 //#region Inner type
@@ -156,7 +156,7 @@ onMounted(async () => {
             if (!paths.length) return
             const fld = fields.find((f:any) => f.name === paths[0])
             if (!fld) return
-            paths[0] = fld.display || fld.name
+            paths[0] = _L(fld.display) || fld.name
             
             let type = fld.type
             for(let i = 1; i < paths.length; i++)

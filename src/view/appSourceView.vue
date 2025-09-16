@@ -13,7 +13,7 @@
                 lazy: true,
                 lazyLoad: lazyLoad
             }" 
-            :placeholder="getSelectPlaceHolder(scalarNode)"
+            :placeholder="scalarNode.selectPlaceHolder"
             :disabled="state.readonly || state.disable" :clearable="!state.require"
             v-bind="$attrs">
             <template #default="{ data }">
@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { getAppCachedSchema, getAppSchema, isNull, subscribeAppSchemaChange, subscribeLanguage, type IAppSchema, type ScalarNode } from "schema-node"
-import { _L, getSelectPlaceHolder } from "schema-node-vueview"
+import { _L } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, toRaw } from "vue"
 
 //#region Inner type

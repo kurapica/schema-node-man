@@ -276,7 +276,7 @@ registerSchema([
     {
         name: "schema.exptypes",
         type: SchemaType.Array,
-        display: _L("schema.exptypes"),
+        display: _LS("schema.exptypes"),
         array: {
             element: "schema.exptype"
         }
@@ -354,11 +354,11 @@ registerSchema([
             values: [
                 {
                     value: "enUS",
-                    name: "English"
+                    name: _LS("English")
                 },
                 {
                     value: "zhCN",
-                    name: "中文"
+                    name: _LS("中文")
                 }
             ]
         }
@@ -399,7 +399,7 @@ registerSchema([
         struct: {
             fields: [
                 {
-                    name: "default",
+                    name: "key",
                     type: NS_SYSTEM_STRING,
                     require: true,
                     display: _LS("schema.localestring.default")
@@ -429,7 +429,7 @@ registerSchema([
                 },
                 {
                     name: "unit",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.scalardefine.unit"),
                     upLimit: 8,
                 } as IStructScalarFieldConfig,
@@ -445,7 +445,7 @@ registerSchema([
                 },
                 {
                     name: "error",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.scalardefine.error"),
                     upLimit: 128,
                 },
@@ -508,7 +508,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
@@ -831,7 +831,7 @@ registerSchema([
     {
         name: "schema.isvaluenotnull",
         type: SchemaType.Function,
-        display: _L("schema.isvaluenotnull"),
+        display: _LS("schema.isvaluenotnull"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -1220,19 +1220,19 @@ registerSchema([
                 },
                 {
                     name: "display",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.structfieldtype.display"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "desc",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.structfieldtype.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
                 {
                     name: "error",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.structfieldtype.error"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
@@ -1263,7 +1263,7 @@ registerSchema([
                 },
                 {
                     name: "unit",
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.structfieldtype.unit"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
@@ -2622,7 +2622,7 @@ registerSchema([
                 {
                     name: "display",
                     require: true,
-                    type: NS_SYSTEM_STRING,
+                    type: "schema.localestring",
                     display: _LS("schema.namespacedefine.display"),
                     upLimit: 128,
                 } as IStructScalarFieldConfig,
@@ -2866,8 +2866,10 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import funcdefineView from "./view/funcdefineView.vue"
+import localstringView from "./view/localstringView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
+regSchemaTypeView("schema.localestring", localstringView, undefined, true)
 regSchemaTypeView("schema.namespace", namespaceView)
 regSchemaTypeView("schema.scalartype", namespaceView)
 regSchemaTypeView("schema.enumtype", namespaceView)

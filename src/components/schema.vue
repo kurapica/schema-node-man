@@ -40,7 +40,11 @@
              @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
                 <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
+                <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                    <template #default="scope">
+                        {{ _L(scope.row.display) }}
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="type" :label="_L['schema.designer.type']" width="150">
                     <template #default="scope">
                         {{ _L['schema.schematype.' + scope.row.type] }}
@@ -233,7 +237,7 @@ const handleNew = async () => {
     showNamespaceEditor.value = true
 
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + " " + (namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.new"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
     }, true)
 }
 
@@ -246,11 +250,11 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
         }, true)
     }
 }

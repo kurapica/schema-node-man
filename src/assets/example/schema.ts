@@ -17,22 +17,22 @@ registerSchema([
           "values": [
             {
               "value": 4,
-              "name": "A",
+              "name": _LS("A"),
               "disable": false
             },
             {
               "value": 3,
-              "name": "B",
+              "name": _LS("B"),
               "disable": false
             },
             {
               "value": 2,
-              "name": "C",
+              "name": _LS("C"),
               "disable": false
             },
             {
               "value": 1,
-              "name": "D",
+              "name": _LS("D"),
               "disable": false
             }
           ]
@@ -233,91 +233,91 @@ registerSchema([
           "values": [
             {
               "value": 100,
-              "name": "Language",
+              "name": _LS("Language"),
               "disable": false,
               "subList": [
                 {
                   "value": 101,
-                  "name": "English",
+                  "name": _LS("English"),
                   "disable": false
                 },
                 {
                   "value": 102,
-                  "name": "Grammar and Vocabulary",
+                  "name": _LS("Grammar and Vocabulary"),
                   "disable": false
                 },
                 {
                   "value": 103,
-                  "name": "Speech",
+                  "name": _LS("Speech"),
                   "disable": false
                 },
                 {
                   "value": 104,
-                  "name": "Creative Writing",
+                  "name": _LS("Creative Writing"),
                   "disable": false
                 }
               ]
             },
             {
               "value": 200,
-              "name": "Mathematics",
+              "name": _LS("Mathematics"),
               "disable": false,
               "subList": [
                 {
                   "value": 201,
-                  "name": "Algebra I & II",
+                  "name": _LS("Algebra I & II"),
                   "disable": false
                 },
                 {
                   "value": 202,
-                  "name": "Geometry",
+                  "name": _LS("Geometry"),
                   "disable": false
                 },
                 {
                   "value": 203,
-                  "name": "Trigonometry",
+                  "name": _LS("Trigonometry"),
                   "disable": false
                 },
                 {
                   "value": 204,
-                  "name": "Calculus",
+                  "name": _LS("Calculus"),
                   "disable": false
                 },
                 {
                   "value": 205,
-                  "name": "Statistics",
+                  "name": _LS("Statistics"),
                   "disable": false
                 }
               ]
             },
             {
               "value": 300,
-              "name": "Science",
+              "name": _LS("Science"),
               "disable": false,
               "subList": [
                 {
                   "value": 301,
-                  "name": "Biology",
+                  "name": _LS("Biology"),
                   "disable": false
                 },
                 {
                   "value": 302,
-                  "name": "Chemistry",
+                  "name": _LS("Chemistry"),
                   "disable": false
                 },
                 {
                   "value": 303,
-                  "name": "Physics",
+                  "name": _LS("Physics"),
                   "disable": false
                 },
                 {
                   "value": 304,
-                  "name": "Earth Science",
+                  "name": _LS("Earth Science"),
                   "disable": false
                 },
                 {
                   "value": 305,
-                  "name": "Environmental Science",
+                  "name": _LS("Environmental Science"),
                   "disable": false
                 }
               ]
@@ -376,22 +376,22 @@ registerSchema([
           "values": [
             {
               "value": 0,
-              "name": "None",
+              "name": _LS("None"),
               "disable": false
             },
             {
               "value": 1,
-              "name": "Worker",
+              "name": _LS("Worker"),
               "disable": false
             },
             {
               "value": 2,
-              "name": "Mananger",
+              "name": _LS("Mananger"),
               "disable": false
             },
             {
               "value": 4,
-              "name": "Admin",
+              "name": _LS("Admin"),
               "disable": false
             }
           ]
