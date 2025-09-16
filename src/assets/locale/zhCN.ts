@@ -74,6 +74,16 @@ importLanguage("zhCN", {
     "schema.datacombinetype.min": "最小值",
     "schema.datacombinetype.max": "最大值",
 
+    "schema.language": "语言",
+    "schema.localetran": "翻译条目",
+    "schema.localetran.lang": "语言",
+    "schema.localetran.tran": "翻译",
+    "schema.localetrans": "翻译条目列表",
+
+    "schema.localestring": "可本地化字符串",
+    "schema.localestring.default": "默认文本",
+    "schema.localestring.trans": "翻译条目",
+
     "schema.scalardefine": "基础结构体类型定义",
     "schema.scalardefine.base": "原始基础数据类型",
     "schema.scalardefine.unit": "字面量单位",
@@ -178,6 +188,11 @@ importLanguage("zhCN", {
     "schema.datacombine.field": "字段",
     "schema.datacombine.type": "合并规则",
     "schema.datacombines": "数据合并规则列表",
+
+    "schema.dataindex": "数组索引",
+    "schema.dataindex.name": "索引名称",
+    "schema.dataindex.fields": "索引字段",
+    "schema.dataindexes": "数组索引列表",
 
     "schema.arraydefine": "数组定义",
     "schema.arraydefine.element": "元素数据类型",

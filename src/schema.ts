@@ -345,6 +345,73 @@ registerSchema([
             ]
         }
     },
+    {
+        name: "schema.language",
+        type: SchemaType.Enum,
+        display: _LS("schema.language"),
+        enum: {
+            type: EnumValueType.String,
+            values: [
+                {
+                    value: "enUS",
+                    name: "English"
+                },
+                {
+                    value: "zhCN",
+                    name: "中文"
+                }
+            ]
+        }
+    },
+    {
+        name: "schema.localetran",
+        type: SchemaType.Struct,
+        display: _LS("schema.localetran"),
+        struct: {
+            fields: [
+                {
+                    name: "lang",
+                    type: "schema.language",
+                    require: true,
+                    display: _LS("schema.localetran.lang")
+                },
+                {
+                    name: "tran",
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.localetran.tran")
+                }
+            ]
+        }
+    },
+    {
+        name: "schema.localetrans",
+        type: SchemaType.Array,
+        display: _LS("schema.localetrans"),
+        array: {
+            element: "schema.localetran",
+            primary: [ "lang" ]
+        }
+    },
+    {
+        name: "schema.localestring",
+        type: SchemaType.Struct,
+        display: _LS("schema.localestring"),
+        struct: {
+            fields: [
+                {
+                    name: "default",
+                    type: NS_SYSTEM_STRING,
+                    require: true,
+                    display: _LS("schema.localestring.default")
+                },
+                {
+                    name: "trans",
+                    type: "schema.localetrans",
+                    display: _LS("schema.localestring.trans")
+                }
+            ]
+        }
+    },
     //#endregion
 
     //#region scalar definition
@@ -1988,7 +2055,8 @@ registerSchema([
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "schema.valuetype",
+                    nullable: true,
                 }
             ],
             exps: [],
@@ -2051,6 +2119,47 @@ registerSchema([
         }
     },
     {
+        name: "schema.dataindex",
+        type: SchemaType.Struct,
+        display: _LS("schema.dataindex"),
+        struct: {
+            fields: [
+                {
+                    name: "name",
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.dataindex.name"),
+                    upLimit: 16,
+                } as IStructScalarFieldConfig,
+                {
+                    name: "fields",
+                    type: NS_SYSTEM_STRINGS,
+                    display: _LS("schema.dataindex.fields"),
+                }
+            ],
+            relations: [
+                {
+                    field: "fields.$ele",
+                    type: RelationType.BlackList,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "fields"
+                        }
+                    ]
+                },
+            ]
+        }
+    },
+    {
+        name: "schema.dataindexes",
+        type: SchemaType.Array,
+        display: _LS("schema.dataindexes"),
+        array: {
+            element: "schema.dataindex",
+            primary: ["name"]
+        }
+    },
+    {
         name: "schema.arraydefine",
         type: SchemaType.Struct,
         display: _LS("schema.arraydefine"),
@@ -2070,6 +2179,11 @@ registerSchema([
                     name: "primary",
                     type: NS_SYSTEM_STRINGS,
                     display: _LS("schema.arraydefine.primary"),
+                },
+                {
+                    name: "indexes",
+                    type: "schema.dataindexes",
+                    display: _LS("schema.dataindexes")
                 },
                 {
                     name: "combine",
@@ -2110,6 +2224,26 @@ registerSchema([
                     args: [
                         {
                             name: "primary"
+                        }
+                    ]
+                },
+                {
+                    field: "indexes",
+                    type: RelationType.Invisible,
+                    func: "schema.notstructtype",
+                    args: [
+                        {
+                            name: "element"
+                        }
+                    ]
+                },
+                {
+                    field: "indexes.fields.$ele",
+                    type: RelationType.WhiteList,
+                    func: "schema.getstructindexfields",
+                    args: [
+                        {
+                            name: "element"
                         }
                     ]
                 },

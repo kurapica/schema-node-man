@@ -74,6 +74,16 @@ importLanguage("enUS", {
     "schema.datacombinetype.min": "Minimum",
     "schema.datacombinetype.max": "Maximum",
 
+    "schema.language": "Language",
+    "schema.localetran": "Translate",
+    "schema.localetran.lang": "Language",
+    "schema.localetran.tran": "Translate",
+    "schema.localetrans": "Translate List",
+
+    "schema.localestring": "Locale string",
+    "schema.localestring.default": "Default",
+    "schema.localestring.trans": "Translate",
+    
     "schema.scalardefine": "Scalar Definition",
     "schema.scalardefine.base": "Base Scalar Type",
     "schema.scalardefine.unit": "Unit Literal",
@@ -178,6 +188,11 @@ importLanguage("enUS", {
     "schema.datacombine.field": "Field",
     "schema.datacombine.type": "Combine Rule",
     "schema.datacombines": "Data Combine Rule List",
+
+    "schema.dataindex": "Array Index",
+    "schema.dataindex.name": "Index Name",
+    "schema.dataindex.fields": "Index Field",
+    "schema.dataindexes": "Array Indexes",
 
     "schema.arraydefine": "Array Definition",
     "schema.arraydefine.element": "Element Type",
