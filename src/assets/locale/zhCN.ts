@@ -281,6 +281,7 @@ importLanguage("zhCN", {
     "schema.designer.moveup": "上移",
     "schema.designer.confirmdelete": "执行删除操作?",
     "schema.designer.app": "应用",
+    "schema.designer.tran": "翻译",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",

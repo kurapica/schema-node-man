@@ -36,8 +36,16 @@
                 @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
                 <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
-                <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
+                <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                    <template #default="scope">
+                        {{ _L(scope.row.display) }}
+                    </template>
+                </el-table-column>
+                <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150">
+                    <template #default="scope">
+                        {{ _L(scope.row.desc) }}
+                    </template>
+                </el-table-column>
                 <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="440">
                     <template #header>
                         <a href="javascript:void(0)" v-if="state.app" @click="goback"
@@ -118,7 +126,11 @@
                         header-align="left" 
                         :header-cell-style="{ background: '#eee' }">
                         <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
+                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                            <template #default="scope">
+                                {{ _L(scope.row.display) }}
+                            </template>
+                        </el-table-column>
                         <el-table-column align="left" prop="type" :label="_L['schema.designer.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{
@@ -127,7 +139,11 @@
                                 }" plain-text="left"></schema-view>
                             </template>
                         </el-table-column>
-                        <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
+                        <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150">
+                            <template #default="scope">
+                                {{ _L(scope.row.desc) }}
+                            </template>
+                        </el-table-column>
                         <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="400">
                             <template #header>
                                 <a href="javascript:void(0)" @click="handleFieldNew"
@@ -291,7 +307,7 @@ const handleNew = async () => {
     showAppEditor.value = true
 
     appWatchHandler = appNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + " " + (appNode.value?.data.display || appNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
     }, true)
 }
 
@@ -306,11 +322,11 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     showAppEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (appNode.value?.data.display || appNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
     }
     else {
         appWatchHandler = appNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (appNode.value?.data.display || appNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
         }, true)
     }
 }
@@ -357,7 +373,7 @@ const showFields = async(row: any) => {
     currApp = row.name
     localStorage["schema_curr_app"] = currApp
     const appSchema = await getAppSchema(row.name)
-    appTitle.value = appSchema?.display || appSchema?.name || ""
+    appTitle.value = _L.value(appSchema?.display) || appSchema?.name || ""
     fields.value = appSchema?.fields ? [...appSchema.fields] : []
     showFieldList.value = true
 }
@@ -388,7 +404,7 @@ const handleFieldNew = async () => {
     showAppFieldEditor.value = true
 
     appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-        appFieldOper.value = _L.value["schema.designer.new"] + " " + (appFieldNode.value?.data.display || appFieldNode.value?.data.name || "")
+        appFieldOper.value = _L.value["schema.designer.new"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
     }, true)
 }
 
@@ -401,11 +417,11 @@ const handleFieldEdit = async (row: any, readonly?: boolean) => {
     showAppFieldEditor.value = true
 
     if (readonly) {
-        appFieldOper.value = _L.value["schema.designer.view"] + " " + (appFieldNode.value?.data.display || appFieldNode.value?.data.name || "")
+        appFieldOper.value = _L.value["schema.designer.view"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
     }
     else {
         appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-            appFieldOper.value = _L.value["schema.designer.edit"] + " " + (appFieldNode.value?.data.display || appFieldNode.value?.data.name || "")
+            appFieldOper.value = _L.value["schema.designer.edit"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
         }, true)
     }
 }

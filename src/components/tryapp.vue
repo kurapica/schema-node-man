@@ -1,7 +1,7 @@
 <template>
     <el-form v-if="appNode" ref="form" label-width="140px" :model="appNode.rawData">
         <template v-for="f in appNode.fields">
-            <h2>{{ f.display || f.name }}</h2>
+            <h2>{{ _L(f.display) || f.name }}</h2>
             <schema-view
                 plain-text="left"
                 :node="(f as AnySchemaNode)"

@@ -281,6 +281,7 @@ importLanguage("enUS", {
     "schema.designer.moveup": "Move Up",
     "schema.designer.confirmdelete": "Continue the delete process?",
     "schema.designer.app": "Application",
+    "schema.designer.tran": "Translate",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",

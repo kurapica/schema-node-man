@@ -17,22 +17,54 @@ registerSchema([
           "values": [
             {
               "value": 4,
-              "name": _LS("A"),
+              "name": {
+                "key": "A",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "优秀"
+                  }
+                ]
+              },
               "disable": false
             },
             {
               "value": 3,
-              "name": _LS("B"),
+              "name": {
+                "key": "B",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "良好"
+                  }
+                ]
+              },
               "disable": false
             },
             {
               "value": 2,
-              "name": _LS("C"),
+              "name": {
+                "key": "C",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "及格"
+                  }
+                ]
+              },
               "disable": false
             },
             {
               "value": 1,
-              "name": _LS("D"),
+              "name": {
+                "key": "D",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "不及格"
+                  }
+                ]
+              },
               "disable": false
             }
           ]
@@ -233,91 +265,227 @@ registerSchema([
           "values": [
             {
               "value": 100,
-              "name": _LS("Language"),
+              "name": {
+                "key": "Language",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "语言"
+                  }
+                ]
+              },
               "disable": false,
               "subList": [
                 {
                   "value": 101,
-                  "name": _LS("English"),
+                  "name": {
+                    "key": "English",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "英语"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 102,
-                  "name": _LS("Grammar and Vocabulary"),
+                  "name": {
+                    "key": "Grammar and Vocabulary",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "语法"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 103,
-                  "name": _LS("Speech"),
+                  "name": {
+                    "key": "Speech",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "演讲"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 104,
-                  "name": _LS("Creative Writing"),
+                  "name": {
+                    "key": "Creative Writing",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "写作"
+                      }
+                    ]
+                  },
                   "disable": false
                 }
               ]
             },
             {
               "value": 200,
-              "name": _LS("Mathematics"),
+              "name": {
+                "key": "Mathematics",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "数学"
+                  }
+                ]
+              },
               "disable": false,
               "subList": [
                 {
                   "value": 201,
-                  "name": _LS("Algebra I & II"),
+                  "name": {
+                    "key": "Algebra I & II",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "代数"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 202,
-                  "name": _LS("Geometry"),
+                  "name": {
+                    "key": "Geometry",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "几何"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 203,
-                  "name": _LS("Trigonometry"),
+                  "name": {
+                    "key": "Trigonometry",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "三角学"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 204,
-                  "name": _LS("Calculus"),
+                  "name": {
+                    "key": "Calculus",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "计算"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 205,
-                  "name": _LS("Statistics"),
+                  "name": {
+                    "key": "Statistics",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "统计"
+                      }
+                    ]
+                  },
                   "disable": false
                 }
               ]
             },
             {
               "value": 300,
-              "name": _LS("Science"),
+              "name": {
+                "key": "Science",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "科学"
+                  }
+                ]
+              },
               "disable": false,
               "subList": [
                 {
                   "value": 301,
-                  "name": _LS("Biology"),
+                  "name": {
+                    "key": "Biology",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "生物"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 302,
-                  "name": _LS("Chemistry"),
+                  "name": {
+                    "key": "Chemistry",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "化学"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 303,
-                  "name": _LS("Physics"),
+                  "name": {
+                    "key": "Physics",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "物理"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 304,
-                  "name": _LS("Earth Science"),
+                  "name": {
+                    "key": "Earth Science",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "地球科学"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 305,
-                  "name": _LS("Environmental Science"),
+                  "name": {
+                    "key": "Environmental Science",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "环境"
+                      }
+                    ]
+                  },
                   "disable": false
                 }
               ]

@@ -237,7 +237,7 @@ const handleNew = async () => {
     showNamespaceEditor.value = true
 
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }, true)
 }
 
@@ -250,11 +250,11 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
