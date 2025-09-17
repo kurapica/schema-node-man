@@ -217,7 +217,6 @@ registerSchema([
               "args": [
                 {
                   "name": "gpa",
-                  "value": true
                 },
                 {
                   "value": "test.gpa"

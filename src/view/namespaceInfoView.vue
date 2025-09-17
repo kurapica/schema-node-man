@@ -29,7 +29,7 @@
                     <el-breadcrumb-item v-for="item in state.schema.enum.cascade">{{ item }}</el-breadcrumb-item>
                 </el-breadcrumb>
                 <ul>
-                    <li v-for="item in state.schema.enum!.values.slice(0, 5)">{{ item.name }}</li>
+                    <li v-for="item in state.schema.enum!.values.slice(0, 5)">{{ _L(item.name) }}</li>
                 </ul>
             </template>
             <!-- Enum Array -->
@@ -39,7 +39,7 @@
                     <el-breadcrumb-item v-for="item in state.eleschema.enum.cascade">{{ item }}</el-breadcrumb-item>
                 </el-breadcrumb>
                 <ul>
-                    <li v-for="item in state.eleschema.enum!.values.slice(0, 5)">{{ item.name }}</li>
+                    <li v-for="item in state.eleschema.enum!.values.slice(0, 5)">{{ _L(item.name) }}</li>
                 </ul>
             </template>
             <!-- Struct -->
@@ -47,7 +47,11 @@
                 <el-table :data="state.structure" row-key="label" default-expand-all
                     :tree-props="{ children: 'children' }">
                     <el-table-column prop="label" :label="_L['schema.structfieldtype.name']" min-width="240"></el-table-column>
-                    <el-table-column prop="desc" :label="_L['schema.structfieldtype.desc']" min-width="240"></el-table-column>
+                    <el-table-column prop="desc" :label="_L['schema.structfieldtype.desc']" min-width="240">
+                        <template #default="scope">
+                            {{ _L(scope.row.desc) }}
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="" :label="_L['schema.designer.tag']" min-width="240">
                         <template #default="scope">
                             <!-- Type -->
@@ -64,7 +68,11 @@
             <template v-if="typeof(state.retType) === 'object' && state.retType.structure">
                 <el-table :data="state.retType.structure" row-key="label" default-expand-all :tree-props="{ children: 'children' }" style="margin-bottom: 24px;">
                     <el-table-column prop="label" :label="_L['schema.designer.returnstruct']" min-width="240"></el-table-column>
-                    <el-table-column prop="desc" :label="_L['schema.structfieldtype.name']" min-width="240"></el-table-column>
+                    <el-table-column prop="desc" :label="_L['schema.structfieldtype.name']" min-width="240">
+                        <template #default="scope">
+                            {{ _L(scope.row.desc) }}
+                        </template>
+                    </el-table-column>
                     <el-table-column prop=""  :label="_L['schema.designer.tag']" min-width="240">
                         <template #default="scope">
                             <!-- Type -->
@@ -157,7 +165,8 @@ const buildStruct = async (type: string): Promise<ITypeStructInfo[]> => {
     for (let i = 0; i < schema.struct!.fields.length; i++) {
         const field = schema.struct.fields[i]
         const fschema = await getSchema(field.type)
-        const info: ITypeStructInfo = { label: field.name, type: fschema!.type, desc: `${field.display}${field.unit ? `(${field.unit})` : ''}` }
+        const unit = _L.value(field.unit)
+        const info: ITypeStructInfo = { label: field.name, type: fschema!.type, desc: `${_L.value(field.display)}${unit ? `(${unit})` : ''}` }
 
         if (fschema?.type === SchemaType.Scalar) {
             info.baseType = await getBaseType(field.type)
