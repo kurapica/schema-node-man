@@ -7,12 +7,12 @@
             :plainText="plainText"
             v-bind="$attrs">
             <template #append>
-                <a href="javasscript:void(0)" @click="openTrans">{{ _L["schema.designer.tran"] }}</a>
+                <a href="javascript:void(0)" @click="openTrans">{{ _L["schema.designer.tran"] }}</a>
             </template>
         </schema-view>
 
         <template v-if="keyNode.readonly && plainText">
-            <a href="javasscript:void(0)" style="position: absolute; right: 1rem" @click="openTrans">{{ _L["schema.designer.tran"] }}</a>
+            <a href="javascript:void(0)" style="position: absolute; right: 1rem" @click="openTrans">{{ _L["schema.designer.tran"] }}</a>
         </template>
 
         <!-- show trans -->
