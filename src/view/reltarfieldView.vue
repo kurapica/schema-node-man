@@ -150,7 +150,7 @@ onMounted(() => {
                 if (!paths.length) return
                 const fld = fieldsNode.data.find((f:any) => f.name === paths[0])
                 if (!fld) return
-                paths[0] = fld.display || fld.name
+                paths[0] = _L(fld.display) || fld.name
                 
                 let type = fld.type
                 for(let i = 1; i < paths.length; i++)
@@ -255,7 +255,7 @@ onMounted(() => {
             {
                 if (!state.data) return
                 const paths = (state.data as string).split(".")
-                if (!paths.length) return                
+                if (!paths.length) return
                 let type = elementNode.rawData
                 for(let i = 0; i < paths.length; i++)
                 {
@@ -271,7 +271,7 @@ onMounted(() => {
                         break
                     }
                     if (schema?.type !== SchemaType.Struct) break
-                    const f = schema.struct!.fields.find(d => d.name === paths[i])
+                    const f = schema.struct!.fields.find((d:any) => d.name === paths[i])
                     if (!f) break
                     paths[i] = `${_L(f.display) || f.name}`
                     type = f.type
