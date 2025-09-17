@@ -82,7 +82,7 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: IAppSchema[]
         if (blackList.indexOf(v.name) >= 0) continue
         const ele: ICascaderOptionInfo = {
             value: v.name,
-            label: `${v.display || v.name}`,
+            label: `${_L.value(v.display) || v.name}`,
             loadState: v.loadState || 0,
             leaf: (v.hasFields || v.fields?.length || !(v.hasApps || v.apps?.length)) ? true : false,
             children: null
@@ -138,7 +138,7 @@ const loadWhiteList = (options: ICascaderOptionInfo[], app: string) => {
             if (exist) return
             options.push({
                 value: name,
-                label: `${v.display || v.name}`,
+                label: `${_L.value(v.display) || v.name}`,
                 loadState: v.loadState || 0,
                 leaf: true,
                 children: null
@@ -156,7 +156,7 @@ const loadWhiteList = (options: ICascaderOptionInfo[], app: string) => {
             {
                 options.push({
                     value: name,
-                    label: `${v.display || v.name}`,
+                    label: `${_L.value(v.display) || v.name}`,
                     loadState: v.loadState || 0,
                     leaf: false,
                     children: []
