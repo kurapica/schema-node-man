@@ -16,7 +16,7 @@
         </template>
 
         <!-- show trans -->
-        <el-drawer v-model="showTrans" :title="_L['schema.designer.tran'] + ` ${keyNode.rawData}`" direction="rtl" size="50%"
+        <el-drawer v-model="showTrans" :title="_L['schema.designer.tran'] + ` ${keyNode.rawData || ''}`" direction="rtl" size="50%"
             destroy-on-close
             append-to-body>
             <el-container class="main" style="height: 80vh;">
