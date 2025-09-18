@@ -1,4 +1,4 @@
-import {_LS, importLanguage, registerSchema, SchemaLoadState, type IStructScalarFieldConfig } from "schema-node"
+import {_LS, importLanguage, registerAppSchema, registerSchema, SchemaLoadState, type IStructScalarFieldConfig } from "schema-node"
 import waterFallView from "@/view/waterFallView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
@@ -6,33 +6,65 @@ registerSchema([
   {
     "name": "test",
     "type": "namespace",
-    "desc": _LS("test"),
+    "display": _LS("test"),
     "schemas": [
       {
         "name": "test.gpa",
         "type": "enum",
-        "desc": _LS("test.gpa"),
+        "display": _LS("test.gpa"),
         "enum": {
           "type": "int",
           "values": [
             {
               "value": 4,
-              "name": "A",
+              "name": {
+                "key": "A",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "优秀"
+                  }
+                ]
+              },
               "disable": false
             },
             {
               "value": 3,
-              "name": "B",
+              "name": {
+                "key": "B",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "良好"
+                  }
+                ]
+              },
               "disable": false
             },
             {
               "value": 2,
-              "name": "C",
+              "name": {
+                "key": "C",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "及格"
+                  }
+                ]
+              },
               "disable": false
             },
             {
               "value": 1,
-              "name": "D",
+              "name": {
+                "key": "D",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "不及格"
+                  }
+                ]
+              },
               "disable": false
             }
           ]
@@ -41,7 +73,7 @@ registerSchema([
       {
         "name": "test.nosubjects",
         "type": "func",
-        "desc": _LS("test.nosubjects"),
+        "display": _LS("test.nosubjects"),
         "func": {
           "return": "system.bool",
           "args": [
@@ -109,7 +141,7 @@ registerSchema([
       {
         "name": "test.person",
         "type": "struct",
-        "desc": _LS("test.person"),
+        "display": _LS("test.person"),
         "struct": {
           "fields": [
             {
@@ -185,7 +217,6 @@ registerSchema([
               "args": [
                 {
                   "name": "gpa",
-                  "value": true
                 },
                 {
                   "value": "test.gpa"
@@ -214,7 +245,7 @@ registerSchema([
       {
         "name": "test.persons",
         "type": "array",
-        "desc": _LS("test.persons"),
+        "display": _LS("test.persons"),
         "array": {
           element: "test.person",
           primary: ["name"]
@@ -223,7 +254,7 @@ registerSchema([
       {
         "name": "test.subject",
         "type": "enum",
-        "desc": _LS("test.subject"),
+        "display": _LS("test.subject"),
         "enum": {
           "type": "int",
           "cascade": [
@@ -233,91 +264,227 @@ registerSchema([
           "values": [
             {
               "value": 100,
-              "name": "Language",
+              "name": {
+                "key": "Language",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "语言"
+                  }
+                ]
+              },
               "disable": false,
               "subList": [
                 {
                   "value": 101,
-                  "name": "English",
+                  "name": {
+                    "key": "English",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "英语"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 102,
-                  "name": "Grammar and Vocabulary",
+                  "name": {
+                    "key": "Grammar and Vocabulary",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "语法"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 103,
-                  "name": "Speech",
+                  "name": {
+                    "key": "Speech",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "演讲"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 104,
-                  "name": "Creative Writing",
+                  "name": {
+                    "key": "Creative Writing",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "写作"
+                      }
+                    ]
+                  },
                   "disable": false
                 }
               ]
             },
             {
               "value": 200,
-              "name": "Mathematics",
+              "name": {
+                "key": "Mathematics",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "数学"
+                  }
+                ]
+              },
               "disable": false,
               "subList": [
                 {
                   "value": 201,
-                  "name": "Algebra I & II",
+                  "name": {
+                    "key": "Algebra I & II",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "代数"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 202,
-                  "name": "Geometry",
+                  "name": {
+                    "key": "Geometry",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "几何"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 203,
-                  "name": "Trigonometry",
+                  "name": {
+                    "key": "Trigonometry",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "三角学"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 204,
-                  "name": "Calculus",
+                  "name": {
+                    "key": "Calculus",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "计算"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 205,
-                  "name": "Statistics",
+                  "name": {
+                    "key": "Statistics",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "统计"
+                      }
+                    ]
+                  },
                   "disable": false
                 }
               ]
             },
             {
               "value": 300,
-              "name": "Science",
+              "name": {
+                "key": "Science",
+                "trans": [
+                  {
+                    "lang": "zhCN",
+                    "tran": "科学"
+                  }
+                ]
+              },
               "disable": false,
               "subList": [
                 {
                   "value": 301,
-                  "name": "Biology",
+                  "name": {
+                    "key": "Biology",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "生物"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 302,
-                  "name": "Chemistry",
+                  "name": {
+                    "key": "Chemistry",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "化学"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 303,
-                  "name": "Physics",
+                  "name": {
+                    "key": "Physics",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "物理"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 304,
-                  "name": "Earth Science",
+                  "name": {
+                    "key": "Earth Science",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "地球科学"
+                      }
+                    ]
+                  },
                   "disable": false
                 },
                 {
                   "value": 305,
-                  "name": "Environmental Science",
+                  "name": {
+                    "key": "Environmental Science",
+                    "trans": [
+                      {
+                        "lang": "zhCN",
+                        "tran": "环境"
+                      }
+                    ]
+                  },
                   "disable": false
                 }
               ]
@@ -328,7 +495,7 @@ registerSchema([
       {
         "name": "test.subjects",
         "type": "array",
-        "desc": _LS("test.subjects"),
+        "display": _LS("test.subjects"),
         "array": {
           "element": "test.subject"
         }
@@ -336,7 +503,7 @@ registerSchema([
       {
         "name": "test.subjectscore",
         "type": "struct",
-        "desc": _LS("test.subjectscore"),
+        "display": _LS("test.subjectscore"),
         "struct": {
           "fields": [
             {
@@ -359,7 +526,7 @@ registerSchema([
       {
         "name": "test.subjectscores",
         "type": "array",
-        "desc": _LS("test.subjectscores"),
+        "display": _LS("test.subjectscores"),
         "array": {
           "element": "test.subjectscore",
           "primary": [
@@ -370,28 +537,28 @@ registerSchema([
       {
         "name": "test.role",
         "type": "enum",
-        "desc": _LS("test.role"),
+        "display": _LS("test.role"),
         "enum": {
           "type": "flags",
           "values": [
             {
               "value": 0,
-              "name": "None",
+              "name": _LS("None"),
               "disable": false
             },
             {
               "value": 1,
-              "name": "Worker",
+              "name": _LS("Worker"),
               "disable": false
             },
             {
               "value": 2,
-              "name": "Mananger",
+              "name": _LS("Mananger"),
               "disable": false
             },
             {
               "value": 4,
-              "name": "Admin",
+              "name": _LS("Admin"),
               "disable": false
             }
           ]
@@ -400,7 +567,7 @@ registerSchema([
       {
         "name": "test.gensubjectscore",
         "type": "func",
-        "desc": _LS("test.gensubjectscore"),
+        "display": _LS("test.gensubjectscore"),
         "func": {
           "return": "test.subjectscore",
           "args": [
@@ -420,8 +587,40 @@ registerSchema([
   }
 ], SchemaLoadState.Custom)
 
+registerAppSchema([
+ {
+    "name": "test",
+    "display": _LS("test.app"),
+    "fields": [
+      {
+        "name": "subjects",
+        "type": "test.subjects",
+        "display": _LS("test.subjects")
+      },
+      {
+        "name": "students",
+        "type": "test.persons",
+        "display": _LS("test.persons")
+      }
+    ],
+    "relations": [
+      {
+        "field": "students.subjects",
+        "func": "system.conv.assign",
+        "type": "whiteList",
+        "args": [
+          {
+            "name": "subjects"
+          }
+        ]
+      }
+    ],
+  }
+])
+
 importLanguage("enUS", {
   "test": "A test namespace",
+  "test.app": "A test app",
   "test.gpa": "Grade Point Average",
   "test.nosubjects": "No subject choosed",
   "test.person": "A person info",
@@ -443,6 +642,7 @@ importLanguage("enUS", {
 
 importLanguage("zhCN", {
   "test": "测试用",
+  "test.app": "测试用应用",
   "test.gpa": "使用积点",
   "test.nosubjects": "未选中学科",
   "test.person": "学生成绩信息",
