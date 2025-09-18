@@ -11,7 +11,7 @@
             emitPath: false,
             checkStrictly: !state.root,
         }" 
-        :placeholder="getSelectPlaceHolder(scalarNode)"
+        :placeholder="scalarNode.selectPlaceHolder"
         :disabled="state.readonly || state.disable" 
         :clearable="!state.require"
         v-bind="$attrs"
@@ -19,8 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayNode, getCachedSchema, isNull, SchemaType, StructNode, ScalarNode, getSchema, isSchemaCanBeUseAs, ARRAY_ELEMENT } from "schema-node"
-import { _L, getSelectPlaceHolder } from "schema-node-vueview"
+import { ArrayNode, getCachedSchema, isNull, SchemaType, StructNode, ScalarNode, getSchema, isSchemaCanBeUseAs, ARRAY_ELEMENT, _L } from "schema-node"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 
 //#region Inner type
@@ -76,7 +75,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
                 {
                     result.push({
                         value: `${prefix}${f.name}`,
-                        label: `${f.display || f.name}`,
+                        label: `${_L(f.display) || f.name}`,
                         leaf: false,
                         children
                     })
@@ -86,7 +85,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
             {
                 result.push({
                     value: `${prefix}${f.name}`,
-                    label: `${f.display || f.name}`,
+                    label: `${_L(f.display) || f.name}`,
                     leaf: true,
                     children: null
                 })
@@ -101,7 +100,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
             }
             const option = {
                 value: `${prefix}${f.name}`,
-                label: `${f.display || f.name}`,
+                label: `${_L(f.display) || f.name}`,
                 leaf: schema?.type !== SchemaType.Struct,
                 children: schema?.type === SchemaType.Struct ? await buildOptions(schema.struct!.fields, `${prefix}${f.name}.`) : null
             }
@@ -111,7 +110,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
                 option.children ||= []
                 option.children.unshift ({
                     value: `${prefix}${f.name}.${ARRAY_ELEMENT}`,
-                    label: _L.value["schema.reltarfield.ele"],
+                    label: _L["schema.reltarfield.ele"],
                     leaf: true,
                     children: null
                 })
@@ -151,7 +150,7 @@ onMounted(() => {
                 if (!paths.length) return
                 const fld = fieldsNode.data.find((f:any) => f.name === paths[0])
                 if (!fld) return
-                paths[0] = fld.display || fld.name
+                paths[0] = _L(fld.display) || fld.name
                 
                 let type = fld.type
                 for(let i = 1; i < paths.length; i++)
@@ -164,13 +163,13 @@ onMounted(() => {
                     }
                     if (paths[i] === ARRAY_ELEMENT)
                     {
-                        paths[i] = _L.value["schema.reltarfield.ele"]
+                        paths[i] = _L["schema.reltarfield.ele"]
                         break
                     }
                     if (schema?.type !== SchemaType.Struct) break
-                    const f = schema.struct!.fields.find(d => d.name === paths[i])
+                    const f = schema.struct!.fields.find((d:any) => d.name === paths[i])
                     if (!f) break
-                    paths[i] = `${f.display || f.name}`
+                    paths[i] = `${_L(f.display) || f.name}`
                     type = f.type
                 }
                 state.display = paths.join(" / ")
@@ -237,7 +236,7 @@ onMounted(() => {
                 options.value = [
                     {
                         value: `${ARRAY_ELEMENT}`,
-                        label: _L.value["schema.reltarfield.ele"],
+                        label: _L["schema.reltarfield.ele"],
                         leaf: true,
                         children: null
                     }
@@ -256,7 +255,7 @@ onMounted(() => {
             {
                 if (!state.data) return
                 const paths = (state.data as string).split(".")
-                if (!paths.length) return                
+                if (!paths.length) return
                 let type = elementNode.rawData
                 for(let i = 0; i < paths.length; i++)
                 {
@@ -268,13 +267,13 @@ onMounted(() => {
                     }
                     if (paths[i] === ARRAY_ELEMENT)
                     {
-                        paths[i] = _L.value["schema.reltarfield.ele"]
+                        paths[i] = _L["schema.reltarfield.ele"]
                         break
                     }
                     if (schema?.type !== SchemaType.Struct) break
-                    const f = schema.struct!.fields.find(d => d.name === paths[i])
+                    const f = schema.struct!.fields.find((d:any) => d.name === paths[i])
                     if (!f) break
-                    paths[i] = `${f.display || f.name}`
+                    paths[i] = `${_L(f.display) || f.name}`
                     type = f.type
                 }
                 state.display = paths.join(" / ")

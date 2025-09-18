@@ -40,7 +40,11 @@
              @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
                 <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
+                <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                    <template #default="scope">
+                        {{ _L(scope.row.display) }}
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="type" :label="_L['schema.designer.type']" width="150">
                     <template #default="scope">
                         {{ _L['schema.schematype.' + scope.row.type] }}
@@ -56,7 +60,8 @@
                     </template>
                     <template #default="scope">
                         <el-button v-if="scope.row.type === SchemaType.Namespace"
-                            type="info" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}</el-button>
+                            type="info" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
+                        </el-button>
                         <el-button v-else type="info" @click="handleEdit(scope.row, true)">
                             {{ _L["schema.designer.view"] }}
                         </el-button>
@@ -105,7 +110,7 @@
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + (namespaceNode?.data.desc || namespaceNode?.data.name)" direction="rtl" size="100%"
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%"
             destroy-on-close
             append-to-body>
             <el-container class="main" style="height: 80vh;">
@@ -126,12 +131,11 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import tryitView from './tryit.vue'
-import { _LS, deepClone } from 'schema-node'
-import { getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
+import { _LS, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
-import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '@/schema'
+import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
+import tryitView from './tryit.vue'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -201,7 +205,7 @@ const refresh = async () => {
             temp = temp.filter(p => p.type === state.type)
         }
         if (state.keyword) {
-            temp = temp.filter(p => p.name.match(state.keyword) || p.desc && `${p.desc}`.match(state.keyword))
+            temp = temp.filter(p => p.name.match(state.keyword) || p.display && `${p.display}`.match(state.keyword))
         }
         temp.sort((a, b) => {
             if (schemaTypeOrder[a.type] < schemaTypeOrder[b.type]) return -1
@@ -233,7 +237,7 @@ const handleNew = async () => {
     showNamespaceEditor.value = true
 
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }, true)
 }
 
@@ -246,11 +250,11 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
@@ -306,6 +310,7 @@ const confirmNameSpace = async () => {
 
     registerSchema([data])
     saveStorageSchema(data)
+    closeNamespaceEditor()
     showNamespaceEditor.value = false
     return refresh()
 }
@@ -315,6 +320,7 @@ const closeNamespaceEditor = () => {
     if (namesapceWatchHandler) namesapceWatchHandler()
     namespaceNode.value?.dispose()
     namespaceNode.value = undefined
+    namesapceWatchHandler = null
 }
 
 
@@ -346,46 +352,11 @@ const handleSelection = (val: any[]) => {
     selections = val.map((v: any) => v.name)
 }
 
-const schemaToJson = (schema: INodeSchema | undefined): INodeSchema =>
-{
-    const f = schema!
-    const r: INodeSchema = { name: f.name, type: f.type, desc: deepClone(f.desc) }
-
-    switch(f.type)
-    {
-        case SchemaType.Namespace:
-            r.schemas = f.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
-            break
-
-        case SchemaType.Scalar:
-            r.scalar = deepClone(f.scalar, true)
-            break
-
-        case SchemaType.Enum:
-            r.enum = deepClone(f.enum, true)
-            break
-
-        case SchemaType.Struct:
-            r.struct = deepClone(f.struct, true)
-            break
-
-        case SchemaType.Array:
-            r.array = deepClone(f.array, true)
-            break
-
-        case SchemaType.Function:
-            r.func = { ...deepClone(f.func!, true), func: undefined }
-            if (!r.func!.exps) r.func!.exps = []
-            if (!r.func!.args) r.func!.args = []
-            break
-    }
-    return r
-}
 
 const download = () => {
     if (!selections.length) return
     const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
-    const content = JSON.stringify(selections.map(getCachedSchema).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
+    const content = JSON.stringify(selections.map(getCachedSchema).map(s => schemaToJson(s!)).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
 
     // download
     const blob = new Blob([content], { type: 'application/octet-stream' })

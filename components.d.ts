@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppSchema: typeof import('./src/components/appSchema.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
@@ -26,7 +27,10 @@ declare module 'vue' {
     ElMain: typeof import('element-plus/es')['ElMain']
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
+    ElOption: typeof import('element-plus/es')['ElOption']
+    ElPopconfirm: typeof import('element-plus/es')['ElPopconfirm']
     ElPopover: typeof import('element-plus/es')['ElPopover']
+    ElSelect: typeof import('element-plus/es')['ElSelect']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
@@ -42,6 +46,8 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Schema: typeof import('./src/components/schema.vue')['default']
     Showandtry: typeof import('./src/components/showandtry.vue')['default']
+    Showandtryapp: typeof import('./src/components/showandtryapp.vue')['default']
+    Tryapp: typeof import('./src/components/tryapp.vue')['default']
     Tryit: typeof import('./src/components/tryit.vue')['default']
   }
 }

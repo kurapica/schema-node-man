@@ -36,7 +36,7 @@
         12. **Lower Limit (`lowLimit`)**: Minimum value. For strings, this refers to length.
         13. **Upper Limit (`upLimit`)**: Maximum value. For strings, this also refers to length. Only strings ≤128 characters can be used as array keys.
         14. **As Suggestion Only (`asSuggest`)**: For basic types, whitelist is used as suggestion rather than restriction.
-        15. **Use Original Value for Upper Limit (`useOriginForUplimit`)**: For scenarios like quota limits where a portion is already used and needs to be considered in the limit calculation.
+        15. **Use Original Value for Upper Limit (`useOriginForUpLimit`)**: For scenarios like quota limits where a portion is already used and needs to be considered in the limit calculation.
         16. **Cascade (`cascade`)**: Cascading constraints for enum types (e.g., limiting to county level in administrative regions).
         17. **Root Value (`root`)**: Starting point for enum values, such as displaying provinces only. Can also be used with basic types (e.g., namespace selection).
         18. **Any Level Selectable (`anyLevel`)**: Allows selection from any level of a cascading enum (default is last level only). Useful in scenarios like parameter tables where upper-level enums serve as default values for lower levels.

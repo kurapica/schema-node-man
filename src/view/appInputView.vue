@@ -6,8 +6,8 @@
         <schema-view
             v-model="prefix"
             :config="{
-                type:'schema.namespace',
-                display: _L['schema.designer.upnamespace']
+                type:'schema.app.srcapp',
+                display: _L['schema.designer.upapp']
             }"
         ></schema-view>
         <el-input
@@ -35,7 +35,7 @@ const state = reactive<{
 }>({})
 
 // Data
-const prefix = ref(localStorage["schema_new_namespace"] || "")
+const prefix = ref(localStorage["schema_new_app"] || "")
 const name = ref("")
 
 const refreshData = () => {

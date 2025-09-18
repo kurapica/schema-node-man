@@ -26,7 +26,7 @@
                 lazy: true,
                 lazyLoad: lazyLoad
             }" 
-            :placeholder="getSelectPlaceHolder(scalarNode)"
+            :placeholder="scalarNode.selectPlaceHolder"
             :disabled="state.readonly || state.disable" :clearable="!state.require"
             v-bind="$attrs">
             <template #default="{ data }">
@@ -89,16 +89,18 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
-import { _L, getSelectPlaceHolder } from "schema-node-vueview"
+import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
+import { _L } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
 import { schemaView } from "schema-node-vueview"
+import { options } from "marked"
 
 //#region Inner type
 interface ICascaderOptionInfo {
     value: string
     type: SchemaTypeValue
+    display?: ILocaleString
     label: string
     leaf: boolean
     loadState: number
@@ -148,6 +150,7 @@ const root = reactive<ICascaderOptionInfo>({
     children: null
 })
 let compatibleType = "" // 兼容类型
+let otherCompatibleType = "" // 其他兼容类型
 let upLimit = 99
 let lowLimit = 0
 
@@ -159,10 +162,16 @@ const namespaceMap: any = {
     "schema.structtype": [SchemaType.Namespace, SchemaType.Struct],
     "schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
     "schema.functype": [SchemaType.Namespace, SchemaType.Function],
+    "schema.pushfunctype": [SchemaType.Namespace, SchemaType.Function],
+    "schema.scalarvalidfunc": [SchemaType.Namespace, SchemaType.Function],
     "schema.scalarenumtype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum],
     "schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
     "schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
 }[type as string]
+
+// Push function allow both value type and array type of the value type
+const ispushfunctype = type === "schema.pushfunctype"
+const isscalarvalidfunc = type === "schema.scalarvalidfunc"
 
 // view
 
@@ -188,11 +197,11 @@ const handleEdit = async (name: string, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["schema.designer.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (namespaceNode.value?.data.desc || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["schema.designer.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
@@ -243,7 +252,16 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         {
             const f = await getSchema(funcList[i].value)
             if (f?.type !== SchemaType.Function || !f.func) continue
-            if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType)) {
+            if (isscalarvalidfunc) {
+                // for scalar value validation only
+                if (f.func.args?.length !== 1 || 
+                    compatibleType && !/^[tT]\d*$/.test(f.func.args[0].type) && !await isSchemaCanBeUseAs(f.func.args[0].type, compatibleType))
+                {
+                    blackList.push(f.name)
+                }
+            }
+            else if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType) &&
+                (!otherCompatibleType || !await isSchemaCanBeUseAs(f.func.return, otherCompatibleType))) {
                 blackList.push(f.name)
             }
             else if(f.func.args.length < lowLimit || f.func.args.length > upLimit)
@@ -277,7 +295,8 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
         const ele: ICascaderOptionInfo = {
             value: v.name,
             type: v.type,
-            label: `${v.desc || v.name}`,
+            display: v.display,
+            label: _L.value(v.display),
             loadState: v.loadState || 0,
             leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex(s => s.type === SchemaType.Namespace) < 0)),
             children: null
@@ -344,7 +363,25 @@ const reBuildOptions = async () => {
         root.value = ""
     }
 
+    if (compatibleType && ispushfunctype)
+    {
+        const ctype = await getSchema(compatibleType)
+        if (ctype?.type === SchemaType.Array)
+            otherCompatibleType = ctype.array?.element || ""
+        else if (ctype)
+            otherCompatibleType = (await getArraySchema(ctype, true))?.name || ""
+        else
+            otherCompatibleType = ""
+    }
+
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])
+}
+
+const refreshOptions = (options: ICascaderOptionInfo[]) => {
+    options.forEach(o => {
+        o.label = _L.value(o.display)
+        if (o.children?.length) refreshOptions(o.children)
+    })
 }
 
 // change handler
@@ -386,7 +423,7 @@ onMounted(() => {
             const match = option?.children?.find(c => c.value === name)
             if (match)
             {
-                display.push(match.label)
+                display.push(_L.value(match.label))
                 option = match
             }
             else
@@ -394,7 +431,7 @@ onMounted(() => {
                 rebuild = true
                 const schema = await getSchema(name)
                 if (!schema) break
-                display.push(`${schema.desc || paths[i]}`)
+                display.push(_L.value(schema.display || paths[i]))
             }
         }
         state.display = display.join("/")
@@ -416,7 +453,11 @@ onMounted(() => {
     }, true)
 
     // update display
-    langHandler = subscribeLanguage(reBuildOptions)
+    langHandler = subscribeLanguage(() => {
+        if (!root.children) return
+        refreshOptions(root.children)
+        root.children = [...root.children]
+    })
 })
 
 onUnmounted(() => {
