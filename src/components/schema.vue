@@ -110,7 +110,7 @@
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + (namespaceNode?.data.display || namespaceNode?.data.name)" direction="rtl" size="100%"
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%"
             destroy-on-close
             append-to-body>
             <el-container class="main" style="height: 80vh;">
