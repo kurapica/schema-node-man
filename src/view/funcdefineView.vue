@@ -5,7 +5,7 @@
         <!-- Arguments -->
         <el-form-item :key="argsNode?.guid" :prop="argsNode?.access">
             <template #label>
-                <span><span v-if="argsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{ argsNode.display }} </span>
+                <span><span v-if="argsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{ _L(argsNode.display) }} </span>
             </template>
             <div class="func-arg-list" style="width: 100%;">
                 <template v-if="!state.arglen && !state.readonly">
@@ -31,7 +31,7 @@
                                     :key="argdatas[i - 1].key" 
                                     :config="({
                                         type: argdatas[i - 1].type,
-                                        display: argdatas[i - 1].name,
+                                        display: _LS(argdatas[i - 1].name),
                                         anyLevel: true
                                     } as IStructEnumFieldConfig)" 
                                     v-model="argdatas[i - 1].data"
@@ -54,7 +54,7 @@
         <!-- Exps -->
         <el-form-item :key="expsNode?.guid" :prop="expsNode?.access">
             <template #label>
-                <span><span v-if="expsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{ expsNode.display }} </span>
+                <span><span v-if="expsNode.require" style="color: #f56c6c; font-size: 14px"> * </span>{{ _L(expsNode.display) }} </span>
             </template>
             <div class="func-arg-list" style="width: 100%;">
                 <template v-if="!state.explen && !state.readonly">
@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig } from 'schema-node'
+import { _LS, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L } from 'schema-node-vueview'
 import { schemaView } from 'schema-node-vueview'
