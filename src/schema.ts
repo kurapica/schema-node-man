@@ -297,14 +297,6 @@ registerSchema([
                     name: _LS("schema.enumvaluetype.int")
                 },
                 {
-                    value: EnumValueType.Float,
-                    name: _LS("schema.enumvaluetype.float")
-                },
-                {
-                    value: EnumValueType.Double,
-                    name: _LS("schema.enumvaluetype.double")
-                },
-                {
                     value: EnumValueType.Flags,
                     name: _LS("schema.enumvaluetype.flags")
                 },
@@ -632,82 +624,6 @@ registerSchema([
         },
     },
     {
-        name: "schema.enumfloatvalueinfo",
-        type: SchemaType.Struct,
-        display: _LS("schema.enumvalueinfo"),
-        struct: {
-            fields: [
-                {
-                    name: "value",
-                    require: true,
-                    immutable: true,
-                    type: NS_SYSTEM_FLOAT,
-                    display: _LS("schema.enumvalueinfo.value"),
-                } as IStructScalarFieldConfig,
-                {
-                    name: "name",
-                    require: true,
-                    type: "schema.localestring",
-                    display: _LS("schema.enumvalueinfo.name"),
-                    upLimit: 64
-                },
-                {
-                    name: "disable",
-                    default: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.disable"),
-                }
-            ]
-        },
-    },
-    {
-        name: "schema.enumfloatvalueinfos",
-        type: SchemaType.Array,
-        display: _LS("schema.enumvalueinfos"),
-        array: {
-            element: "schema.enumfloatvalueinfo",
-            primary: ["value"],
-        },
-    },
-    {
-        name: "schema.enumdoublevalueinfo",
-        type: SchemaType.Struct,
-        display: _LS("schema.enumvalueinfo"),
-        struct: {
-            fields: [
-                {
-                    name: "value",
-                    require: true,
-                    immutable: true,
-                    type: NS_SYSTEM_DOUBLE,
-                    display: _LS("schema.enumvalueinfo.value"),
-                } as IStructScalarFieldConfig,
-                {
-                    name: "name",
-                    require: true,
-                    type: "schema.localestring",
-                    display: _LS("schema.enumvalueinfo.name"),
-                    upLimit: 64
-                },
-                {
-                    name: "disable",
-                    default: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.disable"),
-                }
-            ]
-        },
-    },
-    {
-        name: "schema.enumdoublevalueinfos",
-        type: SchemaType.Array,
-        display: _LS("schema.enumvalueinfos"),
-        array: {
-            element: "schema.enumdoublevalueinfo",
-            primary: ["value"],
-        },
-    },
-    {
         name: "schema.enumflagvalueinfo",
         type: SchemaType.Struct,
         display: _LS("schema.enumvalueinfo"),
@@ -798,10 +714,6 @@ registerSchema([
                         return "schema.enumvalueinfos"
                     case EnumValueType.Int:
                         return "schema.enumintvalueinfos"
-                    case EnumValueType.Float:
-                        return "schema.enumfloatvalueinfos"
-                    case EnumValueType.Double:
-                        return "schema.enumdoublevalueinfos"
                     case EnumValueType.Flags:
                         return "schema.enumflagsvalueinfos"
                 }
@@ -2948,8 +2860,6 @@ regSchemaTypeView("schema.namespaceinput", namespaceInputView)
 
 regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
 
 regSchemaTypeView("schema.structfieldtypes", structfieldtypesView)

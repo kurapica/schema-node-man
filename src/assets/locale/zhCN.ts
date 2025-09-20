@@ -62,8 +62,6 @@ importLanguage("zhCN", {
     "schema.enumvaluetype": "枚举值数据类型",
     "schema.enumvaluetype.string": "字符串",
     "schema.enumvaluetype.int": "整数",
-    "schema.enumvaluetype.float": "浮点数",
-    "schema.enumvaluetype.double": "双精度浮点数",
     "schema.enumvaluetype.flags": "标志位",
 
     "schema.datacombinetype": "数据合并方式",

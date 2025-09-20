@@ -62,8 +62,6 @@ importLanguage("enUS", {
     "schema.enumvaluetype": "Enum Value Type",
     "schema.enumvaluetype.string": "String",
     "schema.enumvaluetype.int": "Integer",
-    "schema.enumvaluetype.float": "Float",
-    "schema.enumvaluetype.double": "Double",
     "schema.enumvaluetype.flags": "Flags",
 
     "schema.datacombinetype": "Data Combine Method",
