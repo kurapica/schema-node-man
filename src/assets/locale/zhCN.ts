@@ -333,6 +333,7 @@ importLanguage("zhCN", {
     "schema.app.app.name": "应用名",
     "schema.app.app.display": "应用展示",
     "schema.app.app.desc": "应用描述",
+    "schema.app.app.standalone": "独立应用(无目标)",
     "schema.app.app.main": "主应用",
     "schema.app.app.main.desc": "用于分布式锁",
     "schema.app.app.relations": "应用字段数据关联列表",

@@ -1,4 +1,4 @@
-import { type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -158,7 +158,7 @@ registerSchema([
                 const fields = appSchema?.fields || []
                 const paths = (field || "").split(".")
                 if (paths.length === 0) return null
-                let tarField: { type: string } | undefined = (fields || []).find(p => p.name === paths[0])
+                let tarField: { type: string } | undefined = (fields || []).find((p:IAppFieldSchema) => p.name === paths[0])
                 for (let i = 1; i < paths.length; i++) {
                     if (!tarField) return null
 
@@ -173,7 +173,7 @@ registerSchema([
                     }
 
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
-                        tarField = schema.struct.fields.find(p => p.name === paths[i])
+                        tarField = schema.struct.fields.find((p: IStructFieldConfig) => p.name === paths[i])
                     }
                     else {
                         tarField = undefined
@@ -320,7 +320,7 @@ registerSchema([
             exps: [],
             func: async (app: string, fld: string, info: string) => {
                 const appSchema = await getAppSchema(app)
-                const f = appSchema?.fields?.find(f => f.name === fld)
+                const f = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === fld)
                 return f ? (f as any)[info] : undefined
             }
         }
@@ -649,7 +649,7 @@ registerSchema([
             func: (app: string) => {
                 if (!app) return true
                 const schema = getAppCachedSchema(app)
-                return !(schema?.fields?.find(f => f.sourceApp))
+                return !(schema?.fields?.find((f: IAppFieldSchema) => f.sourceApp))
             }
         }
     },
@@ -694,6 +694,11 @@ registerSchema([
                     display: _LS("schema.app.app.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
+                {
+                    name: "standalone",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.app.app.standalone")
+                },
                 {
                     name: "main",
                     type: "schema.app.srcapp",
@@ -863,15 +868,15 @@ export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema
 
     if (f.apps?.length)
     {
-        r.apps = f.apps.map(a => appSchemaToJson(a, types))
+        r.apps = f.apps.map((a: IAppSchema) => appSchemaToJson(a, types))
     }
     else if(f.fields?.length)
     {
         r.fields = deepClone(f.fields, true)
         r.relations = deepClone(f.relations, true)
 
-        r.fields?.forEach(f => { if (!types.includes(f.type)) types.push(f.type) })
-        r.relations?.forEach(r => { if (!types.includes(r.func)) types.push(r.func) })
+        r.fields?.forEach((f:IAppFieldSchema) => { if (!types.includes(f.type)) types.push(f.type) })
+        r.relations?.forEach((r:IStructFieldRelation) => { if (!types.includes(r.func)) types.push(r.func) })
     }
 
     if (isroot && types?.length)
@@ -935,15 +940,15 @@ function gatherSchemas(types: INodeSchema[], name?: string)
         case SchemaType.Struct:
         {
             r.struct = deepClone(schema.struct, true)
-            r.struct?.fields?.forEach(f => gatherSchemas(types, f.type))
-            r.struct?.relations?.forEach(r => gatherSchemas(types, r.func))
+            r.struct?.fields?.forEach((f: IStructFieldConfig) => gatherSchemas(types, f.type))
+            r.struct?.relations?.forEach((r: IStructFieldRelation) => gatherSchemas(types, r.func))
             break
         }
         case SchemaType.Array:
         {
             r.array = deepClone(schema.array, true)
             gatherSchemas(types, r.array?.element)
-            r.array?.relations?.forEach(r => gatherSchemas(types, r.func))
+            r.array?.relations?.forEach((r: IStructFieldRelation) => gatherSchemas(types, r.func))
             break
         }
         case SchemaType.Function:
@@ -953,8 +958,8 @@ function gatherSchemas(types: INodeSchema[], name?: string)
             if (!r.func!.args) r.func!.args = []
 
             gatherSchemas(types, r.func?.return)
-            r.func?.args?.forEach(a => gatherSchemas(types, a.type))
-            r.func?.exps?.forEach(e => gatherSchemas(types, e.func))
+            r.func?.args?.forEach((a: IFunctionArgumentInfo) => gatherSchemas(types, a.type))
+            r.func?.exps?.forEach((e: IFunctionExpression) => gatherSchemas(types, e.func))
             break
         }
     }
@@ -965,7 +970,7 @@ function getMainApps(app: string): string[] {
     const schema = getAppCachedSchema(app)
     const result: string[] = []
     if (!schema?.fields?.length) return result
-    schema.fields.filter(f => f.sourceApp).forEach(f => {
+    schema.fields.filter((f: IAppSchema) => f.sourceApp).forEach((f: IAppSchema) => {
         if (result.includes(f.sourceApp!)) return
         result.push(f.sourceApp!)
         const r = getMainApps(f.sourceApp!).filter(a => !result.includes(a))

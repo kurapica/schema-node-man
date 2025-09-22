@@ -334,6 +334,7 @@ importLanguage("enUS", {
     "schema.app.app.name": "App Name",
     "schema.app.app.display": "App display",
     "schema.app.app.desc": "App description",
+    "schema.app.app.standalone": "Standalone(No target)",
     "schema.app.app.main": "Main app",
     "schema.app.app.main.desc": "For distribution lock",
     "schema.app.app.relations": "App field associations list",
