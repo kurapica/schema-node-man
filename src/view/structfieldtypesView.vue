@@ -122,7 +122,7 @@ onMounted(() => {
                 view.handler = ele.subscribe(() => {
                     const { name, display } = ele.rawData
                     view.name = name
-                    view.display = display
+                    view.display = _L.value(display)
                 }, true)
                 elementDisplay[i] = view
             }

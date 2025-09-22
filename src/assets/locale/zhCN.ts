@@ -15,6 +15,7 @@ importLanguage("zhCN", {
     "schema.functype": "函数类型",
     "schema.pushfunctype": "推送函数类型",
     "schema.scalarvalidfunc": "基础数据校验用函数类型",
+    "schema.scalarwhitelistfunc": "基础数据类型白名单用",
     "schema.scalarenumtype": "枚举或基础数据类型",
     "schema.arrayeletype": "非数组数据类型",
     "schema.valuetype": "任意数据类型",
@@ -89,6 +90,7 @@ importLanguage("zhCN", {
     "schema.scalardefine.uplimit": "值上限",
     "schema.scalardefine.error": "错误消息",
     "schema.scalardefine.regex": "正则表达式",
+    "schema.scalardefine.whitelist": "白名单函数",
     "schema.scalardefine.prevalid": "前端校验函数",
     "schema.scalardefine.postvalid": "后端校验函数",
 

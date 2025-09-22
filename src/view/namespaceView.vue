@@ -90,11 +90,9 @@ import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
 import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
-import { _L } from "schema-node-vueview"
+import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
-import { schemaView } from "schema-node-vueview"
-import { options } from "marked"
 
 //#region Inner type
 interface ICascaderOptionInfo {
@@ -164,6 +162,7 @@ const namespaceMap: any = {
     "schema.functype": [SchemaType.Namespace, SchemaType.Function],
     "schema.pushfunctype": [SchemaType.Namespace, SchemaType.Function],
     "schema.scalarvalidfunc": [SchemaType.Namespace, SchemaType.Function],
+    "schema.scalarwhitelistfunc": [SchemaType.Namespace, SchemaType.Function],
     "schema.scalarenumtype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum],
     "schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
     "schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
@@ -172,6 +171,7 @@ const namespaceMap: any = {
 // Push function allow both value type and array type of the value type
 const ispushfunctype = type === "schema.pushfunctype"
 const isscalarvalidfunc = type === "schema.scalarvalidfunc"
+const isscalarwhitelist = type === "schema.scalarwhitelistfunc"
 
 // view
 
@@ -260,6 +260,21 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
                     blackList.push(f.name)
                 }
             }
+            else if (isscalarwhitelist)
+            {
+                // for scalar white list
+                if (f.func.args.length > 1) {
+                    blackList.push(f.name)
+                }
+                else if(otherCompatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, otherCompatibleType))
+                {
+                    blackList.push(f.name)
+                }
+                else if(f.func.args.length && !/^[tT]\d*$/.test(f.func.args[0].type) && !await isSchemaCanBeUseAs(compatibleType, f.func.args[0].type))
+                {
+                    blackList.push(f.name)
+                }
+            }
             else if (compatibleType && !/^[tT]\d*$/.test(f.func.return) && !await isSchemaCanBeUseAs(f.func.return, compatibleType) &&
                 (!otherCompatibleType || !await isSchemaCanBeUseAs(f.func.return, otherCompatibleType))) {
                 blackList.push(f.name)
@@ -298,7 +313,7 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
             display: v.display,
             label: _L.value(v.display),
             loadState: v.loadState || 0,
-            leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex(s => s.type === SchemaType.Namespace) < 0)),
+            leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex((s:INodeSchema) => s.type === SchemaType.Namespace) < 0)),
             children: null
         }
         if (!ele.leaf && v.schemas && scalarNode.data && `${scalarNode.data}`.startsWith(v.name)) {
@@ -327,14 +342,14 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
         }
 
         getSchema(value)
-        .then(res => {
+        .then((res: INodeSchema) => {
             buildOptions([], res?.schemas || []).then(r => {
                 ns.children = r
                 resolve(ns.children)
             })
             .catch(ex => reject && reject(ex))
         })
-        .catch(ex => reject && reject(ex))
+        .catch((ex:any) => reject && reject(ex))
     }
     catch (ex) {
         return reject && reject(ex)
@@ -373,6 +388,10 @@ const reBuildOptions = async () => {
         else
             otherCompatibleType = ""
     }
+    else if (compatibleType && isscalarwhitelist)
+    {
+        otherCompatibleType = (await getArraySchema(compatibleType))?.name || ""
+    }
 
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])
 }
@@ -408,6 +427,12 @@ onMounted(() => {
             }
             reBuildOptions()
         }, true)
+    }
+
+    // scalar white list, zero or 1-arg for the base type
+    if (isscalarwhitelist) {
+        upLimit = 1
+        lowLimit = 0
     }
 
     dataWatcher = scalarNode.subscribe(async() =>  {

@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -69,6 +69,14 @@ registerSchema([
         name: "schema.scalarvalidfunc",
         type: SchemaType.Scalar,
         display: _LS("schema.scalarvalidfunc"),
+        scalar: {
+            base: NS_SYSTEM_STRING,
+        },
+    },
+    {
+        name: "schema.scalarwhitelistfunc",
+        type: SchemaType.Scalar,
+        display: _LS("schema.scalarwhitelistfunc"),
         scalar: {
             base: NS_SYSTEM_STRING,
         },
@@ -510,6 +518,16 @@ registerSchema([
                     display: _LS("schema.scalardefine.regex"),
                 },
                 {
+                    name: "whiteList",
+                    type: "schema.scalarwhitelistfunc",
+                    display: _LS("schema.scalardefine.whitelist")
+                },
+                {
+                    name: "asSuggest",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.structfieldtype.assuggest")
+                },
+                {
                     name: "preValid",
                     type: "schema.scalarvalidfunc",
                     display: _LS("schema.scalardefine.prevalid"),
@@ -521,6 +539,16 @@ registerSchema([
                 },
             ],
             relations: [
+                {
+                    field: "whiteList",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "base"
+                        }
+                    ]
+                },
                 {
                     field: "preValid",
                     type: RelationType.Root,
@@ -1830,7 +1858,7 @@ registerSchema([
                     }
 
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
-                        tarField = schema.struct.fields.find(p => p.name === paths[i])
+                        tarField = schema.struct.fields.find((p: IStructFieldConfig) => p.name === paths[i])
                     }
                     else {
                         tarField = null
@@ -1863,7 +1891,7 @@ registerSchema([
 
                 let schema = await getSchema(type)
                 if (!schema) return null
-                let tarField = schema.struct?.fields.find(p => p.name === paths[0])
+                let tarField = schema.struct?.fields.find((p: IStructFieldConfig) => p.name === paths[0])
                 for (let i = 1; i < paths.length; i++) {
                     if (!tarField) return null
 
@@ -1878,7 +1906,7 @@ registerSchema([
                     }
 
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
-                        tarField = schema.struct.fields.find(p => p.name === paths[i])
+                        tarField = schema.struct.fields.find((p: IStructFieldConfig) => p.name === paths[i])
                     }
                     else {
                         tarField = undefined
@@ -2781,7 +2809,7 @@ export function clearAllStorageSchemas()
 export function saveAllCustomSchemaToStroage(root: string = "")
 {
     const schema = getCachedSchema(root)
-    schema?.schemas?.forEach(s => {
+    schema?.schemas?.forEach((s: INodeSchema) => {
         if ((s.loadState || 0) & SchemaLoadState.Custom)
         {
             saveStorageSchema(s)
@@ -2801,7 +2829,7 @@ export function schemaToJson(f: INodeSchema): INodeSchema
     switch(f.type)
     {
         case SchemaType.Namespace:
-            r.schemas = f.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
+            r.schemas = f.schemas?.filter((f: INodeSchema) => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter((f: INodeSchema) => f.type !== SchemaType.Namespace || f.schemas?.length)
             break
 
         case SchemaType.Scalar:
@@ -2853,6 +2881,7 @@ regSchemaTypeView("schema.arraytype", namespaceView)
 regSchemaTypeView("schema.functype", namespaceView)
 regSchemaTypeView("schema.pushfunctype", namespaceView)
 regSchemaTypeView("schema.scalarvalidfunc", namespaceView)
+regSchemaTypeView("schema.scalarwhitelistfunc", namespaceView)
 regSchemaTypeView("schema.scalarenumtype", namespaceView)
 regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)

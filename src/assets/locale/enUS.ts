@@ -14,6 +14,7 @@ importLanguage("enUS", {
     "schema.arraytype": "Array Types",
     "schema.functype": "Function Type",
     "schema.pushfunctype": "Push Function Type",
+    "schema.scalarwhitelistfunc": "Scalar WhiteList Function",
     "schema.scalarvalidfunc": "Scalar Valid Function Type",
     "schema.scalarenumtype": "Scalar or Enum Type",
     "schema.arrayeletype": "Non-array Data Type",
@@ -89,6 +90,7 @@ importLanguage("enUS", {
     "schema.scalardefine.uplimit": "Max Value",
     "schema.scalardefine.error": "Error Message",
     "schema.scalardefine.regex": "Regex Pattern",
+    "schema.scalardefine.whitelist": "WhiteList",
     "schema.scalardefine.valid": "Eval Validation Expression",
     "schema.scalardefine.conv": "Eval Convert Expression",
 
