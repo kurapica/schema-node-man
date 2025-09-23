@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_DOUBLE, NS_SYSTEM_FLOAT, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -69,6 +69,14 @@ registerSchema([
         name: "schema.scalarvalidfunc",
         type: SchemaType.Scalar,
         display: _LS("schema.scalarvalidfunc"),
+        scalar: {
+            base: NS_SYSTEM_STRING,
+        },
+    },
+    {
+        name: "schema.scalarwhitelistfunc",
+        type: SchemaType.Scalar,
+        display: _LS("schema.scalarwhitelistfunc"),
         scalar: {
             base: NS_SYSTEM_STRING,
         },
@@ -297,14 +305,6 @@ registerSchema([
                     name: _LS("schema.enumvaluetype.int")
                 },
                 {
-                    value: EnumValueType.Float,
-                    name: _LS("schema.enumvaluetype.float")
-                },
-                {
-                    value: EnumValueType.Double,
-                    name: _LS("schema.enumvaluetype.double")
-                },
-                {
                     value: EnumValueType.Flags,
                     name: _LS("schema.enumvaluetype.flags")
                 },
@@ -518,6 +518,16 @@ registerSchema([
                     display: _LS("schema.scalardefine.regex"),
                 },
                 {
+                    name: "whiteList",
+                    type: "schema.scalarwhitelistfunc",
+                    display: _LS("schema.scalardefine.whitelist")
+                },
+                {
+                    name: "asSuggest",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.structfieldtype.assuggest")
+                },
+                {
                     name: "preValid",
                     type: "schema.scalarvalidfunc",
                     display: _LS("schema.scalardefine.prevalid"),
@@ -529,6 +539,16 @@ registerSchema([
                 },
             ],
             relations: [
+                {
+                    field: "whiteList",
+                    type: RelationType.Root,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "base"
+                        }
+                    ]
+                },
                 {
                     field: "preValid",
                     type: RelationType.Root,
@@ -632,82 +652,6 @@ registerSchema([
         },
     },
     {
-        name: "schema.enumfloatvalueinfo",
-        type: SchemaType.Struct,
-        display: _LS("schema.enumvalueinfo"),
-        struct: {
-            fields: [
-                {
-                    name: "value",
-                    require: true,
-                    immutable: true,
-                    type: NS_SYSTEM_FLOAT,
-                    display: _LS("schema.enumvalueinfo.value"),
-                } as IStructScalarFieldConfig,
-                {
-                    name: "name",
-                    require: true,
-                    type: "schema.localestring",
-                    display: _LS("schema.enumvalueinfo.name"),
-                    upLimit: 64
-                },
-                {
-                    name: "disable",
-                    default: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.disable"),
-                }
-            ]
-        },
-    },
-    {
-        name: "schema.enumfloatvalueinfos",
-        type: SchemaType.Array,
-        display: _LS("schema.enumvalueinfos"),
-        array: {
-            element: "schema.enumfloatvalueinfo",
-            primary: ["value"],
-        },
-    },
-    {
-        name: "schema.enumdoublevalueinfo",
-        type: SchemaType.Struct,
-        display: _LS("schema.enumvalueinfo"),
-        struct: {
-            fields: [
-                {
-                    name: "value",
-                    require: true,
-                    immutable: true,
-                    type: NS_SYSTEM_DOUBLE,
-                    display: _LS("schema.enumvalueinfo.value"),
-                } as IStructScalarFieldConfig,
-                {
-                    name: "name",
-                    require: true,
-                    type: "schema.localestring",
-                    display: _LS("schema.enumvalueinfo.name"),
-                    upLimit: 64
-                },
-                {
-                    name: "disable",
-                    default: false,
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.disable"),
-                }
-            ]
-        },
-    },
-    {
-        name: "schema.enumdoublevalueinfos",
-        type: SchemaType.Array,
-        display: _LS("schema.enumvalueinfos"),
-        array: {
-            element: "schema.enumdoublevalueinfo",
-            primary: ["value"],
-        },
-    },
-    {
         name: "schema.enumflagvalueinfo",
         type: SchemaType.Struct,
         display: _LS("schema.enumvalueinfo"),
@@ -798,10 +742,6 @@ registerSchema([
                         return "schema.enumvalueinfos"
                     case EnumValueType.Int:
                         return "schema.enumintvalueinfos"
-                    case EnumValueType.Float:
-                        return "schema.enumfloatvalueinfos"
-                    case EnumValueType.Double:
-                        return "schema.enumdoublevalueinfos"
                     case EnumValueType.Flags:
                         return "schema.enumflagsvalueinfos"
                 }
@@ -1918,7 +1858,7 @@ registerSchema([
                     }
 
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
-                        tarField = schema.struct.fields.find(p => p.name === paths[i])
+                        tarField = schema.struct.fields.find((p: IStructFieldConfig) => p.name === paths[i])
                     }
                     else {
                         tarField = null
@@ -1951,7 +1891,7 @@ registerSchema([
 
                 let schema = await getSchema(type)
                 if (!schema) return null
-                let tarField = schema.struct?.fields.find(p => p.name === paths[0])
+                let tarField = schema.struct?.fields.find((p: IStructFieldConfig) => p.name === paths[0])
                 for (let i = 1; i < paths.length; i++) {
                     if (!tarField) return null
 
@@ -1966,7 +1906,7 @@ registerSchema([
                     }
 
                     if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
-                        tarField = schema.struct.fields.find(p => p.name === paths[i])
+                        tarField = schema.struct.fields.find((p: IStructFieldConfig) => p.name === paths[i])
                     }
                     else {
                         tarField = undefined
@@ -2869,7 +2809,7 @@ export function clearAllStorageSchemas()
 export function saveAllCustomSchemaToStroage(root: string = "")
 {
     const schema = getCachedSchema(root)
-    schema?.schemas?.forEach(s => {
+    schema?.schemas?.forEach((s: INodeSchema) => {
         if ((s.loadState || 0) & SchemaLoadState.Custom)
         {
             saveStorageSchema(s)
@@ -2889,7 +2829,7 @@ export function schemaToJson(f: INodeSchema): INodeSchema
     switch(f.type)
     {
         case SchemaType.Namespace:
-            r.schemas = f.schemas?.filter(f => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length)
+            r.schemas = f.schemas?.filter((f: INodeSchema) => f.type === SchemaType.Namespace || !((f.loadState || 0) & SchemaLoadState.System)).map(schemaToJson).filter((f: INodeSchema) => f.type !== SchemaType.Namespace || f.schemas?.length)
             break
 
         case SchemaType.Scalar:
@@ -2941,6 +2881,7 @@ regSchemaTypeView("schema.arraytype", namespaceView)
 regSchemaTypeView("schema.functype", namespaceView)
 regSchemaTypeView("schema.pushfunctype", namespaceView)
 regSchemaTypeView("schema.scalarvalidfunc", namespaceView)
+regSchemaTypeView("schema.scalarwhitelistfunc", namespaceView)
 regSchemaTypeView("schema.scalarenumtype", namespaceView)
 regSchemaTypeView("schema.arrayeletype", namespaceView)
 regSchemaTypeView("schema.valuetype", namespaceView)
@@ -2948,8 +2889,6 @@ regSchemaTypeView("schema.namespaceinput", namespaceInputView)
 
 regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumfloatvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumdoublevalueinfos", enumvalueinfosView)
 regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
 
 regSchemaTypeView("schema.structfieldtypes", structfieldtypesView)
