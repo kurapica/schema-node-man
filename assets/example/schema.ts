@@ -582,6 +582,44 @@ registerSchema([
           ],
           "exps": []
         }
+      },
+      {
+        "name": "test.gettelnos",
+        "type": "func",
+        "display": _LS("test.gettelnos"),
+        "func": {
+          "return": "system.strings",
+          "args": [
+            {
+              "name": "telno",
+              "type": "system.string"
+            }
+          ],
+          "exps": [],
+          "func": (telno: string) => {
+            const remain = 11 - (telno?.length ?? 0)
+            if (remain <= 0) return []
+            const res: string[] = []
+            const len = Math.pow(10, remain)
+            while (res.length < 9)
+            {
+              const rand = `${telno}${Math.floor(Math.random() * len)}`
+              if (!res.includes(rand)) res.push(rand)
+            }
+            return res 
+          }
+        }
+      },
+      {
+        "name": "test.telno",
+        "type": "scalar",
+        "display": _LS("telno"),
+        "scalar": {
+          "base": "system.string",
+          "upLimit": 11,
+          "whiteList": "test.gettelnos",
+          "asSuggest": true
+        }
       }
     ]
   }

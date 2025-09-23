@@ -14,6 +14,7 @@ importLanguage("enUS", {
     "schema.arraytype": "Array Types",
     "schema.functype": "Function Type",
     "schema.pushfunctype": "Push Function Type",
+    "schema.scalarwhitelistfunc": "Scalar WhiteList Function",
     "schema.scalarvalidfunc": "Scalar Valid Function Type",
     "schema.scalarenumtype": "Scalar or Enum Type",
     "schema.arrayeletype": "Non-array Data Type",
@@ -62,8 +63,6 @@ importLanguage("enUS", {
     "schema.enumvaluetype": "Enum Value Type",
     "schema.enumvaluetype.string": "String",
     "schema.enumvaluetype.int": "Integer",
-    "schema.enumvaluetype.float": "Float",
-    "schema.enumvaluetype.double": "Double",
     "schema.enumvaluetype.flags": "Flags",
 
     "schema.datacombinetype": "Data Combine Method",
@@ -91,6 +90,7 @@ importLanguage("enUS", {
     "schema.scalardefine.uplimit": "Max Value",
     "schema.scalardefine.error": "Error Message",
     "schema.scalardefine.regex": "Regex Pattern",
+    "schema.scalardefine.whitelist": "WhiteList",
     "schema.scalardefine.valid": "Eval Validation Expression",
     "schema.scalardefine.conv": "Eval Convert Expression",
 
@@ -334,6 +334,7 @@ importLanguage("enUS", {
     "schema.app.app.name": "App Name",
     "schema.app.app.display": "App display",
     "schema.app.app.desc": "App description",
+    "schema.app.app.standalone": "Standalone(No target)",
     "schema.app.app.main": "Main app",
     "schema.app.app.main.desc": "For distribution lock",
     "schema.app.app.relations": "App field associations list",

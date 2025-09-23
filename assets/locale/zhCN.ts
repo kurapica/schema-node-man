@@ -15,6 +15,7 @@ importLanguage("zhCN", {
     "schema.functype": "函数类型",
     "schema.pushfunctype": "推送函数类型",
     "schema.scalarvalidfunc": "基础数据校验用函数类型",
+    "schema.scalarwhitelistfunc": "基础数据类型白名单用",
     "schema.scalarenumtype": "枚举或基础数据类型",
     "schema.arrayeletype": "非数组数据类型",
     "schema.valuetype": "任意数据类型",
@@ -62,8 +63,6 @@ importLanguage("zhCN", {
     "schema.enumvaluetype": "枚举值数据类型",
     "schema.enumvaluetype.string": "字符串",
     "schema.enumvaluetype.int": "整数",
-    "schema.enumvaluetype.float": "浮点数",
-    "schema.enumvaluetype.double": "双精度浮点数",
     "schema.enumvaluetype.flags": "标志位",
 
     "schema.datacombinetype": "数据合并方式",
@@ -91,6 +90,7 @@ importLanguage("zhCN", {
     "schema.scalardefine.uplimit": "值上限",
     "schema.scalardefine.error": "错误消息",
     "schema.scalardefine.regex": "正则表达式",
+    "schema.scalardefine.whitelist": "白名单函数",
     "schema.scalardefine.prevalid": "前端校验函数",
     "schema.scalardefine.postvalid": "后端校验函数",
 
@@ -333,6 +333,7 @@ importLanguage("zhCN", {
     "schema.app.app.name": "应用名",
     "schema.app.app.display": "应用展示",
     "schema.app.app.desc": "应用描述",
+    "schema.app.app.standalone": "独立应用(无目标)",
     "schema.app.app.main": "主应用",
     "schema.app.app.main.desc": "用于分布式锁",
     "schema.app.app.relations": "应用字段数据关联列表",
