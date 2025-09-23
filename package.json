@@ -1,7 +1,7 @@
 {
   "name": "schema-node-man",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,8 +14,8 @@
     "marked": "^15.0.5",
     "process": "^0.11.10",
     "rollup-plugin-copy": "^3.5.0",
-    "schema-node": "workspace:*",
-    "schema-node-vueview": "workspace:*",
+    "schema-node": "^1.0.2",
+    "schema-node-vueview": "^1.0.3",
     "showdown": "^2.1.0",
     "sortablejs": "^1.15.6",
     "vue": "^3.5.13",
