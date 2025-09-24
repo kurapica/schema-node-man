@@ -5,6 +5,7 @@ importLanguage("zhCN", {
     "schema.nav.tryit": "尝试",
     "schema.nav.type": "类型管理",
     "schema.nav.app": "应用管理",
+    "schema.server.url": "Schema服务地址",
 
     "schema": "类型定义辅助",
     "schema.namespace": "命名空间",

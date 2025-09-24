@@ -5,6 +5,7 @@ importLanguage("enUS", {
     "schema.nav.tryit": "Try It",
     "schema.nav.type": "Type Management",
     "schema.nav.app": "App Management",
+    "schema.server.url": "Schema Services Url",
 
     "schema": "Schema Definition Helper",
     "schema.namespace": "Namespace",

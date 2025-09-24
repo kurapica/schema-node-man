@@ -272,9 +272,9 @@ const handleDelete = async (row: any) => {
         if (provider)
         {
             const res = await provider.deleteSchema(row.name)
-            if (!res.result)
+            if (!res)
             {
-                ElMessage.error(res.message || _L.value["schema.designer.error"])
+                ElMessage.error(_L.value["schema.designer.error"])
                 return
             }
         }
@@ -299,9 +299,9 @@ const confirmNameSpace = async () => {
         if (provider)
         {
             const res = await provider.saveSchema(data)
-            if (!res.result)
+            if (!res)
             {
-                ElMessage.error(res.message || _L.value["schema.designer.error"])
+                ElMessage.error(_L.value["schema.designer.error"])
                 return
             }
             data.loadState = SchemaLoadState.Server
