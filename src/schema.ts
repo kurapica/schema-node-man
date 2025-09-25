@@ -140,6 +140,14 @@ registerSchema([
         scalar: {
         }
     },
+    {
+        name: "schema.color",
+        type: SchemaType.Scalar,
+        display: _LS("schema.color"),
+        scalar: {
+            base: NS_SYSTEM_STRING
+        }
+    },
     //#endregion
 
     //#region enum type
@@ -479,6 +487,15 @@ registerSchema([
             ]
         }
     },
+    {
+        name: "schema.localestrings",
+        type: SchemaType.Array,
+        display: _LS("schema.localestrings"),
+        array: {
+            element: "schema.localestring",
+            primary: ["key"]
+        }
+    },
     //#endregion
 
     //#region scalar definition
@@ -600,6 +617,11 @@ registerSchema([
                     upLimit: 64
                 },
                 {
+                    name: "color",
+                    type: "schema.color",
+                    display: _LS("schema.color"),
+                },
+                {
                     name: "disable",
                     default: false,
                     type: NS_SYSTEM_BOOL,
@@ -636,6 +658,11 @@ registerSchema([
                     type: "schema.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
+                },
+                {
+                    name: "color",
+                    type: "schema.color",
+                    display: _LS("schema.color"),
                 },
                 {
                     name: "disable",
@@ -675,6 +702,11 @@ registerSchema([
                     type: "schema.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
+                },
+                {
+                    name: "color",
+                    type: "schema.color",
+                    display: _LS("schema.color"),
                 },
                 {
                     name: "disable",
@@ -767,7 +799,7 @@ registerSchema([
                 },
                 {
                     name: "cascade",
-                    type: NS_SYSTEM_STRINGS,
+                    type: "schema.localestrings",
                     display: _LS("schema.enumdefine.cascade"),
                 },
                 {
@@ -2885,9 +2917,11 @@ import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import funcdefineView from "./view/funcdefineView.vue"
 import localstringView from "./view/localstringView.vue"
+import colorView from "./view/colorView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("schema.localestring", localstringView, undefined, true)
+regSchemaTypeView("schema.color", colorView)
 regSchemaTypeView("schema.namespace", namespaceView)
 regSchemaTypeView("schema.scalartype", namespaceView)
 regSchemaTypeView("schema.enumtype", namespaceView)

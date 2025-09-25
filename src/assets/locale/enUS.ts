@@ -24,6 +24,7 @@ importLanguage("enUS", {
     "schema.namespaceinput": "Namespace Input",
     "schema.reltarfield": "Related Target Field",
     "schema.anyvalue": "Any Value",
+    "schema.color": "Color",
 
     "schema.reltarfield.ele": "Array Element",
 
@@ -84,6 +85,7 @@ importLanguage("enUS", {
     "schema.localestring": "Locale string",
     "schema.localestring.default": "Default",
     "schema.localestring.trans": "Translate",
+    "schema.localestrings": "Locale strings",
     
     "schema.scalardefine": "Scalar Definition",
     "schema.scalardefine.base": "Base Scalar Type",
@@ -112,6 +114,7 @@ importLanguage("enUS", {
     "schema.enumdefine": "Enum Definition",
     "schema.enumdefine.type": "Enum Value Type",
     "schema.enumdefine.cascade": "Cascade Name",
+    "schema.enumdefine.color": "Enable Color",
     "schema.enumdefine.values": "Enum Values",
     "schema.enumdefine.downlevel": "Next",
     "schema.enumdefine.moveup": "Move up",

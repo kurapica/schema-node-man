@@ -24,6 +24,7 @@ importLanguage("zhCN", {
     "schema.namespaceinput": "命名空间录入用",
     "schema.reltarfield": "关联目标字段",
     "schema.anyvalue": "任意数据",
+    "schema.color": "颜色",
 
     "schema.reltarfield.ele": "数组元素",
     
@@ -84,6 +85,7 @@ importLanguage("zhCN", {
     "schema.localestring": "可本地化字符串",
     "schema.localestring.default": "默认文本",
     "schema.localestring.trans": "翻译条目",
+    "schema.localestrings": "可本地化字符串列表",
 
     "schema.scalardefine": "基础结构体类型定义",
     "schema.scalardefine.base": "原始基础数据类型",
@@ -112,6 +114,7 @@ importLanguage("zhCN", {
     "schema.enumdefine": "枚举值定义",
     "schema.enumdefine.type": "枚举值数据类型",
     "schema.enumdefine.cascade": "级联枚举名",
+    "schema.enumdefine.color": "使用颜色",
     "schema.enumdefine.values": "枚举值列表",
     "schema.enumdefine.downlevel": "下级",
     "schema.enumdefine.moveup": "上移",

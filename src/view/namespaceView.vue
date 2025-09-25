@@ -342,7 +342,7 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
         }
 
         getSchema(value)
-        .then((res: INodeSchema) => {
+        .then((res?: INodeSchema) => {
             buildOptions([], res?.schemas || []).then(r => {
                 ns.children = r
                 resolve(ns.children)
