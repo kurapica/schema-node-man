@@ -40,7 +40,7 @@ const name = ref("")
 
 const refreshData = () => {
     if (props.node.readonly) return
-    props.node.data = name.value ? (prefix.value ? `${prefix.value}.${name.value}` : name.value) : ""
+    props.node.data = name.value ? (typeof(prefix.value) === "string" && prefix.value && prefix.value !== "null" && prefix.value !== "undefined" ? `${prefix.value}.${name.value}` : name.value) : ""
 }
 
 watch(prefix, refreshData)

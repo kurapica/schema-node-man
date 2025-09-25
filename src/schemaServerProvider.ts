@@ -61,7 +61,7 @@ async function postSchemaApi(url: string, param: any): Promise<any> {
             id: generateGuid(),
             params: param
         })
-        return result.result
+        return result?.data?.result
     }
     catch(ex)
     {
@@ -72,7 +72,6 @@ async function postSchemaApi(url: string, param: any): Promise<any> {
 // Default schema
 const defaultSchemaServerProvider: ISchemaServerProvder = {
     loadSchema: async (names: string[]): Promise<INodeSchema[]> => {
-        console.log("load schema", names)
         return (await postSchemaApi("/load-schema", {
             names: names
         }))?.schemas || []

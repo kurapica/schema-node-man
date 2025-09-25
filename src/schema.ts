@@ -213,6 +213,10 @@ registerSchema([
                     name: _LS("schema.relationtype.invisible"),
                 },
                 {
+                    value: RelationType.Visible,
+                    name: _LS("schema.relationtype.visible"),
+                },
+                {
                     value: RelationType.Disable,
                     name: _LS("schema.relationtype.disable"),
                 },
@@ -1740,6 +1744,7 @@ registerSchema([
                         return NS_SYSTEM_INT
 
                     case RelationType.Invisible:
+                    case RelationType.Visible:
                     case RelationType.Disable:
                     case RelationType.AnyLevel:
                     case RelationType.SingleFlag:
@@ -1774,6 +1779,7 @@ registerSchema([
                         RelationType.LowLimit,
                         RelationType.UpLimit,
                         RelationType.Invisible,
+                        RelationType.Visible,
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.InitOnly,
@@ -1788,6 +1794,7 @@ registerSchema([
                         RelationType.WhiteList,
                         RelationType.BlackList,
                         RelationType.Invisible,
+                        RelationType.Visible,
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.InitOnly,
@@ -1801,6 +1808,7 @@ registerSchema([
                 else if (typeInfo?.type === SchemaType.Struct) {
                     return [
                         RelationType.Invisible,
+                        RelationType.Visible,
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.Type
@@ -1812,6 +1820,7 @@ registerSchema([
                     RelationType.WhiteList,
                     RelationType.BlackList,
                     RelationType.Invisible,
+                    RelationType.Visible,
                     RelationType.Disable,
                     RelationType.Assign,
                     RelationType.InitOnly,
@@ -2744,12 +2753,16 @@ export function reloadStorageSchemas()
         if (!schema || typeof(schema) !== "object") continue
         schemas.push(schema)
     }
-    registerSchema(schemas)
+    registerSchema(schemas, SchemaLoadState.Custom)
 }
 
 // save schema to storage
 export function saveStorageSchema(schema: INodeSchema)
 {
+    // only save custom schema in the cache
+    if (schema.loadState && (schema.loadState & SchemaLoadState.Custom) == 0) return
+
+    // update name list
     const namelist = localStorage["schema_custom_namelist"]
     let list: string[] = namelist ? JSON.parse(namelist) : []
     const name = schema.name.toLowerCase()
@@ -2760,6 +2773,8 @@ export function saveStorageSchema(schema: INodeSchema)
         list.sort()
         localStorage["schema_custom_namelist"] = JSON.stringify(list)
     }
+
+    // save schema
     localStorage[`schema_data_${name}`] = JSON.stringify({
         name: schema.name,
         type: schema.type,

@@ -43,6 +43,7 @@ importLanguage("enUS", {
     "schema.relationtype.lowlimit": "Lower Limit",
     "schema.relationtype.uplimit": "Upper Limit",
     "schema.relationtype.invisible": "Invisible",
+    "schema.relationtype.visible": "Visible",
     "schema.relationtype.disable": "Disabled",
     "schema.relationtype.assign": "Force Assign",
     "schema.relationtype.initonly": "Init Only",

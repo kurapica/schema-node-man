@@ -243,10 +243,12 @@ const handleNew = async () => {
 
 // update
 const handleEdit = async (row: any, readonly?: boolean) => {
+    const schema = await getSchema(row.name)
+
     namespaceNode.value = new StructNode({
         type: "schema.namespacedefine",
         readonly
-    }, jsonClone(toRaw(row)))
+    }, jsonClone(schema))
     showNamespaceEditor.value = true
 
     if (readonly) {
@@ -290,7 +292,7 @@ const confirmNameSpace = async () => {
     if (!res || !namespaceNode.value?.valid) return
 
     if (!namespaceNode.value?.valid) return
-    const data = jsonClone(toRaw(namespaceNode.value.data))
+    const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.data)))
     const schema = getCachedSchema(data.name)
     
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
@@ -304,11 +306,11 @@ const confirmNameSpace = async () => {
                 ElMessage.error(_L.value["schema.designer.error"])
                 return
             }
-            data.loadState = SchemaLoadState.Server
+            data.loadState = (data.loadState || 0) | SchemaLoadState.Server
         }
     }
 
-    registerSchema([data])
+    registerSchema([data], data.loadState)
     saveStorageSchema(data)
     closeNamespaceEditor()
     showNamespaceEditor.value = false

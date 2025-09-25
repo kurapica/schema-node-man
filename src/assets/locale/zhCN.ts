@@ -43,6 +43,7 @@ importLanguage("zhCN", {
     "schema.relationtype.lowlimit": "下限",
     "schema.relationtype.uplimit": "上限",
     "schema.relationtype.invisible": "不可见",
+    "schema.relationtype.visible": "可见",
     "schema.relationtype.disable": "不可用",
     "schema.relationtype.assign": "强制赋值",
     "schema.relationtype.initonly": "仅初始化用",
