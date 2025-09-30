@@ -60,12 +60,12 @@
                     </template>
                     <template #default="scope">
                         <el-button v-if="scope.row.type === SchemaType.Namespace"
-                            type="info" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
+                            :type="scope.row.schemas?.length ? 'success' : 'info'" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
                         </el-button>
-                        <el-button v-else type="info" @click="handleEdit(scope.row, true)">
+                        <el-button v-else type="success" @click="handleEdit(scope.row, true)">
                             {{ _L["schema.designer.view"] }}
                         </el-button>
-                        <el-button type="success" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
+                        <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
                             {{ _L["schema.designer.edit"] }}
                         </el-button>
                         <el-button v-if="isSchemaDeletable(scope.row.name)" type="danger" @click="handleDelete(scope.row)">
