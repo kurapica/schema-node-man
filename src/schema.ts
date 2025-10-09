@@ -345,15 +345,7 @@ registerSchema([
                 {
                     value: DataCombineType.Count,
                     name: _LS("schema.datacombinetype.count")
-                },
-                {
-                    value: DataCombineType.Min,
-                    name: _LS("schema.datacombinetype.min")
-                },
-                {
-                    value: DataCombineType.Max,
-                    name: _LS("schema.datacombinetype.max")
-                },
+                }
             ]
         }
     },
@@ -2230,7 +2222,7 @@ registerSchema([
                     display: _LS("schema.dataindexes")
                 },
                 {
-                    name: "combine",
+                    name: "combines",
                     type: "schema.datacombines",
                     display: _LS("schema.arraydefine.combine"),
                 },
@@ -2292,7 +2284,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "combine",
+                    field: "combines",
                     type: RelationType.Invisible,
                     func: "schema.notstructtype",
                     args: [

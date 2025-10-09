@@ -73,8 +73,6 @@ importLanguage("zhCN", {
     "schema.datacombinetype.init": "初始，取第一次赋值",
     "schema.datacombinetype.sum": "合计",
     "schema.datacombinetype.count": "计数",
-    "schema.datacombinetype.min": "最小值",
-    "schema.datacombinetype.max": "最大值",
 
     "schema.language": "语言",
     "schema.localetran": "翻译条目",

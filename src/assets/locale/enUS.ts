@@ -73,8 +73,6 @@ importLanguage("enUS", {
     "schema.datacombinetype.init": "Init, use first value",
     "schema.datacombinetype.sum": "Sum",
     "schema.datacombinetype.count": "Count",
-    "schema.datacombinetype.min": "Minimum",
-    "schema.datacombinetype.max": "Maximum",
 
     "schema.language": "Language",
     "schema.localetran": "Translate",
