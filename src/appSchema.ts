@@ -633,43 +633,6 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.nomainapp",
-        type: SchemaType.Function,
-        display: _LS("schema.app.nomainapp"),
-        func: {
-            return: NS_SYSTEM_BOOL,
-            args: [
-                {
-                    name: "app",
-                    type: "schema.app.srcapp",
-                    nullable: true,
-                }
-            ],
-            exps: [],
-            func: (app: string) => {
-                if (!app) return true
-                const schema = getAppCachedSchema(app)
-                return !(schema?.fields?.find((f: IAppFieldSchema) => f.sourceApp))
-            }
-        }
-    },
-    {
-        name: "schema.app.getmainapps",
-        type: SchemaType.Function,
-        display: _LS("schema.app.getmainapps"),
-        func: {
-            return: NS_SYSTEM_STRINGS,
-            args: [
-                {
-                    name: "app",
-                    type: "schema.app.srcapp",
-                }
-            ],
-            exps: [],
-            func: getMainApps
-        }
-    },
-    {
         name: "schema.app.app",
         type: SchemaType.Struct,
         display: _LS("schema.app.app"),
@@ -700,38 +663,12 @@ registerSchema([
                     display: _LS("schema.app.app.standalone")
                 },
                 {
-                    name: "main",
-                    type: "schema.app.srcapp",
-                    display: _LS("schema.app.app.main"),
-                    desc: _LS("schema.app.app.main.desc"),
-                },
-                {
                     name: "relations",
                     type: "schema.app.fieldrelations",
                     display: _LS("schema.app.app.relations"),
                 },
             ],
             relations: [
-                {
-                    field: "main",
-                    type: RelationType.Invisible,
-                    func: "schema.app.nomainapp",
-                    args: [
-                        {
-                            name: "name"
-                        }
-                    ]
-                },
-                {
-                    field: "main",
-                    type: RelationType.WhiteList,
-                    func: "schema.app.getmainapps",
-                    args: [
-                        {
-                            name: "name"
-                        }
-                    ]
-                },
                 {
                     field: "relations",
                     type: RelationType.Invisible,
@@ -963,20 +900,6 @@ function gatherSchemas(types: INodeSchema[], name?: string)
             break
         }
     }
-}
-
-// gets all the main apps
-function getMainApps(app: string): string[] {
-    const schema = getAppCachedSchema(app)
-    const result: string[] = []
-    if (!schema?.fields?.length) return result
-    schema.fields.filter((f: IAppSchema) => f.sourceApp).forEach((f: IAppSchema) => {
-        if (result.includes(f.sourceApp!)) return
-        result.push(f.sourceApp!)
-        const r = getMainApps(f.sourceApp!).filter(a => !result.includes(a))
-        if (r.length) result.splice(result.length, 0, ...r)
-    })
-    return result
 }
 
 //#endregion

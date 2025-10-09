@@ -60,7 +60,7 @@
                     </template>
                     <template #default="scope">
                         <el-button v-if="scope.row.type === SchemaType.Namespace"
-                            :type="scope.row.schemas?.length ? 'success' : 'info'" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
+                            :type="(scope.row.hasSchemas || scope.row.schemas?.length) ? 'success' : 'info'" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
                         </el-button>
                         <el-button v-else type="success" @click="handleEdit(scope.row, true)">
                             {{ _L["schema.designer.view"] }}
