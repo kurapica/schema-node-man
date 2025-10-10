@@ -229,9 +229,10 @@ import { Delete } from '@element-plus/icons-vue'
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { _LS, type IAppSchema, type IAppFieldSchema,  getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema } from 'schema-node'
-import { ElForm } from 'element-plus'
+import { ElForm, ElMessage } from 'element-plus'
 import { appSchemaToJson, clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '@/appSchema'
 import tryapp from './tryapp.vue'
+import { getSchemaServerProvider } from '@/schemaServerProvider'
 
 //#region View
 
@@ -249,7 +250,7 @@ if (localStorage["schema_man_appsearch"])
         const search = JSON.parse(localStorage["schema_man_appsearch"])
         if (search && typeof(search) === "object")
         {
-            state.app = search.namespace || ""
+            state.app = search.app || ""
             state.keyword = search.keyword || ""
         }
     }
@@ -314,11 +315,11 @@ const handleNew = async () => {
 // update
 const handleEdit = async (row: any, readonly?: boolean) => {
     localStorage["schema_curr_app"] = row.name
-
+    const schema = await getAppSchema(row.name)
     appNode.value = new StructNode({
         type: "schema.app.app",
         readonly
-    }, jsonClone(toRaw(row)))
+    }, jsonClone(schema))
     showAppEditor.value = true
 
     if (readonly) {
@@ -333,6 +334,18 @@ const handleEdit = async (row: any, readonly?: boolean) => {
 
 // delete
 const handleDelete = (row: any) => {
+    if ((row.loadState || 0) & SchemaLoadState.Server)
+    {
+        const provider = getSchemaServerProvider()
+        if (provider)
+        {
+            const res = provider.deleteAppSchema(row.name)
+            if (!res) {
+                ElMessage.error(_L.value["schema.designer.cantdelapp"])
+                return
+            }
+        }
+    }
     removeStorageAppSchema(row.name)
     removeAppSchema(row.name)
     return refresh()
@@ -345,7 +358,22 @@ const confirmApp = async () => {
 
     if (!appNode.value?.valid) return
     const data = jsonClone(toRaw(appNode.value.data))
-    registerAppSchema([data])
+    const schema = getAppCachedSchema(data.name)
+
+    if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
+    {
+        const provider = getSchemaServerProvider()
+        if (provider){
+            const res = await provider.saveAppSchema(data)
+            if (!res) {
+                ElMessage.error(_L.value["schema.designer.error"])
+                return
+            }
+            data.loadState = (data.loadState || 0) | SchemaLoadState.Server
+        }
+    }
+    
+    registerAppSchema([data], data.loadState)
     saveStorageAppSchema(data)
     closeAppEditor()
     showAppEditor.value = false
@@ -431,6 +459,19 @@ const handleFieldDelete = async (row: any) => {
     const appSchema = await getAppSchema(currApp!)
     if (!appSchema?.fields) return
 
+    if ((appSchema.loadState || 0) & SchemaLoadState.Server)
+    {
+        const provider = getSchemaServerProvider()
+        if (provider)
+        {
+            const res = provider.deleteAppFieldSchema(appSchema.name, row.name)
+            if (!res) {
+                ElMessage.error(_L.value["schema.designer.error"])
+                return
+            }
+        }
+    }
+
     const idx =  appSchema.fields.findIndex(f => f.name === row.name)
     if (idx! >= 0)
     {
@@ -446,14 +487,25 @@ const moveFieldUp = async (row: any) => {
     if (!appSchema?.fields) return
 
     const idx =  appSchema.fields.findIndex(f => f.name === row.name)
-    if (idx! > 0)
+    if (idx <= 0) return
+    const temp = appSchema.fields[idx - 1]
+    if ((appSchema.loadState || 0) & SchemaLoadState.Server)
     {
-        const temp = appSchema.fields[idx - 1]
-        appSchema.fields[idx - 1] = appSchema.fields[idx]
-        appSchema.fields[idx] = temp
-        saveStorageAppSchema(appSchema)
-        fields.value = appSchema?.fields ? [...appSchema.fields] : []
+        const provider = getSchemaServerProvider()
+        if (provider)
+        {
+            const res = provider.swapAppFieldSchema(appSchema.name, row.name, temp.name)
+            if (!res) {
+                ElMessage.error(_L.value["schema.designer.error"])
+                return
+            }
+        }
     }
+
+    appSchema.fields[idx - 1] = appSchema.fields[idx]
+    appSchema.fields[idx] = temp
+    saveStorageAppSchema(appSchema)
+    fields.value = appSchema?.fields ? [...appSchema.fields] : []
 }
 
 // save
@@ -465,6 +517,18 @@ const confirmField = async () => {
     const data = jsonClone(toRaw(appFieldNode.value.data))
     const appSchema = await getAppSchema(currApp!)
     if (!appSchema) return
+
+    if ((appSchema.loadState || 0) & SchemaLoadState.Server)
+    {
+        const provider = getSchemaServerProvider()
+        if (provider){
+            const res = await provider.saveAppFieldSchema(appSchema.name, data)
+            if (!res) {
+                ElMessage.error(_L.value["schema.designer.error"])
+                return
+            }
+        }
+    }
 
     if (!appSchema.fields) appSchema.fields = []
     const idx =  appSchema.fields.findIndex(f => f.name === data.name)

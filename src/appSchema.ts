@@ -707,6 +707,9 @@ export function reloadStorageAppSchemas()
 // save schema to storage
 export function saveStorageAppSchema(schema: IAppSchema)
 {
+    // only save custom schema in the cache
+    if (schema.loadState && (schema.loadState & SchemaLoadState.Custom) == 0) return
+
     schema = getAppCachedSchema(schema.name)! // reload to gets the fields
     const namelist = localStorage["schema_custom_applist"]
     let list: string[] = namelist ? JSON.parse(namelist) : []
@@ -799,7 +802,7 @@ export function saveAllCustomAppSchemaToStroage(root: string = "")
 // export app schema
 export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema
 {
-    const r: IAppSchema = { name: f.name, display: f.display, desc: f.desc, main: f.main }
+    const r: IAppSchema = { name: f.name, display: f.display, desc: f.desc }
     const isroot = isNull(types)
     types ||= []
 
@@ -818,8 +821,8 @@ export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema
 
     if (isroot && types?.length)
     {
-        r.types = []
-        types.forEach(t => gatherSchemas(r.types!, t))
+        r.nodeSchemas = []
+        types.forEach(t => gatherSchemas(r.nodeSchemas!, t))
     }
 
     return r

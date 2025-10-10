@@ -261,6 +261,7 @@ importLanguage("enUS", {
     "schema.designer.view": "View",
     "schema.designer.new": "New",
     "schema.designer.cantdelschema": "Cannot delete type in use",
+    "schema.designer.cantdelapp": "Cannot delete specified app",
     "schema.designer.tryit": "Demo",
     "schema.designer.close": "Close",
     "schema.designer.save": "Save",

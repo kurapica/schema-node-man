@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -609,11 +609,6 @@ registerSchema([
                     upLimit: 64
                 },
                 {
-                    name: "color",
-                    type: "schema.color",
-                    display: _LS("schema.color"),
-                },
-                {
                     name: "disable",
                     default: false,
                     type: NS_SYSTEM_BOOL,
@@ -650,11 +645,6 @@ registerSchema([
                     type: "schema.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
-                },
-                {
-                    name: "color",
-                    type: "schema.color",
-                    display: _LS("schema.color"),
                 },
                 {
                     name: "disable",
@@ -694,11 +684,6 @@ registerSchema([
                     type: "schema.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
-                },
-                {
-                    name: "color",
-                    type: "schema.color",
-                    display: _LS("schema.color"),
                 },
                 {
                     name: "disable",
@@ -1144,9 +1129,9 @@ registerSchema([
                 let schema = getCachedSchema(type)
                 if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
                 if (schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1) {
-                    return schema.enum.cascade.map((item: string, i: number) => ({
+                    return schema.enum.cascade.map((item: ILocaleString, i: number) => ({
                         value: i + 1,
-                        label: item.trim()
+                        label: _L(item)
                     }))
                 }
                 return null
@@ -2294,7 +2279,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "combine.field",
+                    field: "combines.field",
                     type: RelationType.WhiteList,
                     func: "schema.getstructnumbervaluefields",
                     args: [

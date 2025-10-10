@@ -28,7 +28,7 @@
                     separator-class="el-icon-arrow-right" style="margin-bottom: 8px;">
                     <el-breadcrumb-item v-for="item in state.schema.enum.cascade">{{ item }}</el-breadcrumb-item>
                 </el-breadcrumb>
-                <ul>
+                <ul v-if="state.schema.enum?.values?.length">
                     <li v-for="item in state.schema.enum!.values.slice(0, 5)">{{ _L(item.name) }}</li>
                 </ul>
             </template>
@@ -38,7 +38,7 @@
                     separator-class="el-icon-arrow-right" style="margin-bottom: 8px;">
                     <el-breadcrumb-item v-for="item in state.eleschema.enum.cascade">{{ item }}</el-breadcrumb-item>
                 </el-breadcrumb>
-                <ul>
+                <ul v-if="state.eleschema.enum?.values?.length">
                     <li v-for="item in state.eleschema.enum!.values.slice(0, 5)">{{ _L(item.name) }}</li>
                 </ul>
             </template>

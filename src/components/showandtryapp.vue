@@ -26,7 +26,11 @@
                         header-align="left" 
                         :header-cell-style="{ background: '#eee' }">
                         <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
+                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                            <template #default="scope">
+                                <span>{{ _L(scope.row.display) }}</span>
+                            </template>
+                        </el-table-column>
                         <el-table-column align="left" prop="type" :label="_L['schema.designer.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{

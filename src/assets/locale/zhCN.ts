@@ -261,6 +261,7 @@ importLanguage("zhCN", {
     "schema.designer.view": "查看",
     "schema.designer.new": "新增",
     "schema.designer.cantdelschema": "无法删除使用中的类型",
+    "schema.designer.cantdelapp": "无法删除指定的应用",
     "schema.designer.tryit": "演示",
     "schema.designer.close": "关闭",
     "schema.designer.save": "保存",

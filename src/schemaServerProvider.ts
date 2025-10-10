@@ -1,12 +1,14 @@
-import axios from "axios";
-import { generateGuid, useSchemaProvider, type IAppSchema, type IEnumValueAccess, type IEnumValueInfo, type INodeSchema, type ISchemaProvider } from "schema-node";
+import axios from "axios"
+import type { IAppDataFieldPushQuery, IAppDataPushResult, IBatchQueryAppDataResult } from "schema-node"
+import type { IAppDataQuery } from "schema-node"
+import { generateGuid, useAppDataProvider, type IAppFieldSchema, type IAppSchema, type IEnumValueAccess, type IEnumValueInfo, type INodeSchema, type IAppSchemaDataProvider } from "schema-node"
 
 /**
  * The schema server api provider interface
  * 
  * The schema server is used to save the schema definition and publish the changes to application servers.
  */
-export interface ISchemaServerProvder extends ISchemaProvider
+export interface ISchemaServerProvder extends IAppSchemaDataProvider
 {
     /**
      * Save the schema to the server
@@ -43,6 +45,40 @@ export interface ISchemaServerProvder extends ISchemaProvider
      * @returns message the error message if provided
      */
     deleteEnumSubList(schema: string, value: any): Promise<boolean>
+
+    /**
+     * Save the app schema to the server
+     * @param app the app schema to save
+     */
+    saveAppSchema(app: IAppSchema): Promise<boolean>
+
+    /**
+     * Delete the app schema from the server
+     * @param app the app schema name to delete
+     */
+    deleteAppSchema(app: string): Promise<boolean>
+
+    /**
+     * Save the app field schema to the server
+     * @param app the app schema name
+     * @param field the app field schema to save
+     */
+    saveAppFieldSchema(app: string, field: IAppFieldSchema): Promise<boolean>
+
+    /**
+     * Delete the app field schema from the server
+     * @param app the app schema name
+     * @param field the app field schema name to delete
+     */
+    deleteAppFieldSchema(app: string, field: string): Promise<boolean>
+
+    /**
+     * Swap the app field schema order with another field
+     * @param app the app schema name
+     * @param field the app field schema name to swap
+     * @param other the other app field schema name to swap
+     */
+    swapAppFieldSchema(app: string, field: string, other: string): Promise<boolean>
 }
 
 //#region Methods
@@ -77,9 +113,10 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         }))?.schemas || []
     },
 
-    loadAppSchema: async (app: string): Promise<IAppSchema | undefined> => {
-        return (await postSchemaApi("/load-app", {
-            name: app
+    loadAppSchema: async (app: string, includeTypes?: boolean): Promise<IAppSchema | undefined> => {
+        return (await postSchemaApi("/load-app-schema", {
+            name: app,
+            includeTypes
         }))?.schema
     },
 
@@ -123,9 +160,52 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         return (await postSchemaApi("/delete-enum-sub-list", {
             name, value
         }))?.result
+    },
+
+    saveAppSchema: async function (schema: IAppSchema): Promise<boolean> {
+        return (await postSchemaApi("/save-app-schema", {
+            schema
+        }))?.result
+    },
+
+    deleteAppSchema: async function (app: string): Promise<boolean> {
+        return (await postSchemaApi("/delete-app-schema", {
+            app
+        }))?.result
+    },
+
+    saveAppFieldSchema: async function (app: string, schema: IAppFieldSchema): Promise<boolean> {
+        return (await postSchemaApi("/save-app-field-schema", {
+            app, schema
+        }))?.result
+    },
+
+    deleteAppFieldSchema: async function (app: string, field: string): Promise<boolean> {
+        return (await postSchemaApi("/delete-app-field-schema", {
+            app, field
+        }))?.result
+    },
+
+    swapAppFieldSchema: async function (app: string, field: string, other: string): Promise<boolean> {
+        return (await postSchemaApi("/swap-app-field-schema", {
+            app, field, other
+        }))?.result
+    },
+
+    batchQueryAppData: async function (querys: IAppDataQuery[]): Promise<IBatchQueryAppDataResult> {
+        return (await postSchemaApi("/batch-query-app-data", {
+            querys
+        }))
+    },
+
+    pushAppData: async function(app: string, target: string, datas: { [key:string]: IAppDataFieldPushQuery }): Promise<IAppDataPushResult>
+    {
+        return (await postSchemaApi("/push-app-data", {
+            app, target, datas
+        }))
     }
 }
-if (localStorage["schema_server_url"]) useSchemaProvider(defaultSchemaServerProvider)
+if (localStorage["schema_server_url"]) useAppDataProvider(defaultSchemaServerProvider)
 
 /**
  * Set the schema site url
@@ -133,7 +213,7 @@ if (localStorage["schema_server_url"]) useSchemaProvider(defaultSchemaServerProv
 export function setSchemaSite(url: string)
 {
     localStorage["schema_server_url"] = url
-    if (url && !schemaServerProvider) useSchemaProvider(defaultSchemaServerProvider)
+    if (url && !schemaServerProvider) useAppDataProvider(defaultSchemaServerProvider)
 }
 
 /**
@@ -150,7 +230,7 @@ export function getSchemaSite()
  */
 export function useSchemaServerProvider(provider: ISchemaServerProvder): void{
     schemaServerProvider = provider
-    useSchemaProvider(provider)
+    useAppDataProvider(provider)
 }
 
 /**

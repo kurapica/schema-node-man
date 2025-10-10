@@ -13,8 +13,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ElForm } from "element-plus";
-import { getAppNode, type AnySchemaNode, type AppNode } from "schema-node";
+import type { ElForm } from "element-plus"
+import { getAppDataProvider, getAppNode, type AnySchemaNode, type AppNode } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"
 import { onMounted, ref } from "vue"
 
@@ -22,6 +22,7 @@ const props = defineProps<{ app: string, skin?: string }>()
 const form = ref<InstanceType<typeof ElForm>>()
 
 const appNode = ref<AppNode | undefined>(undefined)
+const enableAppData = getAppDataProvider() ? true : false
 
 onMounted(async() => {
     appNode.value = await getAppNode({
@@ -30,6 +31,5 @@ onMounted(async() => {
         fields: []
     })
 })
-
 
 </script>

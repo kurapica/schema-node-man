@@ -268,7 +268,7 @@ const handleDelete = async (row: any) => {
         ElMessage.error(_L.value["schema.designer.cantdelschema"])
         return
     }
-    if ((row.loadState || 0) && SchemaLoadState.Server)
+    if ((row.loadState || 0) & SchemaLoadState.Server)
     {
         const provider = getSchemaServerProvider()
         if (provider)
@@ -325,7 +325,6 @@ const closeNamespaceEditor = () => {
     namesapceWatchHandler = null
 }
 
-
 //#endregion
 
 //#region Try it
@@ -353,7 +352,6 @@ const startDownload = () => {
 const handleSelection = (val: any[]) => {
     selections = val.map((v: any) => v.name)
 }
-
 
 const download = () => {
     if (!selections.length) return
