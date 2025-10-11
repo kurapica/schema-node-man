@@ -192,9 +192,9 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         }))?.result
     },
 
-    batchQueryAppData: async function (querys: IAppDataQuery[]): Promise<IBatchQueryAppDataResult> {
+    batchQueryAppData: async function (queries: IAppDataQuery[]): Promise<IBatchQueryAppDataResult> {
         return (await postSchemaApi("/batch-query-app-data", {
-            querys
+            queries
         }))
     },
 

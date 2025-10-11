@@ -286,6 +286,14 @@ importLanguage("zhCN", {
     "schema.designer.confirmdelete": "执行删除操作?",
     "schema.designer.app": "应用",
     "schema.designer.tran": "翻译",
+    "schema.designer.target": "应用目标",
+    "schema.designer.genguid": "生成新GUID",
+    "schema.designer.loaddata": "加载数据",
+    "schema.designer.savedata": "保存数据",
+    "schema.designer.savefailed": "保存数据失败",
+    "schema.designer.inputfield": "输入字段",
+    "schema.designer.reffield": "引用字段",
+    "schema.designer.outputfield": "输出字段",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",
@@ -339,4 +347,9 @@ importLanguage("zhCN", {
     "schema.app.app.desc": "应用描述",
     "schema.app.app.standalone": "独立应用(无目标)",
     "schema.app.app.relations": "应用字段数据关联列表",
+
+    "schema.app.apptarget": "应用及目标",
+    "schema.app.apptarget.app": "应用",
+    "schema.app.apptarget.target": "目标",
+    "schema.app.getapptargets": "获取目标列表",
 })

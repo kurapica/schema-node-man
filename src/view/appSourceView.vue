@@ -224,7 +224,7 @@ onMounted(() => {
                 rebuild = true
                 const schema = await getAppSchema(name)
                 if (!schema) break
-                display.push(`${schema.display || paths[i]}`)
+                display.push(`${_L.value(schema.display) || paths[i]}`)
             }
         }
         state.display = display.join("/")

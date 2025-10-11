@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, NS_SYSTEM_GUID } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -681,7 +681,68 @@ registerSchema([
                 }
             ]
         }
-    }
+    },
+
+    //#region helper
+    {
+        name: "schema.app.getapptargets",
+        type: SchemaType.Function,
+        display: _LS("schema.app.getapptargets"),
+        func: {
+            return: NS_SYSTEM_STRINGS,
+            args: [
+                {
+                    name: "app",
+                    type: "schema.app.srcapp",
+                    nullable: true,
+                }
+            ],
+            exps: [],
+            func: (app: string) => {
+                if (isNull(app)) return []
+                const appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}")
+                if (appTargets && typeof(appTargets) === "object") {
+                    return appTargets[app] || []
+                }
+                return []
+            }
+        }
+    },
+    {
+        name: "schema.app.apptarget",
+        type: SchemaType.Struct,
+        display: _LS("schema.app.apptarget"),
+        struct: {
+            fields: [
+                {
+                    name: "app",
+                    readonly: true,
+                    type: "schema.app.srcapp",
+                    display: _LS("schema.app.apptarget.app"),
+                },
+                {
+                    name: "target",
+                    type: NS_SYSTEM_STRING,
+                    display: _LS("schema.app.apptarget.target"),
+                    asSuggest: true,
+                    upLimit: 64
+                } as IStructScalarFieldConfig,
+            ],
+            relations: [
+                {
+                    field: "target",
+                    type: RelationType.WhiteList,
+                    func: "schema.app.getapptargets",
+                    args: [
+                        {
+                            name: "app"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    //#endregion
 ], SchemaLoadState.System)
 
 //#region App Schema storage
@@ -902,6 +963,22 @@ function gatherSchemas(types: INodeSchema[], name?: string)
             r.func?.exps?.forEach((e: IFunctionExpression) => gatherSchemas(types, e.func))
             break
         }
+    }
+}
+
+export function addAppTarget(app: string, target: string)
+{
+    if (isNull(app) || isNull(target)) return
+
+    let appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}")
+    if (isNull(appTargets) || typeof(appTargets) !== "object") appTargets = {}
+    
+    let targets: string[] = appTargets[app] || []
+    if (!Array.isArray(targets)) targets = []
+    if (!targets.includes(target)) {
+        targets.unshift(target)
+        appTargets[app] = targets
+        localStorage["schema_app_targets"] = JSON.stringify(appTargets)
     }
 }
 

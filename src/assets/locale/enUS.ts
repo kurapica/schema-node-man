@@ -286,6 +286,14 @@ importLanguage("enUS", {
     "schema.designer.confirmdelete": "Continue the delete process?",
     "schema.designer.app": "Application",
     "schema.designer.tran": "Translate",
+    "schema.designer.target": "App Target",
+    "schema.designer.genguid": "Generate GUID",
+    "schema.designer.loaddata": "Load Data",
+    "schema.designer.savedata": "Save Data",
+    "schema.designer.savefailed": "Save Data Failed",
+    "schema.designer.inputfield": "Input Field",
+    "schema.designer.reffield": "Ref Field",
+    "schema.designer.outputfield": "Output Field",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",
@@ -340,4 +348,9 @@ importLanguage("enUS", {
     "schema.app.app.desc": "App description",
     "schema.app.app.standalone": "Standalone(No target)",
     "schema.app.app.relations": "App field associations list",
+
+    "schema.app.apptarget": "App and Target",
+    "schema.app.apptarget.app": "App",
+    "schema.app.apptarget.target": "Target",
+    "schema.app.getapptargets": "Get Target List",
 });
