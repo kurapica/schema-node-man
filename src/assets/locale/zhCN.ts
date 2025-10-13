@@ -294,6 +294,7 @@ importLanguage("zhCN", {
     "schema.designer.inputfield": "输入字段",
     "schema.designer.reffield": "引用字段",
     "schema.designer.outputfield": "输出字段",
+    "schema.designer.viewref": "查看引用",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",

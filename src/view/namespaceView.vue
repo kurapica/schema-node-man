@@ -154,6 +154,7 @@ let lowLimit = 0
 
 // namespace map
 const namespaceMap: any = {
+    "schema.anytype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Function],
     "schema.namespace": [SchemaType.Namespace],
     "schema.scalartype": [SchemaType.Namespace, SchemaType.Scalar],
     "schema.enumtype": [SchemaType.Namespace, SchemaType.Enum],

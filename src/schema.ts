@@ -10,6 +10,14 @@ registerSchema([
 
     //#region scalar type
     {
+        name: "schema.anytype",
+        type: SchemaType.Scalar,
+        display: _LS("schema.anytype"),
+        scalar: {
+            base: NS_SYSTEM_STRING,
+        }
+    },
+    {
         name: "schema.namespace",
         type: SchemaType.Scalar,
         display: _LS("schema.namespace"),
@@ -2899,6 +2907,8 @@ import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("schema.localestring", localstringView, undefined, true)
 regSchemaTypeView("schema.color", colorView)
+
+regSchemaTypeView("schema.anytype", namespaceView)
 regSchemaTypeView("schema.namespace", namespaceView)
 regSchemaTypeView("schema.scalartype", namespaceView)
 regSchemaTypeView("schema.enumtype", namespaceView)

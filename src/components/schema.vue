@@ -100,6 +100,7 @@
                     <template v-if="namespaceNode?.readonly">
                         <el-button v-if="tryitTypes.includes(namespaceNode.rawData.type)" type="primary" @click="tryit">{{ _L["schema.designer.tryit"] }}</el-button>
                         <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                        <el-button v-if="currRow?.usedBy?.length || currRow?.usedByApp?.length" @click="showViewRef = true" style="float:right" type="info" >{{ _L["schema.designer.viewref"] }}</el-button>
                     </template>
                     <template v-else>
                         <el-button type="primary" @click="confirmNameSpace">{{ _L["schema.designer.save"] }}</el-button>
@@ -115,13 +116,51 @@
             append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <tryit-view
-                        :type="tryittype"
-                    ></tryit-view>
+                    <tryit-view :type="tryittype"></tryit-view>
                 </el-main>
                 <el-footer>
                     <br/>
                     <el-button @click="showtryit = false">{{ _L["schema.designer.close"] }}</el-button>
+                </el-footer>
+            </el-container>
+        </el-drawer>
+
+        <!-- View ref -->
+        <el-drawer v-model="showViewRef" :title="_L['schema.designer.viewref']" direction="rtl" size="40%"
+            destroy-on-close
+            append-to-body>
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <template v-if="currRow?.usedBy?.length">
+                        <h3>{{ _L["schema.schematype"] }}</h3>
+                        <hr/>
+                        <ul>
+                            <li v-for="type in currRow?.usedBy" :key="type">
+                                <schema-view :config="{
+                                    type: 'schema.anytype',
+                                    readonly: true
+                                }" :value="type" plain-text="left"></schema-view>
+                            </li>
+                        </ul>
+                        <br/>
+                    </template>
+
+                    <template v-if="currRow?.usedByApp?.length">
+                        <h3>{{ _L["schema.app.apptarget.app"] }}</h3>
+                        <hr/>
+                        <ul>
+                            <li v-for="app in currRow?.usedByApp" :key="app">
+                                <schema-view :config="{
+                                    type: 'schema.app.srcapp',
+                                    readonly: true
+                                }" :value="app" plain-text="left"></schema-view>
+                            </li>
+                        </ul>
+                    </template>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <el-button @click="showViewRef = false">{{ _L["schema.designer.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
@@ -224,6 +263,7 @@ const editorRef = ref<InstanceType<typeof ElForm>>()
 const showNamespaceEditor = ref(false)
 const namespaceNode = ref<StructNode | undefined>(undefined)
 const operation = ref("")
+const showViewRef = ref(false)
 
 let namesapceWatchHandler: Function | null = null
 
@@ -242,7 +282,9 @@ const handleNew = async () => {
 }
 
 // update
+const currRow = ref<INodeSchema | null>(null)
 const handleEdit = async (row: any, readonly?: boolean) => {
+    currRow.value = row
     const schema = await getSchema(row.name)
 
     namespaceNode.value = new StructNode({
@@ -323,6 +365,7 @@ const closeNamespaceEditor = () => {
     namespaceNode.value?.dispose()
     namespaceNode.value = undefined
     namesapceWatchHandler = null
+    currRow.value = null
 }
 
 //#endregion

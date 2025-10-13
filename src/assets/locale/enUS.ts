@@ -294,6 +294,7 @@ importLanguage("enUS", {
     "schema.designer.inputfield": "Input Field",
     "schema.designer.reffield": "Ref Field",
     "schema.designer.outputfield": "Output Field",
+    "schema.designer.viewref": "View Ref",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",
