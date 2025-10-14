@@ -1,5 +1,5 @@
 <template>
-    <section style="width: 100%;">
+    <section style="width: 100%; min-width: 120px;">
         <schema-view
             style="width: 100%;"
             :key="localeNode.guid"

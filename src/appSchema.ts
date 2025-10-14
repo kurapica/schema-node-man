@@ -381,6 +381,31 @@ registerSchema([
         }
     },
     {
+        name: "schema.app.istrackpushdisable",
+        type: SchemaType.Function,
+        display: _LS("schema.app.istrackpushdisable"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "field",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                },
+                {
+                    name: "func",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                }
+            ],
+            exps: [],
+            func: (type: string, func: string) => {
+                if (!type || !func) return true
+                return false
+            }
+        }
+    },
+    {
         name: "schema.app.field",
         type: SchemaType.Struct,
         display: _LS("schema.app.field"),
@@ -420,6 +445,11 @@ registerSchema([
                     name: "sourceField",
                     type: "schema.app.srcfld",
                     display: _LS("schema.app.field.sourcefld"),
+                },
+                {
+                    name: "trackPush",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.app.field.trackpush"),
                 },
                 {
                     name: "incrUpdate",
@@ -608,6 +638,19 @@ registerSchema([
                         }
                     ]
                 },
+                {
+                    field: "trackPush",
+                    type: RelationType.Invisible,
+                    func: "schema.app.istrackpushdisable",
+                    args: [
+                        {
+                            name: "sourceField"
+                        },
+                        {
+                            name: "func"
+                        }
+                    ]
+                }
             ]
         }
     },
@@ -657,11 +700,6 @@ registerSchema([
                     display: _LS("schema.app.app.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
-                {
-                    name: "standalone",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.app.app.standalone")
-                },
                 {
                     name: "relations",
                     type: "schema.app.fieldrelations",

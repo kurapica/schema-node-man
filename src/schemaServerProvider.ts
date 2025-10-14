@@ -38,15 +38,6 @@ export interface ISchemaServerProvder extends IAppSchemaDataProvider
     saveEnumSubList(schema: string, value: any, values: IEnumValueInfo[], append?: boolean): Promise<boolean>
 
     /**
-     * Delete the enum sub list of the given enum value
-     * @param schema the enum schema name
-     * @param value the enum value
-     * @returns result whether the sub list deleted
-     * @returns message the error message if provided
-     */
-    deleteEnumSubList(schema: string, value: any): Promise<boolean>
-
-    /**
      * Save the app schema to the server
      * @param app the app schema to save
      */
@@ -153,12 +144,6 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
     saveEnumSubList: async (name: string, value: any, values: IEnumValueInfo[], append?: boolean): Promise<boolean> => {
         return (await postSchemaApi("/save-enum-sub-list", {
             name, value, values, append
-        }))?.result
-    },
-
-    deleteEnumSubList: async (name: string, value: any): Promise<boolean> => {
-        return (await postSchemaApi("/delete-enum-sub-list", {
-            name, value
         }))?.result
     },
 

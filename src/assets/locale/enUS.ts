@@ -342,12 +342,12 @@ importLanguage("enUS", {
     "schema.app.field.frontend": "Frontend only",
     "schema.app.field.disable": "Disabled",
     "schema.app.field.combine": "Data combine rule",
+    "schema.app.field.trackpush": "Track push, switch source to auto-sync",
 
     "schema.app.app": "App definition",
     "schema.app.app.name": "App Name",
     "schema.app.app.display": "App display",
     "schema.app.app.desc": "App description",
-    "schema.app.app.standalone": "Standalone(No target)",
     "schema.app.app.relations": "App field associations list",
 
     "schema.app.apptarget": "App and Target",

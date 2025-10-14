@@ -342,11 +342,11 @@ importLanguage("zhCN", {
     "schema.app.field.frontend": "仅前端用",
     "schema.app.field.disable": "禁用",
     "schema.app.field.combine": "数据合并规则",
+    "schema.app.field.trackpush": "跟踪推送，切换源自动同步",
     "schema.app.app": "应用定义",
     "schema.app.app.name": "应用名",
     "schema.app.app.display": "应用展示",
     "schema.app.app.desc": "应用描述",
-    "schema.app.app.standalone": "独立应用(无目标)",
     "schema.app.app.relations": "应用字段数据关联列表",
 
     "schema.app.apptarget": "应用及目标",
