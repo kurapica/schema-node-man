@@ -26,7 +26,7 @@
             <template v-if="state.schema.type === SchemaType.Enum">
                 <el-breadcrumb v-if="state.schema.enum?.cascade && state.schema.enum.cascade.length > 0"
                     separator-class="el-icon-arrow-right" style="margin-bottom: 8px;">
-                    <el-breadcrumb-item v-for="item in state.schema.enum.cascade">{{ item }}</el-breadcrumb-item>
+                    <el-breadcrumb-item v-for="item in state.schema.enum.cascade">{{ _L(item) }}</el-breadcrumb-item>
                 </el-breadcrumb>
                 <ul v-if="state.schema.enum?.values?.length">
                     <li v-for="item in state.schema.enum!.values.slice(0, 5)">{{ _L(item.name) }}</li>
