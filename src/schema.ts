@@ -357,145 +357,6 @@ registerSchema([
             ]
         }
     },
-    {
-        name: "schema.language",
-        type: SchemaType.Enum,
-        display: _LS("schema.language"),
-        enum: {
-            type: EnumValueType.String,
-            values: [
-                { value: "afZA", name: _LS("Afrikaans") },
-                { value: "arSA", name: _LS("العربية") },
-                { value: "azAZ", name: _LS("Azərbaycanca") },
-                { value: "beBY", name: _LS("Беларуская") },
-                { value: "bgBG", name: _LS("Български") },
-                { value: "bnBD", name: _LS("বাংলা") },
-                { value: "caES", name: _LS("Català") },
-                { value: "csCZ", name: _LS("Čeština") },
-                { value: "daDK", name: _LS("Dansk") },
-                { value: "deDE", name: _LS("Deutsch") },
-                { value: "elGR", name: _LS("Ελληνικά") },
-                { value: "enUS", name: _LS("English (US)") },
-                { value: "enGB", name: _LS("English (UK)") },
-                { value: "esES", name: _LS("Español (España)") },
-                { value: "esMX", name: _LS("Español (México)") },
-                { value: "etEE", name: _LS("Eesti") },
-                { value: "euES", name: _LS("Euskara") },
-                { value: "faIR", name: _LS("فارسی") },
-                { value: "fiFI", name: _LS("Suomi") },
-                { value: "frFR", name: _LS("Français") },
-                { value: "glES", name: _LS("Galego") },
-                { value: "guIN", name: _LS("ગુજરાતી") },
-                { value: "heIL", name: _LS("עברית") },
-                { value: "hiIN", name: _LS("हिन्दी") },
-                { value: "hrHR", name: _LS("Hrvatski") },
-                { value: "huHU", name: _LS("Magyar") },
-                { value: "hyAM", name: _LS("Հայերեն") },
-                { value: "idID", name: _LS("Bahasa Indonesia") },
-                { value: "isIS", name: _LS("Íslenska") },
-                { value: "itIT", name: _LS("Italiano") },
-                { value: "jaJP", name: _LS("日本語") },
-                { value: "kaGE", name: _LS("ქართული") },
-                { value: "kkKZ", name: _LS("Қазақша") },
-                { value: "kmKH", name: _LS("ភាសាខ្មែរ") },
-                { value: "knIN", name: _LS("ಕನ್ನಡ") },
-                { value: "koKR", name: _LS("한국어") },
-                { value: "loLA", name: _LS("ລາວ") },
-                { value: "ltLT", name: _LS("Lietuvių") },
-                { value: "lvLV", name: _LS("Latviešu") },
-                { value: "mkMK", name: _LS("Македонски") },
-                { value: "mlIN", name: _LS("മലയാളം") },
-                { value: "mnMN", name: _LS("Монгол") },
-                { value: "mrIN", name: _LS("मराठी") },
-                { value: "msMY", name: _LS("Bahasa Melayu") },
-                { value: "myMM", name: _LS("မြန်မာစာ") },
-                { value: "neNP", name: _LS("नेपाली") },
-                { value: "nlNL", name: _LS("Nederlands") },
-                { value: "noNO", name: _LS("Norsk") },
-                { value: "paIN", name: _LS("ਪੰਜਾਬੀ") },
-                { value: "plPL", name: _LS("Polski") },
-                { value: "ptPT", name: _LS("Português (Portugal)") },
-                { value: "ptBR", name: _LS("Português (Brasil)") },
-                { value: "roRO", name: _LS("Română") },
-                { value: "ruRU", name: _LS("Русский") },
-                { value: "siLK", name: _LS("සිංහල") },
-                { value: "skSK", name: _LS("Slovenčina") },
-                { value: "slSI", name: _LS("Slovenščina") },
-                { value: "sqAL", name: _LS("Shqip") },
-                { value: "srRS", name: _LS("Српски") },
-                { value: "svSE", name: _LS("Svenska") },
-                { value: "swKE", name: _LS("Kiswahili") },
-                { value: "taIN", name: _LS("தமிழ்") },
-                { value: "teIN", name: _LS("తెలుగు") },
-                { value: "thTH", name: _LS("ไทย") },
-                { value: "trTR", name: _LS("Türkçe") },
-                { value: "ukUA", name: _LS("Українська") },
-                { value: "urPK", name: _LS("اردو") },
-                { value: "uzUZ", name: _LS("Oʻzbekcha") },
-                { value: "viVN", name: _LS("Tiếng Việt") },
-                { value: "zhCN", name: _LS("简体中文") },
-                { value: "zhTW", name: _LS("繁體中文") },
-                { value: "zuZA", name: _LS("isiZulu") }
-            ]
-        }
-    },
-    {
-        name: "schema.localetran",
-        type: SchemaType.Struct,
-        display: _LS("schema.localetran"),
-        struct: {
-            fields: [
-                {
-                    name: "lang",
-                    type: "schema.language",
-                    require: true,
-                    display: _LS("schema.localetran.lang")
-                },
-                {
-                    name: "tran",
-                    type: NS_SYSTEM_STRING,
-                    display: _LS("schema.localetran.tran")
-                }
-            ]
-        }
-    },
-    {
-        name: "schema.localetrans",
-        type: SchemaType.Array,
-        display: _LS("schema.localetrans"),
-        array: {
-            element: "schema.localetran",
-            primary: [ "lang" ]
-        }
-    },
-    {
-        name: "schema.localestring",
-        type: SchemaType.Struct,
-        display: _LS("schema.localestring"),
-        struct: {
-            fields: [
-                {
-                    name: "key",
-                    type: NS_SYSTEM_STRING,
-                    display: _LS("schema.localestring.default")
-                },
-                {
-                    name: "trans",
-                    type: "schema.localetrans",
-                    display: _LS("schema.localestring.trans")
-                }
-            ]
-        }
-    },
-    {
-        name: "schema.localestrings",
-        type: SchemaType.Array,
-        display: _LS("schema.localestrings"),
-        array: {
-            element: "schema.localestring",
-            primary: ["key"]
-        }
-    },
     //#endregion
 
     //#region scalar definition
@@ -513,7 +374,7 @@ registerSchema([
                 },
                 {
                     name: "unit",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.scalardefine.unit"),
                     upLimit: 8,
                 } as IStructScalarFieldConfig,
@@ -529,7 +390,7 @@ registerSchema([
                 },
                 {
                     name: "error",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.scalardefine.error"),
                     upLimit: 128,
                 },
@@ -612,7 +473,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
@@ -650,7 +511,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
@@ -689,7 +550,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
@@ -784,7 +645,7 @@ registerSchema([
                 },
                 {
                     name: "cascade",
-                    type: "schema.localestrings",
+                    type: "system.localestrings",
                     display: _LS("schema.enumdefine.cascade"),
                 },
                 {
@@ -1244,19 +1105,19 @@ registerSchema([
                 },
                 {
                     name: "display",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.display"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "desc",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
                 {
                     name: "error",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.error"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
@@ -1287,7 +1148,7 @@ registerSchema([
                 },
                 {
                     name: "unit",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.unit"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
@@ -2651,7 +2512,7 @@ registerSchema([
                 {
                     name: "display",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.namespacedefine.display"),
                     upLimit: 128,
                 } as IStructScalarFieldConfig,
@@ -2905,7 +2766,7 @@ import localstringView from "./view/localstringView.vue"
 import colorView from "./view/colorView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
-regSchemaTypeView("schema.localestring", localstringView, undefined, true)
+regSchemaTypeView("system.localestring", localstringView, undefined, true)
 regSchemaTypeView("schema.color", colorView)
 
 regSchemaTypeView("schema.anytype", namespaceView)

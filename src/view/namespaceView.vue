@@ -248,7 +248,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
     // check compatible type
     if (namespaceMap.includes(SchemaType.Function)) {
         const funcList = options.filter(r => r.type === SchemaType.Function)
-        const blackList: string[] = []
+        const blackList: string[] = ["schema"]
         for(let i = 0; i < funcList.length; i++)
         {
             const f = await getSchema(funcList[i].value)
@@ -288,7 +288,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         return blackList
     }
     else {
-        return []
+        return ["schema"]
     }
 }
 

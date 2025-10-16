@@ -73,17 +73,6 @@ importLanguage("enUS", {
     "schema.datacombinetype.init": "Init, use first value",
     "schema.datacombinetype.sum": "Sum",
     "schema.datacombinetype.count": "Count",
-
-    "schema.language": "Language",
-    "schema.localetran": "Translate",
-    "schema.localetran.lang": "Language",
-    "schema.localetran.tran": "Translate",
-    "schema.localetrans": "Translate List",
-
-    "schema.localestring": "Locale string",
-    "schema.localestring.default": "Default",
-    "schema.localestring.trans": "Translate",
-    "schema.localestrings": "Locale strings",
     
     "schema.scalardefine": "Scalar Definition",
     "schema.scalardefine.base": "Base Scalar Type",

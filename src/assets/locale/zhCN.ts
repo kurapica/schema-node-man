@@ -74,17 +74,6 @@ importLanguage("zhCN", {
     "schema.datacombinetype.sum": "合计",
     "schema.datacombinetype.count": "计数",
 
-    "schema.language": "语言",
-    "schema.localetran": "翻译条目",
-    "schema.localetran.lang": "语言",
-    "schema.localetran.tran": "翻译",
-    "schema.localetrans": "翻译条目列表",
-
-    "schema.localestring": "可本地化字符串",
-    "schema.localestring.default": "默认文本",
-    "schema.localestring.trans": "翻译条目",
-    "schema.localestrings": "可本地化字符串列表",
-
     "schema.scalardefine": "基础结构体类型定义",
     "schema.scalardefine.base": "原始基础数据类型",
     "schema.scalardefine.unit": "字面量单位",
