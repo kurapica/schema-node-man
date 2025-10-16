@@ -467,6 +467,11 @@ registerSchema([
                     display: _LS("schema.app.field.disable"),
                 },
                 {
+                    name: "readonly",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.app.field.readonly"),
+                },
+                {
                     name: "func",
                     type: "schema.pushfunctype",
                     display: _LS("schema.app.field.func"),
@@ -546,12 +551,12 @@ registerSchema([
                         }
                     ]
                 },
-                {
+                /*{
                     field: "sourceApp",
                     type: RelationType.BlackList,
                     func: "schema.app.getsourceappblacklist",
                     args: []
-                },
+                },*/
                 {
                     field: "sourceField",
                     type: RelationType.Invisible,
@@ -753,20 +758,36 @@ registerSchema([
         struct: {
             fields: [
                 {
+                    name: "allowApps",
+                    type: NS_SYSTEM_STRINGS,
+                    invisible: true,
+                },
+                {
                     name: "app",
-                    readonly: true,
                     type: "schema.app.srcapp",
+                    require: true,
                     display: _LS("schema.app.apptarget.app"),
                 },
                 {
                     name: "target",
                     type: NS_SYSTEM_STRING,
+                    require: true,
                     display: _LS("schema.app.apptarget.target"),
                     asSuggest: true,
                     upLimit: 64
                 } as IStructScalarFieldConfig,
             ],
             relations: [
+                {
+                    field: "app",
+                    type: RelationType.WhiteList,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "allowApps"
+                        }
+                    ]
+                },
                 {
                     field: "target",
                     type: RelationType.WhiteList,

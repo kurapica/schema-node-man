@@ -68,9 +68,20 @@
                         <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
                             {{ _L["schema.designer.edit"] }}
                         </el-button>
-                        <el-button v-if="isSchemaDeletable(scope.row.name)" type="danger" @click="handleDelete(scope.row)">
-                            {{ _L["schema.designer.delete"] }}
-                        </el-button>
+                        <el-popconfirm
+                            v-if="isSchemaDeletable(scope.row.name)" 
+                            :title="_L['schema.designer.confirmdelete']"                            
+                            :confirm-button-text="_L['YES']"
+                            :cancel-button-text="_L['NO']"
+                            :icon="Delete"
+                            @confirm="handleDelete(scope.row)"
+                            >
+                            <template #reference>
+                                <el-button type="danger">
+                                    {{ _L["schema.designer.delete"] }}
+                                </el-button>
+                            </template>
+                        </el-popconfirm>
                     </template>
                 </el-table-column>
             </el-table>
@@ -175,6 +186,7 @@ import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
 import tryitView from './tryit.vue'
+import { Delete } from '@element-plus/icons-vue'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -183,7 +195,8 @@ const schemaTypeOrder = {
     [SchemaType.Enum]: 3,
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
-    [SchemaType.Function]: 6
+    [SchemaType.Function]: 6,
+    [SchemaType.Json]: 7
 }
 
 const tryitTypes = [ SchemaType.Struct, SchemaType.Array ]

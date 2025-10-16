@@ -118,7 +118,7 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
     },
 
     loadEnumAccessList: async (name: string, value: any, noSubList?: boolean, withSubList?: boolean): Promise<IEnumValueAccess[]> => {
-        return (await postSchemaApi("/load-enum-sub-list", {
+        return (await postSchemaApi("/load-enum-access-list", {
             name, value, noSubList, withSubList
         }))?.access
     },
@@ -188,8 +188,23 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         return (await postSchemaApi("/push-app-data", {
             app, target, datas
         }))
+    },
+
+    setSourceTarget: async function(app: string, target: string, sourceApp: string, sourceTarget?: string): Promise<boolean>
+    {
+        return (await postSchemaApi("/set-source-target", {
+            app, target, sourceApp, sourceTarget
+        }))?.result
+    },
+
+    getSourceTarget: async function(app: string, target: string, sourceApp: string): Promise<string | undefined>
+    {
+        return (await postSchemaApi("/get-source-target", {
+            app, target, sourceApp
+        }))?.target
     }
 }
+
 if (localStorage["schema_server_url"]) useAppDataProvider(defaultSchemaServerProvider)
 
 /**

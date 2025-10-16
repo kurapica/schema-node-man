@@ -30,10 +30,10 @@ import { _L } from 'schema-node-vueview'
 import { ref, watch } from 'vue'
 import { schemaView } from 'schema-node-vueview'
 
-const props = defineProps<{ app: string }>()
+const props = defineProps<{ app?: string }>()
 const appSchema = ref<IAppSchema | undefined>(undefined)
 
 watch (() => props.app, async () => {
-    appSchema.value = await getAppSchema(props.app)
+    appSchema.value = props.app ? await getAppSchema(props.app) : undefined
 }, { immediate: true })
 </script>

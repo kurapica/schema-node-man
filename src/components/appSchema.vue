@@ -161,9 +161,19 @@
                                 <el-button v-if="scope.$index > 0" type="warning" @click="moveFieldUp(scope.row)">
                                     {{ _L["schema.designer.moveup"] }}
                                 </el-button>
-                                <el-button type="danger" @click="handleFieldDelete(scope.row)">
-                                    {{ _L["schema.designer.delete"] }}
-                                </el-button>
+                                <el-popconfirm
+                                    :title="_L['schema.designer.confirmdelete']"
+                                    :confirm-button-text="_L['YES']"
+                                    :cancel-button-text="_L['NO']"
+                                    :icon="Delete"
+                                    @confirm="handleFieldDelete(scope.row)"
+                                    >
+                                    <template #reference>
+                                        <el-button type="danger">
+                                            {{ _L["schema.designer.delete"] }}
+                                        </el-button>
+                                    </template>
+                                </el-popconfirm>
                             </template>
                         </el-table-column>
                     </el-table>
