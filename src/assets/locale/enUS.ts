@@ -35,6 +35,7 @@ importLanguage("enUS", {
     "schema.schematype.struct": "Struct",
     "schema.schematype.array": "Array",
     "schema.schematype.func": "Function",
+    "schema.schematype.json": "Json",
 
     "schema.relationtype": "Relation Purpose",
     "schema.relationtype.default": "Default Value",

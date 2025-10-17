@@ -189,6 +189,10 @@ registerSchema([
                 {
                     value: SchemaType.Function,
                     name: _LS("schema.schematype.func"),
+                },
+                {
+                    value: SchemaType.Json,
+                    name: _LS("schema.schematype.json")
                 }
             ]
         }
@@ -2530,7 +2534,8 @@ registerSchema([
                     type: "schema.schematype",
                     display: _LS("schema.namespacedefine.type"),
                     default: SchemaType.Namespace,
-                },
+                    blackList: [SchemaType.Json],
+                } as IStructEnumFieldConfig,
                 {
                     name: "display",
                     require: true,

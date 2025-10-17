@@ -87,6 +87,7 @@ import { _LS, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArrayS
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L } from 'schema-node-vueview'
 import { schemaView } from 'schema-node-vueview'
+import { fi } from 'element-plus/es/locales.mjs';
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
@@ -105,6 +106,15 @@ const argdatas: { key: string, name: string, type: string, data: any, showdata: 
 const result = ref<any[]>([])
 const argColor = ref<string[]>([])
 const color = ref<string[]>([])
+
+// for white list in the 2nd argument
+const fieldAccessFunc = [
+    "system.collection.delfield",
+    "system.collection.fieldequal",
+    "system.collection.getfield",
+    "system.collection.getfields",
+    "system.collection.setfield",
+]
 
 let stateHandler: Function | undefined = undefined
 let retHandler: Function | undefined = undefined
@@ -338,6 +348,9 @@ const refresh = async () => {
         let arrayEle = ""
         let isarray = type !== ExpressionType.Call
         let arrIdx = -1
+        let isfieldacess = fieldAccessFunc.includes(func || "")
+        let fieldacesstype: INodeSchema | undefined = undefined
+        
         switch (type) {
             case ExpressionType.Filter:
                 funcret = NS_SYSTEM_BOOL
@@ -449,6 +462,32 @@ const refresh = async () => {
             if (!isEqual((name.rule as ScalarRule).whiteList, whitelist)) {
                 (name.rule as ScalarRule).whiteList = whitelist
                 name.notifyState()
+            }
+
+            // field access check
+            const valueField = farg.getField("value") as ScalarNode           
+            if (k == 0 && isfieldacess)
+            {
+                fieldacesstype = exp?.schema
+                if (fieldacesstype?.type === SchemaType.Array && fieldacesstype.array?.element)
+                    fieldacesstype = await getSchema(fieldacesstype.array.element)
+            }
+            if (k == 1)
+            {
+                if (isfieldacess && fieldacesstype?.type === SchemaType.Struct && fieldacesstype.struct?.fields.length)
+                {
+                    const valwhitelist: string[] = fieldacesstype.struct!.fields.map(f => f.name) || []
+                    if (isEqual(valueField.rule.whiteList, valwhitelist) === false)
+                    {
+                        valueField.rule.whiteList = valwhitelist
+                        valueField.notifyState()
+                    }
+                }
+                else if (valueField.rule.whiteList?.length)
+                {
+                    valueField.rule.whiteList = undefined
+                    valueField.notifyState()
+                }
             }
         }
 

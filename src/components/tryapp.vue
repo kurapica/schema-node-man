@@ -33,7 +33,7 @@
                 </template>
             </el-form>
         </el-header>
-        <el-main v-if="appNode" style="max-height: 60vh;margin-top:4rem;">
+        <el-main v-if="appNode" style="max-height: 55vh;margin-top:4rem;">
             <el-tabs v-model="activeTab" v-if="showref || showoutput">
                 <el-tab-pane :label="_L['schema.designer.inputfield']" :name="0"></el-tab-pane>
                 <el-tab-pane v-if="showref" :label="_L['schema.designer.reffield']" :name="1"></el-tab-pane>

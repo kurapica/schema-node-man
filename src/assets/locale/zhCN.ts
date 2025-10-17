@@ -35,6 +35,7 @@ importLanguage("zhCN", {
     "schema.schematype.struct": "结构体类型",
     "schema.schematype.array": "数组类型",
     "schema.schematype.func": "函数类型",
+    "schema.schematype.json": "JSON类型",
 
     "schema.relationtype": "字段计算结果用途",
     "schema.relationtype.default": "默认值计算",

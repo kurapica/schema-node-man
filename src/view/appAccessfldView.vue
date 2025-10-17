@@ -143,7 +143,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
 let datahandler: Function | undefined = undefined
 let statehandler: Function | undefined = undefined
 onMounted(async () => {
-    const app = localStorage["schema_curr_app"] // current app    
+    const app = localStorage["schema_curr_app"] // current app
     const fields = (await getAppSchema(app))!.fields!
 
     // option generate
