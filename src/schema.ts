@@ -958,7 +958,7 @@ registerSchema([
             func: (type: string) => {
                 let schema = getCachedSchema(type)
                 if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
-                return schema?.name
+                return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum ? schema?.name : NS_SYSTEM_STRING
             }
         }
     },
@@ -1079,8 +1079,30 @@ registerSchema([
             ],
             exps: [],
             func: async (type: string) => {
+                const schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array || schema?.type === SchemaType.Struct) return NS_SYSTEM_STRING
+                
                 const arraySchema = await getArraySchema(type)
                 return arraySchema?.name
+            }
+        }
+    },
+    {
+        name: "schema.getscalarorenumtype",
+        type: SchemaType.Function,
+        display: _LS("schema.getscalarorenumtype"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: async (type: string) => {
+                const schema = getCachedSchema(type)
+                return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum ? type : NS_SYSTEM_STRING
             }
         }
     },
@@ -1230,7 +1252,7 @@ registerSchema([
                 {
                     field: "default",
                     type: RelationType.Type,
-                    func: "system.conv.assign",
+                    func: "schema.getscalarorenumtype",
                     args: [
                         {
                             name: "type"
@@ -2762,11 +2784,9 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import funcdefineView from "./view/funcdefineView.vue"
-import localstringView from "./view/localstringView.vue"
 import colorView from "./view/colorView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
-regSchemaTypeView("system.localestring", localstringView, undefined, true)
 regSchemaTypeView("schema.color", colorView)
 
 regSchemaTypeView("schema.anytype", namespaceView)

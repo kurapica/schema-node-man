@@ -69,7 +69,7 @@
                         </el-button>
                         <el-popconfirm
                             v-if="!scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length" 
-                            :title="_L['schema.designer.confirmdelete']"                            
+                            :title="_L['schema.designer.confirmdelete']"
                             :confirm-button-text="_L['YES']"
                             :cancel-button-text="_L['NO']"
                             :icon="Delete"

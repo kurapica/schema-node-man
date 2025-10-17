@@ -123,9 +123,9 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         }))?.access
     },
 
-    callFunction: async (name: string, args: any[], generic?: string | string[]): Promise<any> => {
-        return (await postSchemaApi("/load-enum-sub-list", {
-            name, args, generic
+    callFunction: async (name: string, args: any[], generic?: string | string[], target?: string): Promise<any> => {
+        return (await postSchemaApi("/call-function", {
+            name, args, generic, target
         }))?.result
     },
 
