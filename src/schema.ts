@@ -1182,6 +1182,7 @@ registerSchema([
                     name: "default",
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.structfieldtype.default"),
+                    asSuggest: true,
                 },
 
                 // scalar config
