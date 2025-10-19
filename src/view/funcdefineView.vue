@@ -87,7 +87,7 @@ import { _LS, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArrayS
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L } from 'schema-node-vueview'
 import { schemaView } from 'schema-node-vueview'
-import { fi } from 'element-plus/es/locales.mjs';
+import type { AnySchemaNode } from 'schema-node';
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
@@ -476,7 +476,7 @@ const refresh = async () => {
             {
                 if (isfieldacess && fieldacesstype?.type === SchemaType.Struct && fieldacesstype.struct?.fields.length)
                 {
-                    const valwhitelist: string[] = fieldacesstype.struct!.fields.map(f => f.name) || []
+                    const valwhitelist: string[] = fieldacesstype.struct!.fields.map((f:any) => f.name) || []
                     if (isEqual(valueField.rule.whiteList, valwhitelist) === false)
                     {
                         valueField.rule.whiteList = valwhitelist
@@ -508,7 +508,7 @@ const refresh = async () => {
             }
             else
             {
-                const fld = retSchema?.struct?.fields.find(f => f.name === name)
+                const fld = retSchema?.struct?.fields.find((f:any) => f.name === name)
                 if (fld)
                 {
                     retColor[i] = await isSchemaCanBeUseAs(ret, fld.type) ? 'LIGHTBLUE' : 'RED'
@@ -555,7 +555,7 @@ const refreshArgs = async () => {
         acolor[i] = ""
         if (schema?.type === SchemaType.Struct && schema.struct?.fields.length)
         {
-            const fld = schema.struct.fields.find(f => f.name === name)
+            const fld = schema.struct.fields.find((f:any) => f.name === name)
             if (fld)
             {
                 acolor[i] = await isSchemaCanBeUseAs(type, fld.type) ? 'LIGHTBLUE' : 'RED'   
@@ -597,7 +597,7 @@ onMounted(() => {
         }
 
         // subscribe
-        argsNode.elements.forEach((e, i) => {
+        argsNode.elements.forEach((e:AnySchemaNode, i:number) => {
             if (argsHandlers.length > i)
             {
                 if (argsHandlers[i].guid === e.guid) return
@@ -635,7 +635,7 @@ onMounted(() => {
         }
 
         // subscribe
-        expsNode.elements.forEach((e, i) => {
+        expsNode.elements.forEach((e:AnySchemaNode, i:number) => {
             if (expsHandlers.length > i)
             {
                 if (expsHandlers[i].guid === e.guid) return
@@ -678,5 +678,9 @@ onUnmounted(() => {
     if (retHandler) retHandler()
     if (argsHandler) argsHandler()
     if (expsHandler) expsHandler()
+    soonRefresh.cancel()
+    delayRefresh.cancel()
+    soonRefreshArgs.cancel()
+    delayRefreshArgs.cancel()
 })
 </script>
