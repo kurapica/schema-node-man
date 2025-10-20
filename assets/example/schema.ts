@@ -139,6 +139,53 @@ registerSchema([
         }
       },
       {
+        "name": "test.averagefields",
+        "type": "func",
+        "display": _LS("test.averagefields"),
+        "func": {
+            "return": "system.number",
+            "args": [
+                {
+                    "name": "array",
+                    "type": "system.array",
+                    "nullable": false,
+                },
+                {
+                    "name": "field",
+                    "type": "system.string",
+                    "nullable": false,
+                }
+            ],
+            "exps": [
+                {
+                    "name": "numbers",
+                    "type": "call",
+                    "func": "system.collection.getfields",
+                    "return": "system.numbers",
+                    "args": [
+                        {
+                            "name": "array",
+                        },
+                        {
+                            "name": "field",
+                        }
+                    ]
+                },
+                {
+                    name: "result",
+                    type: "call",
+                    func: "system.collection.average",
+                    return: "system.number",
+                    args: [
+                        {
+                            name: "numbers",
+                        }
+                    ]
+                }
+            ],
+        }
+      },
+      {
         "name": "test.person",
         "type": "struct",
         "display": _LS("test.person"),
@@ -229,7 +276,7 @@ registerSchema([
             {
               "field": "avg",
               "type": "default",
-              "func": "system.collection.averagefields",
+              "func": "test.averagefields",
               "args": [
                 {
                   "name": "scores"
