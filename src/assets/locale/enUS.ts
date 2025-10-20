@@ -290,6 +290,7 @@ importLanguage("enUS", {
     "schema.designer.sourceapptar": "Source App and Target",
     "schema.designer.loadappsource": "Load Source Target",
     "schema.designer.saveappsource": "Save Source Target",
+    "schema.designer.copyschema": "Copy Schema Definition",
 
     "schema.catalog": "Catalog",
     "schema.catalog.01.intro": "01. Intro",

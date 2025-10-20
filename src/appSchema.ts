@@ -306,22 +306,44 @@ registerSchema([
             args: [
                 {
                     name: "sourceApp",
-                    type: NS_SYSTEM_STRING
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
                 },
                 {
                     name: "sourceFld",
-                    type: NS_SYSTEM_STRING
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
                 },
                 {
                     name: "info",
-                    type: NS_SYSTEM_STRING
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                },
+                {
+                    name: "type",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
                 }
             ],
             exps: [],
-            func: async (app: string, fld: string, info: string) => {
-                const appSchema = await getAppSchema(app)
-                const f = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === fld)
-                return f ? (f as any)[info] : undefined
+            func: async (app: string, fld: string, info: string, type: string) => {
+                if (app && fld)
+                {
+                    const appSchema = await getAppSchema(app)
+                    const f = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === fld)
+                    if (f) return (f as any)[info]
+                }
+                
+                if (type)
+                {
+                    const schema = await getSchema(type)
+                    if (schema)
+                    {
+                        if (info === "name") return schema.name.split(".").pop()
+                        else if(info === "display") return schema.display
+                    }
+                }
+                return null
             }
         }
     },
@@ -496,10 +518,19 @@ registerSchema([
                 {
                     field: "name",
                     type: RelationType.Default,
-                    func: "system.conv.assign",
+                    func: "schema.app.getsourceappfldinfo",
                     args: [
                         {
+                            name: "sourceApp"
+                        },
+                        {
                             name: "sourceField"
+                        },
+                        {
+                            value: "name"
+                        },
+                        {
+                            name: "type"
                         }
                     ]
                 },
@@ -516,6 +547,9 @@ registerSchema([
                         },
                         {
                             value: "display"
+                        },
+                        {
+                            name: "type"
                         }
                     ]
                 },
@@ -551,12 +585,12 @@ registerSchema([
                         }
                     ]
                 },
-                /*{
+                {
                     field: "sourceApp",
                     type: RelationType.BlackList,
                     func: "schema.app.getsourceappblacklist",
                     args: []
-                },*/
+                },
                 {
                     field: "sourceField",
                     type: RelationType.Invisible,

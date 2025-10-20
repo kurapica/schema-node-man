@@ -83,11 +83,9 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig } from 'schema-node'
+import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
-import { _L } from 'schema-node-vueview'
-import { schemaView } from 'schema-node-vueview'
-import type { AnySchemaNode } from 'schema-node';
+import { _L, schemaView } from 'schema-node-vueview'
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
@@ -678,9 +676,9 @@ onUnmounted(() => {
     if (retHandler) retHandler()
     if (argsHandler) argsHandler()
     if (expsHandler) expsHandler()
-    soonRefresh.cancel()
-    delayRefresh.cancel()
-    soonRefreshArgs.cancel()
-    delayRefreshArgs.cancel()
+    clearDebounce(soonRefresh)
+    clearDebounce(delayRefresh)
+    clearDebounce(soonRefreshArgs)
+    clearDebounce(delayRefreshArgs)
 })
 </script>

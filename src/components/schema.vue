@@ -91,7 +91,7 @@
         </el-footer>
 
         <!-- namespace editor -->
-        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" destroy-on-close
+        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%"
             append-to-body @closed="closeNamespaceEditor">
             <el-container class="main" style="height: 80vh;">
                 <el-main>
@@ -112,6 +112,7 @@
                         <el-button v-if="tryitTypes.includes(namespaceNode.rawData.type)" type="primary" @click="tryit">{{ _L["schema.designer.tryit"] }}</el-button>
                         <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.close"] }}</el-button>
                         <el-button v-if="currRow?.usedBy?.length || currRow?.usedByApp?.length" @click="showViewRef = true" style="float:right" type="info" >{{ _L["schema.designer.viewref"] }}</el-button>
+                        <el-button type="warning" @click="copySchema">{{ _L["schema.designer.copyschema"] }}</el-button>
                     </template>
                     <template v-else>
                         <el-button type="primary" @click="confirmNameSpace">{{ _L["schema.designer.save"] }}</el-button>
@@ -122,9 +123,7 @@
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%"
-            destroy-on-close
-            append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <tryit-view :type="tryittype"></tryit-view>
@@ -137,9 +136,7 @@
         </el-drawer>
 
         <!-- View ref -->
-        <el-drawer v-model="showViewRef" :title="_L['schema.designer.viewref']" direction="rtl" size="40%"
-            destroy-on-close
-            append-to-body>
+        <el-drawer v-model="showViewRef" :title="_L['schema.designer.viewref']" direction="rtl" size="40%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <template v-if="currRow?.usedBy?.length">
@@ -391,6 +388,35 @@ const tryittype = ref("")
 const tryit = () => {
     tryittype.value = namespaceNode.value?.rawData.name
     showtryit.value = true
+}
+
+//#endregion
+
+//#region Copy Schema
+
+const copySchema = async () => {
+    const schema = jsonClone(namespaceNode.value?.rawData)
+    if (!schema) return
+    
+    closeNamespaceEditor()
+    showNamespaceEditor.value = false
+    await new Promise(resolve => setTimeout(resolve, 200)) // wait drawer close animation
+
+    const name = `${schema.name}_copy`
+    schema.name = ""
+    localStorage["schema_new_namespace"] = state.namespace
+
+    namespaceNode.value = new StructNode({
+        type: "schema.namespacedefine",
+    }, jsonClone(schema))
+
+    namespaceNode.value.getField("name")!.data = name
+
+    if (namesapceWatchHandler) namesapceWatchHandler()
+    namesapceWatchHandler = namespaceNode.value.subscribe(() => {
+        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
+    }, true)
+    showNamespaceEditor.value = true
 }
 
 //#endregion

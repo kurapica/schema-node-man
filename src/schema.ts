@@ -2204,6 +2204,26 @@ registerSchema([
 
     //#region function definition
     {
+        name: "schema.gettypedisplayorname",
+        type: SchemaType.Function,
+        display: _LS("schema.gettypedisplayorname"),
+        func: {
+            return: NS_SYSTEM_STRING,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype",
+                }
+            ],
+            exps: [],
+            func: async (type: string) => {
+                const schema = type ? await getSchema(type) : null
+                if (!schema) return null
+                return schema.display?.key ? _L(schema.display) : schema.name.split('.').pop()
+            }
+        }
+    },
+    {
         name: "schema.funcarg",
         type: SchemaType.Struct,
         display: _LS("schema.funcarg"),
@@ -2226,6 +2246,18 @@ registerSchema([
                     name: "nullable",
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.funcarg.nullable"),
+                }
+            ],
+            relations: [
+                {
+                    field: "name",
+                    type: RelationType.Default,
+                    func: "schema.gettypedisplayorname",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
                 }
             ]
         }

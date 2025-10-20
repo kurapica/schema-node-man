@@ -175,6 +175,7 @@ const buildStruct = async (type: string): Promise<ITypeStructInfo[]> => {
     for (let i = 0; i < schema.struct!.fields.length; i++) {
         const field = schema.struct.fields[i]
         const fschema = await getSchema(field.type)
+        if (!fschema) continue
         const unit = _L.value(field.unit)
         const info: ITypeStructInfo = { label: field.name, schemaType: field.type, type: fschema!.type, desc: `${_L.value(field.display)}${unit ? `(${unit})` : ''}` }
 

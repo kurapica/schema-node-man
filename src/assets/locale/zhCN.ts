@@ -290,6 +290,7 @@ importLanguage("zhCN", {
     "schema.designer.sourceapptar": "源应用及目标",
     "schema.designer.loadappsource": "加载源应用目标",
     "schema.designer.saveappsource": "保存源应用目标",
+    "schema.designer.copyschema": "复制类型定义",
 
     "schema.catalog": "目录",
     "schema.catalog.01.intro": "01. 简介",

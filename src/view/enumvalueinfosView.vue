@@ -16,7 +16,6 @@
 
     <!-- sub list -->
     <el-drawer v-if="subListStack.length" v-model="showSubList" :title="`${_L(cascade[subListStack.length])} - ${_L(subListStack[subListStack.length-1].name)}(${subListStack[subListStack.length-1].value})`" direction="rtl" size="100%"
-        destroy-on-close
         append-to-body
         :before-close="onSubValueEditorClose">
         <el-container class="main" style="height: 80vh;">

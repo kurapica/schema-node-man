@@ -51,8 +51,7 @@
         </el-cascader>
 
         <!-- namespace editor -->
-        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" destroy-on-close
-            append-to-body @closed="closeNamespaceEditor">
+        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body @closed="closeNamespaceEditor">
             <el-container class="main" style="height: 80vh;color:black">
                 <el-header>
                     <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["schema.designer.edit"] }}</el-button>
