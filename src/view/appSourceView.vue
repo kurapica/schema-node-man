@@ -1,7 +1,19 @@
 <template>
     <section style="width: 100%;">
         <template v-if="state.readonly && plainText">
-            {{ state.display }}
+            <el-popover
+                placement="bottom-start"
+                :title="state.display"
+                width="width:fit-content"
+                trigger="hover">
+                <app-info-view :app="state.data"/>
+                <template #reference>
+                    <a :style="{'width': '100%', 'color': 'green', 'text-align': plainText === true ? 'center' : plainText }"
+                        href="javascript:void(0)">
+                        {{ state.display }}
+                    </a>
+                </template>
+            </el-popover>
         </template>
         <el-cascader v-else
             v-model="data" 
@@ -27,6 +39,7 @@
 import { getAppCachedSchema, getAppSchema, isNull, subscribeAppSchemaChange, subscribeLanguage, type IAppSchema, type ScalarNode } from "schema-node"
 import { _L } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, toRaw } from "vue"
+import appInfoView from "./appInfoView.vue"
 
 //#region Inner type
 interface ICascaderOptionInfo {
@@ -224,7 +237,7 @@ onMounted(() => {
                 rebuild = true
                 const schema = await getAppSchema(name)
                 if (!schema) break
-                display.push(`${schema.display || paths[i]}`)
+                display.push(`${_L.value(schema.display) || paths[i]}`)
             }
         }
         state.display = display.join("/")

@@ -1,27 +1,214 @@
 <template>
-    <el-form v-if="appNode" ref="form" label-width="140px" :model="appNode.rawData">
-        <template v-for="f in appNode.fields">
-            <h2>{{ _L(f.display) || f.name }}</h2>
-            <schema-view
-                plain-text="left"
-                :node="(f as AnySchemaNode)"
-                :in-form="true"
-                :skin="skin"
-            ></schema-view>
-        </template>
-    </el-form>
+    <el-container>
+        <el-tabs v-if="sourceAppNode" v-model="activeTargetTab" style="margin-bottom: 1rem;">
+            <el-tab-pane :label="_L['schema.designer.apptarget']" :name="0"></el-tab-pane>
+            <el-tab-pane :label="_L['schema.designer.sourceapptar']" :name="1"></el-tab-pane>
+        </el-tabs>
+        <el-header>
+            <el-form v-if="enableAppData && appTargetNode" ref="form" label-width="140px" label-position="left" :model="appTargetNode.rawData">
+                <template v-if="activeTargetTab == 0">
+                    <section style="float:right;margin-left: 1rem;">
+                        <el-button type="info" @click="genguid">{{ _L["schema.designer.genguid"] }}</el-button>
+                        <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadData">{{ _L["schema.designer.loaddata"] }}</el-button>
+                        <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveData">{{ _L["schema.designer.savedata"] }}</el-button>
+                    </section>
+                    <schema-view
+                        :node="(appTargetNode as StructNode)" 
+                        :in-form="true" 
+                        plain-text="left">
+                    </schema-view>
+                </template>
+
+                <template v-else>
+                    <section style="float:right;margin-left: 1rem;">
+                        <el-button type="info" @click="gensourceguid">{{ _L["schema.designer.genguid"] }}</el-button>
+                        <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadSourceTarget">{{ _L["schema.designer.loadappsource"] }}</el-button>
+                        <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveSourceTarget">{{ _L["schema.designer.saveappsource"] }}</el-button>
+                    </section>
+                    <schema-view
+                        :node="(sourceAppNode as StructNode)" 
+                        :in-form="true" 
+                        plain-text="left">
+                    </schema-view>
+                </template>
+            </el-form>
+        </el-header>
+        <el-main v-if="appNode" style="max-height: 55vh;margin-top:4rem;">
+            <el-tabs v-model="activeTab" v-if="showref || showoutput">
+                <el-tab-pane :label="_L['schema.designer.inputfield']" :name="0"></el-tab-pane>
+                <el-tab-pane v-if="showref" :label="_L['schema.designer.reffield']" :name="1"></el-tab-pane>
+                <el-tab-pane v-if="showoutput" :label="_L['schema.designer.outputfield']" :name="2"></el-tab-pane>
+            </el-tabs>
+
+            <el-form v-show="activeTab === 0" ref="form" label-width="140px" :model="appNode.rawData">
+                <template v-for="f in appNode.inputFields" :key="f.guid">
+                    <h2>{{ _L(f.display) || f.name }}</h2>
+                    <schema-view
+                        plain-text="left"
+                        :node="(f as AnySchemaNode)"
+                        :in-form="true"
+                        :skin="skin"
+                    ></schema-view>
+                </template>
+            </el-form>
+
+            <el-form v-show="activeTab === 1 && showref" label-width="140px" :model="appNode.rawData">
+                <template v-for="f in appNode.refFields" :key="f.guid">
+                    <h2>{{ _L(f.display) || f.name }}</h2>
+                    <schema-view
+                        plain-text="left"
+                        :node="(f as AnySchemaNode)"
+                        :in-form="true"
+                        :skin="skin"
+                    ></schema-view>
+                </template>
+            </el-form>
+
+            <el-form v-show="activeTab === 2 && showoutput" label-width="140px" :model="appNode.rawData">
+                <template v-for="f in appNode.pushFields" :key="f.guid">
+                    <h2>{{ _L(f.display) || f.name }}</h2>
+                    <schema-view
+                        plain-text="left"
+                        :node="(f as AnySchemaNode)"
+                        :in-form="true"
+                        :skin="skin"
+                    ></schema-view>
+                </template>
+            </el-form>
+        </el-main>
+    </el-container>
 </template>
 
 <script lang="ts" setup>
-import type { ElForm } from "element-plus";
-import { getAppNode, type AnySchemaNode, type AppNode } from "schema-node";
+import { addAppTarget } from "@/appSchema";
+import { ElMessage, type ElForm } from "element-plus"
+import { getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"
 import { onMounted, ref } from "vue"
 
 const props = defineProps<{ app: string, skin?: string }>()
 const form = ref<InstanceType<typeof ElForm>>()
+const activeTargetTab = ref(0)
+const activeTab = ref(0)
 
 const appNode = ref<AppNode | undefined>(undefined)
+const dataProvider = getAppDataProvider()
+const enableAppData = dataProvider ? true : false
+
+// app target node
+const appTargetNode = ref<StructNode | undefined>(undefined)
+const genguid = () => {
+    appTargetNode.value!.getField("target")!.data = crypto.randomUUID()
+}
+const gensourceguid = () => {
+    sourceAppNode.value!.getField("target")!.data = crypto.randomUUID()
+}
+
+// source app and target
+const sourceAppNode = ref<StructNode | undefined>(undefined)
+
+const loading = ref(false)
+const saving = ref(false)
+const showref = ref(false)
+const showoutput = ref(false)
+
+const loadData = async() => {
+    if (!appTargetNode.value) return
+    try {
+        const target = appTargetNode.value.getField("target")!.rawData as string
+        if (isNull(target)) return
+        loading.value = true
+        appNode.value = await getAppNode({
+            app: props.app,
+            target: target,
+            fields: []
+        })
+    } catch(e) {
+        console.error(e)
+    }
+    finally{
+        loading.value = false
+    }
+}
+
+const saveData = async() => {
+    if (!appTargetNode.value || !appNode.value) return
+    try {
+        await form.value?.validate()
+        if (!appNode.value.valid) return
+
+        const target = appTargetNode.value.getField("target")!.rawData as string
+        if (isNull(target)) return
+
+        saving.value = true
+        const r = await appNode.value.submit();
+        if (!r?.result) {
+            ElMessage.error(_L.value(r?.error || "schema.designer.savefailed"))
+            return
+        }
+        else
+        {
+            ElMessage.success(_L.value("schema.designer.savesuccess"))
+        }
+        
+        addAppTarget(props.app, target)
+        appTargetNode.value.getField("app")!.data = ""
+        await new Promise(resolve => setTimeout(resolve, 100))
+        appTargetNode.value.getField("app")!.data = props.app
+
+        // re-load data
+        await loadData()
+    } catch(e) {
+        console.error(e)
+    }
+    finally{
+        saving.value = false
+    }
+}
+
+const loadSourceTarget = async() => {
+    if (!sourceAppNode.value || !appTargetNode.value) return
+    try {
+        const target = appTargetNode.value?.getField("target")!.data as string
+        const sourceApp = sourceAppNode.value.getField("app")!.data as string
+        if (isNull(target) || isNull(sourceApp)) return
+        loading.value = true
+        const sourceTarget = await dataProvider!.getSourceTarget(props.app, target, sourceApp)
+        sourceAppNode.value!.getField("target")!.data = sourceTarget || ""
+    } catch(e) {
+        console.error(e)
+    }
+    finally{
+        loading.value = false
+    }
+}
+
+const saveSourceTarget = async() => {
+    if (!sourceAppNode.value || !appTargetNode.value) return
+    try {
+        const target = appTargetNode.value.getField("target")!.data as string
+        const sourceApp = sourceAppNode.value.getField("app")!.data as string
+        const sourceTarget = sourceAppNode.value.getField("target")!.data as string
+        if (isNull(target) || isNull(sourceApp)) return
+
+        saving.value = true
+        const r = await dataProvider!.setSourceTarget(props.app, target, sourceApp, sourceTarget);
+        if (!r) {
+            ElMessage.error(_L.value("schema.designer.savefailed"))
+            return
+        }
+        else
+        {
+            ElMessage.success(_L.value("schema.designer.savesuccess"))
+        }
+        if (sourceTarget) addAppTarget(sourceApp, sourceTarget)
+    } catch(e) {
+        console.error(e)
+    }
+    finally{
+        saving.value = false
+    }
+}
 
 onMounted(async() => {
     appNode.value = await getAppNode({
@@ -29,7 +216,19 @@ onMounted(async() => {
         target: "",
         fields: []
     })
-})
+    showref.value = appNode.value?.refFields.length ? true : false
+    showoutput.value = appNode.value?.pushFields.length ? true : false
+    if (!enableAppData) return
 
+    appTargetNode.value = (await getSchemaNode({
+        type: "schema.app.apptarget"
+    }, { allowApps: [props.app],  app: props.app, target: ""})) as StructNode
+
+    const sourceApps = appNode.value?.sourceApps || []
+    if (sourceApps.length > 0)
+        sourceAppNode.value = (await getSchemaNode({
+            type: "schema.app.apptarget"
+        }, { allowApps: sourceApps, app: sourceApps[0], target: "" })) as StructNode
+})
 
 </script>

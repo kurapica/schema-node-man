@@ -17,7 +17,9 @@ declare module 'vue' {
     ElCascader: typeof import('element-plus/es')['ElCascader']
     ElCollapse: typeof import('element-plus/es')['ElCollapse']
     ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
+    ElColorPicker: typeof import('element-plus/es')['ElColorPicker']
     ElContainer: typeof import('element-plus/es')['ElContainer']
+    ElContaner: typeof import('element-plus/es')['ElContaner']
     ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElFooter: typeof import('element-plus/es')['ElFooter']
     ElForm: typeof import('element-plus/es')['ElForm']
@@ -49,5 +51,8 @@ declare module 'vue' {
     Showandtryapp: typeof import('./src/components/showandtryapp.vue')['default']
     Tryapp: typeof import('./src/components/tryapp.vue')['default']
     Tryit: typeof import('./src/components/tryit.vue')['default']
+  }
+  export interface GlobalDirectives {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

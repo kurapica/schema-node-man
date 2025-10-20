@@ -26,9 +26,9 @@
             <template v-if="state.schema.type === SchemaType.Enum">
                 <el-breadcrumb v-if="state.schema.enum?.cascade && state.schema.enum.cascade.length > 0"
                     separator-class="el-icon-arrow-right" style="margin-bottom: 8px;">
-                    <el-breadcrumb-item v-for="item in state.schema.enum.cascade">{{ item }}</el-breadcrumb-item>
+                    <el-breadcrumb-item v-for="item in state.schema.enum.cascade">{{ _L(item) }}</el-breadcrumb-item>
                 </el-breadcrumb>
-                <ul>
+                <ul v-if="state.schema.enum?.values?.length">
                     <li v-for="item in state.schema.enum!.values.slice(0, 5)">{{ _L(item.name) }}</li>
                 </ul>
             </template>
@@ -38,7 +38,7 @@
                     separator-class="el-icon-arrow-right" style="margin-bottom: 8px;">
                     <el-breadcrumb-item v-for="item in state.eleschema.enum.cascade">{{ item }}</el-breadcrumb-item>
                 </el-breadcrumb>
-                <ul>
+                <ul v-if="state.eleschema.enum?.values?.length">
                     <li v-for="item in state.eleschema.enum!.values.slice(0, 5)">{{ _L(item.name) }}</li>
                 </ul>
             </template>
@@ -46,8 +46,16 @@
             <template v-if="state.structure">
                 <el-table :data="state.structure" row-key="label" default-expand-all
                     :tree-props="{ children: 'children' }">
-                    <el-table-column prop="label" :label="_L['schema.structfieldtype.name']" min-width="240"></el-table-column>
-                    <el-table-column prop="desc" :label="_L['schema.structfieldtype.desc']" min-width="240">
+                    <el-table-column prop="label" :label="_L['schema.structfieldtype.name']" min-width="120"></el-table-column>
+                    <el-table-column prop="schemaType" :label="_L['schema.structfieldtype.type']" min-width="180">
+                        <template #default="scope">
+                           <schema-view :config="{
+                                type: 'schema.anytype',
+                                readonly: true
+                            }" :value="scope.row.schemaType" plain-text="left"></schema-view>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="desc" :label="_L['schema.structfieldtype.desc']" min-width="180">
                         <template #default="scope">
                             {{ _L(scope.row.desc) }}
                         </template>
@@ -110,6 +118,7 @@
 import { getSchema, NS_SYSTEM_BOOL, NS_SYSTEM_DATE, NS_SYSTEM_FULLDATE, NS_SYSTEM_INT, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_YEAR, NS_SYSTEM_YEARMONTH, SchemaType, type INodeSchema, type SchemaTypeValue } from 'schema-node'
 import { reactive, watch } from 'vue'
 import { _L } from 'schema-node-vueview'
+import { schemaView } from 'schema-node-vueview'
 
 interface ITypeStructInfo {
     label: string
@@ -119,6 +128,7 @@ interface ITypeStructInfo {
     baseType?: string | null
     useArg?: string
     children?: ITypeStructInfo[]
+    schemaType?: string
 }
 
 const props = defineProps<{ type?: string }>()
@@ -165,8 +175,9 @@ const buildStruct = async (type: string): Promise<ITypeStructInfo[]> => {
     for (let i = 0; i < schema.struct!.fields.length; i++) {
         const field = schema.struct.fields[i]
         const fschema = await getSchema(field.type)
+        if (!fschema) continue
         const unit = _L.value(field.unit)
-        const info: ITypeStructInfo = { label: field.name, type: fschema!.type, desc: `${_L.value(field.display)}${unit ? `(${unit})` : ''}` }
+        const info: ITypeStructInfo = { label: field.name, schemaType: field.type, type: fschema!.type, desc: `${_L.value(field.display)}${unit ? `(${unit})` : ''}` }
 
         if (fschema?.type === SchemaType.Scalar) {
             info.baseType = await getBaseType(field.type)

@@ -1,11 +1,14 @@
-import { useSchemaProvider, type IEnumValueInfo, type INodeSchema, type ISchemaProvider } from "schema-node";
+import axios from "axios"
+import type { IAppDataFieldPushQuery, IAppDataPushResult, IBatchQueryAppDataResult } from "schema-node"
+import type { IAppDataQuery } from "schema-node"
+import { generateGuid, useAppDataProvider, type IAppFieldSchema, type IAppSchema, type IEnumValueAccess, type IEnumValueInfo, type INodeSchema, type IAppSchemaDataProvider } from "schema-node"
 
 /**
  * The schema server api provider interface
  * 
  * The schema server is used to save the schema definition and publish the changes to application servers.
  */
-export interface ISchemaServerProvder extends ISchemaProvider
+export interface ISchemaServerProvder extends IAppSchemaDataProvider
 {
     /**
      * Save the schema to the server
@@ -13,7 +16,7 @@ export interface ISchemaServerProvder extends ISchemaProvider
      * @returns result whether the schema is saved
      * @returns message the error message if provided
      */
-    saveSchema(schema: INodeSchema): Promise<{ result: boolean, message?: string }>
+    saveSchema(schema: INodeSchema): Promise<boolean>
 
     /**
      * Delete the schema from the server
@@ -21,7 +24,7 @@ export interface ISchemaServerProvder extends ISchemaProvider
      * @returns result whether the schema is deleteed
      * @returns message the error message if provided
      */
-    deleteSchema(schema: string): Promise<{ result: boolean, message?: string }>
+    deleteSchema(schema: string): Promise<boolean>
 
     /**
      * Save the enum sub list for the given enum value
@@ -32,20 +35,194 @@ export interface ISchemaServerProvder extends ISchemaProvider
      * @returns result whether the sub list saved
      * @returns message the error message if provided
      */
-    saveEnumSubList(schema: string, value: any, values: IEnumValueInfo[], append?: boolean): Promise<{ result: boolean, message?: string}>
+    saveEnumSubList(schema: string, value: any, values: IEnumValueInfo[], append?: boolean): Promise<boolean>
 
     /**
-     * Delete the enum sub list of the given enum value
-     * @param schema the enum schema name
-     * @param value the enum value
-     * @returns result whether the sub list deleted
-     * @returns message the error message if provided
+     * Save the app schema to the server
+     * @param app the app schema to save
      */
-    deleteEnumSubList(schema: string, value: any): Promise<{ result: boolean, message?: string}>
+    saveAppSchema(app: IAppSchema): Promise<boolean>
+
+    /**
+     * Delete the app schema from the server
+     * @param app the app schema name to delete
+     */
+    deleteAppSchema(app: string): Promise<boolean>
+
+    /**
+     * Save the app field schema to the server
+     * @param app the app schema name
+     * @param field the app field schema to save
+     */
+    saveAppFieldSchema(app: string, field: IAppFieldSchema): Promise<boolean>
+
+    /**
+     * Delete the app field schema from the server
+     * @param app the app schema name
+     * @param field the app field schema name to delete
+     */
+    deleteAppFieldSchema(app: string, field: string): Promise<boolean>
+
+    /**
+     * Swap the app field schema order with another field
+     * @param app the app schema name
+     * @param field the app field schema name to swap
+     * @param other the other app field schema name to swap
+     */
+    swapAppFieldSchema(app: string, field: string, other: string): Promise<boolean>
 }
 
 //#region Methods
 let schemaServerProvider: ISchemaServerProvder | null = null
+
+async function postSchemaApi(url: string, param: any): Promise<any> {
+    try
+    {
+        let site: string = localStorage["schema_server_url"] || ""
+        if (!site) return null
+        if (site.endsWith("/")) site = site.substring(0, site.length - 1)
+        if (url.startsWith("/")) url = url.substring(1)
+        const result: any = await axios.post(`${site}/${url}`, {
+            jsonrpc: "2.0",
+            method: "",
+            id: generateGuid(),
+            params: param
+        })
+        return result?.data?.result
+    }
+    catch(ex)
+    {
+        return null
+    }
+}
+
+// Default schema
+const defaultSchemaServerProvider: ISchemaServerProvder = {
+    loadSchema: async (names: string[]): Promise<INodeSchema[]> => {
+        return (await postSchemaApi("/load-schema", {
+            names: names
+        }))?.schemas || []
+    },
+
+    loadAppSchema: async (app: string, includeTypes?: boolean): Promise<IAppSchema | undefined> => {
+        return (await postSchemaApi("/load-app-schema", {
+            name: app,
+            includeTypes
+        }))?.schema
+    },
+
+    loadEnumSubList: async (name: string, value?: any, fullList?: boolean): Promise<IEnumValueInfo[]> => {
+        return (await postSchemaApi("/load-enum-sub-list", {
+            name, value, fullList
+        }))?.values
+    },
+
+    loadEnumAccessList: async (name: string, value: any, noSubList?: boolean, withSubList?: boolean): Promise<IEnumValueAccess[]> => {
+        return (await postSchemaApi("/load-enum-access-list", {
+            name, value, noSubList, withSubList
+        }))?.access
+    },
+
+    callFunction: async (name: string, args: any[], generic?: string | string[], target?: string): Promise<any> => {
+        return (await postSchemaApi("/call-function", {
+            name, args, generic, target
+        }))?.result
+    },
+
+    saveSchema: async (schema: INodeSchema): Promise<boolean> => {
+        return (await postSchemaApi("/save-schema", {
+            schema
+        }))?.result
+    },
+
+    deleteSchema: async (name: string): Promise<boolean> => {
+        return (await postSchemaApi("/delete-schema", {
+            name
+        }))?.result
+    },
+
+    saveEnumSubList: async (name: string, value: any, values: IEnumValueInfo[], append?: boolean): Promise<boolean> => {
+        return (await postSchemaApi("/save-enum-sub-list", {
+            name, value, values, append
+        }))?.result
+    },
+
+    saveAppSchema: async function (schema: IAppSchema): Promise<boolean> {
+        return (await postSchemaApi("/save-app-schema", {
+            schema
+        }))?.result
+    },
+
+    deleteAppSchema: async function (app: string): Promise<boolean> {
+        return (await postSchemaApi("/delete-app-schema", {
+            app
+        }))?.result
+    },
+
+    saveAppFieldSchema: async function (app: string, schema: IAppFieldSchema): Promise<boolean> {
+        return (await postSchemaApi("/save-app-field-schema", {
+            app, schema
+        }))?.result
+    },
+
+    deleteAppFieldSchema: async function (app: string, field: string): Promise<boolean> {
+        return (await postSchemaApi("/delete-app-field-schema", {
+            app, field
+        }))?.result
+    },
+
+    swapAppFieldSchema: async function (app: string, field: string, other: string): Promise<boolean> {
+        return (await postSchemaApi("/swap-app-field-schema", {
+            app, field, other
+        }))?.result
+    },
+
+    batchQueryAppData: async function (queries: IAppDataQuery[]): Promise<IBatchQueryAppDataResult> {
+        return (await postSchemaApi("/batch-query-app-data", {
+            queries
+        }))
+    },
+
+    pushAppData: async function(app: string, target: string, datas: { [key:string]: IAppDataFieldPushQuery }): Promise<IAppDataPushResult>
+    {
+        return (await postSchemaApi("/push-app-data", {
+            app, target, datas
+        }))
+    },
+
+    setSourceTarget: async function(app: string, target: string, sourceApp: string, sourceTarget?: string): Promise<boolean>
+    {
+        return (await postSchemaApi("/set-source-target", {
+            app, target, sourceApp, sourceTarget
+        }))?.result
+    },
+
+    getSourceTarget: async function(app: string, target: string, sourceApp: string): Promise<string | undefined>
+    {
+        return (await postSchemaApi("/get-source-target", {
+            app, target, sourceApp
+        }))?.target
+    }
+}
+
+if (localStorage["schema_server_url"]) useAppDataProvider(defaultSchemaServerProvider)
+
+/**
+ * Set the schema site url
+ */
+export function setSchemaSite(url: string)
+{
+    localStorage["schema_server_url"] = url
+    if (url && !schemaServerProvider) useAppDataProvider(defaultSchemaServerProvider)
+}
+
+/**
+ * Get schema site url
+ */
+export function getSchemaSite()
+{
+    return localStorage["schema_server_url"]
+}
 
 /**
  * Sets the schema server api provider
@@ -53,7 +230,7 @@ let schemaServerProvider: ISchemaServerProvder | null = null
  */
 export function useSchemaServerProvider(provider: ISchemaServerProvder): void{
     schemaServerProvider = provider
-    useSchemaProvider(provider)
+    useAppDataProvider(provider)
 }
 
 /**
@@ -61,5 +238,5 @@ export function useSchemaServerProvider(provider: ISchemaServerProvder): void{
  * @returns the schema server provider
  */
 export function getSchemaServerProvider() {
-    return schemaServerProvider
+    return localStorage["schema_server_url"] ? defaultSchemaServerProvider : schemaServerProvider
 }

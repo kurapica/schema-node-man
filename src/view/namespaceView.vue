@@ -51,8 +51,7 @@
         </el-cascader>
 
         <!-- namespace editor -->
-        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" destroy-on-close
-            append-to-body @closed="closeNamespaceEditor">
+        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body @closed="closeNamespaceEditor">
             <el-container class="main" style="height: 80vh;color:black">
                 <el-header>
                     <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["schema.designer.edit"] }}</el-button>
@@ -89,7 +88,7 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, registerSchema, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
+import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, registerSchema, RelationType, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -135,7 +134,8 @@ const schemaTypeOrder = {
     [SchemaType.Enum]: 3,
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
-    [SchemaType.Function]: 6
+    [SchemaType.Function]: 6,
+    [SchemaType.Json]: 7
 }
 
 // cascader root
@@ -147,13 +147,14 @@ const root = reactive<ICascaderOptionInfo>({
     loadState: 0,
     children: null
 })
-let compatibleType = "" // 兼容类型
-let otherCompatibleType = "" // 其他兼容类型
+let compatibleType = ""
+let otherCompatibleType = ""
 let upLimit = 99
 let lowLimit = 0
 
 // namespace map
 const namespaceMap: any = {
+    "schema.anytype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Function],
     "schema.namespace": [SchemaType.Namespace],
     "schema.scalartype": [SchemaType.Namespace, SchemaType.Scalar],
     "schema.enumtype": [SchemaType.Namespace, SchemaType.Enum],
@@ -172,6 +173,7 @@ const namespaceMap: any = {
 const ispushfunctype = type === "schema.pushfunctype"
 const isscalarvalidfunc = type === "schema.scalarvalidfunc"
 const isscalarwhitelist = type === "schema.scalarwhitelistfunc"
+const enableEntries = ref(true)
 
 // view
 
@@ -220,16 +222,16 @@ const confirmNameSpace = async () => {
         if (provider)
         {
             const res = await provider.saveSchema(data)
-            if (!res.result)
+            if (!res)
             {
-                ElMessage.error(res.message || _L.value["schema.designer.error"])
+                ElMessage.error(_L.value["schema.designer.error"])
                 return
             }
-            data.loadState = SchemaLoadState.Server
+            data.loadState |= SchemaLoadState.Server
         }
     }
 
-    registerSchema([data])
+    registerSchema([data], data.loadState)
     saveStorageSchema(data)
     showNamespaceEditor.value = false
 }
@@ -247,11 +249,16 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
     // check compatible type
     if (namespaceMap.includes(SchemaType.Function)) {
         const funcList = options.filter(r => r.type === SchemaType.Function)
-        const blackList: string[] = []
+        const blackList: string[] = ["schema"]
         for(let i = 0; i < funcList.length; i++)
         {
             const f = await getSchema(funcList[i].value)
             if (f?.type !== SchemaType.Function || !f.func) continue
+
+            // special handling for system entries
+            if (enableEntries.value && await isSchemaCanBeUseAs(f.func.return, NS_SYSTEM_ENTRIES))
+                continue
+
             if (isscalarvalidfunc) {
                 // for scalar value validation only
                 if (f.func.args?.length !== 1 || 
@@ -287,7 +294,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         return blackList
     }
     else {
-        return []
+        return ["schema"]
     }
 }
 
@@ -342,7 +349,7 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
         }
 
         getSchema(value)
-        .then((res: INodeSchema) => {
+        .then((res?: INodeSchema) => {
             buildOptions([], res?.schemas || []).then(r => {
                 ns.children = r
                 resolve(ns.children)
@@ -408,6 +415,7 @@ let dataWatcher: Function | null = null
 let stateHandler: Function | null = null
 let langHandler: Function | null = null
 let exptypeHandler: Function | null = null
+let relationtypeHandler: Function | null = null
 
 onMounted(() => {
     const parent = scalarNode.parent
@@ -427,6 +435,13 @@ onMounted(() => {
             }
             reBuildOptions()
         }, true)
+    }
+    else if (parent instanceof StructNode && parent.getField("type")?.config?.type === "schema.relationtype")
+    {
+        const typeNode = parent.getField("type")
+        relationtypeHandler = typeNode.subscribe(() => {
+            enableEntries.value = typeNode.data == RelationType.WhiteList
+        })
     }
 
     // scalar white list, zero or 1-arg for the base type
@@ -490,5 +505,6 @@ onUnmounted(() => {
     if (stateHandler) stateHandler()
     if (langHandler) langHandler()
     if (exptypeHandler) exptypeHandler()
+    if (relationtypeHandler) relationtypeHandler()
 })
 </script>

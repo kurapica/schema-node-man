@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, NS_SYSTEM_GUID } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -306,22 +306,44 @@ registerSchema([
             args: [
                 {
                     name: "sourceApp",
-                    type: NS_SYSTEM_STRING
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
                 },
                 {
                     name: "sourceFld",
-                    type: NS_SYSTEM_STRING
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
                 },
                 {
                     name: "info",
-                    type: NS_SYSTEM_STRING
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                },
+                {
+                    name: "type",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
                 }
             ],
             exps: [],
-            func: async (app: string, fld: string, info: string) => {
-                const appSchema = await getAppSchema(app)
-                const f = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === fld)
-                return f ? (f as any)[info] : undefined
+            func: async (app: string, fld: string, info: string, type: string) => {
+                if (app && fld)
+                {
+                    const appSchema = await getAppSchema(app)
+                    const f = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === fld)
+                    if (f) return (f as any)[info]
+                }
+                
+                if (type)
+                {
+                    const schema = await getSchema(type)
+                    if (schema)
+                    {
+                        if (info === "name") return schema.name.split(".").pop()
+                        else if(info === "display") return schema.display
+                    }
+                }
+                return null
             }
         }
     },
@@ -381,6 +403,31 @@ registerSchema([
         }
     },
     {
+        name: "schema.app.istrackpushdisable",
+        type: SchemaType.Function,
+        display: _LS("schema.app.istrackpushdisable"),
+        func: {
+            return: NS_SYSTEM_BOOL,
+            args: [
+                {
+                    name: "field",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                },
+                {
+                    name: "func",
+                    type: NS_SYSTEM_STRING,
+                    nullable: true
+                }
+            ],
+            exps: [],
+            func: (type: string, func: string) => {
+                if (!type || !func) return true
+                return false
+            }
+        }
+    },
+    {
         name: "schema.app.field",
         type: SchemaType.Struct,
         display: _LS("schema.app.field"),
@@ -401,13 +448,13 @@ registerSchema([
                 },
                 {
                     name: "display",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.app.field.display"),
                     upLimit: 64,
                 },
                 {
                     name: "desc",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.app.field.desc"),
                     upLimit: 255,
                 },
@@ -420,6 +467,11 @@ registerSchema([
                     name: "sourceField",
                     type: "schema.app.srcfld",
                     display: _LS("schema.app.field.sourcefld"),
+                },
+                {
+                    name: "trackPush",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.app.field.trackpush"),
                 },
                 {
                     name: "incrUpdate",
@@ -435,6 +487,11 @@ registerSchema([
                     name: "disable",
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.app.field.disable"),
+                },
+                {
+                    name: "readonly",
+                    type: NS_SYSTEM_BOOL,
+                    display: _LS("schema.app.field.readonly"),
                 },
                 {
                     name: "func",
@@ -461,10 +518,19 @@ registerSchema([
                 {
                     field: "name",
                     type: RelationType.Default,
-                    func: "system.conv.assign",
+                    func: "schema.app.getsourceappfldinfo",
                     args: [
                         {
+                            name: "sourceApp"
+                        },
+                        {
                             name: "sourceField"
+                        },
+                        {
+                            value: "name"
+                        },
+                        {
+                            name: "type"
                         }
                     ]
                 },
@@ -481,6 +547,9 @@ registerSchema([
                         },
                         {
                             value: "display"
+                        },
+                        {
+                            name: "type"
                         }
                     ]
                 },
@@ -608,6 +677,19 @@ registerSchema([
                         }
                     ]
                 },
+                {
+                    field: "trackPush",
+                    type: RelationType.Invisible,
+                    func: "schema.app.istrackpushdisable",
+                    args: [
+                        {
+                            name: "sourceField"
+                        },
+                        {
+                            name: "func"
+                        }
+                    ]
+                }
             ]
         }
     },
@@ -633,43 +715,6 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.nomainapp",
-        type: SchemaType.Function,
-        display: _LS("schema.app.nomainapp"),
-        func: {
-            return: NS_SYSTEM_BOOL,
-            args: [
-                {
-                    name: "app",
-                    type: "schema.app.srcapp",
-                    nullable: true,
-                }
-            ],
-            exps: [],
-            func: (app: string) => {
-                if (!app) return true
-                const schema = getAppCachedSchema(app)
-                return !(schema?.fields?.find((f: IAppFieldSchema) => f.sourceApp))
-            }
-        }
-    },
-    {
-        name: "schema.app.getmainapps",
-        type: SchemaType.Function,
-        display: _LS("schema.app.getmainapps"),
-        func: {
-            return: NS_SYSTEM_STRINGS,
-            args: [
-                {
-                    name: "app",
-                    type: "schema.app.srcapp",
-                }
-            ],
-            exps: [],
-            func: getMainApps
-        }
-    },
-    {
         name: "schema.app.app",
         type: SchemaType.Struct,
         display: _LS("schema.app.app"),
@@ -684,27 +729,16 @@ registerSchema([
                 } as IStructScalarFieldConfig,
                 {
                     name: "display",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.app.app.display"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "desc",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.app.app.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
-                {
-                    name: "standalone",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.app.app.standalone")
-                },
-                {
-                    name: "main",
-                    type: "schema.app.srcapp",
-                    display: _LS("schema.app.app.main"),
-                    desc: _LS("schema.app.app.main.desc"),
-                },
                 {
                     name: "relations",
                     type: "schema.app.fieldrelations",
@@ -712,26 +746,6 @@ registerSchema([
                 },
             ],
             relations: [
-                {
-                    field: "main",
-                    type: RelationType.Invisible,
-                    func: "schema.app.nomainapp",
-                    args: [
-                        {
-                            name: "name"
-                        }
-                    ]
-                },
-                {
-                    field: "main",
-                    type: RelationType.WhiteList,
-                    func: "schema.app.getmainapps",
-                    args: [
-                        {
-                            name: "name"
-                        }
-                    ]
-                },
                 {
                     field: "relations",
                     type: RelationType.Invisible,
@@ -744,7 +758,84 @@ registerSchema([
                 }
             ]
         }
-    }
+    },
+
+    //#region helper
+    {
+        name: "schema.app.getapptargets",
+        type: SchemaType.Function,
+        display: _LS("schema.app.getapptargets"),
+        func: {
+            return: NS_SYSTEM_STRINGS,
+            args: [
+                {
+                    name: "app",
+                    type: "schema.app.srcapp",
+                    nullable: true,
+                }
+            ],
+            exps: [],
+            func: (app: string) => {
+                if (isNull(app)) return []
+                const appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}")
+                if (appTargets && typeof(appTargets) === "object") {
+                    return appTargets[app] || []
+                }
+                return []
+            }
+        }
+    },
+    {
+        name: "schema.app.apptarget",
+        type: SchemaType.Struct,
+        display: _LS("schema.app.apptarget"),
+        struct: {
+            fields: [
+                {
+                    name: "allowApps",
+                    type: NS_SYSTEM_STRINGS,
+                    invisible: true,
+                },
+                {
+                    name: "app",
+                    type: "schema.app.srcapp",
+                    require: true,
+                    display: _LS("schema.app.apptarget.app"),
+                },
+                {
+                    name: "target",
+                    type: NS_SYSTEM_STRING,
+                    require: true,
+                    display: _LS("schema.app.apptarget.target"),
+                    asSuggest: true,
+                    upLimit: 64
+                } as IStructScalarFieldConfig,
+            ],
+            relations: [
+                {
+                    field: "app",
+                    type: RelationType.WhiteList,
+                    func: "system.conv.assign",
+                    args: [
+                        {
+                            name: "allowApps"
+                        }
+                    ]
+                },
+                {
+                    field: "target",
+                    type: RelationType.WhiteList,
+                    func: "schema.app.getapptargets",
+                    args: [
+                        {
+                            name: "app"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    //#endregion
 ], SchemaLoadState.System)
 
 //#region App Schema storage
@@ -770,6 +861,9 @@ export function reloadStorageAppSchemas()
 // save schema to storage
 export function saveStorageAppSchema(schema: IAppSchema)
 {
+    // only save custom schema in the cache
+    if (schema.loadState && (schema.loadState & SchemaLoadState.Custom) == 0) return
+
     schema = getAppCachedSchema(schema.name)! // reload to gets the fields
     const namelist = localStorage["schema_custom_applist"]
     let list: string[] = namelist ? JSON.parse(namelist) : []
@@ -862,7 +956,7 @@ export function saveAllCustomAppSchemaToStroage(root: string = "")
 // export app schema
 export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema
 {
-    const r: IAppSchema = { name: f.name, display: f.display, desc: f.desc, main: f.main }
+    const r: IAppSchema = { name: f.name, display: f.display, desc: f.desc }
     const isroot = isNull(types)
     types ||= []
 
@@ -881,8 +975,8 @@ export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema
 
     if (isroot && types?.length)
     {
-        r.types = []
-        types.forEach(t => gatherSchemas(r.types!, t))
+        r.nodeSchemas = []
+        types.forEach(t => gatherSchemas(r.nodeSchemas!, t))
     }
 
     return r
@@ -965,18 +1059,20 @@ function gatherSchemas(types: INodeSchema[], name?: string)
     }
 }
 
-// gets all the main apps
-function getMainApps(app: string): string[] {
-    const schema = getAppCachedSchema(app)
-    const result: string[] = []
-    if (!schema?.fields?.length) return result
-    schema.fields.filter((f: IAppSchema) => f.sourceApp).forEach((f: IAppSchema) => {
-        if (result.includes(f.sourceApp!)) return
-        result.push(f.sourceApp!)
-        const r = getMainApps(f.sourceApp!).filter(a => !result.includes(a))
-        if (r.length) result.splice(result.length, 0, ...r)
-    })
-    return result
+export function addAppTarget(app: string, target: string)
+{
+    if (isNull(app) || isNull(target)) return
+
+    let appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}")
+    if (isNull(appTargets) || typeof(appTargets) !== "object") appTargets = {}
+    
+    let targets: string[] = appTargets[app] || []
+    if (!Array.isArray(targets)) targets = []
+    if (!targets.includes(target)) {
+        targets.unshift(target)
+        appTargets[app] = targets
+        localStorage["schema_app_targets"] = JSON.stringify(appTargets)
+    }
 }
 
 //#endregion

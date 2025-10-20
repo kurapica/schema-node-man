@@ -1,9 +1,7 @@
 <template>
     <section>
         <el-button type="success" @click="showtryit = true">{{ _L["schema.designer.clicktotry"] }}</el-button>
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit']" direction="rtl" size="100%"
-            destroy-on-close
-            append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit']" direction="rtl" size="100%" append-to-body>
             <el-container class="main" style="height: 80vh;color:black;">
                 <el-main>
                     <el-tabs v-model="activeTab">
@@ -26,7 +24,11 @@
                         header-align="left" 
                         :header-cell-style="{ background: '#eee' }">
                         <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150" />
+                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                            <template #default="scope">
+                                <span>{{ _L(scope.row.display) }}</span>
+                            </template>
+                        </el-table-column>
                         <el-table-column align="left" prop="type" :label="_L['schema.designer.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{

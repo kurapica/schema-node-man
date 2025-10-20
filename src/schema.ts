@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_GUID, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -9,6 +9,14 @@ registerSchema([
     },
 
     //#region scalar type
+    {
+        name: "schema.anytype",
+        type: SchemaType.Scalar,
+        display: _LS("schema.anytype"),
+        scalar: {
+            base: NS_SYSTEM_STRING,
+        }
+    },
     {
         name: "schema.namespace",
         type: SchemaType.Scalar,
@@ -140,6 +148,14 @@ registerSchema([
         scalar: {
         }
     },
+    {
+        name: "schema.color",
+        type: SchemaType.Scalar,
+        display: _LS("schema.color"),
+        scalar: {
+            base: NS_SYSTEM_STRING
+        }
+    },
     //#endregion
 
     //#region enum type
@@ -173,6 +189,10 @@ registerSchema([
                 {
                     value: SchemaType.Function,
                     name: _LS("schema.schematype.func"),
+                },
+                {
+                    value: SchemaType.Json,
+                    name: _LS("schema.schematype.json")
                 }
             ]
         }
@@ -211,6 +231,10 @@ registerSchema([
                 {
                     value: RelationType.Invisible,
                     name: _LS("schema.relationtype.invisible"),
+                },
+                {
+                    value: RelationType.Visible,
+                    name: _LS("schema.relationtype.visible"),
                 },
                 {
                     value: RelationType.Disable,
@@ -333,144 +357,6 @@ registerSchema([
                 {
                     value: DataCombineType.Count,
                     name: _LS("schema.datacombinetype.count")
-                },
-                {
-                    value: DataCombineType.Min,
-                    name: _LS("schema.datacombinetype.min")
-                },
-                {
-                    value: DataCombineType.Max,
-                    name: _LS("schema.datacombinetype.max")
-                },
-            ]
-        }
-    },
-    {
-        name: "schema.language",
-        type: SchemaType.Enum,
-        display: _LS("schema.language"),
-        enum: {
-            type: EnumValueType.String,
-            values: [
-                { value: "afZA", name: _LS("Afrikaans") },
-                { value: "arSA", name: _LS("العربية") },
-                { value: "azAZ", name: _LS("Azərbaycanca") },
-                { value: "beBY", name: _LS("Беларуская") },
-                { value: "bgBG", name: _LS("Български") },
-                { value: "bnBD", name: _LS("বাংলা") },
-                { value: "caES", name: _LS("Català") },
-                { value: "csCZ", name: _LS("Čeština") },
-                { value: "daDK", name: _LS("Dansk") },
-                { value: "deDE", name: _LS("Deutsch") },
-                { value: "elGR", name: _LS("Ελληνικά") },
-                { value: "enUS", name: _LS("English (US)") },
-                { value: "enGB", name: _LS("English (UK)") },
-                { value: "esES", name: _LS("Español (España)") },
-                { value: "esMX", name: _LS("Español (México)") },
-                { value: "etEE", name: _LS("Eesti") },
-                { value: "euES", name: _LS("Euskara") },
-                { value: "faIR", name: _LS("فارسی") },
-                { value: "fiFI", name: _LS("Suomi") },
-                { value: "frFR", name: _LS("Français") },
-                { value: "glES", name: _LS("Galego") },
-                { value: "guIN", name: _LS("ગુજરાતી") },
-                { value: "heIL", name: _LS("עברית") },
-                { value: "hiIN", name: _LS("हिन्दी") },
-                { value: "hrHR", name: _LS("Hrvatski") },
-                { value: "huHU", name: _LS("Magyar") },
-                { value: "hyAM", name: _LS("Հայերեն") },
-                { value: "idID", name: _LS("Bahasa Indonesia") },
-                { value: "isIS", name: _LS("Íslenska") },
-                { value: "itIT", name: _LS("Italiano") },
-                { value: "jaJP", name: _LS("日本語") },
-                { value: "kaGE", name: _LS("ქართული") },
-                { value: "kkKZ", name: _LS("Қазақша") },
-                { value: "kmKH", name: _LS("ភាសាខ្មែរ") },
-                { value: "knIN", name: _LS("ಕನ್ನಡ") },
-                { value: "koKR", name: _LS("한국어") },
-                { value: "loLA", name: _LS("ລາວ") },
-                { value: "ltLT", name: _LS("Lietuvių") },
-                { value: "lvLV", name: _LS("Latviešu") },
-                { value: "mkMK", name: _LS("Македонски") },
-                { value: "mlIN", name: _LS("മലയാളം") },
-                { value: "mnMN", name: _LS("Монгол") },
-                { value: "mrIN", name: _LS("मराठी") },
-                { value: "msMY", name: _LS("Bahasa Melayu") },
-                { value: "myMM", name: _LS("မြန်မာစာ") },
-                { value: "neNP", name: _LS("नेपाली") },
-                { value: "nlNL", name: _LS("Nederlands") },
-                { value: "noNO", name: _LS("Norsk") },
-                { value: "paIN", name: _LS("ਪੰਜਾਬੀ") },
-                { value: "plPL", name: _LS("Polski") },
-                { value: "ptPT", name: _LS("Português (Portugal)") },
-                { value: "ptBR", name: _LS("Português (Brasil)") },
-                { value: "roRO", name: _LS("Română") },
-                { value: "ruRU", name: _LS("Русский") },
-                { value: "siLK", name: _LS("සිංහල") },
-                { value: "skSK", name: _LS("Slovenčina") },
-                { value: "slSI", name: _LS("Slovenščina") },
-                { value: "sqAL", name: _LS("Shqip") },
-                { value: "srRS", name: _LS("Српски") },
-                { value: "svSE", name: _LS("Svenska") },
-                { value: "swKE", name: _LS("Kiswahili") },
-                { value: "taIN", name: _LS("தமிழ்") },
-                { value: "teIN", name: _LS("తెలుగు") },
-                { value: "thTH", name: _LS("ไทย") },
-                { value: "trTR", name: _LS("Türkçe") },
-                { value: "ukUA", name: _LS("Українська") },
-                { value: "urPK", name: _LS("اردو") },
-                { value: "uzUZ", name: _LS("Oʻzbekcha") },
-                { value: "viVN", name: _LS("Tiếng Việt") },
-                { value: "zhCN", name: _LS("简体中文") },
-                { value: "zhTW", name: _LS("繁體中文") },
-                { value: "zuZA", name: _LS("isiZulu") }
-            ]
-        }
-    },
-    {
-        name: "schema.localetran",
-        type: SchemaType.Struct,
-        display: _LS("schema.localetran"),
-        struct: {
-            fields: [
-                {
-                    name: "lang",
-                    type: "schema.language",
-                    require: true,
-                    display: _LS("schema.localetran.lang")
-                },
-                {
-                    name: "tran",
-                    type: NS_SYSTEM_STRING,
-                    display: _LS("schema.localetran.tran")
-                }
-            ]
-        }
-    },
-    {
-        name: "schema.localetrans",
-        type: SchemaType.Array,
-        display: _LS("schema.localetrans"),
-        array: {
-            element: "schema.localetran",
-            primary: [ "lang" ]
-        }
-    },
-    {
-        name: "schema.localestring",
-        type: SchemaType.Struct,
-        display: _LS("schema.localestring"),
-        struct: {
-            fields: [
-                {
-                    name: "key",
-                    type: NS_SYSTEM_STRING,
-                    display: _LS("schema.localestring.default")
-                },
-                {
-                    name: "trans",
-                    type: "schema.localetrans",
-                    display: _LS("schema.localestring.trans")
                 }
             ]
         }
@@ -492,7 +378,7 @@ registerSchema([
                 },
                 {
                     name: "unit",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.scalardefine.unit"),
                     upLimit: 8,
                 } as IStructScalarFieldConfig,
@@ -508,7 +394,7 @@ registerSchema([
                 },
                 {
                     name: "error",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.scalardefine.error"),
                     upLimit: 128,
                 },
@@ -591,7 +477,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
@@ -629,7 +515,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
@@ -668,7 +554,7 @@ registerSchema([
                 {
                     name: "name",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
@@ -763,7 +649,7 @@ registerSchema([
                 },
                 {
                     name: "cascade",
-                    type: NS_SYSTEM_STRINGS,
+                    type: "system.localestrings",
                     display: _LS("schema.enumdefine.cascade"),
                 },
                 {
@@ -1076,7 +962,7 @@ registerSchema([
             func: (type: string) => {
                 let schema = getCachedSchema(type)
                 if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
-                return schema?.name
+                return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum ? schema?.name : NS_SYSTEM_STRING
             }
         }
     },
@@ -1116,9 +1002,9 @@ registerSchema([
                 let schema = getCachedSchema(type)
                 if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
                 if (schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1) {
-                    return schema.enum.cascade.map((item: string, i: number) => ({
+                    return schema.enum.cascade.map((item: ILocaleString, i: number) => ({
                         value: i + 1,
-                        label: item.trim()
+                        label: _L(item)
                     }))
                 }
                 return null
@@ -1197,8 +1083,30 @@ registerSchema([
             ],
             exps: [],
             func: async (type: string) => {
+                const schema = getCachedSchema(type)
+                if (schema?.type === SchemaType.Array || schema?.type === SchemaType.Struct) return NS_SYSTEM_STRING
+                
                 const arraySchema = await getArraySchema(type)
                 return arraySchema?.name
+            }
+        }
+    },
+    {
+        name: "schema.getscalarorenumtype",
+        type: SchemaType.Function,
+        display: _LS("schema.getscalarorenumtype"),
+        func: {
+            return: "schema.valuetype",
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype"
+                }
+            ],
+            exps: [],
+            func: async (type: string) => {
+                const schema = getCachedSchema(type)
+                return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum ? type : NS_SYSTEM_STRING
             }
         }
     },
@@ -1223,19 +1131,19 @@ registerSchema([
                 },
                 {
                     name: "display",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.display"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "desc",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
                 {
                     name: "error",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.error"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
@@ -1266,7 +1174,7 @@ registerSchema([
                 },
                 {
                     name: "unit",
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.structfieldtype.unit"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
@@ -1274,6 +1182,7 @@ registerSchema([
                     name: "default",
                     type: NS_SYSTEM_STRING,
                     display: _LS("schema.structfieldtype.default"),
+                    asSuggest: true,
                 },
 
                 // scalar config
@@ -1348,7 +1257,7 @@ registerSchema([
                 {
                     field: "default",
                     type: RelationType.Type,
-                    func: "system.conv.assign",
+                    func: "schema.getscalarorenumtype",
                     args: [
                         {
                             name: "type"
@@ -1740,6 +1649,7 @@ registerSchema([
                         return NS_SYSTEM_INT
 
                     case RelationType.Invisible:
+                    case RelationType.Visible:
                     case RelationType.Disable:
                     case RelationType.AnyLevel:
                     case RelationType.SingleFlag:
@@ -1774,6 +1684,7 @@ registerSchema([
                         RelationType.LowLimit,
                         RelationType.UpLimit,
                         RelationType.Invisible,
+                        RelationType.Visible,
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.InitOnly,
@@ -1788,6 +1699,7 @@ registerSchema([
                         RelationType.WhiteList,
                         RelationType.BlackList,
                         RelationType.Invisible,
+                        RelationType.Visible,
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.InitOnly,
@@ -1801,6 +1713,7 @@ registerSchema([
                 else if (typeInfo?.type === SchemaType.Struct) {
                     return [
                         RelationType.Invisible,
+                        RelationType.Visible,
                         RelationType.Disable,
                         RelationType.Assign,
                         RelationType.Type
@@ -1812,6 +1725,7 @@ registerSchema([
                     RelationType.WhiteList,
                     RelationType.BlackList,
                     RelationType.Invisible,
+                    RelationType.Visible,
                     RelationType.Disable,
                     RelationType.Assign,
                     RelationType.InitOnly,
@@ -2189,7 +2103,7 @@ registerSchema([
                     display: _LS("schema.dataindexes")
                 },
                 {
-                    name: "combine",
+                    name: "combines",
                     type: "schema.datacombines",
                     display: _LS("schema.arraydefine.combine"),
                 },
@@ -2251,7 +2165,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "combine",
+                    field: "combines",
                     type: RelationType.Invisible,
                     func: "schema.notstructtype",
                     args: [
@@ -2261,7 +2175,7 @@ registerSchema([
                     ]
                 },
                 {
-                    field: "combine.field",
+                    field: "combines.field",
                     type: RelationType.WhiteList,
                     func: "schema.getstructnumbervaluefields",
                     args: [
@@ -2290,6 +2204,26 @@ registerSchema([
 
     //#region function definition
     {
+        name: "schema.gettypedisplayorname",
+        type: SchemaType.Function,
+        display: _LS("schema.gettypedisplayorname"),
+        func: {
+            return: NS_SYSTEM_STRING,
+            args: [
+                {
+                    name: "type",
+                    type: "schema.valuetype",
+                }
+            ],
+            exps: [],
+            func: async (type: string) => {
+                const schema = type ? await getSchema(type) : null
+                if (!schema) return null
+                return schema.display?.key ? _L(schema.display) : schema.name.split('.').pop()
+            }
+        }
+    },
+    {
         name: "schema.funcarg",
         type: SchemaType.Struct,
         display: _LS("schema.funcarg"),
@@ -2312,6 +2246,18 @@ registerSchema([
                     name: "nullable",
                     type: NS_SYSTEM_BOOL,
                     display: _LS("schema.funcarg.nullable"),
+                }
+            ],
+            relations: [
+                {
+                    field: "name",
+                    type: RelationType.Default,
+                    func: "schema.gettypedisplayorname",
+                    args: [
+                        {
+                            name: "type"
+                        }
+                    ]
                 }
             ]
         }
@@ -2621,11 +2567,12 @@ registerSchema([
                     type: "schema.schematype",
                     display: _LS("schema.namespacedefine.type"),
                     default: SchemaType.Namespace,
-                },
+                    blackList: [SchemaType.Json],
+                } as IStructEnumFieldConfig,
                 {
                     name: "display",
                     require: true,
-                    type: "schema.localestring",
+                    type: "system.localestring",
                     display: _LS("schema.namespacedefine.display"),
                     upLimit: 128,
                 } as IStructScalarFieldConfig,
@@ -2744,12 +2691,16 @@ export function reloadStorageSchemas()
         if (!schema || typeof(schema) !== "object") continue
         schemas.push(schema)
     }
-    registerSchema(schemas)
+    registerSchema(schemas, SchemaLoadState.Custom)
 }
 
 // save schema to storage
 export function saveStorageSchema(schema: INodeSchema)
 {
+    // only save custom schema in the cache
+    if (schema.loadState && (schema.loadState & SchemaLoadState.Custom) == 0) return
+
+    // update name list
     const namelist = localStorage["schema_custom_namelist"]
     let list: string[] = namelist ? JSON.parse(namelist) : []
     const name = schema.name.toLowerCase()
@@ -2760,6 +2711,8 @@ export function saveStorageSchema(schema: INodeSchema)
         list.sort()
         localStorage["schema_custom_namelist"] = JSON.stringify(list)
     }
+
+    // save schema
     localStorage[`schema_data_${name}`] = JSON.stringify({
         name: schema.name,
         type: schema.type,
@@ -2869,10 +2822,12 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import funcdefineView from "./view/funcdefineView.vue"
-import localstringView from "./view/localstringView.vue"
+import colorView from "./view/colorView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
-regSchemaTypeView("schema.localestring", localstringView, undefined, true)
+regSchemaTypeView("schema.color", colorView)
+
+regSchemaTypeView("schema.anytype", namespaceView)
 regSchemaTypeView("schema.namespace", namespaceView)
 regSchemaTypeView("schema.scalartype", namespaceView)
 regSchemaTypeView("schema.enumtype", namespaceView)

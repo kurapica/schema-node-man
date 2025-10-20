@@ -2,7 +2,7 @@
     <div style="width: 100%;">
         <el-tabs v-if="elTabVis" ref="elTabsRef" class="struct-field-types" v-model="activeCol" :addable="!node.readonly" @edit="handleTabsEdit">
             <el-tab-pane v-for="(element, i) in elementDisplay"
-                :closable="!(node.readonly || element.name && noClosable.includes(element.name))"
+                :closable="!(node.readonly || element.require || element.name && noClosable.includes(element.name))"
                 :label="_L(element.display || element.name || _L['schema.structdefine.unkown'])"
                 :name="i"></el-tab-pane>
         </el-tabs>
@@ -90,7 +90,7 @@ const regSortable = () => {
 // data change handler
 let dataChangeHandler: Function | null = null
 let baseChangeHandler: Function | null = null
-let elementDisplay = reactive<{ guid: string, name: string, handler: Function, display: string }[]>([])
+let elementDisplay = reactive<{ guid: string, name: string, handler: Function, display: string, require: boolean }[]>([])
 onMounted(() => {
     let oldLength = 0
     dataChangeHandler = arrayNode.subscribe((action: any) => {
@@ -112,17 +112,20 @@ onMounted(() => {
                     guid: string,
                     display: string,
                     name: string,
+                    require: boolean
                     handler: Function
                 }>({
                     guid: ele.guid,
                     display: "",
                     name: "",
+                    require: false,
                     handler: ():void => {}
                 })
                 view.handler = ele.subscribe(() => {
-                    const { name, display } = ele.rawData
+                    const { name, display, require } = ele.rawData
                     view.name = name
                     view.display = _L.value(display)
+                    view.require = require
                 }, true)
                 elementDisplay[i] = view
             }

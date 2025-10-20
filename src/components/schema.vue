@@ -60,17 +60,28 @@
                     </template>
                     <template #default="scope">
                         <el-button v-if="scope.row.type === SchemaType.Namespace"
-                            type="info" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
+                            :type="(scope.row.hasSchemas || scope.row.schemas?.length) ? 'success' : 'info'" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
                         </el-button>
-                        <el-button v-else type="info" @click="handleEdit(scope.row, true)">
+                        <el-button v-else type="success" @click="handleEdit(scope.row, true)">
                             {{ _L["schema.designer.view"] }}
                         </el-button>
-                        <el-button type="success" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
+                        <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
                             {{ _L["schema.designer.edit"] }}
                         </el-button>
-                        <el-button v-if="isSchemaDeletable(scope.row.name)" type="danger" @click="handleDelete(scope.row)">
-                            {{ _L["schema.designer.delete"] }}
-                        </el-button>
+                        <el-popconfirm
+                            v-if="isSchemaDeletable(scope.row.name)" 
+                            :title="_L['schema.designer.confirmdelete']"                            
+                            :confirm-button-text="_L['YES']"
+                            :cancel-button-text="_L['NO']"
+                            :icon="Delete"
+                            @confirm="handleDelete(scope.row)"
+                            >
+                            <template #reference>
+                                <el-button type="danger">
+                                    {{ _L["schema.designer.delete"] }}
+                                </el-button>
+                            </template>
+                        </el-popconfirm>
                     </template>
                 </el-table-column>
             </el-table>
@@ -80,7 +91,7 @@
         </el-footer>
 
         <!-- namespace editor -->
-        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" destroy-on-close
+        <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%"
             append-to-body @closed="closeNamespaceEditor">
             <el-container class="main" style="height: 80vh;">
                 <el-main>
@@ -100,6 +111,8 @@
                     <template v-if="namespaceNode?.readonly">
                         <el-button v-if="tryitTypes.includes(namespaceNode.rawData.type)" type="primary" @click="tryit">{{ _L["schema.designer.tryit"] }}</el-button>
                         <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                        <el-button v-if="currRow?.usedBy?.length || currRow?.usedByApp?.length" @click="showViewRef = true" style="float:right" type="info" >{{ _L["schema.designer.viewref"] }}</el-button>
+                        <el-button type="warning" @click="copySchema">{{ _L["schema.designer.copyschema"] }}</el-button>
                     </template>
                     <template v-else>
                         <el-button type="primary" @click="confirmNameSpace">{{ _L["schema.designer.save"] }}</el-button>
@@ -110,18 +123,52 @@
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%"
-            destroy-on-close
-            append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <tryit-view
-                        :type="tryittype"
-                    ></tryit-view>
+                    <tryit-view :type="tryittype"></tryit-view>
                 </el-main>
                 <el-footer>
                     <br/>
                     <el-button @click="showtryit = false">{{ _L["schema.designer.close"] }}</el-button>
+                </el-footer>
+            </el-container>
+        </el-drawer>
+
+        <!-- View ref -->
+        <el-drawer v-model="showViewRef" :title="_L['schema.designer.viewref']" direction="rtl" size="40%" append-to-body>
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <template v-if="currRow?.usedBy?.length">
+                        <h3>{{ _L["schema.schematype"] }}</h3>
+                        <hr/>
+                        <ul>
+                            <li v-for="type in currRow?.usedBy" :key="type">
+                                <schema-view :config="{
+                                    type: 'schema.anytype',
+                                    readonly: true
+                                }" :value="type" plain-text="left"></schema-view>
+                            </li>
+                        </ul>
+                        <br/>
+                    </template>
+
+                    <template v-if="currRow?.usedByApp?.length">
+                        <h3>{{ _L["schema.app.apptarget.app"] }}</h3>
+                        <hr/>
+                        <ul>
+                            <li v-for="app in currRow?.usedByApp" :key="app">
+                                <schema-view :config="{
+                                    type: 'schema.app.srcapp',
+                                    readonly: true
+                                }" :value="app" plain-text="left"></schema-view>
+                            </li>
+                        </ul>
+                    </template>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <el-button @click="showViewRef = false">{{ _L["schema.designer.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
@@ -136,6 +183,7 @@ import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
 import tryitView from './tryit.vue'
+import { Delete } from '@element-plus/icons-vue'
 
 const schemas = ref<INodeSchema[]>([])
 const schemaTypeOrder = {
@@ -144,7 +192,8 @@ const schemaTypeOrder = {
     [SchemaType.Enum]: 3,
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
-    [SchemaType.Function]: 6
+    [SchemaType.Function]: 6,
+    [SchemaType.Json]: 7
 }
 
 const tryitTypes = [ SchemaType.Struct, SchemaType.Array ]
@@ -224,6 +273,7 @@ const editorRef = ref<InstanceType<typeof ElForm>>()
 const showNamespaceEditor = ref(false)
 const namespaceNode = ref<StructNode | undefined>(undefined)
 const operation = ref("")
+const showViewRef = ref(false)
 
 let namesapceWatchHandler: Function | null = null
 
@@ -242,11 +292,15 @@ const handleNew = async () => {
 }
 
 // update
+const currRow = ref<INodeSchema | null>(null)
 const handleEdit = async (row: any, readonly?: boolean) => {
+    currRow.value = row
+    const schema = await getSchema(row.name)
+
     namespaceNode.value = new StructNode({
         type: "schema.namespacedefine",
         readonly
-    }, jsonClone(toRaw(row)))
+    }, jsonClone(schema))
     showNamespaceEditor.value = true
 
     if (readonly) {
@@ -266,15 +320,15 @@ const handleDelete = async (row: any) => {
         ElMessage.error(_L.value["schema.designer.cantdelschema"])
         return
     }
-    if ((row.loadState || 0) && SchemaLoadState.Server)
+    if ((row.loadState || 0) & SchemaLoadState.Server)
     {
         const provider = getSchemaServerProvider()
         if (provider)
         {
             const res = await provider.deleteSchema(row.name)
-            if (!res.result)
+            if (!res)
             {
-                ElMessage.error(res.message || _L.value["schema.designer.error"])
+                ElMessage.error(_L.value["schema.designer.error"])
                 return
             }
         }
@@ -290,7 +344,7 @@ const confirmNameSpace = async () => {
     if (!res || !namespaceNode.value?.valid) return
 
     if (!namespaceNode.value?.valid) return
-    const data = jsonClone(toRaw(namespaceNode.value.data))
+    const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.data)))
     const schema = getCachedSchema(data.name)
     
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
@@ -299,16 +353,16 @@ const confirmNameSpace = async () => {
         if (provider)
         {
             const res = await provider.saveSchema(data)
-            if (!res.result)
+            if (!res)
             {
-                ElMessage.error(res.message || _L.value["schema.designer.error"])
+                ElMessage.error(_L.value["schema.designer.error"])
                 return
             }
-            data.loadState = SchemaLoadState.Server
+            data.loadState = (data.loadState || 0) | SchemaLoadState.Server
         }
     }
 
-    registerSchema([data])
+    registerSchema([data], data.loadState)
     saveStorageSchema(data)
     closeNamespaceEditor()
     showNamespaceEditor.value = false
@@ -321,8 +375,8 @@ const closeNamespaceEditor = () => {
     namespaceNode.value?.dispose()
     namespaceNode.value = undefined
     namesapceWatchHandler = null
+    currRow.value = null
 }
-
 
 //#endregion
 
@@ -334,6 +388,35 @@ const tryittype = ref("")
 const tryit = () => {
     tryittype.value = namespaceNode.value?.rawData.name
     showtryit.value = true
+}
+
+//#endregion
+
+//#region Copy Schema
+
+const copySchema = async () => {
+    const schema = jsonClone(namespaceNode.value?.rawData)
+    if (!schema) return
+    
+    closeNamespaceEditor()
+    showNamespaceEditor.value = false
+    await new Promise(resolve => setTimeout(resolve, 200)) // wait drawer close animation
+
+    const name = `${schema.name}_copy`
+    schema.name = ""
+    localStorage["schema_new_namespace"] = state.namespace
+
+    namespaceNode.value = new StructNode({
+        type: "schema.namespacedefine",
+    }, jsonClone(schema))
+
+    namespaceNode.value.getField("name")!.data = name
+
+    if (namesapceWatchHandler) namesapceWatchHandler()
+    namesapceWatchHandler = namespaceNode.value.subscribe(() => {
+        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
+    }, true)
+    showNamespaceEditor.value = true
 }
 
 //#endregion
@@ -351,7 +434,6 @@ const startDownload = () => {
 const handleSelection = (val: any[]) => {
     selections = val.map((v: any) => v.name)
 }
-
 
 const download = () => {
     if (!selections.length) return
