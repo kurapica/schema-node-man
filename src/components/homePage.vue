@@ -2,7 +2,7 @@
     <el-container>
         <el-header style="position: relative;">
             <nav-header></nav-header>
-            <p style="position: absolute; top: 0rem; right: 1rem">
+            <p v-if="!isEmbedded" style="position: absolute; top: 0rem; right: 1rem">
                 <el-input v-model="url" :placeholder="_L['schema.server.url']" style="display:inline;margin-right: 2rem" @change="saveServer"></el-input>
                 <a href="javascript:void(0)" @click="toggle('enUS')" :class="lang =='enUS' ? 'active' : 'deactive'">EN</a>
                 |
@@ -21,6 +21,8 @@ import NavHeader from "./navHeader.vue"
 import { setLanguage, getLanguage } from "schema-node"
 import { _L } from "schema-node-vueview"
 import { getSchemaSite, setSchemaSite } from "@/schemaServerProvider"
+
+const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'
 
 const lang = ref(getLanguage())
 const toggle = (l: string) => {

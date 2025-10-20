@@ -12,6 +12,7 @@ import { setLanguage } from 'schema-node'
 import { reloadStorageSchemas } from '@/schema'
 import { reloadStorageAppSchemas } from './appSchema'
 import "@/assets/example/schema"
+import { setSchemaSite } from './schemaServerProvider'
 
 const app = createApp(App)
 
@@ -22,6 +23,9 @@ if (localStorage["lang"])
 // schema init
 reloadStorageSchemas()
 reloadStorageAppSchemas()
+if (document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true') {
+    setSchemaSite(document.querySelector('meta[name="api-base-url"]')?.getAttribute('content') || '/schema')
+}
 
 // Router
 const router = createRouter({
