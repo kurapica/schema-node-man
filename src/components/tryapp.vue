@@ -53,7 +53,7 @@
             </el-form>
 
             <el-form v-show="activeTab === 1 && showref" label-width="140px" :model="appNode.rawData">
-                <template v-for="f in appNode.refFields" :key="f.guid">
+                <template v-for="f in appNode.refInputFields" :key="f.guid">
                     <h2>{{ _L(f.display) || f.name }}</h2>
                     <schema-view
                         plain-text="left"
@@ -216,7 +216,7 @@ onMounted(async() => {
         target: "",
         fields: []
     })
-    showref.value = appNode.value?.refFields.length ? true : false
+    showref.value = appNode.value?.refInputFields.length ? true : false
     showoutput.value = appNode.value?.pushFields.length ? true : false
     if (!enableAppData) return
 
