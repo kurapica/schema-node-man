@@ -214,7 +214,7 @@
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + appTitle" direction="rtl" size="100%" append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + appTitle" direction="rtl" size="100%" append-to-body destroy-on-close>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <tryapp v-if="currApp"

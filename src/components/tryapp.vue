@@ -61,6 +61,7 @@
                         :in-form="true"
                         :skin="skin"
                     ></schema-view>
+                    <br/>
                 </template>
             </el-form>
 
@@ -73,6 +74,7 @@
                         :in-form="true"
                         :skin="skin"
                     ></schema-view>
+                    <br/>
                 </template>
             </el-form>
         </el-main>
@@ -121,7 +123,8 @@ const loadData = async() => {
         appNode.value = await getAppNode({
             app: props.app,
             target: target,
-            fields: []
+            fields: [],
+            take: 5
         })
     } catch(e) {
         console.error(e)
@@ -143,7 +146,8 @@ const saveData = async() => {
         saving.value = true
         const r = await appNode.value.submit();
         if (!r?.result) {
-            ElMessage.error(_L.value(r?.error || "schema.designer.savefailed"))
+            if (r?.error)
+                ElMessage.error(_L.value(r?.error || "schema.designer.savefailed"))
             return
         }
         else
