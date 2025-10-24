@@ -40,7 +40,7 @@
                         width="width:fit-content"
                         :open-delay="500"
                         trigger="hover">
-                        <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["schema.designer.view"] }}</el-button>
+                        <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
                         <namespace-info-view style="min-width: 300px;" :type="data.value"/>
                         <template #reference>
                             <span style="width: 100%; display: inline-block;">{{ data.label }}</span>
@@ -54,7 +54,7 @@
         <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body @closed="closeNamespaceEditor">
             <el-container class="main" style="height: 80vh;color:black">
                 <el-header>
-                    <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["schema.designer.edit"] }}</el-button>
+                    <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["frontend.view.edit"] }}</el-button>
                 </el-header>
                 <el-main>
                     <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawData" label-width="160"
@@ -72,11 +72,11 @@
                 <el-footer>
                     <br/>
                     <template v-if="namespaceNode?.readonly">
-                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button>
                     </template>
                     <template v-else>
-                        <el-button type="primary" @click="confirmNameSpace">{{ _L["schema.designer.save"] }}</el-button>
-                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                        <el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
                     </template>
                 </el-footer>
             </el-container>
@@ -199,11 +199,11 @@ const handleEdit = async (name: string, readonly?: boolean) => {
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["frontend.view.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["frontend.view.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
@@ -224,7 +224,7 @@ const confirmNameSpace = async () => {
             const res = await provider.saveSchema(data)
             if (!res)
             {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
             data.loadState |= SchemaLoadState.Server

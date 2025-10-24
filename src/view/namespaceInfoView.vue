@@ -60,7 +60,7 @@
                             {{ _L(scope.row.desc) }}
                         </template>
                     </el-table-column>
-                    <el-table-column prop="" :label="_L['schema.designer.tag']" min-width="240">
+                    <el-table-column prop="" :label="_L['frontend.view.tag']" min-width="240">
                         <template #default="scope">
                             <!-- Type -->
                             <el-tag v-if="scope.row.type">{{ _L[`schema.schematype.${scope.row.type}`] }}</el-tag>
@@ -75,13 +75,13 @@
             <!-- Return -->
             <template v-if="typeof(state.retType) === 'object' && state.retType.structure">
                 <el-table :data="state.retType.structure" row-key="label" default-expand-all :tree-props="{ children: 'children' }" style="margin-bottom: 24px;">
-                    <el-table-column prop="label" :label="_L['schema.designer.returnstruct']" min-width="240"></el-table-column>
+                    <el-table-column prop="label" :label="_L['frontend.view.returnstruct']" min-width="240"></el-table-column>
                     <el-table-column prop="desc" :label="_L['schema.structfieldtype.name']" min-width="240">
                         <template #default="scope">
                             {{ _L(scope.row.desc) }}
                         </template>
                     </el-table-column>
-                    <el-table-column prop=""  :label="_L['schema.designer.tag']" min-width="240">
+                    <el-table-column prop=""  :label="_L['frontend.view.tag']" min-width="240">
                         <template #default="scope">
                             <!-- Type -->
                             <el-tag v-if="scope.row.type">{{ _L[`schema.schematype.${scope.row.type}`] }}</el-tag>

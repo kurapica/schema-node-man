@@ -1,16 +1,16 @@
 <template>
     <el-container>
         <el-tabs v-if="sourceAppNode" v-model="activeTargetTab" style="margin-bottom: 1rem;">
-            <el-tab-pane :label="_L['schema.designer.apptarget']" :name="0"></el-tab-pane>
-            <el-tab-pane :label="_L['schema.designer.sourceapptar']" :name="1"></el-tab-pane>
+            <el-tab-pane :label="_L['frontend.view.apptarget']" :name="0"></el-tab-pane>
+            <el-tab-pane :label="_L['frontend.view.sourceapptar']" :name="1"></el-tab-pane>
         </el-tabs>
         <el-header>
             <el-form v-if="enableAppData && appTargetNode" ref="form" label-width="140px" label-position="left" :model="appTargetNode.rawData">
                 <template v-if="activeTargetTab == 0">
                     <section style="float:right;margin-left: 1rem;">
-                        <el-button type="info" @click="genguid">{{ _L["schema.designer.genguid"] }}</el-button>
-                        <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadData">{{ _L["schema.designer.loaddata"] }}</el-button>
-                        <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveData">{{ _L["schema.designer.savedata"] }}</el-button>
+                        <el-button type="info" @click="genguid">{{ _L["frontend.view.genguid"] }}</el-button>
+                        <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadData">{{ _L["frontend.view.loaddata"] }}</el-button>
+                        <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveData">{{ _L["frontend.view.savedata"] }}</el-button>
                     </section>
                     <schema-view
                         :node="(appTargetNode as StructNode)" 
@@ -21,9 +21,9 @@
 
                 <template v-else>
                     <section style="float:right;margin-left: 1rem;">
-                        <el-button type="info" @click="gensourceguid">{{ _L["schema.designer.genguid"] }}</el-button>
-                        <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadSourceTarget">{{ _L["schema.designer.loadappsource"] }}</el-button>
-                        <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveSourceTarget">{{ _L["schema.designer.saveappsource"] }}</el-button>
+                        <el-button type="info" @click="gensourceguid">{{ _L["frontend.view.genguid"] }}</el-button>
+                        <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadSourceTarget">{{ _L["frontend.view.loadappsource"] }}</el-button>
+                        <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveSourceTarget">{{ _L["frontend.view.saveappsource"] }}</el-button>
                     </section>
                     <schema-view
                         :node="(sourceAppNode as StructNode)" 
@@ -35,9 +35,9 @@
         </el-header>
         <el-main v-if="appNode" style="max-height: 55vh;margin-top:4rem;">
             <el-tabs v-model="activeTab" v-if="showref || showoutput">
-                <el-tab-pane :label="_L['schema.designer.inputfield']" :name="0"></el-tab-pane>
-                <el-tab-pane v-if="showref" :label="_L['schema.designer.reffield']" :name="1"></el-tab-pane>
-                <el-tab-pane v-if="showoutput" :label="_L['schema.designer.outputfield']" :name="2"></el-tab-pane>
+                <el-tab-pane :label="_L['frontend.view.inputfield']" :name="0"></el-tab-pane>
+                <el-tab-pane v-if="showref" :label="_L['frontend.view.reffield']" :name="1"></el-tab-pane>
+                <el-tab-pane v-if="showoutput" :label="_L['frontend.view.outputfield']" :name="2"></el-tab-pane>
             </el-tabs>
 
             <el-form v-show="activeTab === 0" ref="form" label-width="140px" :model="appNode.rawData">
@@ -147,12 +147,12 @@ const saveData = async() => {
         const r = await appNode.value.submit();
         if (!r?.result) {
             if (r?.error)
-                ElMessage.error(_L.value(r?.error || "schema.designer.savefailed"))
+                ElMessage.error(_L.value(r?.error || "frontend.view.savefailed"))
             return
         }
         else
         {
-            ElMessage.success(_L.value("schema.designer.savesuccess"))
+            ElMessage.success(_L.value("frontend.view.savesuccess"))
         }
         
         addAppTarget(props.app, target)
@@ -198,12 +198,12 @@ const saveSourceTarget = async() => {
         saving.value = true
         const r = await dataProvider!.setSourceTarget(props.app, target, sourceApp, sourceTarget);
         if (!r) {
-            ElMessage.error(_L.value("schema.designer.savefailed"))
+            ElMessage.error(_L.value("frontend.view.savefailed"))
             return
         }
         else
         {
-            ElMessage.success(_L.value("schema.designer.savesuccess"))
+            ElMessage.success(_L.value("frontend.view.savesuccess"))
         }
         if (sourceTarget) addAppTarget(sourceApp, sourceTarget)
     } catch(e) {

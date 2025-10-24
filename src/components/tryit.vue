@@ -4,14 +4,14 @@
             plain-text="left"
             :config="{
                 type: type,
-                display: _L['schema.designer.tryit']
+                display: _L['frontend.view.tryit']
             }"
             :in-form="true"
             v-model="data"
             :skin="skin"
         ></schema-view>
         <el-form-item>
-            <el-button type="primary" @click="form?.validate()">{{ _L["schema.designer.validate"] }}</el-button>
+            <el-button type="primary" @click="form?.validate()">{{ _L["frontend.view.validate"] }}</el-button>
         </el-form-item>
         <section style="width: 100%;text-align: center;">
             <textarea style="width:72lh;height: 20rem;" disabled>{{ data }}</textarea>

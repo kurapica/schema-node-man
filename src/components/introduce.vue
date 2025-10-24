@@ -1,7 +1,7 @@
 <template>
     <el-container style="height: 86vh">
         <el-aside style="height: 80%;width: 10rem;">
-            <div class="outline">{{ _L["schema.catalog"] }}</div>
+            <div class="outline">{{ _L["frontend.catalog"] }}</div>
             <el-tree :data="tree" default-expand-all @node-click="onclick">
                 <template #default="scope">
                     {{ _L[scope.data.label] }}
@@ -42,7 +42,7 @@ class SectionNode {
 
     constructor(name: string, nodes?: SectionNode[])
     {
-        this.label = `schema.catalog.${name}`
+        this.label = `frontend.catalog.${name}`
         this.zh = () => import(`@/assets/docs/zh/${name}.vue`)
         this.en = () => import(`@/assets/docs/en/${name}.vue`)
         this.com = shallowRef(null)

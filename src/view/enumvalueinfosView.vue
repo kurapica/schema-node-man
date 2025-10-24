@@ -39,10 +39,10 @@
             <el-footer>
                 <br/>
                 <template v-if="!readonly">
-                    <el-button type="primary" @click="saveSubList">{{ _L["schema.designer.save"] }}</el-button>
-                    <el-button type="info" @click="closeSubList">{{ _L["schema.designer.cancel"] }}</el-button>
+                    <el-button type="primary" @click="saveSubList">{{ _L["frontend.view.save"] }}</el-button>
+                    <el-button type="info" @click="closeSubList">{{ _L["frontend.view.cancel"] }}</el-button>
                 </template>
-                <el-button v-else type="info" @click="closeSubList">{{ _L["schema.designer.close"] }}</el-button>
+                <el-button v-else type="info" @click="closeSubList">{{ _L["frontend.view.close"] }}</el-button>
             </el-footer>
         </el-container>
     </el-drawer>
@@ -128,7 +128,7 @@ const saveSubList = async () => {
         const res = await serverProvider.saveEnumSubList(namefield.data, stack.value, data)
         if (!res)
         {
-            ElMessage.error(_L["schema.designer.savefailed"])
+            ElMessage.error(_L["frontend.view.savefailed"])
             return
         }
     }

@@ -7,7 +7,7 @@
             v-model="prefix"
             :config="{
                 type:'schema.namespace',
-                display: _L['schema.designer.upnamespace']
+                display: _L['frontend.view.upnamespace']
             }"
         ></schema-view>
         <el-input

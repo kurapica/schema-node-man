@@ -7,7 +7,7 @@
             v-model="prefix"
             :config="{
                 type:'schema.app.srcapp',
-                display: _L['schema.designer.upapp']
+                display: _L['frontend.view.upapp']
             }"
         ></schema-view>
         <el-input
