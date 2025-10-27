@@ -3,12 +3,12 @@
         <el-header style="height: fit-content; width: 100%;">
             <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
                 <schema-view v-model="state.namespace" in-form :config="{
-                    type: 'schema.namespace',
-                    display: _LS('schema.namespace')
+                    type: 'system.schema.namespace',
+                    display: _LS('system.schema.namespace')
                 }"></schema-view>
                 <schema-view v-model="state.type" in-form :config="{
-                    type: 'schema.schematype',
-                    display: _LS('schema.schematype')
+                    type: 'system.schema.schematype',
+                    display: _LS('system.schema.schematype')
                 }"></schema-view>
                 <schema-view v-model="state.keyword" in-form :config="{
                     type: 'system.string',
@@ -47,7 +47,7 @@
                 </el-table-column>
                 <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
                     <template #default="scope">
-                        {{ _L['schema.schematype.' + scope.row.type] }}
+                        {{ _L['system.schema.schematype.' + scope.row.type] }}
                     </template>
                 </el-table-column>
                 <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="280">
@@ -140,12 +140,12 @@
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <template v-if="currRow?.usedBy?.length">
-                        <h3>{{ _L["schema.schematype"] }}</h3>
+                        <h3>{{ _L["system.schema.schematype"] }}</h3>
                         <hr/>
                         <ul>
                             <li v-for="type in currRow?.usedBy" :key="type">
                                 <schema-view :config="{
-                                    type: 'schema.anytype',
+                                    type: 'system.schema.anytype',
                                     readonly: true
                                 }" :value="type" plain-text="left"></schema-view>
                             </li>
@@ -154,12 +154,12 @@
                     </template>
 
                     <template v-if="currRow?.usedByApp?.length">
-                        <h3>{{ _L["schema.app.apptarget.app"] }}</h3>
+                        <h3>{{ _L["system.schema.app.apptarget.app"] }}</h3>
                         <hr/>
                         <ul>
                             <li v-for="app in currRow?.usedByApp" :key="app">
                                 <schema-view :config="{
-                                    type: 'schema.app.srcapp',
+                                    type: 'system.schema.app.srcapp',
                                     readonly: true
                                 }" :value="app" plain-text="left"></schema-view>
                             </li>
@@ -192,7 +192,7 @@ const schemaTypeOrder = {
     [SchemaType.Enum]: 3,
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
-    [SchemaType.Function]: 6,
+    [SchemaType.Func]: 6,
     [SchemaType.Json]: 7
 }
 
@@ -282,7 +282,7 @@ const handleNew = async () => {
     localStorage["schema_new_namespace"] = state.namespace
 
     namespaceNode.value = new StructNode({
-        type: "schema.namespacedefine",
+        type: "system.schema.nodeschema",
     }, {})
     showNamespaceEditor.value = true
 
@@ -298,7 +298,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     const schema = await getSchema(row.name)
 
     namespaceNode.value = new StructNode({
-        type: "schema.namespacedefine",
+        type: "system.schema.nodeschema",
         readonly
     }, jsonClone(schema))
     showNamespaceEditor.value = true
@@ -407,7 +407,7 @@ const copySchema = async () => {
     localStorage["schema_new_namespace"] = state.namespace
 
     namespaceNode.value = new StructNode({
-        type: "schema.namespacedefine",
+        type: "system.schema.nodeschema",
     }, jsonClone(schema))
 
     namespaceNode.value.getField("name")!.data = name
@@ -437,7 +437,7 @@ const handleSelection = (val: any[]) => {
 
 const download = () => {
     if (!selections.length) return
-    const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
+    const name = selections.length > 1 ? "system.schema.json" : `${selections[0]}.json` 
     const content = JSON.stringify(selections.map(getCachedSchema).map(s => schemaToJson(s!)).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
 
     // download

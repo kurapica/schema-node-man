@@ -38,7 +38,7 @@ const handleTabsEdit = (target: any, action: string) => {
     else if (action === "remove") {
         const delRow = arrayNode.elements[target]
         if (!delRow) return
-        ElMessageBox.confirm(_L.value["schema.structdefine.confirmrldel"], _L.value["schema.structdefine.relations"], {
+        ElMessageBox.confirm(_L.value["system.schema.structschema.confirmrldel"], _L.value["system.schema.structschema.relations"], {
             confirmButtonText: _L.value["YES"],
             cancelButtonText: _L.value["NO"]
         }).then(() => {
@@ -81,7 +81,7 @@ onMounted(() => {
                 view.handler = ele.subscribe(() => {
                     const { field, type } = ele.rawData
                     view.field = field
-                    view.type = type ? _L.value["schema.relationtype."+(type as string).toLowerCase()] : ""
+                    view.type = type ? _L.value["system.schema.relationtype."+(type as string).toLowerCase()] : ""
                 }, true)
                 elementDisplay[i] = view
             }

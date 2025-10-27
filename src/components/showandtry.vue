@@ -59,9 +59,9 @@ watch(() => props.type, async () => {
     const schema = await getSchema(props.type)
     if (schema)
     {
-        isnamespace.value = schema.type === SchemaType.Namespace || schema.type === SchemaType.Function
+        isnamespace.value = schema.type === SchemaType.Namespace || schema.type === SchemaType.Func
         schemaNode.value = new StructNode({
-            type: "schema.namespacedefine",
+            type: "system.schema.nodeschema",
             readonly: true
         }, jsonClone(toRaw(schema)))
     }

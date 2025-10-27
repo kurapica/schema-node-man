@@ -7,10 +7,10 @@
         v-bind="$attrs">
         <template #operator="{ row, index }">
             <template v-if="!readonly">
-                <a href="javascript:void(0)" v-if="!isflags && index" @click="arrayNode.swapRow(index, index - 1)">{{ _L["schema.enumdefine.moveup"] }}</a>
+                <a href="javascript:void(0)" v-if="!isflags && index" @click="arrayNode.swapRow(index, index - 1)">{{ _L["system.schema.enumschema.moveup"] }}</a>
                 <a href="javascript:void(0)" v-if="customEnum || !(row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="arrayNode.delRows(index)">{{ _L["DEL"] }}</a>
             </template>
-            <a href="javascript:void(0)" v-if="cascade.length > 1 && (row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[1] || "schema.enumdefine.downlevel") }}</a>
+            <a href="javascript:void(0)" v-if="cascade.length > 1 && (row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[1] || "system.schema.enumschema.downlevel") }}</a>
         </template>
     </table-view>
 
@@ -29,10 +29,10 @@
                     operWidth="200">
                     <template #operator="{ row, index }">
                         <template v-if="!readonly">
-                            <a href="javascript:void(0)" v-if="index" @click="swapSubListRow(index, index - 1)">{{ _L["schema.enumdefine.moveup"] }}</a>
+                            <a href="javascript:void(0)" v-if="index" @click="swapSubListRow(index, index - 1)">{{ _L["system.schema.enumschema.moveup"] }}</a>
                             <a href="javascript:void(0)" v-if="customEnum || !(row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="delSubListRow(index)">{{ _L["DEL"] }}</a>
                         </template>
-                        <a href="javascript:void(0)" v-if="(cascade.length > subListStack.length + 1) && (row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[subListStack.length + 1] || "schema.enumdefine.downlevel") }}</a>
+                        <a href="javascript:void(0)" v-if="(cascade.length > subListStack.length + 1) && (row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[subListStack.length + 1] || "system.schema.enumschema.downlevel") }}</a>
                     </template>
                 </table-view>
             </el-main>

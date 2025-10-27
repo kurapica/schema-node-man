@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayNode, getSchema, NS_SYSTEM_STRING, StructNode, RelationType, SchemaType, NS_SYSTEM_ENTRIES, NS_SYSTEM_ARRAY } from 'schema-node'
+import { ArrayNode, getSchema, NS_SYSTEM_STRING, StructNode, RelationType, NS_SYSTEM_ARRAY } from 'schema-node'
 import { onMounted, onUnmounted, toRaw } from 'vue'
 import { SchemaNodeFormType, tableView } from 'schema-node-vueview'
 

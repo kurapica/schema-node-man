@@ -6,7 +6,7 @@
         <schema-view
             v-model="prefix"
             :config="{
-                type:'schema.app.srcapp',
+                type:'system.schema.app.srcapp',
                 display: _L['frontend.view.upapp']
             }"
         ></schema-view>

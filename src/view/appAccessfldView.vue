@@ -33,7 +33,7 @@ interface ICascaderOptionInfo {
 
 const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()
 const scalarNode = toRaw(props.node)
-const ispush = scalarNode.config.type === "schema.app.pushfld"
+const ispush = scalarNode.config.type === "system.schema.app.pushfld"
 
 // display state
 const state = reactive<{
@@ -128,7 +128,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
                 option.children ||= []
                 option.children.unshift ({
                     value: `${prefix}${f.name}.${ARRAY_ELEMENT}`,
-                    label: _L["schema.reltarfield.ele"],
+                    label: _L["system.schema.reltarfield.ele"],
                     leaf: true,
                     children: null
                 })
@@ -173,7 +173,7 @@ onMounted(async () => {
                 }
                 if (paths[i] === ARRAY_ELEMENT)
                 {
-                    paths[i] = _L["schema.reltarfield.ele"]
+                    paths[i] = _L["system.schema.reltarfield.ele"]
                     break
                 }
                 if (schema?.type !== SchemaType.Struct) break

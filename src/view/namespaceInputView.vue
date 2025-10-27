@@ -6,7 +6,7 @@
         <schema-view
             v-model="prefix"
             :config="{
-                type:'schema.namespace',
+                type:'system.schema.namespace',
                 display: _L['frontend.view.upnamespace']
             }"
         ></schema-view>

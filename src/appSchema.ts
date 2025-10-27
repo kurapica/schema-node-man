@@ -1,88 +1,88 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, NS_SYSTEM_GUID } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema } from "schema-node"
 
 // Schema for definition
 registerSchema([
     {
-        name: "schema.app",
+        name: "system.schema.app",
         type: SchemaType.Namespace,
-        display: _LS("schema.app")
+        display: _LS("system.schema.app")
     },
     {
-        name: "schema.app.srcapp",
+        name: "system.schema.app.srcapp",
         type: SchemaType.Scalar,
-        display: _LS("schema.app.srcapp"),
+        display: _LS("system.schema.app.srcapp"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
     },
     {
-        name: "schema.app.srcfld",
+        name: "system.schema.app.srcfld",
         type: SchemaType.Scalar,
-        display: _LS("schema.app.srcfld"),
+        display: _LS("system.schema.app.srcfld"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
     },
     {
-        name: "schema.app.accessfld",
+        name: "system.schema.app.accessfld",
         type: SchemaType.Scalar,
-        display: _LS("schema.app.accessfld"),
+        display: _LS("system.schema.app.accessfld"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
     },
     {
-        name: "schema.app.pushfld",
+        name: "system.schema.app.pushfld",
         type: SchemaType.Scalar,
-        display: _LS("schema.app.pushfld"),
+        display: _LS("system.schema.app.pushfld"),
         scalar: {
-            base: "schema.app.accessfld"
+            base: "system.schema.app.accessfld"
         }
     },
     {
-        name: "schema.app.appinput",
+        name: "system.schema.app.appinput",
         type: SchemaType.Scalar,
-        display: _LS("schema.app.appinput"),
+        display: _LS("system.schema.app.appinput"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
     },
     {
-        name: "schema.app.pushflds",
+        name: "system.schema.app.pushflds",
         type: SchemaType.Array,
-        display: _LS("schema.app.pushflds"),
+        display: _LS("system.schema.app.pushflds"),
         array: {
-            element: "schema.app.pushfld"
+            element: "system.schema.app.pushfld"
         }
     },
     {
-        name: "schema.app.fieldvalarg",
+        name: "system.schema.app.fieldvalarg",
         type: SchemaType.Struct,
-        display: _LS("schema.app.fieldvalarg"),
+        display: _LS("system.schema.app.fieldvalarg"),
         struct: {
             fields: [
                 {
                     name: "label",
                     type: NS_SYSTEM_STRING,
                     displayOnly: true,
-                    display: _LS("schema.funccallarg.display"),
+                    display: _LS("system.schema.funccallarg.display"),
                 },
                 {
                     name: "type",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                     invisible: false,
                     displayOnly: true,
-                    display: _LS("schema.structfldfuncarg.type"),
+                    display: _LS("system.schema.structfldfuncarg.type"),
                 },
                 {
                     name: "name",
-                    type: "schema.app.accessfld",
-                    display: _LS("schema.app.fieldvalarg.name")
+                    type: "system.schema.app.accessfld",
+                    display: _LS("system.schema.app.fieldvalarg.name")
                 },
                 {
                     name: "value",
-                    type: "schema.anyvalue",
-                    display: _LS("schema.app.fieldvalarg.value")
+                    type: "system.schema.anyvalue",
+                    display: _LS("system.schema.app.fieldvalarg.value")
                 },
             ],
             relations: [
@@ -99,7 +99,7 @@ registerSchema([
                 {
                     field: "name",
                     type: RelationType.Disable,
-                    func: "schema.isvaluenotnull",
+                    func: "system.schema.isvaluenotnull",
                     args: [
                         {
                             name: "value"
@@ -109,7 +109,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Type,
-                    func: "schema.getexpvaluetype",
+                    func: "system.schema.getexpvaluetype",
                     args: [
                         {
                             name: "type"
@@ -119,7 +119,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Disable,
-                    func: "schema.hideexpvalue",
+                    func: "system.schema.hideexpvalue",
                     args: [
                         {
                             name: "type"
@@ -133,19 +133,19 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.fieldvalargs",
+        name: "system.schema.app.fieldvalargs",
         type: SchemaType.Array,
-        display: _LS("schema.app.fieldvalargs"),
+        display: _LS("system.schema.app.fieldvalargs"),
         array: {
-            element: "schema.app.fieldvalarg"
+            element: "system.schema.app.fieldvalarg"
         }
     },
     {
-        name: "schema.app.getfieldtype",
-        type: SchemaType.Function,
-        display: _LS("schema.getfieldtype"),
+        name: "system.schema.app.getfieldtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getfieldtype"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "field",
@@ -184,54 +184,54 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.fieldrelation",
+        name: "system.schema.app.fieldrelation",
         type: SchemaType.Struct,
-        display: _LS("schema.app.fieldrelation"),
+        display: _LS("system.schema.app.fieldrelation"),
         struct: {
             fields: [
                 {
                     name: "field",
                     require: true,
-                    type: "schema.app.accessfld",
-                    display: _LS("schema.app.fieldrelation.field")
+                    type: "system.schema.app.accessfld",
+                    display: _LS("system.schema.app.fieldrelation.field")
                 },
                 {
                     name: "fieldType",
                     displayOnly: true,
                     invisible: true,
-                    type : "schema.valuetype",
-                    display: _LS("schema.structfldrelationinfo.fieldtype"),
+                    type : "system.schema.valuetype",
+                    display: _LS("system.schema.structfieldrelation.fieldtype"),
                 },
                 {
                     name: "return",
                     displayOnly: true,
                     invisible: true,
-                    type: "schema.valuetype",
-                    display: _LS("schema.structfldrelationinfo.return"),
+                    type: "system.schema.valuetype",
+                    display: _LS("system.schema.structfieldrelation.return"),
                 },
                 {
                     name: "type",
                     require: true,
-                    type: "schema.relationtype",
-                    display: _LS("schema.app.fieldrelation.type"),
+                    type: "system.schema.relationtype",
+                    display: _LS("system.schema.app.fieldrelation.type"),
                 },
                 {
                     name: "func",
                     require: true,
-                    type: "schema.functype",
-                    display: _LS("schema.app.fieldrelation.func"),
+                    type: "system.schema.functype",
+                    display: _LS("system.schema.app.fieldrelation.func"),
                 },
                 {
                     name: "args",
-                    type: "schema.app.fieldvalargs",
-                    display: _LS("schema.app.fieldrelation.args"),
+                    type: "system.schema.app.fieldvalargs",
+                    display: _LS("system.schema.app.fieldrelation.args"),
                 },
             ],
             relations: [
                 {
                     field: "fieldType",
                     type: RelationType.Default,
-                    func: "schema.app.getfieldtype",
+                    func: "system.schema.app.getfieldtype",
                     args: [
                         {
                             name: "field"
@@ -241,7 +241,7 @@ registerSchema([
                 {
                     field: "type",
                     type: RelationType.WhiteList,
-                    func: "schema.getrelationwhitelist",
+                    func: "system.schema.getrelationwhitelist",
                     args: [
                         {
                             name: "fieldType"
@@ -251,7 +251,7 @@ registerSchema([
                 {
                     field: "return",
                     type: RelationType.Default,
-                    func: "schema.getrelationfuncreturn",
+                    func: "system.schema.getrelationfuncreturn",
                     args: [
                         {
                             name: "fieldType"
@@ -275,18 +275,18 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.fieldrelations",
+        name: "system.schema.app.fieldrelations",
         type: SchemaType.Array,
-        display: _LS("schema.app.fieldrelations"),
+        display: _LS("system.schema.app.fieldrelations"),
         array: {
-            element: "schema.app.fieldrelation",
+            element: "system.schema.app.fieldrelation",
             primary: [ "field", "type" ]
         }
     },
     {
-        name: "schema.app.getsourceappblacklist",
-        type: SchemaType.Function,
-        display: _LS("schema.app.getsourceappblacklist"),
+        name: "system.schema.app.getsourceappblacklist",
+        type: SchemaType.Func,
+        display: _LS("system.schema.app.getsourceappblacklist"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [],
@@ -298,11 +298,11 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.getsourceappfldinfo",
-        type: SchemaType.Function,
-        display: _LS("schema.app.getsourceappfldinfo"),
+        name: "system.schema.app.getsourceappfldinfo",
+        type: SchemaType.Func,
+        display: _LS("system.schema.app.getsourceappfldinfo"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "sourceApp",
@@ -348,9 +348,9 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.iscombinedisable",
-        type: SchemaType.Function,
-        display: _LS("schema.app.iscombinedisable"),
+        name: "system.schema.app.iscombinedisable",
+        type: SchemaType.Func,
+        display: _LS("system.schema.app.iscombinedisable"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -375,9 +375,9 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.iscombinesdisable",
-        type: SchemaType.Function,
-        display: _LS("schema.app.iscombinesdisable"),
+        name: "system.schema.app.iscombinesdisable",
+        type: SchemaType.Func,
+        display: _LS("system.schema.app.iscombinesdisable"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -403,9 +403,9 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.istrackpushdisable",
-        type: SchemaType.Function,
-        display: _LS("schema.app.istrackpushdisable"),
+        name: "system.schema.app.istrackpushdisable",
+        type: SchemaType.Func,
+        display: _LS("system.schema.app.istrackpushdisable"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
@@ -428,97 +428,97 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.field",
+        name: "system.schema.app.field",
         type: SchemaType.Struct,
-        display: _LS("schema.app.field"),
+        display: _LS("system.schema.app.field"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
-                    type: "schema.varname",
-                    display: _LS("schema.app.field.name"),
+                    type: "system.schema.varname",
+                    display: _LS("system.schema.app.field.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "type",
                     require: true,
-                    type: "schema.valuetype",
-                    display: _LS("schema.app.field.type"),
+                    type: "system.schema.valuetype",
+                    display: _LS("system.schema.app.field.type"),
                 },
                 {
                     name: "display",
                     type: "system.localestring",
-                    display: _LS("schema.app.field.display"),
+                    display: _LS("system.schema.app.field.display"),
                     upLimit: 64,
                 },
                 {
                     name: "desc",
                     type: "system.localestring",
-                    display: _LS("schema.app.field.desc"),
+                    display: _LS("system.schema.app.field.desc"),
                     upLimit: 255,
                 },
                 {
                     name: "sourceApp",
-                    type: "schema.app.srcapp",
-                    display: _LS("schema.app.field.sourceapp"),
+                    type: "system.schema.app.srcapp",
+                    display: _LS("system.schema.app.field.sourceapp"),
                 },
                 {
                     name: "sourceField",
-                    type: "schema.app.srcfld",
-                    display: _LS("schema.app.field.sourcefld"),
+                    type: "system.schema.app.srcfld",
+                    display: _LS("system.schema.app.field.sourcefld"),
                 },
                 {
                     name: "trackPush",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.app.field.trackpush"),
+                    display: _LS("system.schema.app.field.trackpush"),
                 },
                 {
                     name: "incrUpdate",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.app.field.incrupdate"),
+                    display: _LS("system.schema.app.field.incrupdate"),
                 },
                 {
                     name: "frontend",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.app.field.frontend"),
+                    display: _LS("system.schema.app.field.frontend"),
                 },
                 {
                     name: "disable",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.app.field.disable"),
+                    display: _LS("system.schema.app.field.disable"),
                 },
                 {
                     name: "readonly",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.app.field.readonly"),
+                    display: _LS("system.schema.app.field.readonly"),
                 },
                 {
                     name: "func",
-                    type: "schema.pushfunctype",
-                    display: _LS("schema.app.field.func"),
+                    type: "system.schema.pushfunctype",
+                    display: _LS("system.schema.app.field.func"),
                 },
                 {
                     name: "args",
-                    type: "schema.app.pushflds",
-                    display: _LS("schema.app.field.args"),
+                    type: "system.schema.app.pushflds",
+                    display: _LS("system.schema.app.field.args"),
                 },
                 {
                     name: "combine",
-                    type: "schema.datacombinetype",
-                    display: _LS("schema.app.field.combine"),
+                    type: "system.schema.datacombinetype",
+                    display: _LS("system.schema.app.field.combine"),
                 },
                 {
                     name: "combines",
-                    type: "schema.datacombines",
-                    display: _LS("schema.arraydefine.combine"),
+                    type: "system.schema.datacombines",
+                    display: _LS("system.schema.arrayschema.combine"),
                 },
             ],
             relations: [
                 {
                     field: "name",
                     type: RelationType.Default,
-                    func: "schema.app.getsourceappfldinfo",
+                    func: "system.schema.app.getsourceappfldinfo",
                     args: [
                         {
                             name: "sourceApp"
@@ -537,7 +537,7 @@ registerSchema([
                 {
                     field: "display",
                     type: RelationType.Default,
-                    func: "schema.app.getsourceappfldinfo",
+                    func: "system.schema.app.getsourceappfldinfo",
                     args: [
                         {
                             name: "sourceApp"
@@ -556,7 +556,7 @@ registerSchema([
                 {
                     field: "desc",
                     type: RelationType.Default,
-                    func: "schema.app.getsourceappfldinfo",
+                    func: "system.schema.app.getsourceappfldinfo",
                     args: [
                         {
                             name: "sourceApp"
@@ -572,7 +572,7 @@ registerSchema([
                 {
                     field: "type",
                     type: RelationType.Default,
-                    func: "schema.app.getsourceappfldinfo",
+                    func: "system.schema.app.getsourceappfldinfo",
                     args: [
                         {
                             name: "sourceApp"
@@ -588,7 +588,7 @@ registerSchema([
                 {
                     field: "sourceApp",
                     type: RelationType.BlackList,
-                    func: "schema.app.getsourceappblacklist",
+                    func: "system.schema.app.getsourceappblacklist",
                     args: []
                 },
                 {
@@ -644,7 +644,7 @@ registerSchema([
                 {
                     field: "combine",
                     type: RelationType.Invisible,
-                    func: "schema.app.iscombinedisable",
+                    func: "system.schema.app.iscombinedisable",
                     args: [
                         {
                             name: "type"
@@ -657,7 +657,7 @@ registerSchema([
                 {
                     field: "combines",
                     type: RelationType.Invisible,
-                    func: "schema.app.iscombinesdisable",
+                    func: "system.schema.app.iscombinesdisable",
                     args: [
                         {
                             name: "type"
@@ -670,7 +670,7 @@ registerSchema([
                 {
                     field: "combines.field",
                     type: RelationType.WhiteList,
-                    func: "schema.getstructnumbervaluefields",
+                    func: "system.schema.getstructnumbervaluefields",
                     args: [
                         {
                             name: "type"
@@ -680,7 +680,7 @@ registerSchema([
                 {
                     field: "trackPush",
                     type: RelationType.Invisible,
-                    func: "schema.app.istrackpushdisable",
+                    func: "system.schema.app.istrackpushdisable",
                     args: [
                         {
                             name: "sourceField"
@@ -694,15 +694,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.nofields",
-        type: SchemaType.Function,
-        display: _LS("schema.app.nofields"),
+        name: "system.schema.app.nofields",
+        type: SchemaType.Func,
+        display: _LS("system.schema.app.nofields"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "app",
-                    type: "schema.app.srcapp",
+                    type: "system.schema.app.srcapp",
                     nullable: true,
                 }
             ],
@@ -715,41 +715,41 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.app",
+        name: "system.schema.app.app",
         type: SchemaType.Struct,
-        display: _LS("schema.app.app"),
+        display: _LS("system.schema.app.app"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
-                    type: "schema.app.appinput",
-                    display: _LS("schema.app.app.name"),
+                    type: "system.schema.app.appinput",
+                    display: _LS("system.schema.app.app.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "display",
                     type: "system.localestring",
-                    display: _LS("schema.app.app.display"),
+                    display: _LS("system.schema.app.app.display"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "desc",
                     type: "system.localestring",
-                    display: _LS("schema.app.app.desc"),
+                    display: _LS("system.schema.app.app.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
                 {
                     name: "relations",
-                    type: "schema.app.fieldrelations",
-                    display: _LS("schema.app.app.relations"),
+                    type: "system.schema.app.fieldrelations",
+                    display: _LS("system.schema.app.app.relations"),
                 },
             ],
             relations: [
                 {
                     field: "relations",
                     type: RelationType.Invisible,
-                    func: "schema.app.nofields",
+                    func: "system.schema.app.nofields",
                     args: [
                         {
                             name: "name"
@@ -762,15 +762,15 @@ registerSchema([
 
     //#region helper
     {
-        name: "schema.app.getapptargets",
-        type: SchemaType.Function,
-        display: _LS("schema.app.getapptargets"),
+        name: "system.schema.app.getapptargets",
+        type: SchemaType.Func,
+        display: _LS("system.schema.app.getapptargets"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
                 {
                     name: "app",
-                    type: "schema.app.srcapp",
+                    type: "system.schema.app.srcapp",
                     nullable: true,
                 }
             ],
@@ -786,9 +786,9 @@ registerSchema([
         }
     },
     {
-        name: "schema.app.apptarget",
+        name: "system.schema.app.apptarget",
         type: SchemaType.Struct,
-        display: _LS("schema.app.apptarget"),
+        display: _LS("system.schema.app.apptarget"),
         struct: {
             fields: [
                 {
@@ -798,15 +798,15 @@ registerSchema([
                 },
                 {
                     name: "app",
-                    type: "schema.app.srcapp",
+                    type: "system.schema.app.srcapp",
                     require: true,
-                    display: _LS("schema.app.apptarget.app"),
+                    display: _LS("system.schema.app.apptarget.app"),
                 },
                 {
                     name: "target",
                     type: NS_SYSTEM_STRING,
                     require: true,
-                    display: _LS("schema.app.apptarget.target"),
+                    display: _LS("system.schema.app.apptarget.target"),
                     asSuggest: true,
                     upLimit: 64
                 } as IStructScalarFieldConfig,
@@ -825,7 +825,7 @@ registerSchema([
                 {
                     field: "target",
                     type: RelationType.WhiteList,
-                    func: "schema.app.getapptargets",
+                    func: "system.schema.app.getapptargets",
                     args: [
                         {
                             name: "app"
@@ -1045,7 +1045,7 @@ function gatherSchemas(types: INodeSchema[], name?: string)
             r.array?.relations?.forEach((r: IStructFieldRelation) => gatherSchemas(types, r.func))
             break
         }
-        case SchemaType.Function:
+        case SchemaType.Func:
         {
             r.func = { ...deepClone(schema.func!, true), func: undefined }
             if (!r.func!.exps) r.func!.exps = []
@@ -1088,12 +1088,12 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
-regSchemaTypeView("schema.app.srcapp", sourceappView)
-regSchemaTypeView("schema.app.appinput", appInputView)
-regSchemaTypeView("schema.app.srcfld", appsrcfldView)
-regSchemaTypeView("schema.app.accessfld", appaccessfldView)
-regSchemaTypeView("schema.app.pushfld", appaccessfldView)
-regSchemaTypeView("schema.app.pushflds", appPushfldsView)
-regSchemaTypeView("schema.app.fieldrelations", structfldrelationinfosView)
-regSchemaTypeView("schema.app.fieldvalargs", structfldfuncargsView)
+regSchemaTypeView("system.schema.app.srcapp", sourceappView)
+regSchemaTypeView("system.schema.app.appinput", appInputView)
+regSchemaTypeView("system.schema.app.srcfld", appsrcfldView)
+regSchemaTypeView("system.schema.app.accessfld", appaccessfldView)
+regSchemaTypeView("system.schema.app.pushfld", appaccessfldView)
+regSchemaTypeView("system.schema.app.pushflds", appPushfldsView)
+regSchemaTypeView("system.schema.app.fieldrelations", structfldrelationinfosView)
+regSchemaTypeView("system.schema.app.fieldvalargs", structfldfuncargsView)
 //#endregion

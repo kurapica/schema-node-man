@@ -3,8 +3,8 @@
         <el-header style="height: fit-content; width: 100%;">
             <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
                 <schema-view v-model="state.app" in-form :config="{
-                    type: 'schema.app.srcapp',
-                    display: _LS('schema.app.srcapp')
+                    type: 'system.schema.app.srcapp',
+                    display: _LS('system.schema.app.srcapp')
                 }"></schema-view>
                 <schema-view v-model="state.keyword" in-form :config="{
                     type: 'system.string',
@@ -133,7 +133,7 @@
                         <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{
-                                    type: 'schema.valuetype',
+                                    type: 'system.schema.valuetype',
                                     readonly: true
                                 }" plain-text="left"></schema-view>
                             </template>
@@ -309,7 +309,7 @@ const handleNew = async () => {
     localStorage["schema_new_app"] = state.app
 
     appNode.value = new StructNode({
-        type: "schema.app.app",
+        type: "system.schema.app.app",
     }, {})
     showAppEditor.value = true
 
@@ -323,7 +323,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     localStorage["schema_curr_app"] = row.name
     const schema = await getAppSchema(row.name)
     appNode.value = new StructNode({
-        type: "schema.app.app",
+        type: "system.schema.app.app",
         readonly
     }, jsonClone(schema))
     showAppEditor.value = true
@@ -433,7 +433,7 @@ let appFieldWatchHandler: Function | null = null
 // create
 const handleFieldNew = async () => {
     appFieldNode.value = new StructNode({
-        type: "schema.app.field",
+        type: "system.schema.app.field",
     }, {})
     showAppFieldEditor.value = true
 
@@ -445,7 +445,7 @@ const handleFieldNew = async () => {
 // update
 const handleFieldEdit = async (row: any, readonly?: boolean) => {
     appFieldNode.value = new StructNode({
-        type: "schema.app.field",
+        type: "system.schema.app.field",
         readonly
     }, jsonClone(toRaw(row)))
     showAppFieldEditor.value = true

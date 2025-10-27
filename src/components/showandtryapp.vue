@@ -32,7 +32,7 @@
                         <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{
-                                    type: 'schema.valuetype',
+                                    type: 'system.schema.valuetype',
                                     readonly: true
                                 }" plain-text="left"></schema-view>
                             </template>
@@ -74,7 +74,7 @@ watch(() => props.app, () => {
     if (schema)
     {
         schemaNode.value = new StructNode({
-            type: "schema.app.app",
+            type: "system.schema.app.app",
             readonly: true
         }, jsonClone(toRaw(schema)))
         fields.value = schema.fields ? [...schema.fields] : []
