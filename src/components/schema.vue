@@ -154,12 +154,12 @@
                     </template>
 
                     <template v-if="currRow?.usedByApp?.length">
-                        <h3>{{ _L["system.schema.app.apptarget.app"] }}</h3>
+                        <h3>{{ _L["system.schema.apptarget.app"] }}</h3>
                         <hr/>
                         <ul>
                             <li v-for="app in currRow?.usedByApp" :key="app">
                                 <schema-view :config="{
-                                    type: 'system.schema.app.srcapp',
+                                    type: 'system.schema.appsrc',
                                     readonly: true
                                 }" :value="app" plain-text="left"></schema-view>
                             </li>

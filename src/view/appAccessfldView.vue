@@ -33,7 +33,7 @@ interface ICascaderOptionInfo {
 
 const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()
 const scalarNode = toRaw(props.node)
-const ispush = scalarNode.config.type === "system.schema.app.pushfld"
+const ispush = scalarNode.config.type === "system.schema.apppushfld"
 
 // display state
 const state = reactive<{

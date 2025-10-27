@@ -1,7 +1,7 @@
 <template>
     <el-table :data="rows" :border="true" header-align="left" :header-cell-style="{ background: '#eee' }">
-        <el-table-column align="left" prop="label" :label="_L['system.schema.app.fieldvalarg']" min-width="120" />
-        <el-table-column align="left" :label="_L['system.schema.app.srcfld']" min-width="120">
+        <el-table-column align="left" prop="label" :label="_L['system.schema.appfieldvalarg']" min-width="120" />
+        <el-table-column align="left" :label="_L['system.schema.appsrcfld']" min-width="120">
             <template #default="scope">
                 <schema-view :node="scope.row.node" :plain-text="plainText"></schema-view>
             </template>

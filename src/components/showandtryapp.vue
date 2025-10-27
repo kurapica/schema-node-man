@@ -74,7 +74,7 @@ watch(() => props.app, () => {
     if (schema)
     {
         schemaNode.value = new StructNode({
-            type: "system.schema.app.app",
+            type: "system.schema.appschema",
             readonly: true
         }, jsonClone(toRaw(schema)))
         fields.value = schema.fields ? [...schema.fields] : []

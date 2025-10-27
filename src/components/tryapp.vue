@@ -225,13 +225,13 @@ onMounted(async() => {
     if (!enableAppData) return
 
     appTargetNode.value = (await getSchemaNode({
-        type: "system.schema.app.apptarget"
+        type: "system.schema.apptarget"
     }, { allowApps: [props.app],  app: props.app, target: ""})) as StructNode
 
     const sourceApps = appNode.value?.sourceApps || []
     if (sourceApps.length > 0)
         sourceAppNode.value = (await getSchemaNode({
-            type: "system.schema.app.apptarget"
+            type: "system.schema.apptarget"
         }, { allowApps: sourceApps, app: sourceApps[0], target: "" })) as StructNode
 })
 
