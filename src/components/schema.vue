@@ -3,33 +3,33 @@
         <el-header style="height: fit-content; width: 100%;">
             <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
                 <schema-view v-model="state.namespace" in-form :config="{
-                    type: 'schema.namespace',
-                    display: _LS('schema.namespace')
+                    type: 'system.schema.namespace',
+                    display: _LS('system.schema.namespace')
                 }"></schema-view>
                 <schema-view v-model="state.type" in-form :config="{
-                    type: 'schema.schematype',
-                    display: _LS('schema.schematype')
+                    type: 'system.schema.schematype',
+                    display: _LS('system.schema.schematype')
                 }"></schema-view>
                 <schema-view v-model="state.keyword" in-form :config="{
                     type: 'system.string',
-                    display: _LS('schema.designer.keyword')
+                    display: _LS('frontend.view.keyword')
                 }"></schema-view>
-                <el-button type="info" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
-                <el-button type="primary" @click="handleNew">{{ _L["schema.designer.new"] }}</el-button>
+                <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
+                <el-button type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
                 <!-- download -->
                 <template v-if="!downloading">
-                    <el-button type="success" @click="startDownload">{{ _L["schema.designer.download"] }}</el-button>
+                    <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
                     <el-upload
                         style="padding-left:1rem;"
                         :before-upload="uploadSchema"
                         :limit="1"
                         :show-file-list="false">
-                        <el-button type="success">{{ _L["schema.designer.upload"] }}</el-button>
+                        <el-button type="success">{{ _L["frontend.view.upload"] }}</el-button>
                     </el-upload>
                 </template>
                 <template v-else>
-                    <el-button type="success" @click="download">{{ _L["schema.designer.confirm"] }}</el-button>
-                    <el-button type="info" @click="downloading = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                    <el-button type="success" @click="download">{{ _L["frontend.view.confirm"] }}</el-button>
+                    <el-button type="info" @click="downloading = false">{{ _L["frontend.view.cancel"] }}</el-button>
                 </template>
             </el-form>
         </el-header>
@@ -39,38 +39,38 @@
              :header-cell-style="{ background: '#eee' }"
              @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
-                <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
+                <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                     <template #default="scope">
-                        {{ _L(scope.row.display) }}
+                        {{ _L(scope.row.display.key ? scope.row.display : scope.row.name) }}
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="type" :label="_L['schema.designer.type']" width="150">
+                <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
                     <template #default="scope">
-                        {{ _L['schema.schematype.' + scope.row.type] }}
+                        {{ _L['system.schema.schematype.' + scope.row.type] }}
                     </template>
                 </el-table-column>
-                <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="280">
+                <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="280">
                     <template #header>
                         <a href="javascript:void(0)" v-if="state.namespace" @click="goback"
                             style="text-decoration: underline; color: lightseagreen;">
-                            {{ _L["schema.designer.return"] }}
+                            {{ _L["frontend.view.return"] }}
                         </a>
-                        <span v-else>{{ _L["schema.designer.oper"] }}</span>
+                        <span v-else>{{ _L["frontend.view.oper"] }}</span>
                     </template>
                     <template #default="scope">
                         <el-button v-if="scope.row.type === SchemaType.Namespace"
-                            :type="(scope.row.hasSchemas || scope.row.schemas?.length) ? 'success' : 'info'" @click="choose(scope.row)">{{ _L["schema.designer.down"] }}
+                            :type="(scope.row.hasSchemas || scope.row.schemas?.length) ? 'success' : 'info'" @click="choose(scope.row)">{{ _L["frontend.view.down"] }}
                         </el-button>
                         <el-button v-else type="success" @click="handleEdit(scope.row, true)">
-                            {{ _L["schema.designer.view"] }}
+                            {{ _L["frontend.view.view"] }}
                         </el-button>
                         <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
-                            {{ _L["schema.designer.edit"] }}
+                            {{ _L["frontend.view.edit"] }}
                         </el-button>
                         <el-popconfirm
                             v-if="isSchemaDeletable(scope.row.name)" 
-                            :title="_L['schema.designer.confirmdelete']"                            
+                            :title="_L['frontend.view.confirmdelete']"                            
                             :confirm-button-text="_L['YES']"
                             :cancel-button-text="_L['NO']"
                             :icon="Delete"
@@ -78,7 +78,7 @@
                             >
                             <template #reference>
                                 <el-button type="danger">
-                                    {{ _L["schema.designer.delete"] }}
+                                    {{ _L["frontend.view.delete"] }}
                                 </el-button>
                             </template>
                         </el-popconfirm>
@@ -87,7 +87,7 @@
             </el-table>
         </el-main>
         <el-footer>
-            <el-button type="danger" @click="clearAllStorageSchemas" style="position: absolute;right: 3rem;">{{ _L["schema.designer.clearcustomschemas"] }}</el-button>
+            <el-button type="danger" @click="clearAllStorageSchemas" style="position: absolute;right: 3rem;">{{ _L["frontend.view.clearcustomschemas"] }}</el-button>
         </el-footer>
 
         <!-- namespace editor -->
@@ -109,43 +109,43 @@
                 <el-footer>
                     <br/>
                     <template v-if="namespaceNode?.readonly">
-                        <el-button v-if="tryitTypes.includes(namespaceNode.rawData.type)" type="primary" @click="tryit">{{ _L["schema.designer.tryit"] }}</el-button>
-                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.close"] }}</el-button>
-                        <el-button v-if="currRow?.usedBy?.length || currRow?.usedByApp?.length" @click="showViewRef = true" style="float:right" type="info" >{{ _L["schema.designer.viewref"] }}</el-button>
-                        <el-button type="warning" @click="copySchema">{{ _L["schema.designer.copyschema"] }}</el-button>
+                        <el-button v-if="tryitTypes.includes(namespaceNode.rawData.type)" type="primary" @click="tryit">{{ _L["frontend.view.tryit"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button>
+                        <el-button v-if="currRow?.usedBy?.length || currRow?.usedByApp?.length" @click="showViewRef = true" style="float:right" type="info" >{{ _L["frontend.view.viewref"] }}</el-button>
+                        <el-button type="warning" @click="copySchema">{{ _L["frontend.view.copyschema"] }}</el-button>
                     </template>
                     <template v-else>
-                        <el-button type="primary" @click="confirmNameSpace">{{ _L["schema.designer.save"] }}</el-button>
-                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                        <el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
                     </template>
                 </el-footer>
             </el-container>
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <tryit-view :type="tryittype"></tryit-view>
                 </el-main>
                 <el-footer>
                     <br/>
-                    <el-button @click="showtryit = false">{{ _L["schema.designer.close"] }}</el-button>
+                    <el-button @click="showtryit = false">{{ _L["frontend.view.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
 
         <!-- View ref -->
-        <el-drawer v-model="showViewRef" :title="_L['schema.designer.viewref']" direction="rtl" size="40%" append-to-body>
+        <el-drawer v-model="showViewRef" :title="_L['frontend.view.viewref']" direction="rtl" size="40%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <template v-if="currRow?.usedBy?.length">
-                        <h3>{{ _L["schema.schematype"] }}</h3>
+                        <h3>{{ _L["system.schema.schematype"] }}</h3>
                         <hr/>
                         <ul>
                             <li v-for="type in currRow?.usedBy" :key="type">
                                 <schema-view :config="{
-                                    type: 'schema.anytype',
+                                    type: 'system.schema.anytype',
                                     readonly: true
                                 }" :value="type" plain-text="left"></schema-view>
                             </li>
@@ -154,12 +154,12 @@
                     </template>
 
                     <template v-if="currRow?.usedByApp?.length">
-                        <h3>{{ _L["schema.app.apptarget.app"] }}</h3>
+                        <h3>{{ _L["system.schema.apptarget.app"] }}</h3>
                         <hr/>
                         <ul>
                             <li v-for="app in currRow?.usedByApp" :key="app">
                                 <schema-view :config="{
-                                    type: 'schema.app.srcapp',
+                                    type: 'system.schema.app',
                                     readonly: true
                                 }" :value="app" plain-text="left"></schema-view>
                             </li>
@@ -168,7 +168,7 @@
                 </el-main>
                 <el-footer>
                     <br/>
-                    <el-button @click="showViewRef = false">{{ _L["schema.designer.close"] }}</el-button>
+                    <el-button @click="showViewRef = false">{{ _L["frontend.view.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
@@ -192,7 +192,7 @@ const schemaTypeOrder = {
     [SchemaType.Enum]: 3,
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
-    [SchemaType.Function]: 6,
+    [SchemaType.Func]: 6,
     [SchemaType.Json]: 7
 }
 
@@ -282,12 +282,12 @@ const handleNew = async () => {
     localStorage["schema_new_namespace"] = state.namespace
 
     namespaceNode.value = new StructNode({
-        type: "schema.namespacedefine",
+        type: "system.schema.nodeschema",
     }, {})
     showNamespaceEditor.value = true
 
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["frontend.view.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }, true)
 }
 
@@ -298,17 +298,17 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     const schema = await getSchema(row.name)
 
     namespaceNode.value = new StructNode({
-        type: "schema.namespacedefine",
+        type: "system.schema.nodeschema",
         readonly
     }, jsonClone(schema))
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["frontend.view.view"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["frontend.view.edit"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
@@ -317,7 +317,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
 const handleDelete = async (row: any) => {
     if (!isSchemaDeletable(row.name))
     {
-        ElMessage.error(_L.value["schema.designer.cantdelschema"])
+        ElMessage.error(_L.value["frontend.view.cantdelschema"])
         return
     }
     if ((row.loadState || 0) & SchemaLoadState.Server)
@@ -328,7 +328,7 @@ const handleDelete = async (row: any) => {
             const res = await provider.deleteSchema(row.name)
             if (!res)
             {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
         }
@@ -355,7 +355,7 @@ const confirmNameSpace = async () => {
             const res = await provider.saveSchema(data)
             if (!res)
             {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
             data.loadState = (data.loadState || 0) | SchemaLoadState.Server
@@ -407,14 +407,14 @@ const copySchema = async () => {
     localStorage["schema_new_namespace"] = state.namespace
 
     namespaceNode.value = new StructNode({
-        type: "schema.namespacedefine",
+        type: "system.schema.nodeschema",
     }, jsonClone(schema))
 
     namespaceNode.value.getField("name")!.data = name
 
     if (namesapceWatchHandler) namesapceWatchHandler()
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["frontend.view.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }, true)
     showNamespaceEditor.value = true
 }
@@ -437,7 +437,7 @@ const handleSelection = (val: any[]) => {
 
 const download = () => {
     if (!selections.length) return
-    const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json` 
+    const name = selections.length > 1 ? "system.schema.json" : `${selections[0]}.json` 
     const content = JSON.stringify(selections.map(getCachedSchema).map(s => schemaToJson(s!)).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
 
     // download

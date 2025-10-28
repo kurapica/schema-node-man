@@ -1,131 +1,20 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, DataCombineType, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_GUID, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructEnumFieldConfig, type IStructFieldConfig, type IStructScalarFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
-    {
-        name: "schema",
-        type: SchemaType.Namespace,
-        display: _LS("schema"),
-    },
-
     //#region scalar type
     {
-        name: "schema.anytype",
+        name: "system.schema.pushfunctype",
         type: SchemaType.Scalar,
-        display: _LS("schema.anytype"),
+        display: _LS("system.schema.pushfunctype"),
         scalar: {
-            base: NS_SYSTEM_STRING,
+            base: "system.schema.functype",
         }
     },
     {
-        name: "schema.namespace",
+        name: "system.schema.namespaceinput",
         type: SchemaType.Scalar,
-        display: _LS("schema.namespace"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.scalartype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.scalartype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.enumtype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.enumtype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.structtype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.structtype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.arraytype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.arraytype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.functype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.functype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.pushfunctype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.pushfunctype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.scalarvalidfunc",
-        type: SchemaType.Scalar,
-        display: _LS("schema.scalarvalidfunc"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        },
-    },
-    {
-        name: "schema.scalarwhitelistfunc",
-        type: SchemaType.Scalar,
-        display: _LS("schema.scalarwhitelistfunc"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        },
-    },
-    {
-        name: "schema.scalarenumtype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.scalarenumtype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.arrayeletype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.arrayeletype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.valuetype",
-        type: SchemaType.Scalar,
-        display: _LS("schema.valuetype"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-        }
-    },
-    {
-        name: "schema.varname",
-        type: SchemaType.Scalar,
-        display: _LS("schema.varname"),
-        scalar: {
-            base: NS_SYSTEM_STRING,
-            regex: "^[a-zA-Z]\\w*$",
-        }
-    },
-    {
-        name: "schema.namespaceinput",
-        type: SchemaType.Scalar,
-        display: _LS("schema.namespaceinput"),
+        display: _LS("system.schema.namespaceinput"),
         scalar: {
             base: NS_SYSTEM_STRING,
             upLimit: 128,
@@ -133,295 +22,75 @@ registerSchema([
         }
     },
     {
-        name: "schema.reltarfield",
+        name: "system.schema.reltarfield",
         type: SchemaType.Scalar,
-        display: _LS("schema.reltarfield"),
+        display: _LS("system.schema.reltarfield"),
         scalar: {
             base: NS_SYSTEM_STRING,
             upLimit: 128,
-        }
-    },
-    {
-        name: "schema.anyvalue",
-        type: SchemaType.Scalar,
-        display: _LS("schema.anyvalue"),
-        scalar: {
-        }
-    },
-    {
-        name: "schema.color",
-        type: SchemaType.Scalar,
-        display: _LS("schema.color"),
-        scalar: {
-            base: NS_SYSTEM_STRING
-        }
-    },
-    //#endregion
-
-    //#region enum type
-    {
-        name: "schema.schematype",
-        type: SchemaType.Enum,
-        display: _LS("schema.schematype"),
-        enum: {
-            type: EnumValueType.String,
-            values: [
-                {
-                    value: SchemaType.Namespace,
-                    name: _LS("schema.schematype.namespace"),
-                },
-                {
-                    value: SchemaType.Enum,
-                    name: _LS("schema.schematype.enum"),
-                },
-                {
-                    value: SchemaType.Scalar,
-                    name: _LS("schema.schematype.scalar"),
-                },
-                {
-                    value: SchemaType.Struct,
-                    name: _LS("schema.schematype.struct"),
-                },
-                {
-                    value: SchemaType.Array,
-                    name: _LS("schema.schematype.array"),
-                },
-                {
-                    value: SchemaType.Function,
-                    name: _LS("schema.schematype.func"),
-                },
-                {
-                    value: SchemaType.Json,
-                    name: _LS("schema.schematype.json")
-                }
-            ]
-        }
-    },
-    {
-        name: "schema.relationtype",
-        type: SchemaType.Enum,
-        display: _LS("schema.relationtype"),
-        enum: {
-            type: EnumValueType.String,
-            values: [
-                {
-                    value: RelationType.Default,
-                    name: _LS("schema.relationtype.default"),
-                },
-                {
-                    value: RelationType.Root,
-                    name: _LS("schema.relationtype.root"),
-                },
-                {
-                    value: RelationType.BlackList,
-                    name: _LS("schema.relationtype.blacklist"),
-                },
-                {
-                    value: RelationType.WhiteList,
-                    name: _LS("schema.relationtype.whitelist"),
-                },
-                {
-                    value: RelationType.LowLimit,
-                    name: _LS("schema.relationtype.lowlimit"),
-                },
-                {
-                    value: RelationType.UpLimit,
-                    name: _LS("schema.relationtype.uplimit"),
-                },
-                {
-                    value: RelationType.Invisible,
-                    name: _LS("schema.relationtype.invisible"),
-                },
-                {
-                    value: RelationType.Visible,
-                    name: _LS("schema.relationtype.visible"),
-                },
-                {
-                    value: RelationType.Disable,
-                    name: _LS("schema.relationtype.disable"),
-                },
-                {
-                    value: RelationType.Assign,
-                    name: _LS("schema.relationtype.assign"),
-                },
-                {
-                    value: RelationType.InitOnly,
-                    name: _LS("schema.relationtype.initonly"),
-                },
-                {
-                    value: RelationType.Type,
-                    name: _LS("schema.relationtype.type"),
-                },
-                {
-                    value: RelationType.AnyLevel,
-                    name: _LS("schema.relationtype.anylevel")
-                },
-                {
-                    value: RelationType.Cascade,
-                    name: _LS("schema.relationtype.cascade")
-                },
-                {
-                    value: RelationType.SingleFlag,
-                    name: _LS("schema.relationtype.singleflag")
-                },
-                {
-                    value: RelationType.Validation,
-                    name: _LS("schema.relationtype.validation")
-                }
-            ]
-        }
-    },
-    {
-        name: "schema.exptype",
-        type: SchemaType.Enum,
-        display: _LS("schema.exptype"),
-        enum: {
-            type: EnumValueType.String,
-            values: [
-                {
-                    value: ExpressionType.Call,
-                    name: _LS("schema.exptype.call"),
-                },
-                {
-                    value: ExpressionType.Map,
-                    name: _LS("schema.exptype.map"),
-                },
-                {
-                    value: ExpressionType.Reduce,
-                    name: _LS("schema.exptype.reduce"),
-                },
-                {
-                    value: ExpressionType.First,
-                    name: _LS("schema.exptype.first"),
-                },
-                {
-                    value: ExpressionType.Last,
-                    name: _LS("schema.exptype.last"),
-                },
-                {
-                    value: ExpressionType.Filter,
-                    name: _LS("schema.exptype.filter"),
-                },
-            ]
-        }
-    },
-    {
-        name: "schema.exptypes",
-        type: SchemaType.Array,
-        display: _LS("schema.exptypes"),
-        array: {
-            element: "schema.exptype"
-        }
-    },
-    {
-        name: "schema.enumvaluetype",
-        type: SchemaType.Enum,
-        display: _LS("schema.enumvaluetype"),
-        enum: {
-            type: EnumValueType.String,
-            values: [
-                {
-                    value: EnumValueType.String,
-                    name: _LS("schema.enumvaluetype.string")
-                },
-                {
-                    value: EnumValueType.Int,
-                    name: _LS("schema.enumvaluetype.int")
-                },
-                {
-                    value: EnumValueType.Flags,
-                    name: _LS("schema.enumvaluetype.flags")
-                },
-            ]
-        }
-    },
-    {
-        name: "schema.datacombinetype",
-        type: SchemaType.Enum,
-        display: _LS("schema.datacombinetype"),
-        enum: {
-            type: EnumValueType.String,
-            values: [
-                {
-                    value: DataCombineType.Assign,
-                    name: _LS("schema.datacombinetype.assign")
-                },
-                {
-                    value: DataCombineType.Init,
-                    name: _LS("schema.datacombinetype.init")
-                },
-                {
-                    value: DataCombineType.Sum,
-                    name: _LS("schema.datacombinetype.sum")
-                },
-                {
-                    value: DataCombineType.Count,
-                    name: _LS("schema.datacombinetype.count")
-                }
-            ]
         }
     },
     //#endregion
 
     //#region scalar definition
     {
-        name: "schema.scalardefine",
+        name: "system.schema.scalarschema",
         type: SchemaType.Struct,
-        display: _LS("schema.scalardefine"),
+        display: _LS("system.schema.scalarschema"),
         struct: {
             fields: [
                 {
                     name: "base",
                     require: true,
-                    type: "schema.scalartype",
-                    display: _LS("schema.scalardefine.base"),
+                    type: "system.schema.scalartype",
+                    display: _LS("system.schema.scalarschema.base"),
                 },
                 {
                     name: "unit",
                     type: "system.localestring",
-                    display: _LS("schema.scalardefine.unit"),
+                    display: _LS("system.schema.scalarschema.unit"),
                     upLimit: 8,
                 } as IStructScalarFieldConfig,
                 {
                     name: "lowLimit",
                     type: NS_SYSTEM_NUMBER,
-                    display: _LS("schema.scalardefine.lowlimit"),
+                    display: _LS("system.schema.scalarschema.lowlimit"),
                 },
                 {
                     name: "upLimit",
                     type: NS_SYSTEM_NUMBER,
-                    display: _LS("schema.scalardefine.uplimit"),
+                    display: _LS("system.schema.scalarschema.uplimit"),
                 },
                 {
                     name: "error",
                     type: "system.localestring",
-                    display: _LS("schema.scalardefine.error"),
+                    display: _LS("system.schema.scalarschema.error"),
                     upLimit: 128,
                 },
                 {
                     name: "regex",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.scalardefine.regex"),
+                    display: _LS("system.schema.scalarschema.regex"),
                 },
                 {
                     name: "whiteList",
-                    type: "schema.scalarwhitelistfunc",
-                    display: _LS("schema.scalardefine.whitelist")
+                    type: "system.schema.whitelistfunc",
+                    display: _LS("system.schema.scalarschema.whitelist")
                 },
                 {
                     name: "asSuggest",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.assuggest")
+                    display: _LS("system.schema.structfieldconfig.assuggest")
                 },
                 {
                     name: "preValid",
-                    type: "schema.scalarvalidfunc",
-                    display: _LS("schema.scalardefine.prevalid"),
+                    type: "system.schema.validfunc",
+                    display: _LS("system.schema.scalarschema.prevalid"),
                 } as IStructScalarFieldConfig,
                 {
                     name: "postValid",
-                    type: "schema.scalarvalidfunc",
-                    display: _LS("schema.scalardefine.postvalid"),
+                    type: "system.schema.validfunc",
+                    display: _LS("system.schema.scalarschema.postvalid"),
                 },
             ],
             relations: [
@@ -462,9 +131,9 @@ registerSchema([
 
     //#region enum definition
     {
-        name: "schema.enumvalueinfo",
+        name: "system.schema.enumvalueinfo",
         type: SchemaType.Struct,
-        display: _LS("schema.enumvalueinfo"),
+        display: _LS("system.schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -472,37 +141,37 @@ registerSchema([
                     require: true,
                     immutable: true,
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.enumvalueinfo.value"),
+                    display: _LS("system.schema.enumvalueinfo.value"),
                 } as IStructScalarFieldConfig,
                 {
                     name: "name",
                     require: true,
                     type: "system.localestring",
-                    display: _LS("schema.enumvalueinfo.name"),
+                    display: _LS("system.schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
                 {
                     name: "disable",
                     default: false,
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.disable"),
+                    display: _LS("system.schema.enumvalueinfo.disable"),
                 }
             ]
         },
     },
     {
-        name: "schema.enumvalueinfos",
+        name: "system.schema.enumvalueinfos",
         type: SchemaType.Array,
-        display: _LS("schema.enumvalueinfos"),
+        display: _LS("system.schema.enumvalueinfos"),
         array: {
-            element: "schema.enumvalueinfo",
+            element: "system.schema.enumvalueinfo",
             primary: ["value"],
         },
     },
     {
-        name: "schema.enumintvalueinfo",
+        name: "system.schema.enumintvalueinfo",
         type: SchemaType.Struct,
-        display: _LS("schema.enumvalueinfo"),
+        display: _LS("system.schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -510,37 +179,37 @@ registerSchema([
                     require: true,
                     immutable: true,
                     type: NS_SYSTEM_INT,
-                    display: _LS("schema.enumvalueinfo.value"),
+                    display: _LS("system.schema.enumvalueinfo.value"),
                 } as IStructScalarFieldConfig,
                 {
                     name: "name",
                     require: true,
                     type: "system.localestring",
-                    display: _LS("schema.enumvalueinfo.name"),
+                    display: _LS("system.schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
                 {
                     name: "disable",
                     default: false,
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.disable"),
+                    display: _LS("system.schema.enumvalueinfo.disable"),
                 }
             ]
         },
     },
     {
-        name: "schema.enumintvalueinfos",
+        name: "system.schema.enumintvalueinfos",
         type: SchemaType.Array,
-        display: _LS("schema.enumvalueinfos"),
+        display: _LS("system.schema.enumvalueinfos"),
         array: {
-            element: "schema.enumintvalueinfo",
+            element: "system.schema.enumintvalueinfo",
             primary: ["value"],
         },
     },
     {
-        name: "schema.enumflagvalueinfo",
+        name: "system.schema.enumflagvalueinfo",
         type: SchemaType.Struct,
-        display: _LS("schema.enumvalueinfo"),
+        display: _LS("system.schema.enumvalueinfo"),
         struct: {
             fields: [
                 {
@@ -549,36 +218,36 @@ registerSchema([
                     immutable: true,
                     readonly: true,
                     type: NS_SYSTEM_INT,
-                    display: _LS("schema.enumvalueinfo.value"),
+                    display: _LS("system.schema.enumvalueinfo.value"),
                 } as IStructScalarFieldConfig,
                 {
                     name: "name",
                     require: true,
                     type: "system.localestring",
-                    display: _LS("schema.enumvalueinfo.name"),
+                    display: _LS("system.schema.enumvalueinfo.name"),
                     upLimit: 64
                 },
                 {
                     name: "disable",
                     default: false,
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.enumvalueinfo.disable"),
+                    display: _LS("system.schema.enumvalueinfo.disable"),
                 }
             ]
         },
     },
     {
-        name: "schema.enumflagsvalueinfos",
+        name: "system.schema.enumflagsvalueinfos",
         type: SchemaType.Array,
-        display: _LS("schema.enumvalueinfos"),
+        display: _LS("system.schema.enumvalueinfos"),
         array: {
-            element: "schema.enumflagvalueinfo",
+            element: "system.schema.enumflagvalueinfo",
             primary: ["value"],
             relations: [
                 {
                     field: "value",
                     type: RelationType.Assign,
-                    func: "schema.calcnextflag",
+                    func: "system.schema.calcnextflag",
                     args: [
                         {
                             "name": ARRAY_ITSELF
@@ -589,9 +258,9 @@ registerSchema([
         },
     },
     {
-        name: "schema.calcnextflag",
-        type: SchemaType.Function,
-        display: _LS("schema.calcnextflag"),
+        name: "system.schema.calcnextflag",
+        type: SchemaType.Func,
+        display: _LS("system.schema.calcnextflag"),
         func: {
             return: NS_SYSTEM_INT,
             args: [
@@ -609,15 +278,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getenuminfostype",
-        type: SchemaType.Function,
-        display: _LS("schema.getenuminfostype"),
+        name: "system.schema.getenuminfostype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getenuminfostype"),
         func: {
-            return: "schema.arraytype",
+            return: "system.schema.arraytype",
             args: [
                 {
                     name: "type",
-                    type: "schema.enumvaluetype"
+                    type: "system.schema.enumvaluetype"
                 }
             ],
             exps: [],
@@ -625,37 +294,37 @@ registerSchema([
                 switch (type)
                 {
                     case EnumValueType.String:
-                        return "schema.enumvalueinfos"
+                        return "system.schema.enumvalueinfos"
                     case EnumValueType.Int:
-                        return "schema.enumintvalueinfos"
+                        return "system.schema.enumintvalueinfos"
                     case EnumValueType.Flags:
-                        return "schema.enumflagsvalueinfos"
+                        return "system.schema.enumflagsvalueinfos"
                 }
             }
         }
     },
     {
-        name: "schema.enumdefine",
+        name: "system.schema.enumschema",
         type: SchemaType.Struct,
-        display: _LS("schema.enumdefine"),
+        display: _LS("system.schema.enumschema"),
         struct: {
             fields: [
                 {
                     name: "type",
                     require: true,
-                    type: "schema.enumvaluetype",
-                    display: _LS("schema.enumdefine.type"),
+                    type: "system.schema.enumvaluetype",
+                    display: _LS("system.schema.enumschema.type"),
                     default: EnumValueType.Int,
                 },
                 {
                     name: "cascade",
                     type: "system.localestrings",
-                    display: _LS("schema.enumdefine.cascade"),
+                    display: _LS("system.schema.enumschema.cascade"),
                 },
                 {
                     name: "values",
-                    type: "schema.enumvalueinfos",
-                    display: _LS("schema.enumdefine.values"),
+                    type: "system.schema.enumvalueinfos",
+                    display: _LS("system.schema.enumschema.values"),
                 },
             ],
             relations: [
@@ -675,7 +344,7 @@ registerSchema([
                 {
                     field: "values",
                     type: RelationType.Type,
-                    func: "schema.getenuminfostype",
+                    func: "system.schema.getenuminfostype",
                     args: [
                         {
                             name: "type"
@@ -689,44 +358,15 @@ registerSchema([
 
     //#region struct definition
     {
-        name: "schema.structindex",
-        type: SchemaType.Struct,
-        display: _LS("schema.structindex"),
-        struct: {
-            fields: [
-                {
-                    name: "fields",
-                    require: true,
-                    type: NS_SYSTEM_STRINGS,
-                    display: _LS("schema.structindex.fields"),
-                },
-                {
-                    name: "unique",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structindex.unique"),
-                    default: false
-                },
-            ]
-        }
-    },
-    {
-        name: "schema.structindexs",
-        type: SchemaType.Array,
-        display: _LS("schema.structindexs"),
-        array: {
-            element: "schema.structindex",
-        },
-    },
-    {
-        name: "schema.isvaluenotnull",
-        type: SchemaType.Function,
-        display: _LS("schema.isvaluenotnull"),
+        name: "system.schema.isvaluenotnull",
+        type: SchemaType.Func,
+        display: _LS("system.schema.isvaluenotnull"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "value",
-                    type: "schema.anyvalue"
+                    type: "system.schema.anyvalue"
                 }
             ],
             exps: [],
@@ -738,15 +378,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getexpvaluetype",
-        type: SchemaType.Function,
-        display: _LS("schema.getexpvaluetype"),
+        name: "system.schema.getexpvaluetype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getexpvaluetype"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -759,15 +399,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.hideexpvalue",
-        type: SchemaType.Function,
-        display: _LS("schema.hideexpvalue"),
+        name: "system.schema.hideexpvalue",
+        type: SchemaType.Func,
+        display: _LS("system.schema.hideexpvalue"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 },
                 {
                     name: "name",
@@ -784,32 +424,32 @@ registerSchema([
         }
     },
     {
-        name: "schema.structfldfuncarg",
+        name: "system.schema.structfldfuncarg",
         type: SchemaType.Struct,
-        display: _LS("schema.structfldfuncarg"),
+        display: _LS("system.schema.structfldfuncarg"),
         struct: {
             fields: [
                 {
                     name: "label",
                     type: NS_SYSTEM_STRING,
                     displayOnly: true,
-                    display: _LS("schema.funccallarg.display"),
+                    display: _LS("system.schema.funccallarg.display"),
                 },
                 {
                     name: "type",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                     displayOnly: true,
-                    display: _LS("schema.structfldfuncarg.type"),
+                    display: _LS("system.schema.structfldfuncarg.type"),
                 },
                 {
                     name: "name",
-                    type: "schema.reltarfield",
-                    display: _LS("schema.structfldfuncarg.name"),
+                    type: "system.schema.reltarfield",
+                    display: _LS("system.schema.structfldfuncarg.name"),
                 },
                 {
                     name: "value",
-                    type: "schema.anyvalue",
-                    display: _LS("schema.structfldfuncarg.value"),
+                    type: "system.schema.anyvalue",
+                    display: _LS("system.schema.structfldfuncarg.value"),
                 },
             ],
             relations: [
@@ -826,7 +466,7 @@ registerSchema([
                 {
                     field: "name",
                     type: RelationType.Disable,
-                    func: "schema.isvaluenotnull",
+                    func: "system.schema.isvaluenotnull",
                     args: [
                         {
                             name: "value"
@@ -836,7 +476,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Type,
-                    func: "schema.getexpvaluetype",
+                    func: "system.schema.getexpvaluetype",
                     args: [
                         {
                             name: "type"
@@ -846,7 +486,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Disable,
-                    func: "schema.hideexpvalue",
+                    func: "system.schema.hideexpvalue",
                     args: [
                         {
                             name: "type"
@@ -860,23 +500,23 @@ registerSchema([
         }
     },
     {
-        name: "schema.structfldfuncargs",
+        name: "system.schema.structfldfuncargs",
         type: SchemaType.Array,
-        display: _LS("schema.structfldfuncargs"),
+        display: _LS("system.schema.structfldfuncargs"),
         array: {
-            element: "schema.structfldfuncarg",
+            element: "system.schema.structfldfuncarg",
         },
     },
     {
-        name: "schema.notscalartype",
-        type: SchemaType.Function,
-        display: _LS("schema.notscalartype"),
+        name: "system.schema.notscalartype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.notscalartype"),
         func: {
             return : NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -887,15 +527,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.notenumtype",
-        type: SchemaType.Function,
-        display: _LS("schema.notenumtype"),
+        name: "system.schema.notenumtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.notenumtype"),
         func: {
             return : NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -906,15 +546,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.notscalarenumtype",
-        type: SchemaType.Function,
-        display: _LS("schema.notscalarenumtype"),
+        name: "system.schema.notscalarenumtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.notscalarenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                     nullable: true,
                 }
             ],
@@ -927,15 +567,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.notcascadeenumtype",
-        type: SchemaType.Function,
-        display: _LS("schema.notcascadeenumtype"),
+        name: "system.schema.notcascadeenumtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.notcascadeenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args:[
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -947,15 +587,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getroottype",
-        type: SchemaType.Function,
-        display: _LS("schema.getroottype"),
+        name: "system.schema.getroottype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getroottype"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -967,15 +607,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.notflagsenumtype",
-        type: SchemaType.Function,
-        display: _LS("schema.notflagsenumtype"),
+        name: "system.schema.notflagsenumtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.notflagsenumtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -986,15 +626,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getenumcascadewhitelist",
-        type: SchemaType.Function,
-        display: _LS("schema.getenumcascadewhitelist"),
+        name: "system.schema.getenumcascadewhitelist",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getenumcascadewhitelist"),
         func: {
             return: NS_SYSTEM_ARRAY,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -1012,15 +652,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.noenumroot",
-        type: SchemaType.Function,
-        display: _LS("schema.noenumroot"),
+        name: "system.schema.noenumroot",
+        type: SchemaType.Func,
+        display: _LS("system.schema.noenumroot"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 },
                 {
                     name: "cascade",
@@ -1040,15 +680,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getenumrootcascade",
-        type: SchemaType.Function,
-        display: _LS("schema.getenumrootcascade"),
+        name: "system.schema.getenumrootcascade",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getenumrootcascade"),
         func: {
             return: NS_SYSTEM_INT,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 },
                 {
                     name: "cascade",
@@ -1070,15 +710,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getwhiteblacklisttype",
-        type: SchemaType.Function,
-        display: _LS("schema.getwhiteblacklisttype"),
+        name: "system.schema.getwhiteblacklisttype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getwhiteblacklisttype"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -1092,15 +732,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getscalarorenumtype",
-        type: SchemaType.Function,
-        display: _LS("schema.getscalarorenumtype"),
+        name: "system.schema.getscalarorenumtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getscalarorenumtype"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -1111,77 +751,77 @@ registerSchema([
         }
     },
     {
-        name: "schema.structfieldtype",
+        name: "system.schema.structfieldconfig",
         type: SchemaType.Struct,
-        display: _LS("schema.structfieldtype"),
+        display: _LS("system.schema.structfieldconfig"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
-                    type: "schema.varname",
-                    display: _LS("schema.structfieldtype.name"),
+                    type: "system.schema.varname",
+                    display: _LS("system.schema.structfieldconfig.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "type",
                     require: true,
-                    type: "schema.valuetype",
-                    display: _LS("schema.structfieldtype.type"),
+                    type: "system.schema.valuetype",
+                    display: _LS("system.schema.structfieldconfig.type"),
                 },
                 {
                     name: "display",
                     type: "system.localestring",
-                    display: _LS("schema.structfieldtype.display"),
+                    display: _LS("system.schema.structfieldconfig.display"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "desc",
                     type: "system.localestring",
-                    display: _LS("schema.structfieldtype.desc"),
+                    display: _LS("system.schema.structfieldconfig.desc"),
                     upLimit: 255,
                 } as IStructScalarFieldConfig,
                 {
                     name: "error",
                     type: "system.localestring",
-                    display: _LS("schema.structfieldtype.error"),
+                    display: _LS("system.schema.structfieldconfig.error"),
                     upLimit: 64,
                 } as IStructScalarFieldConfig,
                 {
                     name: "require",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.require"),
+                    display: _LS("system.schema.structfieldconfig.require"),
                 },
                 {
                     name: "immutable",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.immutable"),
+                    display: _LS("system.schema.structfieldconfig.immutable"),
                 },
                 {
                     name: "readonly",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.readonly"),
+                    display: _LS("system.schema.structfieldconfig.readonly"),
                 },
                 {
                     name: "invisible",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.invisible"),
+                    display: _LS("system.schema.structfieldconfig.invisible"),
                 },
                 {
                     name: "displayOnly",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.displayonly"),
+                    display: _LS("system.schema.structfieldconfig.displayonly"),
                 },
                 {
                     name: "unit",
                     type: "system.localestring",
-                    display: _LS("schema.structfieldtype.unit"),
+                    display: _LS("system.schema.structfieldconfig.unit"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "default",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.structfieldtype.default"),
+                    display: _LS("system.schema.structfieldconfig.default"),
                     asSuggest: true,
                 },
 
@@ -1189,57 +829,57 @@ registerSchema([
                 {
                     name: "whiteList",
                     type: NS_SYSTEM_STRINGS,
-                    display: _LS("schema.structfieldtype.whitelist"),
+                    display: _LS("system.schema.structfieldconfig.whitelist"),
                     anyLevel: true
                 } as IStructEnumFieldConfig,
                 {
                     name: "blackList",
                     type: NS_SYSTEM_STRINGS,
-                    display: _LS("schema.structfieldtype.blacklist"),
+                    display: _LS("system.schema.structfieldconfig.blacklist"),
                     anyLevel: true,
                 } as IStructEnumFieldConfig,
                 {
                     name: "lowLimit",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.structfieldtype.lowlimit"),
+                    display: _LS("system.schema.structfieldconfig.lowlimit"),
                 },
                 {
                     name: "upLimit",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.structfieldtype.uplimit"),
+                    display: _LS("system.schema.structfieldconfig.uplimit"),
                 },
                 {
                     name: "asSuggest",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.assuggest"),
+                    display: _LS("system.schema.structfieldconfig.assuggest"),
                 },
                 {
                     name: "useOriginForUpLimit",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.useoriginforuplimit"),
+                    display: _LS("system.schema.structfieldconfig.useoriginforuplimit"),
                 },
 
                 // enum config
                 {
                     name: "cascade",
                     type: NS_SYSTEM_INT,
-                    display: _LS("schema.structfieldtype.cascade"),
+                    display: _LS("system.schema.structfieldconfig.cascade"),
                 },
                 {
                     name: "root",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.structfieldtype.root"),
+                    display: _LS("system.schema.structfieldconfig.root"),
                     anyLevel: true,
                 } as IStructEnumFieldConfig,
                 {
                     name: "anyLevel",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.anylevel"),
+                    display: _LS("system.schema.structfieldconfig.anylevel"),
                 },
                 {
                     name: "singleFlag",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.structfieldtype.singleflag"),
+                    display: _LS("system.schema.structfieldconfig.singleflag"),
                 },
             ],
             relations: [
@@ -1247,7 +887,7 @@ registerSchema([
                 {
                     field: "default",
                     type: RelationType.Invisible,
-                    func: "schema.notscalarenumtype",
+                    func: "system.schema.notscalarenumtype",
                     args: [
                         {
                             name: "type"
@@ -1257,7 +897,7 @@ registerSchema([
                 {
                     field: "default",
                     type: RelationType.Type,
-                    func: "schema.getscalarorenumtype",
+                    func: "system.schema.getscalarorenumtype",
                     args: [
                         {
                             name: "type"
@@ -1329,7 +969,7 @@ registerSchema([
                 {
                     field: "whiteList",
                     type: RelationType.Invisible,
-                    func: "schema.notscalarenumtype",
+                    func: "system.schema.notscalarenumtype",
                     args: [
                         {
                             name: "type"
@@ -1339,7 +979,7 @@ registerSchema([
                 {
                     field: "whiteList",
                     type: RelationType.Type,
-                    func: "schema.getwhiteblacklisttype",
+                    func: "system.schema.getwhiteblacklisttype",
                     args: [
                         {
                             name: "type"
@@ -1379,7 +1019,7 @@ registerSchema([
                 {
                     field: "blackList",
                     type: RelationType.Invisible,
-                    func: "schema.notscalarenumtype",
+                    func: "system.schema.notscalarenumtype",
                     args: [
                         {
                             name: "type"
@@ -1389,7 +1029,7 @@ registerSchema([
                 {
                     field: "blackList",
                     type: RelationType.Type,
-                    func: "schema.getwhiteblacklisttype",
+                    func: "system.schema.getwhiteblacklisttype",
                     args: [
                         {
                             name: "type"
@@ -1419,7 +1059,7 @@ registerSchema([
                 {
                     field: "lowLimit",
                     type: RelationType.Invisible,
-                    func: "schema.notscalartype",
+                    func: "system.schema.notscalartype",
                     args: [
                         {
                             name: "type"
@@ -1429,7 +1069,7 @@ registerSchema([
                 {
                     field: "upLimit",
                     type: RelationType.Invisible,
-                    func: "schema.notscalartype",
+                    func: "system.schema.notscalartype",
                     args: [
                         {
                             name: "type"
@@ -1439,7 +1079,7 @@ registerSchema([
                 {
                     field: "asSuggest",
                     type: RelationType.Invisible,
-                    func: "schema.notscalartype",
+                    func: "system.schema.notscalartype",
                     args: [
                         {
                             name: "type"
@@ -1449,7 +1089,7 @@ registerSchema([
                 {
                     field: "useOriginForUpLimit",
                     type: RelationType.Invisible,
-                    func: "schema.notscalartype",
+                    func: "system.schema.notscalartype",
                     args: [
                         {
                             name: "type"
@@ -1459,7 +1099,7 @@ registerSchema([
                 {
                     field: "cascade",
                     type: RelationType.Invisible,
-                    func: "schema.notcascadeenumtype",
+                    func: "system.schema.notcascadeenumtype",
                     args: [
                         {
                             name: "type"
@@ -1469,7 +1109,7 @@ registerSchema([
                 {
                     field: "cascade",
                     type: RelationType.WhiteList,
-                    func: "schema.getenumcascadewhitelist",
+                    func: "system.schema.getenumcascadewhitelist",
                     args: [
                         {
                             name: "type"
@@ -1479,7 +1119,7 @@ registerSchema([
                 {
                     field: "root",
                     type: RelationType.Invisible,
-                    func: "schema.noenumroot",
+                    func: "system.schema.noenumroot",
                     args: [
                         {
                             name: "type",
@@ -1492,7 +1132,7 @@ registerSchema([
                 {
                     field: "root",
                     type: RelationType.Type,
-                    func: "schema.getroottype",
+                    func: "system.schema.getroottype",
                     args: [
                         {
                             name: "type"
@@ -1502,7 +1142,7 @@ registerSchema([
                 {
                     field: "root",
                     type: RelationType.Cascade,
-                    func: "schema.getenumrootcascade",
+                    func: "system.schema.getenumrootcascade",
                     args: [
                         {
                             name: "type",
@@ -1515,7 +1155,7 @@ registerSchema([
                 {
                     field: "anyLevel",
                     type: RelationType.Invisible,
-                    func: "schema.notcascadeenumtype",
+                    func: "system.schema.notcascadeenumtype",
                     args: [
                         {
                             name: "type"
@@ -1525,7 +1165,7 @@ registerSchema([
                 {
                     field: "singleFlag",
                     type: RelationType.Invisible,
-                    func: "schema.notflagsenumtype",
+                    func: "system.schema.notflagsenumtype",
                     args: [
                         {
                             name: "type"
@@ -1536,24 +1176,24 @@ registerSchema([
         }
     },
     {
-        name: "schema.structfieldtypes",
+        name: "system.schema.structfieldconfigs",
         type: SchemaType.Array,
-        display: _LS("schema.structfieldtypes"),
+        display: _LS("system.schema.structfieldconfigs"),
         array: {
-            element: "schema.structfieldtype",
+            element: "system.schema.structfieldconfig",
             primary: ["name"],
         },
     },
     {
-        name: "schema.getstructindexfields",
-        type: SchemaType.Function,
-        display: _LS("schema.getstructindexfields"),
+        name: "system.schema.getstructindexfields",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getstructindexfields"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -1575,15 +1215,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getstructnumbervaluefields",
-        type: SchemaType.Function,
-        display: _LS("schema.getstructnumbervaluefields"),
+        name: "system.schema.getstructnumbervaluefields",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getstructnumbervaluefields"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 }
             ],
             exps: [],
@@ -1607,19 +1247,19 @@ registerSchema([
         }
     },
     {
-        name: "schema.getrelationfuncreturn",
-        type: SchemaType.Function,
-        display: _LS("schema.getrelationfuncreturn"),
+        name: "system.schema.getrelationfuncreturn",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getrelationfuncreturn"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "fieldType",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 },
                 {
                     name: "relationType",
-                    type: "schema.relationtype"
+                    type: "system.schema.relationtype"
                 }
             ],
             exps: [],
@@ -1643,7 +1283,7 @@ registerSchema([
                         return fieldType
 
                     case RelationType.Type:
-                        return "schema.valuetype"
+                        return "system.schema.valuetype"
 
                     case RelationType.Cascade:
                         return NS_SYSTEM_INT
@@ -1660,9 +1300,9 @@ registerSchema([
         }
     },
     {
-        name: "schema.getrelationwhitelist",
-        type: SchemaType.Function,
-        display: _LS("schema.getrelationwhitelist"),
+        name: "system.schema.getrelationwhitelist",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getrelationwhitelist"),
         func: {
             return: NS_SYSTEM_STRINGS,
             args: [
@@ -1738,11 +1378,11 @@ registerSchema([
         }
     },
     {
-        name: "schema.getstructfieldtype",
-        type: SchemaType.Function,
-        display: _LS("schema.getstructfieldtype"),
+        name: "system.schema.getstructfieldtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getstructfieldtype"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "field",
@@ -1750,7 +1390,7 @@ registerSchema([
                 },
                 {
                     name: "fields",
-                    type: "schema.structfieldtypes"
+                    type: "system.schema.structfieldconfigs"
                 }
             ],
             exps: [],
@@ -1783,15 +1423,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.getstructfieldtypebytype",
-        type: SchemaType.Function,
-        display: _LS("schema.getstructfieldtypebytype"),
+        name: "system.schema.getstructfieldtypebytype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getstructfieldtypebytype"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 },
                 {
                     name: "field",
@@ -1831,54 +1471,54 @@ registerSchema([
         }
     },
     {
-        name: "schema.structfldrelationinfo",
+        name: "system.schema.structfieldrelation",
         type: SchemaType.Struct,
-        display: _LS("schema.structfldrelationinfo"),
+        display: _LS("system.schema.structfieldrelation"),
         struct: {
             fields: [
                 {
                     name: "field",
                     require: true,
-                    type: "schema.reltarfield",
-                    display: _LS("schema.structfldrelationinfo.field"),
+                    type: "system.schema.reltarfield",
+                    display: _LS("system.schema.structfieldrelation.field"),
                 },
                 {
                     name: "fieldType",
                     displayOnly: true,
                     invisible: true,
-                    type : "schema.valuetype",
-                    display: _LS("schema.structfldrelationinfo.fieldtype"),
+                    type : "system.schema.valuetype",
+                    display: _LS("system.schema.structfieldrelation.fieldtype"),
                 },
                 {
                     name: "return",
                     displayOnly: true,
                     invisible: true,
-                    type: "schema.valuetype",
-                    display: _LS("schema.structfldrelationinfo.return"),
+                    type: "system.schema.valuetype",
+                    display: _LS("system.schema.structfieldrelation.return"),
                 },
                 {
                     name: "type",
                     require: true,
-                    type: "schema.relationtype",
-                    display: _LS("schema.structfldrelationinfo.type"),
+                    type: "system.schema.relationtype",
+                    display: _LS("system.schema.structfieldrelation.type"),
                 },
                 {
                     name: "func",
                     require: true,
-                    type: "schema.functype",
-                    display: _LS("schema.structfldrelationinfo.func"),
+                    type: "system.schema.functype",
+                    display: _LS("system.schema.structfieldrelation.func"),
                 },
                 {
                     name: "args",
-                    type: "schema.structfldfuncargs",
-                    display: _LS("schema.structfldrelationinfo.args"),
+                    type: "system.schema.structfldfuncargs",
+                    display: _LS("system.schema.structfieldrelation.args"),
                 },
             ],
             relations: [
                 {
                     field: "type",
                     type: RelationType.WhiteList,
-                    func: "schema.getrelationwhitelist",
+                    func: "system.schema.getrelationwhitelist",
                     args: [
                         {
                             name: "fieldType"
@@ -1888,7 +1528,7 @@ registerSchema([
                 {
                     field: "return",
                     type: RelationType.Default,
-                    func: "schema.getrelationfuncreturn",
+                    func: "system.schema.getrelationfuncreturn",
                     args: [
                         {
                             name: "fieldType"
@@ -1912,42 +1552,42 @@ registerSchema([
         }
     },
     {
-        name: "schema.structfldrelationinfos",
+        name: "system.schema.structfieldrelations",
         type: SchemaType.Array,
-        display: _LS("schema.structfldrelationinfos"),
+        display: _LS("system.schema.structfieldrelations"),
         array: {
-            element: "schema.structfldrelationinfo",
+            element: "system.schema.structfieldrelation",
             primary: ["field", "type"],
         },
     },
     {
-        name: "schema.structdefine",
+        name: "system.schema.structschema",
         type: SchemaType.Struct,
-        display: _LS("schema.structdefine"),
+        display: _LS("system.schema.structschema"),
         struct: {
             fields: [
                 {
                     name: "base",
-                    type: "schema.structtype",
-                    display: _LS("schema.structdefine.base"),
+                    type: "system.schema.structtype",
+                    display: _LS("system.schema.structschema.base"),
                 },
                 {
                     name: "fields",
                     require: true,
-                    type: "schema.structfieldtypes",
-                    display: _LS("schema.structdefine.fields"),
+                    type: "system.schema.structfieldconfigs",
+                    display: _LS("system.schema.structschema.fields"),
                 },
                 {
                     name: "relations",
-                    type: "schema.structfldrelationinfos",
-                    display: _LS("schema.structdefine.relations"),
+                    type: "system.schema.structfieldrelations",
+                    display: _LS("system.schema.structschema.relations"),
                 },
             ],
             relations: [
                 {
                     field: "relations.fieldType",
                     type: RelationType.Default,
-                    func: "schema.getstructfieldtype",
+                    func: "system.schema.getstructfieldtype",
                     args: [
                         {
                             name: "relations.field"
@@ -1964,15 +1604,15 @@ registerSchema([
 
     //#region array definition
     {
-        name: "schema.notstructtype",
-        type: SchemaType.Function,
-        display: _LS("schema.notstructtype"),
+        name: "system.schema.notstructtype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.notstructtype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                     nullable: true,
                 }
             ],
@@ -1985,15 +1625,15 @@ registerSchema([
         }
     },
     {
-        name: "schema.notstructarraytype",
-        type: SchemaType.Function,
-        display: _LS("schema.notstructarraytype"),
+        name: "system.schema.notstructarraytype",
+        type: SchemaType.Func,
+        display: _LS("system.schema.notstructarraytype"),
         func: {
             return: NS_SYSTEM_BOOL,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                     nullable: true
                 }
             ],
@@ -2008,49 +1648,49 @@ registerSchema([
         }
     },
     {
-        name: "schema.datacombine",
+        name: "system.schema.datacombine",
         type: SchemaType.Struct,
-        display: _LS("schema.datacombine"),
+        display: _LS("system.schema.datacombine"),
         struct: {
             fields: [
                 {
                     name: "field",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.datacombine.field")
+                    display: _LS("system.schema.datacombine.field")
                 },
                 {
                     name: "type",
-                    type: "schema.datacombinetype",
-                    display: _LS("schema.datacombine.type")
+                    type: "system.schema.datacombinetype",
+                    display: _LS("system.schema.datacombine.type")
                 }
             ]
         }
     },
     {
-        name: "schema.datacombines",
+        name: "system.schema.datacombines",
         type: SchemaType.Array,
-        display: _LS("schema.datacombines"),
+        display: _LS("system.schema.datacombines"),
         array: {
-            element: "schema.datacombine",
+            element: "system.schema.datacombine",
             primary: ["field"]
         }
     },
     {
-        name: "schema.dataindex",
+        name: "system.schema.dataindex",
         type: SchemaType.Struct,
-        display: _LS("schema.dataindex"),
+        display: _LS("system.schema.dataindex"),
         struct: {
             fields: [
                 {
                     name: "name",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.dataindex.name"),
+                    display: _LS("system.schema.dataindex.name"),
                     upLimit: 16,
                 } as IStructScalarFieldConfig,
                 {
                     name: "fields",
                     type: NS_SYSTEM_STRINGS,
-                    display: _LS("schema.dataindex.fields"),
+                    display: _LS("system.schema.dataindex.fields"),
                 }
             ],
             relations: [
@@ -2068,56 +1708,56 @@ registerSchema([
         }
     },
     {
-        name: "schema.dataindexes",
+        name: "system.schema.dataindexes",
         type: SchemaType.Array,
-        display: _LS("schema.dataindexes"),
+        display: _LS("system.schema.dataindexes"),
         array: {
-            element: "schema.dataindex",
+            element: "system.schema.dataindex",
             primary: ["name"]
         }
     },
     {
-        name: "schema.arraydefine",
+        name: "system.schema.arrayschema",
         type: SchemaType.Struct,
-        display: _LS("schema.arraydefine"),
+        display: _LS("system.schema.arrayschema"),
         struct: {
             fields: [
                 {
                     name: "element",
-                    type: "schema.arrayeletype",
-                    display: _LS("schema.arraydefine.element"),
+                    type: "system.schema.arrayeletype",
+                    display: _LS("system.schema.arrayschema.element"),
                 },
                 {
                     name: "single",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.arraydefine.single"),
+                    display: _LS("system.schema.arrayschema.single"),
                 },
                 {
                     name: "primary",
                     type: NS_SYSTEM_STRINGS,
-                    display: _LS("schema.arraydefine.primary"),
+                    display: _LS("system.schema.arrayschema.primary"),
                 },
                 {
                     name: "indexes",
-                    type: "schema.dataindexes",
-                    display: _LS("schema.dataindexes")
+                    type: "system.schema.dataindexes",
+                    display: _LS("system.schema.dataindexes")
                 },
                 {
                     name: "combines",
-                    type: "schema.datacombines",
-                    display: _LS("schema.arraydefine.combine"),
+                    type: "system.schema.datacombines",
+                    display: _LS("system.schema.arrayschema.combine"),
                 },
                 {
                     name: "relations",
-                    type: "schema.structfldrelationinfos",
-                    display: _LS("schema.structdefine.relations"),
+                    type: "system.schema.structfieldrelations",
+                    display: _LS("system.schema.structschema.relations"),
                 },
             ],
             relations: [
                 {
                     field: "primary",
                     type: RelationType.Invisible,
-                    func: "schema.notstructtype",
+                    func: "system.schema.notstructtype",
                     args: [
                         {
                             name: "element"
@@ -2127,7 +1767,7 @@ registerSchema([
                 {
                     field: "primary.$ele",
                     type: RelationType.WhiteList,
-                    func: "schema.getstructindexfields",
+                    func: "system.schema.getstructindexfields",
                     args: [
                         {
                             name: "element"
@@ -2147,7 +1787,7 @@ registerSchema([
                 {
                     field: "indexes",
                     type: RelationType.Invisible,
-                    func: "schema.notstructtype",
+                    func: "system.schema.notstructtype",
                     args: [
                         {
                             name: "element"
@@ -2157,7 +1797,7 @@ registerSchema([
                 {
                     field: "indexes.fields.$ele",
                     type: RelationType.WhiteList,
-                    func: "schema.getstructindexfields",
+                    func: "system.schema.getstructindexfields",
                     args: [
                         {
                             name: "element"
@@ -2167,7 +1807,7 @@ registerSchema([
                 {
                     field: "combines",
                     type: RelationType.Invisible,
-                    func: "schema.notstructtype",
+                    func: "system.schema.notstructtype",
                     args: [
                         {
                             name: "element"
@@ -2177,7 +1817,7 @@ registerSchema([
                 {
                     field: "combines.field",
                     type: RelationType.WhiteList,
-                    func: "schema.getstructnumbervaluefields",
+                    func: "system.schema.getstructnumbervaluefields",
                     args: [
                         {
                             name: "element"
@@ -2187,7 +1827,7 @@ registerSchema([
                 {
                     field: "relations.fieldType",
                     type: RelationType.Default,
-                    func: "schema.getstructfieldtypebytype",
+                    func: "system.schema.getstructfieldtypebytype",
                     args: [
                         {
                             name: "element"
@@ -2204,15 +1844,15 @@ registerSchema([
 
     //#region function definition
     {
-        name: "schema.gettypedisplayorname",
-        type: SchemaType.Function,
-        display: _LS("schema.gettypedisplayorname"),
+        name: "system.schema.gettypedisplayorname",
+        type: SchemaType.Func,
+        display: _LS("system.schema.gettypedisplayorname"),
         func: {
             return: NS_SYSTEM_STRING,
             args: [
                 {
                     name: "type",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                 }
             ],
             exps: [],
@@ -2224,35 +1864,35 @@ registerSchema([
         }
     },
     {
-        name: "schema.funcarg",
+        name: "system.schema.funcarg",
         type: SchemaType.Struct,
-        display: _LS("schema.funcarg"),
+        display: _LS("system.schema.funcarg"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.funcarg.name"),
+                    display: _LS("system.schema.funcarg.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "type",
                     require: true,
-                    type: "schema.valuetype",
-                    display: _LS("schema.funcarg.type"),
+                    type: "system.schema.valuetype",
+                    display: _LS("system.schema.funcarg.type"),
                 },
                 {
                     name: "nullable",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.funcarg.nullable"),
+                    display: _LS("system.schema.funcarg.nullable"),
                 }
             ],
             relations: [
                 {
                     field: "name",
                     type: RelationType.Default,
-                    func: "schema.gettypedisplayorname",
+                    func: "system.schema.gettypedisplayorname",
                     args: [
                         {
                             name: "type"
@@ -2263,42 +1903,42 @@ registerSchema([
         }
     },
     {
-        name: "schema.funcargs",
+        name: "system.schema.funcargs",
         type: SchemaType.Array,
-        display: _LS("schema.funcargs"),
+        display: _LS("system.schema.funcargs"),
         array: {
-            element: "schema.funcarg",
+            element: "system.schema.funcarg",
         },
     },
     {
-        name: "schema.funccallarg",
+        name: "system.schema.funccallarg",
         type: SchemaType.Struct,
-        display: _LS("schema.funccallarg"),
+        display: _LS("system.schema.funccallarg"),
         struct: {
             fields: [
                 {
                     name: "display",
                     type: NS_SYSTEM_STRING,
                     displayOnly: true,
-                    display: _LS("schema.funccallarg.display"),
+                    display: _LS("system.schema.funccallarg.display"),
                 },
                 {
                     name: "type",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                     displayOnly: true,
                     invisible: true,
-                    display: _LS("schema.structfldfuncarg.type"),
+                    display: _LS("system.schema.structfldfuncarg.type"),
                 },
                 {
                     name: "name",
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.funccallarg.name"),
+                    display: _LS("system.schema.funccallarg.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "value",
-                    type: "schema.anyvalue",
-                    display: _LS("schema.funccallarg.value"),
+                    type: "system.schema.anyvalue",
+                    display: _LS("system.schema.funccallarg.value"),
                 },
             ],
             relations: [
@@ -2315,7 +1955,7 @@ registerSchema([
                 {
                     field: "name",
                     type: RelationType.Disable,
-                    func: "schema.isvaluenotnull",
+                    func: "system.schema.isvaluenotnull",
                     args: [
                         {
                             name: "value"
@@ -2325,7 +1965,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Type,
-                    func: "schema.getexpvaluetype",
+                    func: "system.schema.getexpvaluetype",
                     args: [
                         {
                             name: "type"
@@ -2335,7 +1975,7 @@ registerSchema([
                 {
                     field: "value",
                     type: RelationType.Disable,
-                    func: "schema.hideexpvalue",
+                    func: "system.schema.hideexpvalue",
                     args: [
                         {
                             name: "type"
@@ -2349,23 +1989,23 @@ registerSchema([
         }
     },
     {
-        name: "schema.funccallargs",
+        name: "system.schema.funccallargs",
         type: SchemaType.Array,
-        display: _LS("schema.funccallargs"),
+        display: _LS("system.schema.funccallargs"),
         array: {
-            element: "schema.funccallarg",
+            element: "system.schema.funccallarg",
         },
     },
     {
-        name: "schema.getcalltypewhitelist",
-        type: SchemaType.Function,
-        display: _LS("schema.getcalltypewhitelist"),
+        name: "system.schema.getcalltypewhitelist",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getcalltypewhitelist"),
         func: {
-            return: "schema.exptypes",
+            return: NS_SYSTEM_ARRAY,
             args: [
                 {
                     name: "return",
-                    type: "schema.valuetype"
+                    type: "system.schema.valuetype"
                 },
             ],
             exps: [],
@@ -2389,19 +2029,19 @@ registerSchema([
         }
     },
     {
-        name: "schema.getfuncroot",
-        type: SchemaType.Function,
-        display: _LS("schema.getfuncroot"),
+        name: "system.schema.getfuncroot",
+        type: SchemaType.Func,
+        display: _LS("system.schema.getfuncroot"),
         func: {
-            return: "schema.valuetype",
+            return: "system.schema.valuetype",
             args: [
                 {
                     name: "return",
-                    type: "schema.valuetype",
+                    type: "system.schema.valuetype",
                 },
                 {
                     name: "type",
-                    type: "schema.exptype",
+                    type: "system.schema.expressiontype",
                 }
             ],
             exps: [],
@@ -2426,49 +2066,49 @@ registerSchema([
         }
     },
     {
-        name: "schema.funcexp",
+        name: "system.schema.funcexp",
         type: SchemaType.Struct,
-        display: _LS("schema.funcexp"),
+        display: _LS("system.schema.funcexp"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
                     type: NS_SYSTEM_STRING,
-                    display: _LS("schema.funcexp.name"),
+                    display: _LS("system.schema.funcexp.name"),
                     upLimit: 32,
                 } as IStructScalarFieldConfig,
                 {
                     name: "return",
                     require: true,
-                    type: "schema.valuetype",
-                    display: _LS("schema.funcexp.return"),
+                    type: "system.schema.valuetype",
+                    display: _LS("system.schema.funcexp.return"),
                 },
                 {
                     name: "type",
                     require: true,
-                    type: "schema.exptype",
+                    type: "system.schema.expressiontype",
                     default: ExpressionType.Call,
-                    display: _LS("schema.funcexp.type"),
+                    display: _LS("system.schema.funcexp.type"),
                 },
                 {
                     name: "func",
                     require: true,
-                    type: "schema.functype",
-                    display: _LS("schema.funcexp.func"),
+                    type: "system.schema.functype",
+                    display: _LS("system.schema.funcexp.func"),
                 },
                 {
                     name: "args",
                     require: true,
-                    type: "schema.funccallargs",
-                    display: _LS("schema.funcexp.args"),
+                    type: "system.schema.funccallargs",
+                    display: _LS("system.schema.funcexp.args"),
                 }
             ],
             relations: [
                 {
                     field: "type",
                     type: RelationType.WhiteList,
-                    func: "schema.getcalltypewhitelist",
+                    func: "system.schema.getcalltypewhitelist",
                     args: [
                         {
                             name: "return"
@@ -2478,7 +2118,7 @@ registerSchema([
                 {
                     field: "func",
                     type: RelationType.Root,
-                    func: "schema.getfuncroot",
+                    func: "system.schema.getfuncroot",
                     args: [
                         {
                             name: "return"
@@ -2492,54 +2132,54 @@ registerSchema([
         }
     },
     {
-        name: "schema.funcexps",
+        name: "system.schema.funcexps",
         type: SchemaType.Array,
-        display: _LS("schema.funcexps"),
+        display: _LS("system.schema.funcexps"),
         array: {
-            element: "schema.funcexp",
+            element: "system.schema.funcexp",
             primary: ["name"],
         },
     },
     {
-        name: "schema.funcdefine",
+        name: "system.schema.functionschema",
         type: SchemaType.Struct,
-        display: _LS("schema.funcdefine"),
+        display: _LS("system.schema.functionschema"),
         struct: {
             fields: [
                 {
                     name: "return",
                     require: true,
                     immutable: true,
-                    type: "schema.valuetype",
-                    display: _LS("schema.funcdefine.return")
+                    type: "system.schema.valuetype",
+                    display: _LS("system.schema.functionschema.return")
                 },
                 {
                     name: "args",
                     require: true,
-                    type: "schema.funcargs",
-                    display: _LS("schema.funcdefine.args")
+                    type: "system.schema.funcargs",
+                    display: _LS("system.schema.functionschema.args")
                 },
                 {
                     name: "exps",
                     require: true,
-                    type: "schema.funcexps",
-                    display: _LS("schema.funcdefine.exps")
+                    type: "system.schema.funcexps",
+                    display: _LS("system.schema.functionschema.exps")
                 },
                 {
                     name: "generic",
                     type: NS_SYSTEM_STRINGS,
-                    display: _LS("schema.funcdefine.generic"),
+                    display: _LS("system.schema.functionschema.generic"),
                     invisible: true,
                 },
                 {
                     name: "server",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.funcdefine.server"),
+                    display: _LS("system.schema.functionschema.server"),
                 },
                 {
                     name: "nocache",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("schema.funcdefine.nocache"),
+                    display: _LS("system.schema.functionschema.nocache"),
                 }
             ],
         }
@@ -2548,24 +2188,24 @@ registerSchema([
 
     //#region namespace defintion
     {
-        name: "schema.namespacedefine",
+        name: "system.schema.nodeschema",
         type: SchemaType.Struct,
-        display: _LS("schema.namespacedefine"),
+        display: _LS("system.schema.nodeschema"),
         struct: {
             fields: [
                 {
                     name: "name",
                     require: true,
                     immutable: true,
-                    type: "schema.namespaceinput",
-                    display: _LS("schema.namespacedefine.name"),
+                    type: "system.schema.namespaceinput",
+                    display: _LS("system.schema.nodeschema.name"),
                 },
                 {
                     name: "type",
                     require: true,
                     immutable: true,
-                    type: "schema.schematype",
-                    display: _LS("schema.namespacedefine.type"),
+                    type: "system.schema.schematype",
+                    display: _LS("system.schema.nodeschema.type"),
                     default: SchemaType.Namespace,
                     blackList: [SchemaType.Json],
                 } as IStructEnumFieldConfig,
@@ -2573,40 +2213,40 @@ registerSchema([
                     name: "display",
                     require: true,
                     type: "system.localestring",
-                    display: _LS("schema.namespacedefine.display"),
+                    display: _LS("system.schema.nodeschema.display"),
                     upLimit: 128,
                 } as IStructScalarFieldConfig,
                 {
                     name: "scalar",
-                    type: "schema.scalardefine",
-                    display: _LS("schema.namespacedefine.scalar"),
+                    type: "system.schema.scalarschema",
+                    display: _LS("system.schema.nodeschema.scalar"),
                 },
                 {
                     name: "enum",
-                    type: "schema.enumdefine",
-                    display: _LS("schema.namespacedefine.enum"),
+                    type: "system.schema.enumschema",
+                    display: _LS("system.schema.nodeschema.enum"),
                 },
                 {
                     name: "struct",
-                    type: "schema.structdefine",
-                    display: _LS("schema.namespacedefine.struct"),
+                    type: "system.schema.structschema",
+                    display: _LS("system.schema.nodeschema.struct"),
                 },
                 {
                     name: "array",
-                    type: "schema.arraydefine",
-                    display: _LS("schema.namespacedefine.array"),
+                    type: "system.schema.arrayschema",
+                    display: _LS("system.schema.nodeschema.array"),
                 },
                 {
                     name: "func",
-                    type: "schema.funcdefine",
-                    display: _LS("schema.namespacedefine.func"),
+                    type: "system.schema.functionschema",
+                    display: _LS("system.schema.nodeschema.func"),
                 },
             ],
             relations: [
                 {
                     field: "scalar",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2618,8 +2258,8 @@ registerSchema([
                 },
                 {
                     field: "enum",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2631,8 +2271,8 @@ registerSchema([
                 },
                 {
                     field: "struct",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2644,8 +2284,8 @@ registerSchema([
                 },
                 {
                     field: "array",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2657,14 +2297,14 @@ registerSchema([
                 },
                 {
                     field: "func",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
                         },
                         {
-                            value: SchemaType.Function
+                            value: SchemaType.Func
                         }
                     ]
                 }
@@ -2801,7 +2441,7 @@ export function schemaToJson(f: INodeSchema): INodeSchema
             r.array = deepClone(f.array, true)
             break
 
-        case SchemaType.Function:
+        case SchemaType.Func:
             r.func = { ...deepClone(f.func!, true), func: undefined }
             if (!r.func!.exps) r.func!.exps = []
             if (!r.func!.args) r.func!.args = []
@@ -2822,35 +2462,31 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import reltarfieldView from "./view/reltarfieldView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import funcdefineView from "./view/funcdefineView.vue"
-import colorView from "./view/colorView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
-regSchemaTypeView("schema.color", colorView)
+regSchemaTypeView("system.schema.anytype", namespaceView)
+regSchemaTypeView("system.schema.namespace", namespaceView)
+regSchemaTypeView("system.schema.scalartype", namespaceView)
+regSchemaTypeView("system.schema.enumtype", namespaceView)
+regSchemaTypeView("system.schema.structtype", namespaceView)
+regSchemaTypeView("system.schema.arraytype", namespaceView)
+regSchemaTypeView("system.schema.functype", namespaceView)
+regSchemaTypeView("system.schema.pushfunctype", namespaceView)
+regSchemaTypeView("system.schema.validfunc", namespaceView)
+regSchemaTypeView("system.schema.whitelistfunc", namespaceView)
+regSchemaTypeView("system.schema.arrayeletype", namespaceView)
+regSchemaTypeView("system.schema.valuetype", namespaceView)
+regSchemaTypeView("system.schema.namespaceinput", namespaceInputView)
 
-regSchemaTypeView("schema.anytype", namespaceView)
-regSchemaTypeView("schema.namespace", namespaceView)
-regSchemaTypeView("schema.scalartype", namespaceView)
-regSchemaTypeView("schema.enumtype", namespaceView)
-regSchemaTypeView("schema.structtype", namespaceView)
-regSchemaTypeView("schema.arraytype", namespaceView)
-regSchemaTypeView("schema.functype", namespaceView)
-regSchemaTypeView("schema.pushfunctype", namespaceView)
-regSchemaTypeView("schema.scalarvalidfunc", namespaceView)
-regSchemaTypeView("schema.scalarwhitelistfunc", namespaceView)
-regSchemaTypeView("schema.scalarenumtype", namespaceView)
-regSchemaTypeView("schema.arrayeletype", namespaceView)
-regSchemaTypeView("schema.valuetype", namespaceView)
-regSchemaTypeView("schema.namespaceinput", namespaceInputView)
+regSchemaTypeView("system.schema.enumvalueinfos", enumvalueinfosView)
+regSchemaTypeView("system.schema.enumintvalueinfos", enumvalueinfosView)
+regSchemaTypeView("system.schema.enumflagsvalueinfos", enumvalueinfosView)
 
-regSchemaTypeView("schema.enumvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumintvalueinfos", enumvalueinfosView)
-regSchemaTypeView("schema.enumflagsvalueinfos", enumvalueinfosView)
+regSchemaTypeView("system.schema.structfieldconfigs", structfieldtypesView)
+regSchemaTypeView("system.schema.structfieldrelations", structfldrelationinfosView)
+regSchemaTypeView("system.schema.reltarfield", reltarfieldView)
+regSchemaTypeView("system.schema.structfldfuncargs", structfldfuncargsView)
 
-regSchemaTypeView("schema.structfieldtypes", structfieldtypesView)
-regSchemaTypeView("schema.structfldrelationinfos", structfldrelationinfosView)
-regSchemaTypeView("schema.reltarfield", reltarfieldView)
-regSchemaTypeView("schema.structfldfuncargs", structfldfuncargsView)
-
-regSchemaTypeView("schema.funcdefine", funcdefineView)
+regSchemaTypeView("system.schema.functionschema", funcdefineView)
 
 //#endregion

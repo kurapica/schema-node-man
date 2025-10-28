@@ -3,29 +3,29 @@
         <el-header style="height: fit-content; width: 100%;">
             <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
                 <schema-view v-model="state.app" in-form :config="{
-                    type: 'schema.app.srcapp',
-                    display: _LS('schema.app.srcapp')
+                    type: 'system.schema.app',
+                    display: _LS('system.schema.app')
                 }"></schema-view>
                 <schema-view v-model="state.keyword" in-form :config="{
                     type: 'system.string',
-                    display: _LS('schema.designer.keyword')
+                    display: _LS('frontend.view.keyword')
                 }"></schema-view>
-                <el-button type="info" @click="reset">{{ _L["schema.designer.reset"] }}</el-button>
-                <el-button type="primary" @click="handleNew">{{ _L["schema.designer.new"] }}</el-button>
+                <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
+                <el-button type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
                 <!-- download -->
                 <template v-if="!downloading">
-                    <el-button type="success" @click="startDownload">{{ _L["schema.designer.download"] }}</el-button>
+                    <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
                     <el-upload
                         style="padding-left:1rem;"
                         :before-upload="uploadSchema"
                         :limit="1"
                         :show-file-list="false">
-                        <el-button type="success">{{ _L["schema.designer.upload"] }}</el-button>
+                        <el-button type="success">{{ _L["frontend.view.upload"] }}</el-button>
                     </el-upload>
                 </template>
                 <template v-else>
-                    <el-button type="success" @click="download">{{ _L["schema.designer.confirm"] }}</el-button>
-                    <el-button type="info" @click="downloading = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                    <el-button type="success" @click="download">{{ _L["frontend.view.confirm"] }}</el-button>
+                    <el-button type="info" @click="downloading = false">{{ _L["frontend.view.cancel"] }}</el-button>
                 </template>
             </el-form>
         </el-header>
@@ -35,41 +35,41 @@
                 :header-cell-style="{ background: '#eee' }"
                 @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
-                <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
+                <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                     <template #default="scope">
-                        {{ _L(scope.row.display) }}
+                        {{ _L(scope.row.display.key ? scope.row.display : scope.row.name) }}
                     </template>
                 </el-table-column>
-                <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150">
+                <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
                     <template #default="scope">
                         {{ _L(scope.row.desc) }}
                     </template>
                 </el-table-column>
-                <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="440">
+                <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="440">
                     <template #header>
                         <a href="javascript:void(0)" v-if="state.app" @click="goback"
                             style="text-decoration: underline; color: lightseagreen;">
-                            {{ _L["schema.designer.return"] }}
+                            {{ _L["frontend.view.return"] }}
                         </a>
-                        <span v-else>{{ _L["schema.designer.oper"] }}</span>
+                        <span v-else>{{ _L["frontend.view.oper"] }}</span>
                     </template>
                     <template #default="scope">
                         <el-button type="info" @click="handleEdit(scope.row, true)">
-                            {{ _L["schema.designer.view"] }}
+                            {{ _L["frontend.view.view"] }}
                         </el-button>
                         <el-button type="success" @click="handleEdit(scope.row, false)">
-                            {{ _L["schema.designer.edit"] }}
+                            {{ _L["frontend.view.edit"] }}
                         </el-button>
                         <el-button v-if="!scope.row.hasFields && !scope.row.fields?.length" type="info" @click="choose(scope.row)">
-                            {{ _L["schema.designer.down"] }}
+                            {{ _L["frontend.view.down"] }}
                         </el-button>
                         <el-button v-if="!scope.row.hasApps && !scope.row.apps?.length" type="primary" @click="showFields(scope.row)">
-                            {{ _L["schema.designer.fields"] }}
+                            {{ _L["frontend.view.fields"] }}
                         </el-button>
                         <el-popconfirm
                             v-if="!scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length" 
-                            :title="_L['schema.designer.confirmdelete']"
+                            :title="_L['frontend.view.confirmdelete']"
                             :confirm-button-text="_L['YES']"
                             :cancel-button-text="_L['NO']"
                             :icon="Delete"
@@ -77,7 +77,7 @@
                             >
                             <template #reference>
                                 <el-button type="danger">
-                                    {{ _L["schema.designer.delete"] }}
+                                    {{ _L["frontend.view.delete"] }}
                                 </el-button>
                             </template>
                         </el-popconfirm>
@@ -86,7 +86,7 @@
             </el-table>
         </el-main>
         <el-footer>
-            <el-button type="danger" @click="clearAllStorageAppSchemas" style="position: absolute;right: 3rem;">{{ _L["schema.designer.clearcustomapps"] }}</el-button>
+            <el-button type="danger" @click="clearAllStorageAppSchemas" style="position: absolute;right: 3rem;">{{ _L["frontend.view.clearcustomapps"] }}</el-button>
         </el-footer>
 
         <!-- app editor -->
@@ -107,11 +107,11 @@
                 <el-footer>
                     <br/>
                     <template v-if="appNode?.readonly">
-                        <el-button @click="showAppEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                        <el-button @click="showAppEditor = false">{{ _L["frontend.view.close"] }}</el-button>
                     </template>
                     <template v-else>
-                        <el-button type="primary" @click="confirmApp">{{ _L["schema.designer.save"] }}</el-button>
-                        <el-button @click="showAppEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                        <el-button type="primary" @click="confirmApp">{{ _L["frontend.view.save"] }}</el-button>
+                        <el-button @click="showAppEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
                     </template>
                 </el-footer>
             </el-container>
@@ -124,44 +124,44 @@
                     <el-table :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
                         header-align="left" 
                         :header-cell-style="{ background: '#eee' }">
-                        <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                        <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
+                        <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                             <template #default="scope">
-                                {{ _L(scope.row.display) }}
+                                {{ _L(scope.row.display.key ? scope.row.display : scope.row.name) }}
                             </template>
                         </el-table-column>
-                        <el-table-column align="left" prop="type" :label="_L['schema.designer.type']" min-width="120">
+                        <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{
-                                    type: 'schema.valuetype',
+                                    type: 'system.schema.valuetype',
                                     readonly: true
                                 }" plain-text="left"></schema-view>
                             </template>
                         </el-table-column>
-                        <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150">
+                        <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
                             <template #default="scope">
                                 {{ _L(scope.row.desc) }}
                             </template>
                         </el-table-column>
-                        <el-table-column align="left" header-align="center" :label="_L['schema.designer.oper']" width="400">
+                        <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="400">
                             <template #header>
                                 <a href="javascript:void(0)" @click="handleFieldNew"
                                     style="text-decoration: underline; color: lightseagreen;">
-                                    {{ _L["schema.designer.new"] }}
+                                    {{ _L["frontend.view.new"] }}
                                 </a>
                             </template>
                             <template #default="scope">
                                 <el-button type="info" @click="handleFieldEdit(scope.row, true)">
-                                    {{ _L["schema.designer.view"] }}
+                                    {{ _L["frontend.view.view"] }}
                                 </el-button>
                                 <el-button type="success" @click="handleFieldEdit(scope.row, false)">
-                                    {{ _L["schema.designer.edit"] }}
+                                    {{ _L["frontend.view.edit"] }}
                                 </el-button>
                                 <el-button v-if="scope.$index > 0" type="warning" @click="moveFieldUp(scope.row)">
-                                    {{ _L["schema.designer.moveup"] }}
+                                    {{ _L["frontend.view.moveup"] }}
                                 </el-button>
                                 <el-popconfirm
-                                    :title="_L['schema.designer.confirmdelete']"
+                                    :title="_L['frontend.view.confirmdelete']"
                                     :confirm-button-text="_L['YES']"
                                     :cancel-button-text="_L['NO']"
                                     :icon="Delete"
@@ -169,7 +169,7 @@
                                     >
                                     <template #reference>
                                         <el-button type="danger">
-                                            {{ _L["schema.designer.delete"] }}
+                                            {{ _L["frontend.view.delete"] }}
                                         </el-button>
                                     </template>
                                 </el-popconfirm>
@@ -179,8 +179,8 @@
                 </el-main>
                 <el-footer>
                     <br/>
-                    <el-button v-if="fields.length" type="primary" @click="tryit">{{ _L["schema.designer.tryit"] }}</el-button>
-                    <el-button @click="showFieldList = false">{{ _L["schema.designer.close"] }}</el-button>
+                    <el-button v-if="fields.length" type="primary" @click="tryit">{{ _L["frontend.view.tryit"] }}</el-button>
+                    <el-button @click="showFieldList = false">{{ _L["frontend.view.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
@@ -203,18 +203,18 @@
                 <el-footer>
                     <br/>
                     <template v-if="appFieldNode?.readonly">
-                        <el-button @click="showAppFieldEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                        <el-button @click="showAppFieldEditor = false">{{ _L["frontend.view.close"] }}</el-button>
                     </template>
                     <template v-else>
-                        <el-button type="primary" @click="confirmField">{{ _L["schema.designer.save"] }}</el-button>
-                        <el-button @click="showAppFieldEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                        <el-button type="primary" @click="confirmField">{{ _L["frontend.view.save"] }}</el-button>
+                        <el-button @click="showAppFieldEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
                     </template>
                 </el-footer>
             </el-container>
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit'] + appTitle" direction="rtl" size="100%" append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit'] + appTitle" direction="rtl" size="100%" append-to-body destroy-on-close>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <tryapp v-if="currApp"
@@ -223,7 +223,7 @@
                 </el-main>
                 <el-footer>
                     <br/>
-                    <el-button @click="showtryit = false">{{ _L["schema.designer.close"] }}</el-button>
+                    <el-button @click="showtryit = false">{{ _L["frontend.view.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
@@ -309,12 +309,12 @@ const handleNew = async () => {
     localStorage["schema_new_app"] = state.app
 
     appNode.value = new StructNode({
-        type: "schema.app.app",
+        type: "system.schema.appschema",
     }, {})
     showAppEditor.value = true
 
     appWatchHandler = appNode.value.subscribe(() => {
-        operation.value = _L.value["schema.designer.new"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
+        operation.value = _L.value["frontend.view.new"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
     }, true)
 }
 
@@ -323,17 +323,17 @@ const handleEdit = async (row: any, readonly?: boolean) => {
     localStorage["schema_curr_app"] = row.name
     const schema = await getAppSchema(row.name)
     appNode.value = new StructNode({
-        type: "schema.app.app",
+        type: "system.schema.appschema",
         readonly
     }, jsonClone(schema))
     showAppEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
+        operation.value = _L.value["frontend.view.view"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
     }
     else {
         appWatchHandler = appNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
+            operation.value = _L.value["frontend.view.edit"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
         }, true)
     }
 }
@@ -347,7 +347,7 @@ const handleDelete = (row: any) => {
         {
             const res = provider.deleteAppSchema(row.name)
             if (!res) {
-                ElMessage.error(_L.value["schema.designer.cantdelapp"])
+                ElMessage.error(_L.value["frontend.view.cantdelapp"])
                 return
             }
         }
@@ -372,7 +372,7 @@ const confirmApp = async () => {
         if (provider){
             const res = await provider.saveAppSchema(data)
             if (!res) {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
             data.loadState = (data.loadState || 0) | SchemaLoadState.Server
@@ -433,29 +433,29 @@ let appFieldWatchHandler: Function | null = null
 // create
 const handleFieldNew = async () => {
     appFieldNode.value = new StructNode({
-        type: "schema.app.field",
+        type: "system.schema.appfieldschema",
     }, {})
     showAppFieldEditor.value = true
 
     appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-        appFieldOper.value = _L.value["schema.designer.new"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
+        appFieldOper.value = _L.value["frontend.view.new"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
     }, true)
 }
 
 // update
 const handleFieldEdit = async (row: any, readonly?: boolean) => {
     appFieldNode.value = new StructNode({
-        type: "schema.app.field",
+        type: "system.schema.appfieldschema",
         readonly
     }, jsonClone(toRaw(row)))
     showAppFieldEditor.value = true
 
     if (readonly) {
-        appFieldOper.value = _L.value["schema.designer.view"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
+        appFieldOper.value = _L.value["frontend.view.view"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
     }
     else {
         appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-            appFieldOper.value = _L.value["schema.designer.edit"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
+            appFieldOper.value = _L.value["frontend.view.edit"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
         }, true)
     }
 }
@@ -472,7 +472,7 @@ const handleFieldDelete = async (row: any) => {
         {
             const res = provider.deleteAppFieldSchema(appSchema.name, row.name)
             if (!res) {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
         }
@@ -502,7 +502,7 @@ const moveFieldUp = async (row: any) => {
         {
             const res = provider.swapAppFieldSchema(appSchema.name, row.name, temp.name)
             if (!res) {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
         }
@@ -530,7 +530,7 @@ const confirmField = async () => {
         if (provider){
             const res = await provider.saveAppFieldSchema(appSchema.name, data)
             if (!res) {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
         }

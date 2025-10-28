@@ -9,7 +9,7 @@
             </template>
             <div class="func-arg-list" style="width: 100%;">
                 <template v-if="!state.arglen && !state.readonly">
-                    <el-button type="primary" @click="argsNode.addRow()">{{ _L["schema.designer.new"] }}</el-button>
+                    <el-button type="primary" @click="argsNode.addRow()">{{ _L["frontend.view.new"] }}</el-button>
                 </template>
                 <div v-for="i in state.arglen" class="func-arg"
                     style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
@@ -20,8 +20,8 @@
                             in-form="expand" plain-text="left"
                         ></schema-view>
                         <div v-if="!state.readonly" class="bottom clearfix">
-                            <el-button type="primary" @click="argsNode.addRow(i)">{{ _L["schema.designer.new"] }}</el-button>
-                            <el-button type="danger" style="float: right" @click="argsNode.delRows(i - 1)">{{ _L["schema.designer.delete"] }}</el-button>
+                            <el-button type="primary" @click="argsNode.addRow(i)">{{ _L["frontend.view.new"] }}</el-button>
+                            <el-button type="danger" style="float: right" @click="argsNode.delRows(i - 1)">{{ _L["frontend.view.delete"] }}</el-button>
                         </div>
                     </el-card>
                     <el-card shadow="hover">
@@ -38,12 +38,12 @@
                                     in-form="expandall"
                                 ></schema-view>
                                 <br/>
-                                <el-button type="info"  class="bottom clearfix" @click="argdatas[i - 1].showdata = true">{{ _L["schema.designer.showdata"] }}</el-button>
+                                <el-button type="info"  class="bottom clearfix" @click="argdatas[i - 1].showdata = true">{{ _L["frontend.view.showdata"] }}</el-button>
                             </template>
                             <template v-else>
                                 <pre>{{ argdatas[i - 1].data }}</pre>
                                 <br/>
-                                <el-button type="info"  class="bottom clearfix" @click="argdatas[i - 1].showdata = false">{{ _L["schema.designer.showform"] }}</el-button>
+                                <el-button type="info"  class="bottom clearfix" @click="argdatas[i - 1].showdata = false">{{ _L["frontend.view.showform"] }}</el-button>
                             </template>
                         </el-form>
                     </el-card>
@@ -58,7 +58,7 @@
             </template>
             <div class="func-arg-list" style="width: 100%;">
                 <template v-if="!state.explen && !state.readonly">
-                    <el-button type="primary" @click="expsNode.addRow()">{{ _L["schema.designer.new"] }}</el-button>
+                    <el-button type="primary" @click="expsNode.addRow()">{{ _L["frontend.view.new"] }}</el-button>
                 </template>
                 <div v-for="i in state.explen" class="func-arg" style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
                     <el-card class="box-card" shadow="hover" :style="{ ['background-color']: color[i-1] || 'white' }">
@@ -69,8 +69,8 @@
                             no-add no-del style="width: 100%;"
                         ></schema-view>
                         <div v-if="!state.readonly" class="bottom clearfix">
-                            <el-button type="primary" @click="expsNode.addRow(i)">{{ _L["schema.designer.new"] }}</el-button>
-                            <el-button type="danger" style="float: right" @click="expsNode.delRows(i - 1)">{{ _L["schema.designer.delete"] }}</el-button>
+                            <el-button type="primary" @click="expsNode.addRow(i)">{{ _L["frontend.view.new"] }}</el-button>
+                            <el-button type="danger" style="float: right" @click="expsNode.delRows(i - 1)">{{ _L["frontend.view.delete"] }}</el-button>
                         </div>
                     </el-card>
                     <el-card shadow="hover">

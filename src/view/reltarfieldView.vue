@@ -110,7 +110,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
                 option.children ||= []
                 option.children.unshift ({
                     value: `${prefix}${f.name}.${ARRAY_ELEMENT}`,
-                    label: _L["schema.reltarfield.ele"],
+                    label: _L["system.schema.reltarfield.ele"],
                     leaf: true,
                     children: null
                 })
@@ -128,11 +128,11 @@ let fieldsHandler: Function | undefined = undefined
 const fieldsHandlers: { guid: string, name: Function, type: Function }[] = []
 onMounted(() => {
     let parentNode = scalarNode.parent
-    while (parentNode && parentNode.config.type !== "schema.structdefine" && parentNode.config.type !== "schema.arraydefine")
+    while (parentNode && parentNode.config.type !== "system.schema.structschema" && parentNode.config.type !== "system.schema.arrayschema")
         parentNode = parentNode.parent
     if (!parentNode) return
 
-    if (parentNode.config.type === "schema.structdefine")
+    if (parentNode.config.type === "system.schema.structschema")
     {
         const fieldsNode = (parentNode as StructNode).getField("fields") as ArrayNode
 
@@ -163,7 +163,7 @@ onMounted(() => {
                     }
                     if (paths[i] === ARRAY_ELEMENT)
                     {
-                        paths[i] = _L["schema.reltarfield.ele"]
+                        paths[i] = _L["system.schema.reltarfield.ele"]
                         break
                     }
                     if (schema?.type !== SchemaType.Struct) break
@@ -236,7 +236,7 @@ onMounted(() => {
                 options.value = [
                     {
                         value: `${ARRAY_ELEMENT}`,
-                        label: _L["schema.reltarfield.ele"],
+                        label: _L["system.schema.reltarfield.ele"],
                         leaf: true,
                         children: null
                     }
@@ -267,7 +267,7 @@ onMounted(() => {
                     }
                     if (paths[i] === ARRAY_ELEMENT)
                     {
-                        paths[i] = _L["schema.reltarfield.ele"]
+                        paths[i] = _L["system.schema.reltarfield.ele"]
                         break
                     }
                     if (schema?.type !== SchemaType.Struct) break

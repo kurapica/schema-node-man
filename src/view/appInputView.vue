@@ -6,8 +6,8 @@
         <schema-view
             v-model="prefix"
             :config="{
-                type:'schema.app.srcapp',
-                display: _L['schema.designer.upapp']
+                type:'system.schema.app',
+                display: _L['frontend.view.upapp']
             }"
         ></schema-view>
         <el-input

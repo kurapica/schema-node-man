@@ -8,11 +8,11 @@
 
         这样申明使用该类型的字段，都可以直接使用注册的视图完成操作，例如函数返回值类型，结构体字段类型等等。
     </markdown>
-    <showandtry type="schema.valuetype"></showandtry>
+    <showandtry type="system.schema.valuetype"></showandtry>
     <markdown>
         如果注意到类型展示中它的展示形式的话，实际我们用`schema.scalardefine`类型来描述一个基础数据类型。可以简单尝试下，了解即可，实际应用中很少需要额外定义基础数据类型。
     </markdown>
-    <showandtry type="schema.scalardefine"></showandtry>
+    <showandtry type="system.schema.scalarschema"></showandtry>
 </template>
 
 <script setup lang="ts">

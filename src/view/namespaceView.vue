@@ -40,7 +40,7 @@
                         width="width:fit-content"
                         :open-delay="500"
                         trigger="hover">
-                        <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["schema.designer.view"] }}</el-button>
+                        <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
                         <namespace-info-view style="min-width: 300px;" :type="data.value"/>
                         <template #reference>
                             <span style="width: 100%; display: inline-block;">{{ data.label }}</span>
@@ -54,7 +54,7 @@
         <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body @closed="closeNamespaceEditor">
             <el-container class="main" style="height: 80vh;color:black">
                 <el-header>
-                    <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["schema.designer.edit"] }}</el-button>
+                    <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["frontend.view.edit"] }}</el-button>
                 </el-header>
                 <el-main>
                     <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawData" label-width="160"
@@ -72,11 +72,11 @@
                 <el-footer>
                     <br/>
                     <template v-if="namespaceNode?.readonly">
-                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.close"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button>
                     </template>
                     <template v-else>
-                        <el-button type="primary" @click="confirmNameSpace">{{ _L["schema.designer.save"] }}</el-button>
-                        <el-button @click="showNamespaceEditor = false">{{ _L["schema.designer.cancel"] }}</el-button>
+                        <el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button>
+                        <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
                     </template>
                 </el-footer>
             </el-container>
@@ -134,7 +134,7 @@ const schemaTypeOrder = {
     [SchemaType.Enum]: 3,
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
-    [SchemaType.Function]: 6,
+    [SchemaType.Func]: 6,
     [SchemaType.Json]: 7
 }
 
@@ -154,25 +154,24 @@ let lowLimit = 0
 
 // namespace map
 const namespaceMap: any = {
-    "schema.anytype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Function],
-    "schema.namespace": [SchemaType.Namespace],
-    "schema.scalartype": [SchemaType.Namespace, SchemaType.Scalar],
-    "schema.enumtype": [SchemaType.Namespace, SchemaType.Enum],
-    "schema.structtype": [SchemaType.Namespace, SchemaType.Struct],
-    "schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
-    "schema.functype": [SchemaType.Namespace, SchemaType.Function],
-    "schema.pushfunctype": [SchemaType.Namespace, SchemaType.Function],
-    "schema.scalarvalidfunc": [SchemaType.Namespace, SchemaType.Function],
-    "schema.scalarwhitelistfunc": [SchemaType.Namespace, SchemaType.Function],
-    "schema.scalarenumtype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum],
-    "schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
-    "schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
+    "system.schema.anytype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Func],
+    "system.schema.namespace": [SchemaType.Namespace],
+    "system.schema.scalartype": [SchemaType.Namespace, SchemaType.Scalar],
+    "system.schema.enumtype": [SchemaType.Namespace, SchemaType.Enum],
+    "system.schema.structtype": [SchemaType.Namespace, SchemaType.Struct],
+    "system.schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
+    "system.schema.functype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
+    "system.schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
 }[type as string]
 
 // Push function allow both value type and array type of the value type
-const ispushfunctype = type === "schema.pushfunctype"
-const isscalarvalidfunc = type === "schema.scalarvalidfunc"
-const isscalarwhitelist = type === "schema.scalarwhitelistfunc"
+const ispushfunctype = type === "system.schema.pushfunctype"
+const isscalarvalidfunc = type === "system.schema.validfunc"
+const isscalarwhitelist = type === "system.schema.whitelistfunc"
 const enableEntries = ref(true)
 
 // view
@@ -193,17 +192,17 @@ const handleEdit = async (name: string, readonly?: boolean) => {
     handletype.value = name
     editable.value = (readonly || false) && ((schema?.loadState || 0) & SchemaLoadState.System) === 0
     namespaceNode.value = new StructNode({
-        type: "schema.namespacedefine",
+        type: "system.schema.nodeschema",
         readonly
     }, jsonClone(schema))
     showNamespaceEditor.value = true
 
     if (readonly) {
-        operation.value = _L.value["schema.designer.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+        operation.value = _L.value["frontend.view.view"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
     }
     else {
         namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-            operation.value = _L.value["schema.designer.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
+            operation.value = _L.value["frontend.view.edit"] + " " + _L.value(namespaceNode.value?.data.display || namespaceNode.value?.data.name || "")
         }, true)
     }
 }
@@ -224,7 +223,7 @@ const confirmNameSpace = async () => {
             const res = await provider.saveSchema(data)
             if (!res)
             {
-                ElMessage.error(_L.value["schema.designer.error"])
+                ElMessage.error(_L.value["frontend.view.error"])
                 return
             }
             data.loadState |= SchemaLoadState.Server
@@ -247,13 +246,13 @@ const closeNamespaceEditor = () => {
 // generate
 const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> => {
     // check compatible type
-    if (namespaceMap.includes(SchemaType.Function)) {
-        const funcList = options.filter(r => r.type === SchemaType.Function)
-        const blackList: string[] = ["schema"]
+    if (namespaceMap.includes(SchemaType.Func)) {
+        const funcList = options.filter(r => r.type === SchemaType.Func)
+        const blackList: string[] = ["system.schema"]
         for(let i = 0; i < funcList.length; i++)
         {
             const f = await getSchema(funcList[i].value)
-            if (f?.type !== SchemaType.Function || !f.func) continue
+            if (f?.type !== SchemaType.Func || !f.func) continue
 
             // special handling for system entries
             if (enableEntries.value && await isSchemaCanBeUseAs(f.func.return, NS_SYSTEM_ENTRIES))
@@ -294,7 +293,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         return blackList
     }
     else {
-        return ["schema"]
+        return ["system.schema"]
     }
 }
 
@@ -419,7 +418,7 @@ let relationtypeHandler: Function | null = null
 
 onMounted(() => {
     const parent = scalarNode.parent
-    if (scalarNode.config.type === "schema.functype" && parent?.config.type === "schema.funcexp")
+    if (scalarNode.config.type === "system.schema.functype" && parent?.config.type === "system.schema.funcexp")
     {
         const expNode = (parent as StructNode).getField("type") as ScalarNode
         exptypeHandler = expNode.subscribe(() => {
@@ -436,7 +435,7 @@ onMounted(() => {
             reBuildOptions()
         }, true)
     }
-    else if (parent instanceof StructNode && parent.getField("type")?.config?.type === "schema.relationtype")
+    else if (parent instanceof StructNode && parent.getField("type")?.config?.type === "system.schema.relationtype")
     {
         const typeNode = parent.getField("type")
         relationtypeHandler = typeNode.subscribe(() => {

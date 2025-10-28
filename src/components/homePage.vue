@@ -3,7 +3,7 @@
         <el-header style="position: relative;">
             <nav-header></nav-header>
             <p v-if="!isEmbedded" style="position: absolute; top: 0rem; right: 1rem">
-                <el-input v-model="url" :placeholder="_L['schema.server.url']" style="display:inline;margin-right: 2rem" @change="saveServer"></el-input>
+                <el-input v-model="url" :placeholder="_L['frontend.server.url']" style="display:inline;margin-right: 2rem" @change="saveServer"></el-input>
                 <a href="javascript:void(0)" @click="toggle('enUS')" :class="lang =='enUS' ? 'active' : 'deactive'">EN</a>
                 |
                 <a href="javascript:void(0)" @click="toggle('zhCN')" :class="lang =='zhCN' ? 'active' : 'deactive'">中</a>

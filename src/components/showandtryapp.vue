@@ -1,13 +1,13 @@
 <template>
     <section>
-        <el-button type="success" @click="showtryit = true">{{ _L["schema.designer.clicktotry"] }}</el-button>
-        <el-drawer v-model="showtryit" :title="_L['schema.nav.tryit']" direction="rtl" size="100%" append-to-body>
+        <el-button type="success" @click="showtryit = true">{{ _L["frontend.view.clicktotry"] }}</el-button>
+        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit']" direction="rtl" size="100%" append-to-body>
             <el-container class="main" style="height: 80vh;color:black;">
                 <el-main>
                     <el-tabs v-model="activeTab">
-                        <el-tab-pane :label="_L['schema.designer.tryit']" :name="0"></el-tab-pane>
-                        <el-tab-pane :label="_L['schema.designer.app']" :name="1"></el-tab-pane>
-                        <el-tab-pane :label="_L['schema.designer.fields']" :name="2"></el-tab-pane>
+                        <el-tab-pane :label="_L['frontend.view.tryit']" :name="0"></el-tab-pane>
+                        <el-tab-pane :label="_L['frontend.view.app']" :name="1"></el-tab-pane>
+                        <el-tab-pane :label="_L['frontend.view.fields']" :name="2"></el-tab-pane>
                     </el-tabs>
                     <el-form v-if="activeTab === 1 && schemaNode" ref="editorRef" :model="schemaNode.rawData" label-width="160"
                         label-position="left" style="width: 100%; height: 90%;">
@@ -23,26 +23,26 @@
                     <el-table v-if="activeTab === 2" :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
                         header-align="left" 
                         :header-cell-style="{ background: '#eee' }">
-                        <el-table-column align="left" prop="name" :label="_L['schema.designer.name']" min-width="120" />
-                        <el-table-column align="left" prop="display" :label="_L['schema.designer.display']" min-width="150">
+                        <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
+                        <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                             <template #default="scope">
                                 <span>{{ _L(scope.row.display) }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column align="left" prop="type" :label="_L['schema.designer.type']" min-width="120">
+                        <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{
-                                    type: 'schema.valuetype',
+                                    type: 'system.schema.valuetype',
                                     readonly: true
                                 }" plain-text="left"></schema-view>
                             </template>
                         </el-table-column>
-                        <el-table-column align="left" prop="desc" :label="_L['schema.designer.desc']" min-width="150" />
+                        <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150" />
                     </el-table>
                 </el-main>
                 <el-footer>
                     <br/>
-                    <el-button @click="showtryit = false">{{ _L["schema.designer.close"] }}</el-button>
+                    <el-button @click="showtryit = false">{{ _L["frontend.view.close"] }}</el-button>
                 </el-footer>
             </el-container>
         </el-drawer>
@@ -74,7 +74,7 @@ watch(() => props.app, () => {
     if (schema)
     {
         schemaNode.value = new StructNode({
-            type: "schema.app.app",
+            type: "system.schema.appschema",
             readonly: true
         }, jsonClone(toRaw(schema)))
         fields.value = schema.fields ? [...schema.fields] : []
