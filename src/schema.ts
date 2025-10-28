@@ -2141,9 +2141,9 @@ registerSchema([
         },
     },
     {
-        name: "system.schema.funcschema",
+        name: "system.schema.functionschema",
         type: SchemaType.Struct,
-        display: _LS("system.schema.funcschema"),
+        display: _LS("system.schema.functionschema"),
         struct: {
             fields: [
                 {
@@ -2151,35 +2151,35 @@ registerSchema([
                     require: true,
                     immutable: true,
                     type: "system.schema.valuetype",
-                    display: _LS("system.schema.funcschema.return")
+                    display: _LS("system.schema.functionschema.return")
                 },
                 {
                     name: "args",
                     require: true,
                     type: "system.schema.funcargs",
-                    display: _LS("system.schema.funcschema.args")
+                    display: _LS("system.schema.functionschema.args")
                 },
                 {
                     name: "exps",
                     require: true,
                     type: "system.schema.funcexps",
-                    display: _LS("system.schema.funcschema.exps")
+                    display: _LS("system.schema.functionschema.exps")
                 },
                 {
                     name: "generic",
                     type: NS_SYSTEM_STRINGS,
-                    display: _LS("system.schema.funcschema.generic"),
+                    display: _LS("system.schema.functionschema.generic"),
                     invisible: true,
                 },
                 {
                     name: "server",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("system.schema.funcschema.server"),
+                    display: _LS("system.schema.functionschema.server"),
                 },
                 {
                     name: "nocache",
                     type: NS_SYSTEM_BOOL,
-                    display: _LS("system.schema.funcschema.nocache"),
+                    display: _LS("system.schema.functionschema.nocache"),
                 }
             ],
         }
@@ -2238,15 +2238,15 @@ registerSchema([
                 },
                 {
                     name: "func",
-                    type: "system.schema.funcschema",
+                    type: "system.schema.functionschema",
                     display: _LS("system.schema.nodeschema.func"),
                 },
             ],
             relations: [
                 {
                     field: "scalar",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2258,8 +2258,8 @@ registerSchema([
                 },
                 {
                     field: "enum",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2271,8 +2271,8 @@ registerSchema([
                 },
                 {
                     field: "struct",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2284,8 +2284,8 @@ registerSchema([
                 },
                 {
                     field: "array",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2297,8 +2297,8 @@ registerSchema([
                 },
                 {
                     field: "func",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notequal",
+                    type: RelationType.Visible,
+                    func: "system.logic.equal",
                     args: [
                         {
                             name: "type"
@@ -2487,6 +2487,6 @@ regSchemaTypeView("system.schema.structfieldrelations", structfldrelationinfosVi
 regSchemaTypeView("system.schema.reltarfield", reltarfieldView)
 regSchemaTypeView("system.schema.structfldfuncargs", structfldfuncargsView)
 
-regSchemaTypeView("system.schema.funcschema", funcdefineView)
+regSchemaTypeView("system.schema.functionschema", funcdefineView)
 
 //#endregion

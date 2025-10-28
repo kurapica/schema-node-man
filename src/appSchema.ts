@@ -3,17 +3,17 @@ import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpr
 // Schema for definition
 registerSchema([
     {
-        name: "system.schema.appsrc",
+        name: "system.schema.app",
         type: SchemaType.Scalar,
-        display: _LS("system.schema.appsrc"),
+        display: _LS("system.schema.app"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
     },
     {
-        name: "system.schema.appsrcfld",
+        name: "system.schema.appfield",
         type: SchemaType.Scalar,
-        display: _LS("system.schema.appsrcfld"),
+        display: _LS("system.schema.appfield"),
         scalar: {
             base: NS_SYSTEM_STRING
         }
@@ -455,12 +455,12 @@ registerSchema([
                 },
                 {
                     name: "sourceApp",
-                    type: "system.schema.appsrc",
+                    type: "system.schema.app",
                     display: _LS("system.schema.appfieldschema.sourceapp"),
                 },
                 {
                     name: "sourceField",
-                    type: "system.schema.appsrcfld",
+                    type: "system.schema.appfield",
                     display: _LS("system.schema.appfieldschema.sourcefld"),
                 },
                 {
@@ -697,7 +697,7 @@ registerSchema([
             args: [
                 {
                     name: "app",
-                    type: "system.schema.appsrc",
+                    type: "system.schema.app",
                     nullable: true,
                 }
             ],
@@ -765,7 +765,7 @@ registerSchema([
             args: [
                 {
                     name: "app",
-                    type: "system.schema.appsrc",
+                    type: "system.schema.app",
                     nullable: true,
                 }
             ],
@@ -793,7 +793,7 @@ registerSchema([
                 },
                 {
                     name: "app",
-                    type: "system.schema.appsrc",
+                    type: "system.schema.app",
                     require: true,
                     display: _LS("system.schema.apptarget.app"),
                 },
@@ -1083,9 +1083,9 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
-regSchemaTypeView("system.schema.appsrc", sourceappView)
+regSchemaTypeView("system.schema.app", sourceappView)
 regSchemaTypeView("system.schema.appinput", appInputView)
-regSchemaTypeView("system.schema.appsrcfld", appsrcfldView)
+regSchemaTypeView("system.schema.appfield", appsrcfldView)
 regSchemaTypeView("system.schema.appaccessfld", appaccessfldView)
 regSchemaTypeView("system.schema.apppushfld", appaccessfldView)
 regSchemaTypeView("system.schema.apppushflds", appPushfldsView)

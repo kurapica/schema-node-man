@@ -3,8 +3,8 @@
         <el-header style="height: fit-content; width: 100%;">
             <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
                 <schema-view v-model="state.app" in-form :config="{
-                    type: 'system.schema.appsrc',
-                    display: _LS('system.schema.appsrc')
+                    type: 'system.schema.app',
+                    display: _LS('system.schema.app')
                 }"></schema-view>
                 <schema-view v-model="state.keyword" in-form :config="{
                     type: 'system.string',
@@ -38,7 +38,7 @@
                 <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
                 <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                     <template #default="scope">
-                        {{ _L(scope.row.display) }}
+                        {{ _L(scope.row.display.key ? scope.row.display : scope.row.name) }}
                     </template>
                 </el-table-column>
                 <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
@@ -127,7 +127,7 @@
                         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
                         <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                             <template #default="scope">
-                                {{ _L(scope.row.display) }}
+                                {{ _L(scope.row.display.key ? scope.row.display : scope.row.name) }}
                             </template>
                         </el-table-column>
                         <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
