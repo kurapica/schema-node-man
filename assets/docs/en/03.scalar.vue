@@ -8,11 +8,11 @@
 
         Fields declared with this type can directly use the registered view for interaction. This includes use cases like function return types, struct field types, and more.
     </markdown>
-    <showandtry type="schema.valuetype"></showandtry>
+    <showandtry type="system.schema.valuetype"></showandtry>
     <markdown>
         If you pay attention to how the type is displayed, you’ll notice that we actually use the `schema.scalardefine` type to describe a basic data type. You can try it out briefly just to get a sense of how it works—but in practical applications, there is rarely a need to define additional basic data types.
     </markdown>
-    <showandtry type="schema.scalardefine"></showandtry>
+    <showandtry type="system.schema.scalarschema"></showandtry>
 </template>
 
 <script setup lang="ts">
