@@ -160,6 +160,5 @@ export function useSchemaServerProvider(provider: ISchemaServerProvder): void{
  * @returns the schema server provider
  */
 export function getSchemaServerProvider() {
-    console.log("Get Schema Server Provider:", schemaServerProvider, getSchemaApiBaseUrl())
     return schemaServerProvider ?? (getSchemaApiBaseUrl() ? defaultSchemaServerProvider : null)
 }
