@@ -24,7 +24,7 @@ if (localStorage["lang"])
 reloadStorageSchemas()
 reloadStorageAppSchemas()
 if (document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true') {
-    setSchemaSite(document.querySelector('meta[name="api-base-url"]')?.getAttribute('content') || '/schema')
+    setSchemaSite(document.querySelector('meta[name="schema-api-base-url"]')?.getAttribute('content') || '/schema')
 }
 
 // Router
