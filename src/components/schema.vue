@@ -42,7 +42,7 @@
                 <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
                 <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                     <template #default="scope">
-                        {{ _L(scope.row.display.key ? scope.row.display : scope.row.name) }}
+                        {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
