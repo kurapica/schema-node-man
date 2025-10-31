@@ -317,7 +317,7 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
             value: v.name,
             type: v.type,
             display: v.display,
-            label: _L.value(v.display),
+            label: _L.value(v.display?.key ? v.display : v.name),
             loadState: v.loadState || 0,
             leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex((s:INodeSchema) => s.type === SchemaType.Namespace) < 0)),
             children: null
@@ -470,7 +470,7 @@ onMounted(() => {
                 rebuild = true
                 const schema = await getSchema(name)
                 if (!schema) break
-                display.push(_L.value(schema.display || paths[i]))
+                display.push(_L.value(schema.display?.key ? schema.display : paths[i]))
             }
         }
         state.display = display.join("/")

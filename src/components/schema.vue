@@ -40,14 +40,14 @@
              @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
                 <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
-                <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
-                    <template #default="scope">
-                        {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
-                    </template>
-                </el-table-column>
                 <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
                     <template #default="scope">
                         {{ _L['system.schema.schematype.' + scope.row.type] }}
+                    </template>
+                </el-table-column>
+                <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
+                    <template #default="scope">
+                        {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
                     </template>
                 </el-table-column>
                 <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="280">
@@ -123,7 +123,7 @@
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body destroy-on-close>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <tryit-view :type="tryittype"></tryit-view>
@@ -250,6 +250,7 @@ const refresh = async () => {
     const schema = await getSchema(state.namespace || "")
     if (schema?.type === SchemaType.Namespace) {
         let temp = [...schema.schemas || []]
+        temp = temp.filter(p => ((p.loadState || 0) & SchemaLoadState.Frontend) === 0) // hide frontend only schemas
         if (state.type) {
             temp = temp.filter(p => p.type === state.type)
         }

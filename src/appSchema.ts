@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -143,13 +143,17 @@ registerSchema([
             return: "system.schema.valuetype",
             args: [
                 {
+                    name: "app",
+                    type: NS_SYSTEM_STRING,
+                },
+                {
                     name: "field",
                     type: NS_SYSTEM_STRING
                 },
             ],
             exps: [],
-            func: async (field: string) => {
-                const appSchema = await getAppSchema(localStorage["schema_curr_app"])
+            func: async (app: string, field: string) => {
+                const appSchema = await getAppSchema(app)
                 const fields = appSchema?.fields || []
                 const paths = (field || "").split(".")
                 if (paths.length === 0) return null
@@ -193,7 +197,7 @@ registerSchema([
                 {
                     name: "fieldType",
                     displayOnly: true,
-                    invisible: true,
+                    invisible: false,
                     type : "system.schema.valuetype",
                     display: _LS("system.schema.structfieldrelation.fieldtype"),
                 },
@@ -223,16 +227,6 @@ registerSchema([
                 },
             ],
             relations: [
-                {
-                    field: "fieldType",
-                    type: RelationType.Default,
-                    func: "system.schema.appgetfieldtype",
-                    args: [
-                        {
-                            name: "field"
-                        }
-                    ]
-                },
                 {
                     field: "type",
                     type: RelationType.WhiteList,
@@ -284,11 +278,15 @@ registerSchema([
         display: _LS("system.schema.appgetsourceappblacklist"),
         func: {
             return: NS_SYSTEM_STRINGS,
-            args: [],
+            args: [
+                {
+                    name: "app",
+                    type: NS_SYSTEM_STRING,
+                }
+            ],
             exps: [],
-            func: () => {
-                const currapp = localStorage["schema_curr_app"]
-                return currapp ? [currapp] : []
+            func: (app: string) => {
+                return app ? [app] : []
             }
         }
     },
@@ -428,6 +426,13 @@ registerSchema([
         display: _LS("system.schema.appfieldschema"),
         struct: {
             fields: [
+                {
+                    name: "app",
+                    type: NS_SYSTEM_STRING,
+                    readonly: true,
+                    invisible: true,
+                    display: _LS("system.schema.appfieldschema.app"),
+                },
                 {
                     name: "name",
                     require: true,
@@ -584,7 +589,11 @@ registerSchema([
                     field: "sourceApp",
                     type: RelationType.BlackList,
                     func: "system.schema.appgetsourceappblacklist",
-                    args: []
+                    args: [
+                        {
+                            name: "app"
+                        }
+                    ]
                 },
                 {
                     field: "sourceField",
@@ -741,6 +750,19 @@ registerSchema([
                 },
             ],
             relations: [
+                {
+                    field: "relations.fieldType",
+                    type: RelationType.Default,
+                    func: "system.schema.appgetfieldtype",
+                    args: [
+                        {
+                            name: "name",
+                        },
+                        {
+                            name: "relations.field"
+                        }
+                    ]
+                },
                 {
                     field: "relations",
                     type: RelationType.Invisible,

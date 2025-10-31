@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getCachedSchema, isNull, SchemaType, ScalarNode, getSchema, isSchemaCanBeUseAs, ARRAY_ELEMENT, getAppSchema, _L } from "schema-node"
+import { getCachedSchema, isNull, SchemaType, ScalarNode, getSchema, isSchemaCanBeUseAs, ARRAY_ELEMENT, getAppSchema, _L, StructNode } from "schema-node"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 
 //#region Inner type
@@ -143,8 +143,24 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
 let datahandler: Function | undefined = undefined
 let statehandler: Function | undefined = undefined
 onMounted(async () => {
-    const app = localStorage["schema_curr_app"] // current app
-    const fields = (await getAppSchema(app))!.fields!
+    let app = ""
+    let parentNode = scalarNode.parent
+    while (parentNode)
+    {
+        if (parentNode.config.type === "system.schema.appfieldschema")
+        {
+            app = (parentNode as StructNode).getField("app").rawData
+            break
+        }
+        else if(parentNode.config.type === "system.schema.appschema")
+        {
+            app = (parentNode as StructNode).getField("name").rawData
+            break
+        }
+        parentNode = parentNode.parent
+    }
+
+    const fields = app ? (await getAppSchema(app))!.fields! : []
 
     // option generate
     const rebuildOptions = async () => options.value = await buildOptions(fields)

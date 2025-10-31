@@ -320,7 +320,6 @@ const handleNew = async () => {
 
 // update
 const handleEdit = async (row: any, readonly?: boolean) => {
-    localStorage["schema_curr_app"] = row.name
     const schema = await getAppSchema(row.name)
     appNode.value = new StructNode({
         type: "system.schema.appschema",
@@ -405,7 +404,6 @@ let currApp: string | null = null
 
 const showFields = async(row: any) => {
     currApp = row.name
-    localStorage["schema_curr_app"] = currApp
     const appSchema = await getAppSchema(row.name)
     appTitle.value = _L.value(appSchema?.display) || appSchema?.name || ""
     fields.value = appSchema?.fields ? [...appSchema.fields] : []
@@ -434,7 +432,7 @@ let appFieldWatchHandler: Function | null = null
 const handleFieldNew = async () => {
     appFieldNode.value = new StructNode({
         type: "system.schema.appfieldschema",
-    }, {})
+    }, { app: currApp! })
     showAppFieldEditor.value = true
 
     appFieldWatchHandler = appFieldNode.value.subscribe(() => {

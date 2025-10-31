@@ -79,6 +79,13 @@ importLanguage("zhCN", {
     "frontend.catalog.10.app.ref": "3. 字段引用",
     "frontend.catalog.10.app.main": "4. 主应用",
 
+    "frontend": "前端用",
+    "frontend.header": "Http头",
+    "frontend.header.key": "键",
+    "frontend.header.value": "值",
+    "frontend.auth": "认证配置",
+    "frontend.auth.savestorage": "本地存储",
+
     // system schema
     "system.schema.pushfunctype": "推送函数类型",
     "system.schema.namespaceinput": "命名空间录入用",

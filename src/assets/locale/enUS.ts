@@ -79,6 +79,13 @@ importLanguage("enUS", {
     "frontend.catalog.10.app.ref": "3. Ref",
     "frontend.catalog.10.app.main": "4. Main App",
 
+    "frontend": "Frontend Only",
+    "frontend.header": "Http Header",
+    "frontend.header.key": "Key",
+    "frontend.header.value": "Value",
+    "frontend.auth": "Auth Config",
+    "frontend.auth.savestorage": "Local Storage",
+
     // system schema
     "system.schema.pushfunctype": "Push Function Type",
     "system.schema.namespaceinput": "Namespace Input",
