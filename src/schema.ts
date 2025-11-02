@@ -2188,6 +2188,22 @@ registerSchema([
 
     //#region namespace defintion
     {
+        name: "system.schema.genarraydisplay",
+        type: SchemaType.Func,
+        display: _LS("system.schema.genarraydisplay"),
+        func: {
+            return: NS_SYSTEM_STRING,
+            args: [
+                {
+                    name: "elementType",
+                    type: "system.schema.valuetype",
+                }
+            ],
+            exps: [],
+            func: (elementType: string) => `{[LIST.PREFIX]}{@${elementType}}{[LIST.SUFFIX]}`
+        },
+    },
+    {
         name: "system.schema.nodeschema",
         type: SchemaType.Struct,
         display: _LS("system.schema.nodeschema"),
@@ -2305,6 +2321,16 @@ registerSchema([
                         },
                         {
                             value: SchemaType.Func
+                        }
+                    ]
+                },
+                {
+                    field: "display.key",
+                    type: RelationType.Default,
+                    func: "system.schema.genarraydisplay",
+                    args: [
+                        {
+                            name: "array.element"
                         }
                     ]
                 }
