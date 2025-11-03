@@ -125,7 +125,6 @@ importLanguage("zhCN", {
     "system.schema.getcalltypewhitelist": "获取函数调用类型白名单",
     "system.schema.getfuncroot": "基于返回值和调用类型获取函数返回值",
     "system.schema.getexpvaluetype": "获取表达式值类型",
-    "system.schema.isvaluenotnull": "判定值是否非空",
     "system.schema.hideexpvalue": "是否隐藏表达式的值",
 
     "system.schema.app": "应用",
@@ -133,8 +132,9 @@ importLanguage("zhCN", {
     "system.schema.appaccessfld": "访问字段",
     "system.schema.appinput": "应用名(输入用)",
     "system.schema.apppushfld": "推送用字段",
-    "system.schema.apppushflds": "推送字段列表",
     "system.schema.appfieldvalarg": "参数",
+    "system.schema.appfieldvalarg.label": "标签",
+    "system.schema.appfieldvalarg.type": "类型",
     "system.schema.appfieldvalarg.name": "应用字段名",
     "system.schema.appfieldvalarg.value": "常量",
     "system.schema.appfieldvalargs": "参数列表",

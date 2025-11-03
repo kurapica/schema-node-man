@@ -124,7 +124,6 @@ importLanguage("enUS", {
     "system.schema.getcalltypewhitelist": "Gets the exp call types",
     "system.schema.getfuncroot": "Gets the function return type by call type",
     "system.schema.getexpvaluetype": "Gets the type for exp value",
-    "system.schema.isvaluenotnull": "Check is value not value",
     "system.schema.hideexpvalue": "Hide the exp value",
 
     "system.schema.app": "App",
@@ -132,8 +131,9 @@ importLanguage("enUS", {
     "system.schema.appaccessfld": "Access Field",
     "system.schema.appinput": "App(Input)",
     "system.schema.apppushfld": "Push Field",
-    "system.schema.apppushflds": "Push Field List",
     "system.schema.appfieldvalarg": "Parameter",
+    "system.schema.appfieldvalarg.label": "Display",
+    "system.schema.appfieldvalarg.type": "Type",
     "system.schema.appfieldvalarg.name": "App field name",
     "system.schema.appfieldvalarg.value": "Constant",
     "system.schema.appfieldvalargs": "Parameter list",

@@ -1,857 +1,202 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, type IStructScalarFieldConfig, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING } from "schema-node"
 
 // Schema for definition
 registerSchema([
-    {
-        name: "system.schema.app",
-        type: SchemaType.Scalar,
-        display: _LS("system.schema.app"),
-        scalar: {
-            base: NS_SYSTEM_STRING
-        }
-    },
-    {
-        name: "system.schema.appfield",
-        type: SchemaType.Scalar,
-        display: _LS("system.schema.appfield"),
-        scalar: {
-            base: NS_SYSTEM_STRING
-        }
-    },
-    {
-        name: "system.schema.appaccessfld",
-        type: SchemaType.Scalar,
-        display: _LS("system.schema.appaccessfld"),
-        scalar: {
-            base: NS_SYSTEM_STRING
-        }
-    },
-    {
-        name: "system.schema.apppushfld",
-        type: SchemaType.Scalar,
-        display: _LS("system.schema.apppushfld"),
-        scalar: {
-            base: "system.schema.appaccessfld"
-        }
-    },
-    {
-        name: "system.schema.appinput",
-        type: SchemaType.Scalar,
-        display: _LS("system.schema.appinput"),
-        scalar: {
-            base: NS_SYSTEM_STRING
-        }
-    },
-    {
-        name: "system.schema.apppushflds",
-        type: SchemaType.Array,
-        display: _LS("system.schema.apppushflds"),
-        array: {
-            element: "system.schema.apppushfld"
-        }
-    },
-    {
-        name: "system.schema.appfieldvalarg",
-        type: SchemaType.Struct,
-        display: _LS("system.schema.appfieldvalarg"),
-        struct: {
-            fields: [
-                {
-                    name: "label",
-                    type: NS_SYSTEM_STRING,
-                    displayOnly: true,
-                    display: _LS("system.schema.funccallarg.display"),
-                },
-                {
-                    name: "type",
-                    type: "system.schema.valuetype",
-                    invisible: false,
-                    displayOnly: true,
-                    display: _LS("system.schema.structfldfuncarg.type"),
-                },
-                {
-                    name: "name",
-                    type: "system.schema.appaccessfld",
-                    display: _LS("system.schema.appfieldvalarg.name")
-                },
-                {
-                    name: "value",
-                    type: "system.schema.anyvalue",
-                    display: _LS("system.schema.appfieldvalarg.value")
-                },
-            ],
-            relations: [
-                {
-                    field: "name",
-                    type: RelationType.Root,
-                    func: "system.conv.assign",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "name",
-                    type: RelationType.Disable,
-                    func: "system.schema.isvaluenotnull",
-                    args: [
-                        {
-                            name: "value"
-                        }
-                    ]
-                },
-                {
-                    field: "value",
-                    type: RelationType.Type,
-                    func: "system.schema.getexpvaluetype",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "value",
-                    type: RelationType.Disable,
-                    func: "system.schema.hideexpvalue",
-                    args: [
-                        {
-                            name: "type"
-                        },
-                        {
-                            name: "name"
-                        }
-                    ]
-                },
-            ]
-        }
-    },
-    {
-        name: "system.schema.appfieldvalargs",
-        type: SchemaType.Array,
-        display: _LS("system.schema.appfieldvalargs"),
-        array: {
-            element: "system.schema.appfieldvalarg"
-        }
-    },
-    {
-        name: "system.schema.appgetfieldtype",
-        type: SchemaType.Func,
-        display: _LS("system.schema.getfieldtype"),
-        func: {
-            return: "system.schema.valuetype",
-            args: [
-                {
-                    name: "app",
-                    type: NS_SYSTEM_STRING,
-                },
-                {
-                    name: "field",
-                    type: NS_SYSTEM_STRING
-                },
-            ],
-            exps: [],
-            func: async (app: string, field: string) => {
-                const appSchema = await getAppSchema(app)
-                const fields = appSchema?.fields || []
-                const paths = (field || "").split(".")
-                if (paths.length === 0) return null
-                let tarField: { type: string } | undefined = (fields || []).find((p:IAppFieldSchema) => p.name === paths[0])
-                for (let i = 1; i < paths.length; i++) {
-                    if (!tarField) return null
+    newSystemScalar("system.schema.app", NS_SYSTEM_STRING, undefined, undefined, { upLimit: 128 }),
+    newSystemScalar("system.schema.appfield", "system.schema.varname"),
+    newSystemScalar("system.schema.appaccessfld", NS_SYSTEM_STRING),
+    newSystemScalar("system.schema.apppushfld", "system.schema.appaccessfld"),
+    newSystemArray("system.schema.apppushflds", "system.schema.apppushfld"),
+    newSystemScalar("system.schema.appinput", NS_SYSTEM_STRING),
 
-                    let schema = await getSchema(tarField.type)
-                    if (schema?.type === SchemaType.Array && schema.array?.element) {
-                        schema = await getSchema(schema.array!.element)
-                    }
+    newSystemStruct("system.schema.appfieldvalarg", [
+        { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
+        { name: "type", type: "system.schema.valuetype", invisible: false, displayOnly: true },
+        { name: "name", type: "system.schema.appaccessfld" },
+        { name: "value", type: "system.schema.anyvalue" },
+    ], [
+        { field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ] },
+        { field: "name", type: RelationType.Disable, func: "system.schema.isvaluenotnull", args: [ { name: "value" } ] },
+        { field: "value", type: RelationType.Type, func: "system.schema.getexpvaluetype", args: [ { name: "type" } ] },
+        { field: "value", type: RelationType.Disable, func: "system.schema.hideexpvalue", args: [ { name: "type" }, { name: "name" } ] },
+    ]),
+    newSystemArray("system.schema.appfieldvalargs", "system.schema.appfieldvalarg"),
 
-                    if (paths[i] === ARRAY_ELEMENT)
-                    {
-                        return schema?.name
-                    }
+    newSystemFunc("system.schema.appgetfieldtype", "system.schema.valuetype", [
+        { name: "app", type: NS_SYSTEM_STRING },
+        { name: "field", type: NS_SYSTEM_STRING },
+    ], async (app: string, field: string) => {
+        const appSchema = await getAppSchema(app)
+        const fields = appSchema?.fields || []
+        const paths = (field || "").split(".")
+        if (paths.length === 0) return null
+        let tarField: { type: string } | undefined = (fields || []).find((p:IAppFieldSchema) => p.name === paths[0])
+        for (let i = 1; i < paths.length; i++) {
+            if (!tarField) return null
 
-                    if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
-                        tarField = schema.struct.fields.find((p: IStructFieldConfig) => p.name === paths[i])
-                    }
-                    else {
-                        tarField = undefined
-                    }
-                }
-                return tarField?.type
+            let schema = await getSchema(tarField.type)
+            if (schema?.type === SchemaType.Array && schema.array?.element) {
+                schema = await getSchema(schema.array!.element)
             }
-        }
-    },
-    {
-        name: "system.schema.appfieldrelation",
-        type: SchemaType.Struct,
-        display: _LS("system.schema.appfieldrelation"),
-        struct: {
-            fields: [
-                {
-                    name: "field",
-                    require: true,
-                    type: "system.schema.appaccessfld",
-                    display: _LS("system.schema.appfieldrelation.field")
-                },
-                {
-                    name: "fieldType",
-                    displayOnly: true,
-                    invisible: false,
-                    type : "system.schema.valuetype",
-                    display: _LS("system.schema.structfieldrelation.fieldtype"),
-                },
-                {
-                    name: "return",
-                    displayOnly: true,
-                    invisible: true,
-                    type: "system.schema.valuetype",
-                    display: _LS("system.schema.structfieldrelation.return"),
-                },
-                {
-                    name: "type",
-                    require: true,
-                    type: "system.schema.relationtype",
-                    display: _LS("system.schema.appfieldrelation.type"),
-                },
-                {
-                    name: "func",
-                    require: true,
-                    type: "system.schema.functype",
-                    display: _LS("system.schema.appfieldrelation.func"),
-                },
-                {
-                    name: "args",
-                    type: "system.schema.appfieldvalargs",
-                    display: _LS("system.schema.appfieldrelation.args"),
-                },
-            ],
-            relations: [
-                {
-                    field: "type",
-                    type: RelationType.WhiteList,
-                    func: "system.schema.getrelationwhitelist",
-                    args: [
-                        {
-                            name: "fieldType"
-                        }
-                    ]
-                },
-                {
-                    field: "return",
-                    type: RelationType.Default,
-                    func: "system.schema.getrelationfuncreturn",
-                    args: [
-                        {
-                            name: "fieldType"
-                        },
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "func",
-                    type: RelationType.Root,
-                    func: "system.conv.assign",
-                    args: [
-                        {
-                            name: "return"
-                        }
-                    ]
-                }
-            ]
-        }
-    },
-    {
-        name: "system.schema.appfieldrelations",
-        type: SchemaType.Array,
-        display: _LS("system.schema.appfieldrelations"),
-        array: {
-            element: "system.schema.appfieldrelation",
-            primary: [ "field", "type" ]
-        }
-    },
-    {
-        name: "system.schema.appgetsourceappblacklist",
-        type: SchemaType.Func,
-        display: _LS("system.schema.appgetsourceappblacklist"),
-        func: {
-            return: NS_SYSTEM_STRINGS,
-            args: [
-                {
-                    name: "app",
-                    type: NS_SYSTEM_STRING,
-                }
-            ],
-            exps: [],
-            func: (app: string) => {
-                return app ? [app] : []
-            }
-        }
-    },
-    {
-        name: "system.schema.appgetsourceappfldinfo",
-        type: SchemaType.Func,
-        display: _LS("system.schema.appgetsourceappfldinfo"),
-        func: {
-            return: "system.schema.valuetype",
-            args: [
-                {
-                    name: "sourceApp",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                },
-                {
-                    name: "sourceFld",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                },
-                {
-                    name: "info",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                },
-                {
-                    name: "type",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                }
-            ],
-            exps: [],
-            func: async (app: string, fld: string, info: string, type: string) => {
-                if (app && fld)
-                {
-                    const appSchema = await getAppSchema(app)
-                    const f = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === fld)
-                    if (f) return (f as any)[info]
-                }
-                
-                if (type)
-                {
-                    const schema = await getSchema(type)
-                    if (schema)
-                    {
-                        if (info === "name") return schema.name.split(".").pop()
-                        else if(info === "display") return schema.display
-                    }
-                }
-                return null
-            }
-        }
-    },
-    {
-        name: "system.schema.appiscombinedisable",
-        type: SchemaType.Func,
-        display: _LS("system.schema.appiscombinedisable"),
-        func: {
-            return: NS_SYSTEM_BOOL,
-            args: [
-                {
-                    name: "type",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                },
-                {
-                    name: "func",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                }
-            ],
-            exps: [],
-            func: (type: string, func: string) => {
-                if (!type || !func) return true
-                let schema = getCachedSchema(type)
-                if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
-                return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
-            }
-        }
-    },
-    {
-        name: "system.schema.appiscombinesdisable",
-        type: SchemaType.Func,
-        display: _LS("system.schema.appiscombinesdisable"),
-        func: {
-            return: NS_SYSTEM_BOOL,
-            args: [
-                {
-                    name: "type",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                },
-                {
-                    name: "func",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                }
-            ],
-            exps: [],
-            func: (type: string, func: string) => {
-                if (!type || !func) return true
-                let schema = getCachedSchema(type)
-                if (schema?.type === SchemaType.Array)
-                    schema = schema.array?.element ? getCachedSchema(schema.array.element) : undefined
-                return schema?.type !== SchemaType.Struct
-            }
-        }
-    },
-    {
-        name: "system.schema.appistrackpushdisable",
-        type: SchemaType.Func,
-        display: _LS("system.schema.appistrackpushdisable"),
-        func: {
-            return: NS_SYSTEM_BOOL,
-            args: [
-                {
-                    name: "field",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                },
-                {
-                    name: "func",
-                    type: NS_SYSTEM_STRING,
-                    nullable: true
-                }
-            ],
-            exps: [],
-            func: (type: string, func: string) => {
-                if (!type || !func) return true
-                return false
-            }
-        }
-    },
-    {
-        name: "system.schema.appfieldschema",
-        type: SchemaType.Struct,
-        display: _LS("system.schema.appfieldschema"),
-        struct: {
-            fields: [
-                {
-                    name: "app",
-                    type: NS_SYSTEM_STRING,
-                    readonly: true,
-                    invisible: true,
-                    display: _LS("system.schema.appfieldschema.app"),
-                },
-                {
-                    name: "name",
-                    require: true,
-                    type: "system.schema.varname",
-                    display: _LS("system.schema.appfieldschema.name"),
-                    upLimit: 32,
-                } as IStructScalarFieldConfig,
-                {
-                    name: "type",
-                    require: true,
-                    type: "system.schema.valuetype",
-                    display: _LS("system.schema.appfieldschema.type"),
-                },
-                {
-                    name: "display",
-                    type: "system.localestring",
-                    display: _LS("system.schema.appfieldschema.display"),
-                    upLimit: 64,
-                },
-                {
-                    name: "desc",
-                    type: "system.localestring",
-                    display: _LS("system.schema.appfieldschema.desc"),
-                    upLimit: 255,
-                },
-                {
-                    name: "sourceApp",
-                    type: "system.schema.app",
-                    display: _LS("system.schema.appfieldschema.sourceapp"),
-                },
-                {
-                    name: "sourceField",
-                    type: "system.schema.appfield",
-                    display: _LS("system.schema.appfieldschema.sourcefld"),
-                },
-                {
-                    name: "trackPush",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("system.schema.appfieldschema.trackpush"),
-                },
-                {
-                    name: "incrUpdate",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("system.schema.appfieldschema.incrupdate"),
-                },
-                {
-                    name: "frontend",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("system.schema.appfieldschema.frontend"),
-                },
-                {
-                    name: "disable",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("system.schema.appfieldschema.disable"),
-                },
-                {
-                    name: "readonly",
-                    type: NS_SYSTEM_BOOL,
-                    display: _LS("system.schema.appfieldschema.readonly"),
-                },
-                {
-                    name: "func",
-                    type: "system.schema.pushfunctype",
-                    display: _LS("system.schema.appfieldschema.func"),
-                },
-                {
-                    name: "args",
-                    type: "system.schema.apppushflds",
-                    display: _LS("system.schema.appfieldschema.args"),
-                },
-                {
-                    name: "combine",
-                    type: "system.schema.datacombinetype",
-                    display: _LS("system.schema.appfieldschema.combine"),
-                },
-                {
-                    name: "combines",
-                    type: "system.schema.datacombines",
-                    display: _LS("system.schema.arrayschema.combine"),
-                },
-            ],
-            relations: [
-                {
-                    field: "name",
-                    type: RelationType.Default,
-                    func: "system.schema.appgetsourceappfldinfo",
-                    args: [
-                        {
-                            name: "sourceApp"
-                        },
-                        {
-                            name: "sourceField"
-                        },
-                        {
-                            value: "name"
-                        },
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "display",
-                    type: RelationType.Default,
-                    func: "system.schema.appgetsourceappfldinfo",
-                    args: [
-                        {
-                            name: "sourceApp"
-                        },
-                        {
-                            name: "sourceField"
-                        },
-                        {
-                            value: "display"
-                        },
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "desc",
-                    type: RelationType.Default,
-                    func: "system.schema.appgetsourceappfldinfo",
-                    args: [
-                        {
-                            name: "sourceApp"
-                        },
-                        {
-                            name: "sourceField"
-                        },
-                        {
-                            value: "desc"
-                        }
-                    ]
-                },
-                {
-                    field: "type",
-                    type: RelationType.Default,
-                    func: "system.schema.appgetsourceappfldinfo",
-                    args: [
-                        {
-                            name: "sourceApp"
-                        },
-                        {
-                            name: "sourceField"
-                        },
-                        {
-                            value: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "sourceApp",
-                    type: RelationType.BlackList,
-                    func: "system.schema.appgetsourceappblacklist",
-                    args: [
-                        {
-                            name: "app"
-                        }
-                    ]
-                },
-                {
-                    field: "sourceField",
-                    type: RelationType.Invisible,
-                    func: "system.logic.isnull",
-                    args: [
-                        {
-                            name: "sourceApp"
-                        }
-                    ]
-                },
-                {
-                    field: "sourceField",
-                    type: RelationType.Root,
-                    func: "system.conv.assign",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "func",
-                    type: RelationType.Root,
-                    func: "system.conv.assign",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "args",
-                    type: RelationType.Invisible,
-                    func: "system.logic.isnull",
-                    args: [
-                        {
-                            name: "func"
-                        }
-                    ]
-                },
-                {
-                    field: "frontend",
-                    type: RelationType.Invisible,
-                    func: "system.logic.notnull",
-                    args: [
-                        {
-                            name: "sourceApp"
-                        }
-                    ]
-                },
-                {
-                    field: "combine",
-                    type: RelationType.Invisible,
-                    func: "system.schema.appiscombinedisable",
-                    args: [
-                        {
-                            name: "type"
-                        },
-                        {
-                            name: "func"
-                        }
-                    ]
-                },
-                {
-                    field: "combines",
-                    type: RelationType.Invisible,
-                    func: "system.schema.appiscombinesdisable",
-                    args: [
-                        {
-                            name: "type"
-                        },
-                        {
-                            name: "func"
-                        }
-                    ]
-                },
-                {
-                    field: "combines.field",
-                    type: RelationType.WhiteList,
-                    func: "system.schema.getstructnumbervaluefields",
-                    args: [
-                        {
-                            name: "type"
-                        }
-                    ]
-                },
-                {
-                    field: "trackPush",
-                    type: RelationType.Invisible,
-                    func: "system.schema.appistrackpushdisable",
-                    args: [
-                        {
-                            name: "sourceField"
-                        },
-                        {
-                            name: "func"
-                        }
-                    ]
-                }
-            ]
-        }
-    },
-    {
-        name: "system.schema.appnofields",
-        type: SchemaType.Func,
-        display: _LS("system.schema.appnofields"),
-        func: {
-            return: NS_SYSTEM_BOOL,
-            args: [
-                {
-                    name: "app",
-                    type: "system.schema.app",
-                    nullable: true,
-                }
-            ],
-            exps: [],
-            func: (app: string) => {
-                if (!app) return true
-                const schema = getAppCachedSchema(app)
-                return (schema?.hasFields || schema?.fields?.length) ? false : true
-            }
-        }
-    },
-    {
-        name: "system.schema.appschema",
-        type: SchemaType.Struct,
-        display: _LS("system.schema.appschema"),
-        struct: {
-            fields: [
-                {
-                    name: "name",
-                    require: true,
-                    type: "system.schema.appinput",
-                    display: _LS("system.schema.appschema.name"),
-                    upLimit: 32,
-                } as IStructScalarFieldConfig,
-                {
-                    name: "display",
-                    type: "system.localestring",
-                    display: _LS("system.schema.appschema.display"),
-                    upLimit: 64,
-                } as IStructScalarFieldConfig,
-                {
-                    name: "desc",
-                    type: "system.localestring",
-                    display: _LS("system.schema.appschema.desc"),
-                    upLimit: 255,
-                } as IStructScalarFieldConfig,
-                {
-                    name: "relations",
-                    type: "system.schema.appfieldrelations",
-                    display: _LS("system.schema.appschema.relations"),
-                },
-            ],
-            relations: [
-                {
-                    field: "relations.fieldType",
-                    type: RelationType.Default,
-                    func: "system.schema.appgetfieldtype",
-                    args: [
-                        {
-                            name: "name",
-                        },
-                        {
-                            name: "relations.field"
-                        }
-                    ]
-                },
-                {
-                    field: "relations",
-                    type: RelationType.Invisible,
-                    func: "system.schema.appnofields",
-                    args: [
-                        {
-                            name: "name"
-                        }
-                    ]
-                }
-            ]
-        }
-    },
 
-    //#region helper
-    {
-        name: "system.schema.appgetapptargets",
-        type: SchemaType.Func,
-        display: _LS("system.schema.appgetapptargets"),
-        func: {
-            return: NS_SYSTEM_STRINGS,
-            args: [
-                {
-                    name: "app",
-                    type: "system.schema.app",
-                    nullable: true,
-                }
-            ],
-            exps: [],
-            func: (app: string) => {
-                if (isNull(app)) return []
-                const appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}")
-                if (appTargets && typeof(appTargets) === "object") {
-                    return appTargets[app] || []
-                }
-                return []
+            if (paths[i] === ARRAY_ELEMENT)
+            {
+                return schema?.name
+            }
+
+            if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
+                tarField = schema.struct.fields.find((p: IStructFieldConfig) => p.name === paths[i])
+            }
+            else {
+                tarField = undefined
             }
         }
-    },
-    {
-        name: "system.schema.apptarget",
-        type: SchemaType.Struct,
-        display: _LS("system.schema.apptarget"),
-        struct: {
-            fields: [
-                {
-                    name: "allowApps",
-                    type: NS_SYSTEM_STRINGS,
-                    invisible: true,
-                },
-                {
-                    name: "app",
-                    type: "system.schema.app",
-                    require: true,
-                    display: _LS("system.schema.apptarget.app"),
-                },
-                {
-                    name: "target",
-                    type: NS_SYSTEM_STRING,
-                    require: true,
-                    display: _LS("system.schema.apptarget.target"),
-                    asSuggest: true,
-                    upLimit: 64
-                } as IStructScalarFieldConfig,
-            ],
-            relations: [
-                {
-                    field: "app",
-                    type: RelationType.WhiteList,
-                    func: "system.conv.assign",
-                    args: [
-                        {
-                            name: "allowApps"
-                        }
-                    ]
-                },
-                {
-                    field: "target",
-                    type: RelationType.WhiteList,
-                    func: "system.schema.appgetapptargets",
-                    args: [
-                        {
-                            name: "app"
-                        }
-                    ]
-                }
-            ]
+        return tarField?.type
+    }),
+
+    newSystemStruct("system.schema.appfieldrelation", [
+        { name: "field", require: true, type: "system.schema.appaccessfld", },
+        { name: "fieldType", displayOnly: true, invisible: false, type : "system.schema.valuetype", },
+        { name: "return", displayOnly: true, invisible: true, type: "system.schema.valuetype", },
+        { name: "type", require: true, type: "system.schema.relationtype", },
+        { name: "func", require: true, type: "system.schema.functype", },
+        { name: "args", type: "system.schema.appfieldvalargs", },
+    ], [
+        { field: "type", type: RelationType.WhiteList, func: "system.schema.getrelationwhitelist", args: [ { name: "fieldType" } ] },
+        { field: "return", type: RelationType.Default, func: "system.schema.getrelationfuncreturn", args: [ { name: "fieldType" }, { name: "type" } ] },
+        { field: "func", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "return" } ] }
+    ]),
+    newSystemArray("system.schema.appfieldrelations", "system.schema.appfieldrelation", "field", "type" ),
+
+    newSystemFunc("system.schema.appgetsourceappblacklist", NS_SYSTEM_STRINGS, [
+        { name: "app", type: NS_SYSTEM_STRING }
+    ], (app: string) => {
+        return app ? [app] : []
+    }),
+
+    newSystemFunc("system.schema.appgetsourceappfldinfo", "system.schema.valuetype", [
+        { name: "sourceApp", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "sourceFld", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "info", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "type", type: NS_SYSTEM_STRING, nullable: true }
+    ],  async (app: string, fld: string, info: string, type: string) => {
+        if (app && fld)
+        {
+            const appSchema = await getAppSchema(app)
+            const f = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === fld)
+            if (f) return (f as any)[info]
         }
-    },
+        
+        if (type)
+        {
+            const schema = await getSchema(type)
+            if (schema)
+            {
+                if (info === "name") return schema.name.split(".").pop()
+                else if(info === "display") return schema.display
+            }
+        }
+        return null
+    }),
+
+    newSystemFunc("system.schema.appiscombinedisable", NS_SYSTEM_BOOL, [
+        { name: "type", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "func", type: NS_SYSTEM_STRING, nullable: true }
+    ], (type: string, func: string) => {
+        if (!type || !func) return true
+        let schema = getCachedSchema(type)
+        if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
+        return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
+    }),
+
+    newSystemFunc("system.schema.appiscombinesdisable", NS_SYSTEM_BOOL, [
+        { name: "type", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "func", type: NS_SYSTEM_STRING, nullable: true }
+    ], async (type: string, func: string) => {
+        if (!type || !func) return true
+        let schema = await getSchema(type)
+        if (schema?.type === SchemaType.Array)
+            schema = schema.array?.element ? await getSchema(schema.array.element) : undefined
+        return schema?.type !== SchemaType.Struct
+    }),
+    
+    newSystemFunc("system.schema.appistrackpushdisable", NS_SYSTEM_BOOL, [
+        { name: "field", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "func", type: NS_SYSTEM_STRING, nullable: true }
+    ], (type: string, func: string) => {
+        if (!type || !func) return true
+        return false
+    }),
+
+    newSystemStruct("system.schema.appfieldschema", [
+        { name: "app", type: NS_SYSTEM_STRING, readonly: true, invisible: true },
+        { name: "name", type: "system.schema.varname", require: true, upLimit: 32 } ,
+        { name: "type", type: "system.schema.valuetype", require: true },
+        { name: "display", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "sourceApp", type: "system.schema.app" },
+        { name: "sourceField", type: "system.schema.appfield" },
+        { name: "trackPush", type: NS_SYSTEM_BOOL },
+        { name: "incrUpdate", type: NS_SYSTEM_BOOL },
+        { name: "frontend", type: NS_SYSTEM_BOOL },
+        { name: "disable", type: NS_SYSTEM_BOOL },
+        { name: "readonly", type: NS_SYSTEM_BOOL },
+        { name: "func", type: "system.schema.pushfunctype" },
+        { name: "args", type: "system.schema.apppushflds" },
+        { name: "combine", type: "system.schema.datacombinetype" },
+        { name: "combines", type: "system.schema.datacombines" },
+    ], [
+        { field: "name", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "name" }, { name: "type" }] },
+        { field: "display", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "display" }, { name: "type" }] },
+        { field: "desc", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "desc" }] },
+        { field: "type", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "type" }] },
+        { field: "sourceApp", type: RelationType.BlackList, func: "system.schema.appgetsourceappblacklist", args: [ { name: "app" }] },
+        { field: "sourceField", type: RelationType.Invisible, func: "system.logic.isnull", args: [ { name: "sourceApp" }] },
+        { field: "sourceField", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" }] },
+        { field: "func", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" }] },
+        { field: "args", type: RelationType.Invisible, func: "system.logic.isnull", args: [ { name: "func" }] },
+        { field: "frontend", type: RelationType.Invisible, func: "system.logic.notnull", args: [ { name: "sourceApp" }] },
+        { field: "combine", type: RelationType.Invisible, func: "system.schema.appiscombinedisable", args: [ { name: "type" }, { name: "func" }] },
+        { field: "combines", type: RelationType.Invisible, func: "system.schema.appiscombinesdisable", args: [ { name: "type" }, { name: "func" }] },
+        { field: "combines.field", type: RelationType.WhiteList, func: "system.schema.getstructnumbervaluefields", args: [ { name: "type" }] },
+        { field: "trackPush", type: RelationType.Invisible, func: "system.schema.appistrackpushdisable", args: [ { name: "sourceField" }, { name: "func" }] }
+    ]),
+    
+    newSystemFunc("system.schema.appnofields", NS_SYSTEM_BOOL, [
+        { name: "app", type: "system.schema.app", nullable: true },
+    ], async (app: string) => {
+        if (!app) return true
+        const schema = await getAppSchema(app)
+        return (schema?.hasFields || schema?.fields?.length) ? false : true
+    }),
+    
+    newSystemStruct("system.schema.appschema", [
+        { name: "name", require: true, type: "system.schema.appinput", upLimit: 32 },
+        { name: "display", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "relations", type: "system.schema.appfieldrelations" },
+    ], [
+        { field: "relations.fieldType", type: RelationType.Default, func: "system.schema.appgetfieldtype", args: [ {     name: "name", }, {     name: "relations.field" } ] },
+        { field: "relations", type: RelationType.Invisible, func: "system.schema.appnofields", args: [ {     name: "name" } ] }
+    ]),
+
+    newSystemFunc("system.schema.appgetapptargets", NS_SYSTEM_STRINGS, [
+        { name: "app", type: "system.schema.app", nullable: true }
+    ], (app: string) => {
+        if (isNull(app)) return []
+        const appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}")
+        if (appTargets && typeof(appTargets) === "object") appTargets[app] || []
+        return []
+    }),
+
+    newSystemStruct("system.schema.apptarget", [
+        { name: "allowApps", type: NS_SYSTEM_STRINGS, invisible: true },
+        { name: "app", type: "system.schema.app", require: true },
+        { name: "target", type: NS_SYSTEM_STRING, require: true, asSuggest: true, upLimit: 64 },
+    ], [
+        { field: "app", type: RelationType.WhiteList, func: "system.conv.assign", args: [ { name: "allowApps" } ] },
+        { field: "target", type: RelationType.WhiteList, func: "system.schema.appgetapptargets", args: [ { name: "app" } ] }
+    ]),
     //#endregion
 ], SchemaLoadState.System)
 
