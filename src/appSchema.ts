@@ -2,11 +2,9 @@ import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpr
 
 // Schema for definition
 registerSchema([
-    newSystemScalar("system.schema.app", NS_SYSTEM_STRING, undefined, undefined, { upLimit: 128 }),
-    newSystemScalar("system.schema.appfield", "system.schema.varname"),
     newSystemScalar("system.schema.appaccessfld", NS_SYSTEM_STRING),
     newSystemScalar("system.schema.apppushfld", "system.schema.appaccessfld"),
-    newSystemArray("system.schema.apppushflds", "system.schema.apppushfld"),
+    newSystemArray ("system.schema.apppushflds", "system.schema.apppushfld"),
     newSystemScalar("system.schema.appinput", NS_SYSTEM_STRING),
 
     newSystemStruct("system.schema.appfieldvalarg", [
@@ -180,7 +178,29 @@ registerSchema([
         { field: "relations", type: RelationType.Invisible, func: "system.schema.appnofields", args: [ {     name: "name" } ] }
     ]),
 
-    newSystemFunc("system.schema.appgetapptargets", NS_SYSTEM_STRINGS, [
+    newSystemStruct("system.schema.appworkflownodeschema", [
+        { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
+        { name: "type", type: "system.schema.workflowtype", require: true },
+        { name: "payload", type: "system.schema.valuetype", require: true },
+        { name: "previous", type: "system.schema.appworkflows" },
+        { name: "func", type: "system.schema.functype" },
+        { name: "args", type: "system.schema.funcargs" },
+        { name: "event", type: "system.schema.eventtype" },
+        { name: "fork", type: NS_SYSTEM_BOOL },
+        { name: "state", type: "system.schema.any" }
+    ], [
+    ]),
+    newSystemArray("system.schema.appworkflownodeschemas", "system.schema.appworkflownodeschema", "name"),
+
+    newSystemStruct("system.schema.appworkflowschema", [
+        { name: "app", type: "system.schema.app", readonly: true, invisible: true },
+        { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
+        { name: "active", type: NS_SYSTEM_BOOL },
+        { name: "nodes", type: "system.schema.appworkflownodeschemas" },
+    ]),
+
+    //#region frontend app schema
+    newSystemFunc("frontend.appgetapptargets", NS_SYSTEM_STRINGS, [
         { name: "app", type: "system.schema.app", nullable: true }
     ], (app: string) => {
         if (isNull(app)) return []
@@ -189,13 +209,13 @@ registerSchema([
         return []
     }),
 
-    newSystemStruct("system.schema.apptarget", [
+    newSystemStruct("frontend.apptarget", [
         { name: "allowApps", type: NS_SYSTEM_STRINGS, invisible: true },
         { name: "app", type: "system.schema.app", require: true },
         { name: "target", type: NS_SYSTEM_STRING, require: true, asSuggest: true, upLimit: 64 },
     ], [
         { field: "app", type: RelationType.WhiteList, func: "system.conv.assign", args: [ { name: "allowApps" } ] },
-        { field: "target", type: RelationType.WhiteList, func: "system.schema.appgetapptargets", args: [ { name: "app" } ] }
+        { field: "target", type: RelationType.WhiteList, func: "frontend.appgetapptargets", args: [ { name: "app" } ] }
     ]),
     //#endregion
 ], SchemaLoadState.System)

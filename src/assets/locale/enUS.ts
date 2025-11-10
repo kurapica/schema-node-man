@@ -144,8 +144,8 @@ importLanguage("enUS", {
     "system.schema.appfieldrelation.args": "Association parameters",
     "system.schema.appfieldrelations": "App field association list",
 
-    "system.schema.apptarget": "App and Target",
-    "system.schema.apptarget.app": "App",
-    "system.schema.apptarget.target": "Target",
-    "system.schema.appgetapptargets": "Get Target List",
+    "frontend.apptarget": "App and Target",
+    "frontend.apptarget.app": "App",
+    "frontend.apptarget.target": "Target",
+    "frontend.appgetapptargets": "Get Target List",
 });

@@ -1,4 +1,4 @@
-import { useAppDataProvider, type IAppFieldSchema, type IAppSchema, type IEnumValueInfo, type INodeSchema, type IAppSchemaDataProvider, defaultAppSchemaProvider, setSchemaApiBaseUrl, getSchemaApiBaseUrl, postSchemaApi } from "schema-node"
+import { useAppDataProvider, type IAppFieldSchema, type IAppWorkflowSchema, type IAppSchema, type IEnumValueInfo, type INodeSchema, type IAppSchemaDataProvider, defaultAppSchemaProvider, setSchemaApiBaseUrl, getSchemaApiBaseUrl, postSchemaApi } from "schema-node"
 
 /**
  * The schema server api provider interface
@@ -67,6 +67,28 @@ export interface ISchemaServerProvder extends IAppSchemaDataProvider
      * @param other the other app field schema name to swap
      */
     swapAppFieldSchema(app: string, field: string, other: string): Promise<boolean>
+
+    /**
+     * Save the app workflow schema to the server
+     * @param app the app schema name
+     * @param workflow the workflow
+     */
+    saveAppWorkflowSchema?(app: string, workflow: IAppWorkflowSchema): Promise<boolean>
+
+    /**
+     * Delete the app workflow schema from the server
+     * @param app the app schema name
+     * @param workflow the workflow name
+     */
+    deleteAppWorkflowSchema?(app: string, workflow: string): Promise<boolean>
+
+    /**
+     * Toggle the app workflow
+     * @param app the app schema name
+     * @param workflow the workflow name
+     * @param active whether active
+     */
+    toggleAppWorkflowSchema?(app: string, workflow: string, active: boolean): Promise<boolean>
 }
 
 //#region Methods
@@ -124,6 +146,23 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         }))?.result
     },
 
+    saveAppWorkflowSchema: async function (app: string, workflow: IAppWorkflowSchema): Promise<boolean> {
+        return (await postSchemaApi("/save-app-workflow-schema", {
+            app, workflow
+        }))?.result
+    },
+    
+    deleteAppWorkflowSchema: async function (app: string, workflow: string): Promise<boolean> {
+        return (await postSchemaApi("/delete-app-workflow-schema", {
+            app, workflow
+        }))?.result
+    },
+
+    toggleAppWorkflowSchema: async function (app: string, workflow: string, active: boolean): Promise<boolean> {
+        return (await postSchemaApi("/toggle-app-workflow-schema", {
+            app, workflow, active
+        }))?.result
+    }
 }
 
 if (localStorage["schema_server_url"]) 

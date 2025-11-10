@@ -643,6 +643,22 @@ registerSchema([
     ]),
     //#endregion
 
+    //#region event definition
+    newSystemStruct("system.schema.eventschema", [
+        { name: "scope", type: "system.schema.eventscope", require: true, readonly: true },
+        { name: "payload", type: "system.schema.valuetype", readonly: true }
+    ]),
+    //#endregion
+
+    //#region workflow definition
+    newSystemStruct("system.schema.workflowschema", [
+        { name: "mode", type: "system.schema.workflowmode", require: true, readonly: true },
+        { name: "payload", type: "system.schema.valuetype", readonly: true },
+        { name: "state", type: "system.schema.valuetype", readonly: true },
+        { name: "session", type: "system.schema.valuetype", readonly: true }
+    ]),
+    //#endregion
+
     //#region namespace definition
     newSystemFunc("system.schema.genarraydisplay", NS_SYSTEM_STRING, [
         { name: "elementType", type: "system.schema.valuetype" }
@@ -657,12 +673,16 @@ registerSchema([
         { name: "struct", type: "system.schema.structschema" },
         { name: "array", type: "system.schema.arrayschema" },
         { name: "func", type: "system.schema.functionschema" },
+        { name: "event", type: "system.schema.eventschema" },
+        { name: "workflow", type: "system.schema.workflowschema" }
     ], [
         { field: "scalar", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Scalar } ] },
         { field: "enum", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Enum } ] },
         { field: "struct", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Struct } ] },
         { field: "array", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Array } ] },
         { field: "func", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Func } ] },
+        { field: "event", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Event } ] },
+        { field: "workflow", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Workflow } ] },
         { field: "display.key", type: RelationType.Default, func: "system.schema.genarraydisplay", args: [ { name: "array.element" } ] }
     ]),
     //#endregion

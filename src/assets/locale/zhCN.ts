@@ -145,8 +145,8 @@ importLanguage("zhCN", {
     "system.schema.appfieldrelation.args": "关联参数",
     "system.schema.appfieldrelations": "应用字段数据关联列表",
 
-    "system.schema.apptarget": "应用及目标",
-    "system.schema.apptarget.app": "应用",
-    "system.schema.apptarget.target": "目标",
-    "system.schema.appgetapptargets": "获取目标列表",
+    "frontend.apptarget": "应用及目标",
+    "frontend.apptarget.app": "应用",
+    "frontend.apptarget.target": "目标",
+    "frontend.appgetapptargets": "获取目标列表",
 })
