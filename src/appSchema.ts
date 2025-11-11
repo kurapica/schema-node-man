@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, ARRAY_ITSELF } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -97,33 +97,33 @@ registerSchema([
         return null
     }),
 
-    newSystemFunc("system.schema.appiscombinedisable", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.appiscombineenable", NS_SYSTEM_BOOL, [
         { name: "type", type: NS_SYSTEM_STRING, nullable: true },
         { name: "func", type: NS_SYSTEM_STRING, nullable: true }
     ], (type: string, func: string) => {
-        if (!type || !func) return true
+        if (!type || !func) return false
         let schema = getCachedSchema(type)
         if (schema?.type === SchemaType.Array && schema.array?.element) schema = getCachedSchema(schema.array.element)
-        return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
+        return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum
     }),
 
-    newSystemFunc("system.schema.appiscombinesdisable", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.appiscombinesenable", NS_SYSTEM_BOOL, [
         { name: "type", type: NS_SYSTEM_STRING, nullable: true },
         { name: "func", type: NS_SYSTEM_STRING, nullable: true }
     ], async (type: string, func: string) => {
-        if (!type || !func) return true
+        if (!type || !func) return false
         let schema = await getSchema(type)
         if (schema?.type === SchemaType.Array)
             schema = schema.array?.element ? await getSchema(schema.array.element) : undefined
-        return schema?.type !== SchemaType.Struct
+        return schema?.type === SchemaType.Struct
     }),
     
-    newSystemFunc("system.schema.appistrackpushdisable", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.appistrackpushenable", NS_SYSTEM_BOOL, [
         { name: "field", type: NS_SYSTEM_STRING, nullable: true },
         { name: "func", type: NS_SYSTEM_STRING, nullable: true }
     ], (type: string, func: string) => {
-        if (!type || !func) return true
-        return false
+        if (!type || !func) return false
+        return true
     }),
 
     newSystemStruct("system.schema.appfieldschema", [
@@ -149,23 +149,23 @@ registerSchema([
         { field: "desc", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "desc" }] },
         { field: "type", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "type" }] },
         { field: "sourceApp", type: RelationType.BlackList, func: "system.schema.appgetsourceappblacklist", args: [ { name: "app" }] },
-        { field: "sourceField", type: RelationType.Invisible, func: "system.logic.isnull", args: [ { name: "sourceApp" }] },
+        { field: "sourceField", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "sourceApp" }] },
         { field: "sourceField", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" }] },
         { field: "func", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" }] },
-        { field: "args", type: RelationType.Invisible, func: "system.logic.isnull", args: [ { name: "func" }] },
-        { field: "frontend", type: RelationType.Invisible, func: "system.logic.notnull", args: [ { name: "sourceApp" }] },
-        { field: "combine", type: RelationType.Invisible, func: "system.schema.appiscombinedisable", args: [ { name: "type" }, { name: "func" }] },
-        { field: "combines", type: RelationType.Invisible, func: "system.schema.appiscombinesdisable", args: [ { name: "type" }, { name: "func" }] },
+        { field: "args", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "func" }] },
+        { field: "frontend", type: RelationType.Visible, func: "system.logic.isnull", args: [ { name: "sourceApp" }] },
+        { field: "combine", type: RelationType.Visible, func: "system.schema.appiscombineenable", args: [ { name: "type" }, { name: "func" }] },
+        { field: "combines", type: RelationType.Visible, func: "system.schema.appiscombinesenable", args: [ { name: "type" }, { name: "func" }] },
         { field: "combines.field", type: RelationType.WhiteList, func: "system.schema.getstructnumbervaluefields", args: [ { name: "type" }] },
-        { field: "trackPush", type: RelationType.Invisible, func: "system.schema.appistrackpushdisable", args: [ { name: "sourceField" }, { name: "func" }] }
+        { field: "trackPush", type: RelationType.Visible, func: "system.schema.appistrackpushenable", args: [ { name: "sourceField" }, { name: "func" }] }
     ]),
     
-    newSystemFunc("system.schema.appnofields", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.apphasfields", NS_SYSTEM_BOOL, [
         { name: "app", type: "system.schema.app", nullable: true },
     ], async (app: string) => {
-        if (!app) return true
+        if (!app) return false
         const schema = await getAppSchema(app)
-        return (schema?.hasFields || schema?.fields?.length) ? false : true
+        return (schema?.hasFields || schema?.fields?.length) ? true : false
     }),
     
     newSystemStruct("system.schema.appschema", [
@@ -175,28 +175,73 @@ registerSchema([
         { name: "relations", type: "system.schema.appfieldrelations" },
     ], [
         { field: "relations.fieldType", type: RelationType.Default, func: "system.schema.appgetfieldtype", args: [ {     name: "name", }, {     name: "relations.field" } ] },
-        { field: "relations", type: RelationType.Invisible, func: "system.schema.appnofields", args: [ {     name: "name" } ] }
+        { field: "relations", type: RelationType.Visible, func: "system.schema.apphasfields", args: [ {     name: "name" } ] }
     ]),
+
+    newSystemFunc("system.schema.getworkflowmode", NS_SYSTEM_STRING, [
+        { name: "type", type: "system.schema.workflowtype", nullable: true },
+    ], async (type: string) => {
+        if (!type) return null
+        const schema = await getSchema(type)
+        return schema?.workflow?.mode || null
+    }),
+
+    newSystemFunc("system.schema.getworkflowstatetype", NS_SYSTEM_STRING, [
+        { name: "type", type: "system.schema.workflowtype", nullable: true },
+    ], async (type: string) => {
+        if (!type) return null
+        const schema = await getSchema(type)
+        return schema?.workflow?.state || "system.schema.anyvalue"
+    }),
+
+    newSystemFunc("system.schema.hasworkflowstatetype", NS_SYSTEM_BOOL, [
+        { name: "type", type: "system.schema.workflowtype", nullable: true },
+    ], async (type: string) => {
+        if (!type) return null
+        const schema = await getSchema(type)
+        return schema?.workflow?.state ? true : false
+    }),
+
+    newSystemFunc("system.schema.haspreviousworkflow", NS_SYSTEM_BOOL, [
+        { name: "previous", type: "system.schema.appworkflownodeschemas", nullable: true },
+    ], (previous: any[]) => {
+        return (previous && previous.length > 0) ? true : false
+    }),
 
     newSystemStruct("system.schema.appworkflownodeschema", [
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
+        { name: "display", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "fork", type: NS_SYSTEM_BOOL },
         { name: "type", type: "system.schema.workflowtype", require: true },
-        { name: "payload", type: "system.schema.valuetype", require: true },
+        { name: "mode", type: "system.schema.workflowmode", displayOnly: true, invisible: true },
         { name: "previous", type: "system.schema.appworkflows" },
         { name: "func", type: "system.schema.functype" },
         { name: "args", type: "system.schema.funcargs" },
         { name: "event", type: "system.schema.eventtype" },
-        { name: "fork", type: NS_SYSTEM_BOOL },
-        { name: "state", type: "system.schema.any" }
+        { name: "state", type: "system.schema.anyvalue" },
+        { name: "payload", type: "system.schema.valuetype", require: true },
     ], [
+        { field: "mode", type: RelationType.Default, func: "system.schema.getworkflowmode", args: [ { name: "type" } ]},
+        { field: "func", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Function } ] },
+        { field: "args", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "func" } ] },
+        { field: "event", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Event } ] },
+        { field: "previous.$ele", type: RelationType.BlackList, func: "system.conv.assign", args: [ { name: "previous" } ] },
+        { field: "state", type: RelationType.Type, func: "system.schema.getworkflowstatetype", args: [ { name: "type" } ] },
+        { field: "state", type: RelationType.Visible, func: "system.schema.hasworkflowstatetype", args: [ { name: "type" } ] },
+        { field: "payload", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "type" } ] },
+        { field: "type", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.workflow" } ] },
     ]),
     newSystemArray("system.schema.appworkflownodeschemas", "system.schema.appworkflownodeschema", "name"),
 
     newSystemStruct("system.schema.appworkflowschema", [
         { name: "app", type: "system.schema.app", readonly: true, invisible: true },
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
-        { name: "active", type: NS_SYSTEM_BOOL },
+        { name: "display", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
         { name: "nodes", type: "system.schema.appworkflownodeschemas" },
+    ],[
+        { field: "nodes.previous", type: RelationType.Visible, func: "system.schema.haspreviousworkflow", args: [ { name: "nodes" } ] },
+        { field: "nodes.previous.$ele", type: RelationType.WhiteList, func: "system.collection.getfields", args: [ { name: "nodes" }, { value: "name" } ] },
     ]),
 
     //#region frontend app schema
@@ -461,6 +506,7 @@ export function addAppTarget(app: string, target: string)
 
 //#region View
 
+import waterFallView from "./view/waterFallView.vue"
 import sourceappView from "./view/appSourceView.vue"
 import appInputView from "./view/appInputView.vue"
 import appsrcfldView from "./view/appSrcfldView.vue"
@@ -478,4 +524,5 @@ regSchemaTypeView("system.schema.apppushfld", appaccessfldView)
 regSchemaTypeView("system.schema.apppushflds", appPushfldsView)
 regSchemaTypeView("system.schema.appfieldrelations", structfldrelationinfosView)
 regSchemaTypeView("system.schema.appfieldvalargs", structfldfuncargsView)
+regSchemaTypeView("system.schema.appworkflownodeschemas", waterFallView)
 //#endregion

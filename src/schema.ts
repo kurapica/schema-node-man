@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_LOCALE_STRINGS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -72,7 +72,7 @@ registerSchema([
 
     newSystemStruct("system.schema.enumschema", [
         { name: "type", type: "system.schema.enumvaluetype", require: true, default: EnumValueType.Int },
-        { name: "cascade", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "cascade", type: NS_SYSTEM_LOCALE_STRINGS },
         { name: "values", type: "system.schema.enumvalueinfos" },
     ], [
         { field: "cascade", type: RelationType.Invisible, func: "system.logic.equal", args: [ { name: "type" }, { value: EnumValueType.Flags }] },
@@ -113,34 +113,27 @@ registerSchema([
     ]),
     newSystemArray("system.schema.structfldfuncargs", "system.schema.structfldfuncarg"),
     
-    newSystemFunc("system.schema.notscalartype", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.isscalartype", NS_SYSTEM_BOOL, [
         { name: "type", type: "system.schema.valuetype" }
     ], async (type: string) => {
         const schema = await getSchema(type)
-        return schema?.type !== SchemaType.Scalar
-    }),
-
-    newSystemFunc("system.schema.notenumtype", NS_SYSTEM_BOOL, [
-        { name: "type", type: "system.schema.valuetype"}
-    ], async (type: string) => {
-        const schema = await getSchema(type)
-        return schema?.type !== SchemaType.Enum
+        return schema?.type === SchemaType.Scalar
     }),
     
-    newSystemFunc("system.schema.notscalarenumtype", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.isscalarenumtype", NS_SYSTEM_BOOL, [
         { name: "type", type: "system.schema.valuetype", nullable: true }
     ], async (type: string) => {
         let schema = type ? await getSchema(type) : null
         if (schema?.type === SchemaType.Array && schema.array?.element) schema = await getSchema(schema.array.element)
-        return schema?.type !== SchemaType.Scalar && schema?.type !== SchemaType.Enum
+        return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum
     }),
 
-    newSystemFunc("system.schema.notcascadeenumtype", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.iscascadeenumtype", NS_SYSTEM_BOOL, [
         { name: "type", type: "system.schema.valuetype" }
     ], async (type: string) => {
         let schema = await getSchema(type)
         if (schema?.type === SchemaType.Array && schema.array?.element) schema = await getSchema(schema.array.element)
-        return schema?.type !== SchemaType.Enum || !schema.enum?.cascade || schema.enum.cascade.length <= 1
+        return schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1
     }),
     
     newSystemFunc("system.schema.getroottype", "system.schema.valuetype", [
@@ -151,11 +144,11 @@ registerSchema([
         return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum ? schema?.name : NS_SYSTEM_STRING
     }),
 
-    newSystemFunc("system.schema.notflagsenumtype", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.isflagsenumtype", NS_SYSTEM_BOOL, [
         { name: "type", type: "system.schema.valuetype" }
     ], async (type: string) => {
         const schema = await getSchema(type)
-        return schema?.type !== SchemaType.Enum || schema.enum?.type !== EnumValueType.Flags
+        return schema?.type === SchemaType.Enum && schema.enum?.type === EnumValueType.Flags
     }),
 
     newSystemFunc("system.schema.getenumcascadewhitelist", NS_SYSTEM_ARRAY, [
@@ -172,16 +165,16 @@ registerSchema([
         return null
     }),
 
-    newSystemFunc("system.schema.noenumroot", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.isenumroot", NS_SYSTEM_BOOL, [
         { name: "type", type: "system.schema.valuetype" },
         { name: "cascade", type: NS_SYSTEM_INT, nullable: true }
-    ], async (type: string, cascade?: number) => {                
+    ], async (type: string, cascade?: number) => {
         let schema = await getSchema(type)
         if (schema?.type === SchemaType.Array && schema.array?.element) schema = await getSchema(schema.array.element)
         if (schema?.type === SchemaType.Enum && schema.enum?.cascade && schema.enum.cascade.length > 1) {
-            return cascade === 1
+            return cascade != 1
         }
-        return true
+        return false
     }),
 
     newSystemFunc("system.schema.getenumrootcascade", NS_SYSTEM_INT, [
@@ -240,7 +233,7 @@ registerSchema([
         { name: "singleFlag", type: NS_SYSTEM_BOOL },
     ], [
         // default
-        { field: "default", type: RelationType.Invisible, func: "system.schema.notscalarenumtype", args: [ { name: "type" } ] },
+        { field: "default", type: RelationType.Visible, func: "system.schema.isscalarenumtype", args: [ { name: "type" } ] },
         { field: "default", type: RelationType.Type, func: "system.schema.getscalarorenumtype", args: [ { name: "type" } ] },
         { field: "default", type: RelationType.WhiteList, func: "system.conv.assign", args: [ { name: "whiteList" } ] },
         { field: "default", type: RelationType.BlackList, func: "system.conv.assign", args: [ { name: "blackList" } ] },
@@ -250,26 +243,26 @@ registerSchema([
         { field: "default", type: RelationType.SingleFlag, func: "system.conv.assign", args: [ { name: "singleFlag" } ] },
 
         // white list
-        { field: "whiteList", type: RelationType.Invisible, func: "system.schema.notscalarenumtype", args: [ { name: "type" } ] },
+        { field: "whiteList", type: RelationType.Visible, func: "system.schema.isscalarenumtype", args: [ { name: "type" } ] },
         { field: "whiteList", type: RelationType.Type, func: "system.schema.getwhiteblacklisttype", args: [ { name: "type" } ] },
         { field: "whiteList", type: RelationType.BlackList, func: "system.conv.assign", args: [ { name: "blackList" } ] },
         { field: "whiteList", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "root" } ] },
         { field: "whiteList", type: RelationType.Cascade, func: "system.conv.assign", args: [ { name: "cascade" } ] },
-        { field: "blackList", type: RelationType.Invisible, func: "system.schema.notscalarenumtype", args: [ { name: "type" } ] },
+        { field: "blackList", type: RelationType.Visible, func: "system.schema.isscalarenumtype", args: [ { name: "type" } ] },
         { field: "blackList", type: RelationType.Type, func: "system.schema.getwhiteblacklisttype", args: [ { name: "type" } ] },
         { field: "blackList", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "root" } ] },
         { field: "blackList", type: RelationType.Cascade, func: "system.conv.assign", args: [ { name: "cascade" } ] },
-        { field: "lowLimit", type: RelationType.Invisible, func: "system.schema.notscalartype", args: [ { name: "type" } ] },
-        { field: "upLimit", type: RelationType.Invisible, func: "system.schema.notscalartype", args: [ { name: "type" } ] },
-        { field: "asSuggest", type: RelationType.Invisible, func: "system.schema.notscalartype", args: [ { name: "type" } ] },
-        { field: "useOriginForUpLimit", type: RelationType.Invisible, func: "system.schema.notscalartype", args: [ { name: "type" } ] },
-        { field: "cascade", type: RelationType.Invisible, func: "system.schema.notcascadeenumtype", args: [ { name: "type" } ] },
+        { field: "lowLimit", type: RelationType.Visible, func: "system.schema.isscalartype", args: [ { name: "type" } ] },
+        { field: "upLimit", type: RelationType.Visible, func: "system.schema.isscalartype", args: [ { name: "type" } ] },
+        { field: "asSuggest", type: RelationType.Visible, func: "system.schema.isscalartype", args: [ { name: "type" } ] },
+        { field: "useOriginForUpLimit", type: RelationType.Visible, func: "system.schema.isscalartype", args: [ { name: "type" } ] },
+        { field: "cascade", type: RelationType.Visible, func: "system.schema.iscascadeenumtype", args: [ { name: "type" } ] },
         { field: "cascade", type: RelationType.WhiteList, func: "system.schema.getenumcascadewhitelist", args: [ { name: "type" } ] },
-        { field: "root", type: RelationType.Invisible, func: "system.schema.noenumroot", args: [ { name: "type", }, {     name: "cascade" } ] },
+        { field: "root", type: RelationType.Visible, func: "system.schema.isenumroot", args: [ { name: "type", }, { name: "cascade" } ] },
         { field: "root", type: RelationType.Type, func: "system.schema.getroottype", args: [ { name: "type" } ] },
         { field: "root", type: RelationType.Cascade, func: "system.schema.getenumrootcascade", args: [ { name: "type", }, {     name: "cascade" } ] },
-        { field: "anyLevel", type: RelationType.Invisible, func: "system.schema.notcascadeenumtype", args: [ { name: "type" } ] },
-        { field: "singleFlag", type: RelationType.Invisible, func: "system.schema.notflagsenumtype", args: [ { name: "type" } ] }
+        { field: "anyLevel", type: RelationType.Visible, func: "system.schema.iscascadeenumtype", args: [ { name: "type" } ] },
+        { field: "singleFlag", type: RelationType.Visible, func: "system.schema.isflagsenumtype", args: [ { name: "type" } ] }
     ]),
     newSystemArray("system.schema.structfieldconfigs", "system.schema.structfieldconfig", "name"),
 
@@ -497,12 +490,12 @@ registerSchema([
     //#endregion
 
     //#region array definition
-    newSystemFunc("system.schema.notstructtype", NS_SYSTEM_BOOL, [
+    newSystemFunc("system.schema.isstructtype", NS_SYSTEM_BOOL, [
         { name: "type", type: "system.schema.valuetype", nullable: true }
     ], async (type: string) => {
         if (!type) return true
         const schema = await getSchema(type)
-        return schema?.type !== SchemaType.Struct
+        return schema?.type === SchemaType.Struct
     }),
 
     newSystemFunc("system.schema.notstructarraytype", NS_SYSTEM_BOOL, [
@@ -537,12 +530,12 @@ registerSchema([
         { name: "combines", type: "system.schema.datacombines" },
         { name: "relations", type: "system.schema.structfieldrelations" },
     ], [
-        { field: "primary", type: RelationType.Invisible, func: "system.schema.notstructtype", args: [ { name: "element" } ] },
+        { field: "primary", type: RelationType.Visible, func: "system.schema.isstructtype", args: [ { name: "element" } ] },
         { field: "primary.$ele", type: RelationType.WhiteList, func: "system.schema.getstructindexfields", args: [ { name: "element" } ] },
         { field: "primary.$ele", type: RelationType.BlackList, func: "system.conv.assign", args: [ { name: "primary" } ] },
-        { field: "indexes", type: RelationType.Invisible, func: "system.schema.notstructtype", args: [ { name: "element" } ] },
+        { field: "indexes", type: RelationType.Visible, func: "system.schema.isstructtype", args: [ { name: "element" } ] },
         { field: "indexes.fields.$ele", type: RelationType.WhiteList, func: "system.schema.getstructindexfields", args: [ { name: "element" } ] },
-        { field: "combines", type: RelationType.Invisible, func: "system.schema.notstructtype", args: [ { name: "element" } ] },
+        { field: "combines", type: RelationType.Visible, func: "system.schema.isstructtype", args: [ { name: "element" } ] },
         { field: "combines.field", type: RelationType.WhiteList, func: "system.schema.getstructnumbervaluefields", args: [ { name: "element" } ] },
         { field: "relations.fieldType", type: RelationType.Default, func: "system.schema.getstructfieldtypebytype", args: [ { name: "element" }, { name: "relations.field" } ] },
     ]),

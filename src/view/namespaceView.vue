@@ -88,7 +88,7 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, registerSchema, RelationType, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
+import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, registerSchema, RelationType, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -135,7 +135,9 @@ const schemaTypeOrder = {
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
     [SchemaType.Func]: 6,
-    [SchemaType.Json]: 7
+    [SchemaType.Event]: 7,
+    [SchemaType.Workflow]: 8,
+    [SchemaType.Json]: 9    
 }
 
 // cascader root
@@ -161,6 +163,8 @@ const namespaceMap: any = {
     "system.schema.structtype": [SchemaType.Namespace, SchemaType.Struct],
     "system.schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
     "system.schema.functype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.eventtype": [SchemaType.Namespace, SchemaType.Event],
+    "system.schema.workflowtype": [SchemaType.Namespace, SchemaType.Workflow],
     "system.schema.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],
@@ -340,13 +344,13 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
         const { value } = node
         if (!value) return resolve([])
 
-        const paths = value.toLowerCase().split(".")
+        const paths = (root.value?.length ? value.substring(root.value.length + 1) : value).toLowerCase().split(".")
         let ns = root
         for (let i = 0; i < paths.length; i++) {
-            const name = paths.slice(0, i + 1).join(".")
-            ns = ns.children!.find(c => c.value.toLowerCase() === name)!
+            const name = (root.value?.length ? `${root.value}.` : "") + paths.slice(0, i + 1).join(".")
+            ns = ns.children!.find((c: ICascaderOptionInfo) => c.value.toLowerCase() === name)!
         }
-
+        
         getSchema(value)
         .then((res?: INodeSchema) => {
             buildOptions([], res?.schemas || []).then(r => {
@@ -374,7 +378,8 @@ const reBuildOptions = async () => {
             root.value = enumRoot
             compatibleType = ""
         }
-        else {
+        else 
+        {
             root.value = ""
             compatibleType = "" + enumRoot
         }
@@ -453,13 +458,13 @@ onMounted(() => {
         const data = scalarNode.rawData
         state.data = data
         
-        const paths = (data || "").split(".")
+        const paths = (isNull(data) ? "" : data).split(".")
         const display: string[] = []
         let option = root
         let rebuild = false
         for (let i = 0; i < paths.length; i++) {
             const name = paths.slice(0, i + 1).join(".")
-            const match = option?.children?.find(c => c.value === name)
+            const match = option?.children?.find((c: ICascaderOptionInfo) => c.value === name)
             if (match)
             {
                 display.push(_L.value(match.label))

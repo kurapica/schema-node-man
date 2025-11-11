@@ -67,8 +67,11 @@
                         <el-button v-if="!scope.row.hasApps && !scope.row.apps?.length" type="primary" @click="showFields(scope.row)">
                             {{ _L["frontend.view.fields"] }}
                         </el-button>
+                        <el-button v-if="!scope.row.hasApps && !scope.row.apps?.length && enableWorkflow " type="warning" @click="showWorkflows(scope.row)">
+                            {{ _L["frontend.view.workflow"] }}
+                        </el-button>
                         <el-popconfirm
-                            v-if="!scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length" 
+                            v-if="!scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length && !scope.row.workflows?.length" 
                             :title="_L['frontend.view.confirmdelete']"
                             :confirm-button-text="_L['YES']"
                             :cancel-button-text="_L['NO']"
@@ -213,6 +216,98 @@
             </el-container>
         </el-drawer>
 
+        <!-- workflow list -->
+        <el-drawer v-model="showWorkflowList" :title="appTitle"  direction="rtl" size="100%" append-to-body>
+            <el-container class="main" style="height: 80vh;">
+                <el-main> 
+                    <el-table :data="workflows" style="width: 100%; height: 65vh;" :border="true"
+                        header-align="left" 
+                        :header-cell-style="{ background: '#eee' }">
+                        <el-table-column align="left" prop="name" :label="_L['system.schema.appworkflowschema.name']" min-width="120" />
+                        <el-table-column align="left" prop="display" :label="_L['system.schema.appworkflowschema.display']" min-width="150">
+                            <template #default="scope">
+                                {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="left" prop="desc" :label="_L['system.schema.appworkflowschema.desc']" min-width="150">
+                            <template #default="scope">
+                                {{ _L(scope.row.desc) }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="left" prop="active" :label="_L['system.schema.appworkflowschema.active']" min-width="120">
+                            <template #default="scope">
+                                <schema-view v-model="scope.row.active" :config="{
+                                    type: NS_SYSTEM_BOOL,
+                                    readonly: true
+                                }" plain-text="left"></schema-view>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="400">
+                            <template #header>
+                                <a href="javascript:void(0)" @click="handleWorkflowNew"
+                                    style="text-decoration: underline; color: lightseagreen;">
+                                    {{ _L["frontend.view.new"] }}
+                                </a>
+                            </template>
+                            <template #default="scope">
+                                <el-button type="info" @click="handleWorkflowEdit(scope.row, true)">
+                                    {{ _L["frontend.view.view"] }}
+                                </el-button>
+                                <el-button type="success" @click="handleWorkflowEdit(scope.row, false)">
+                                    {{ _L["frontend.view.edit"] }}
+                                </el-button>
+                                <el-popconfirm
+                                    :title="_L['frontend.view.confirmdelete']"
+                                    :confirm-button-text="_L['YES']"
+                                    :cancel-button-text="_L['NO']"
+                                    :icon="Delete"
+                                    @confirm="handleWorkflowDelete(scope.row)"
+                                    >
+                                    <template #reference>
+                                        <el-button type="danger">
+                                            {{ _L["frontend.view.delete"] }}
+                                        </el-button>
+                                    </template>
+                                </el-popconfirm>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <el-button @click="showWorkflowList = false">{{ _L["frontend.view.close"] }}</el-button>
+                </el-footer>
+            </el-container>
+        </el-drawer>
+
+        <!-- workflow editor -->
+        <el-drawer v-model="showWorkflowEditor" :title="appWorkflowOper" direction="rtl" size="100%" append-to-body @closed="closeWorkflowEditor">
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawData" label-width="160"
+                        label-position="left" style="width: 100%; height: 90%;">
+                        <div class="draw-view">
+                            <schema-view
+                                :node="(appWorkflowNode as StructNode)"
+                                in-form="expandall"
+                                plain-text="left"
+                            ></schema-view>
+                        </div>
+                    </el-form>
+                </el-main>
+                <el-footer>
+                    <br/>
+                    <template v-if="appWorkflowNode?.readonly">
+                        <el-button @click="showWorkflowEditor = false">{{ _L["frontend.view.close"] }}</el-button>
+                    </template>
+                    <template v-else>
+                        <el-button type="primary" @click="confirmWorkflow">{{ _L["frontend.view.save"] }}</el-button>
+                        <el-button @click="showWorkflowEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
+                    </template>
+                </el-footer>
+            </el-container>
+        </el-drawer>
+
         <!-- try it -->
         <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit'] + appTitle" direction="rtl" size="100%" append-to-body destroy-on-close>
             <el-container class="main" style="height: 80vh;">
@@ -234,13 +329,15 @@
 import { Delete } from '@element-plus/icons-vue'
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, type IAppSchema, type IAppFieldSchema,  getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema } from 'schema-node'
+import { _LS, type IAppSchema, type IAppFieldSchema,  getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema, type IAppWorkflowSchema, NS_SYSTEM_BOOL } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { appSchemaToJson, clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '@/appSchema'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
 
 //#region View
+
+const enableWorkflow = getSchemaServerProvider() ? true : false
 
 const appSchemas = ref<IAppSchema[]>([])
 
@@ -560,6 +657,115 @@ const closeFieldEditor = () => {
     
     // forece refresh
     refresh()
+}
+
+//#endregion
+
+//#endregion
+
+//#region Workflows
+
+const showWorkflowList = ref(false)
+const workflows = ref<IAppWorkflowSchema[]>([])
+const showWorkflows = async(row: any) => {
+    currApp = row.name
+    const appSchema = await getAppSchema(row.name)
+    appTitle.value = _L.value(appSchema?.display) || appSchema?.name || ""
+    workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+    showWorkflowList.value = true
+}
+
+//#region Workflow Edit
+
+const workflowEditorRef = ref<InstanceType<typeof ElForm>>()
+const showWorkflowEditor = ref(false)
+const appWorkflowNode = ref<StructNode | undefined>(undefined)
+const appWorkflowOper = ref("")
+let appWorkflowWatchHandler: Function | null = null
+
+// create
+const handleWorkflowNew = async () => {
+    appWorkflowNode.value = new StructNode({
+        type: "system.schema.appworkflowschema",
+    }, { app: currApp! })
+    showWorkflowEditor.value = true
+
+    appWorkflowWatchHandler = appWorkflowNode.value.subscribe(() => {
+        appWorkflowOper.value = _L.value["frontend.view.new"] + " " + (_L.value(appWorkflowNode.value?.data.display) || appWorkflowNode.value?.data.name || "")
+    }, true)
+}
+
+// update
+const handleWorkflowEdit = async (row: any, readonly?: boolean) => {
+    appWorkflowNode.value = new StructNode({
+        type: "system.schema.appworkflowschema",
+        readonly
+    }, jsonClone(toRaw(row)))
+    showWorkflowEditor.value = true
+}
+
+// delete
+const handleWorkflowDelete = async (row: any) => {
+    const appSchema = await getAppSchema(currApp!)
+    if (!appSchema?.workflows) return
+    if ((appSchema.loadState || 0) & SchemaLoadState.Server)
+    {
+        const provider = getSchemaServerProvider()
+        if (provider)
+        {
+            const res = provider.deleteAppWorkflowSchema(appSchema.name, row.name)
+            if (!res) {
+                ElMessage.error(_L.value["frontend.view.error"])
+                return
+            }
+        }
+    }
+    appSchema.workflows = appSchema.workflows.filter(w => w.name !== row.name)
+    saveStorageAppSchema(appSchema)
+    workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+}
+
+// save
+const confirmWorkflow = async () => {
+    const res = await workflowEditorRef.value?.validate()
+    if (!res || !appWorkflowNode.value?.valid) return
+    if (!appWorkflowNode.value?.valid) return
+    const data = jsonClone(toRaw(appWorkflowNode.value.data))
+    const appSchema = await getAppSchema(currApp!)
+    if (!appSchema) return
+    if ((appSchema.loadState || 0) & SchemaLoadState.Server)
+    {
+        const provider = getSchemaServerProvider()
+        if (provider){
+            const res = await provider.saveAppWorkflowSchema(appSchema.name, data)
+            if (!res) {
+                ElMessage.error(_L.value["frontend.view.error"])
+                return
+            }
+        }
+    }
+    if (!appSchema.workflows) appSchema.workflows = []
+    const idx =  appSchema.workflows.findIndex(w => w.name === data.name)
+    if (idx! >= 0)
+    {
+        appSchema.workflows[idx] = data
+    }
+    else
+    {
+        appSchema.workflows.push(data)
+    }
+    saveStorageAppSchema(appSchema)
+    workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+    closeWorkflowEditor()
+    showWorkflowEditor.value = false
+}
+
+// close
+const closeWorkflowEditor = () => {
+    if (appWorkflowWatchHandler) appWorkflowWatchHandler()
+    appWorkflowNode.value?.dispose()
+    appWorkflowNode.value = undefined
+    appWorkflowWatchHandler = null
 }
 
 //#endregion

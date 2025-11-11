@@ -68,6 +68,7 @@ let stateWatcher: Function | null = null
 onMounted(() => {
     const node = scalarNode
     const srcAppNode = (node.parent as StructNode).getField('sourceApp') as ScalarNode
+
     let appSchema: IAppSchema | undefined = undefined
     let type: string  = node.rule.root
 
@@ -91,7 +92,7 @@ onMounted(() => {
         state.display = state.whiteList?.find(w => w.value === node.rawData)?.label || node.rawData
     }
 
-    appWatcher = srcAppNode.subscribe(async () => {
+    appWatcher = srcAppNode?.subscribe(async () => {
         const app = srcAppNode?.rawData || ""
         appSchema = app ? await getAppSchema(app) : undefined
         await refreshWhiteList()
