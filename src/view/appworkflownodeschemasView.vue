@@ -17,9 +17,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayNode, clearDebounce, debounce, StructNode } from 'schema-node'
+import { ArrayNode, clearDebounce, debounce, getCachedSchema, SchemaType, StructNode } from 'schema-node'
 import { _L, schemaView } from 'schema-node-vueview'
-import { h, onUnmounted, reactive, toRaw } from 'vue'
+import { onUnmounted, reactive, toRaw } from 'vue'
 
 const props = defineProps<{ node: ArrayNode, plainText?: any, inForm?: any }>()
 const arrayNode = toRaw(props.node)
@@ -37,7 +37,15 @@ const clearWorkflowHandler = (h: IWorkflowHandler | undefined) => {
 const workflowHandlers: IWorkflowHandler[] = []
 
 const refreshWorkflows = () => {
-    
+    const payloadMaps: Record<string, string> = {}
+    for (let i = 0; i < arrayNode.elements.length; i++) {
+        const n = arrayNode.elements[i] as StructNode
+        const { name, type } = n.submitData
+        if (!name || !type) continue
+
+        const workflowType = getCachedSchema(type)
+        if (workflowType?.type !== SchemaType.Workflow) continue
+    }
 }
 
 const soonRefresh = debounce(refreshWorkflows, 50)
