@@ -16,39 +16,54 @@
                 </template>
             </el-popover>
         </template>
-        <el-cascader v-else
-            v-model="data" 
-            style="width: 100%" 
-            :options="root.children" 
-            :props="{
-                emitPath: false,
-                checkStrictly: namespaceMap.length === 1,
-                lazy: true,
-                lazyLoad: lazyLoad
-            }" 
-            :placeholder="scalarNode.selectPlaceHolder"
-            :disabled="state.readonly || state.disable" :clearable="!state.require"
-            v-bind="$attrs">
-            <template #default="{ data }">
-                <template v-if="namespaceMap.length === 1 || data.type === SchemaType.Namespace">
-                    <span>{{ data.label }}</span>
+        <section v-else style="display: flex;">
+            <el-cascader
+                v-model="data" 
+                :style="{width: `${state.generic?.length ? Math.floor(100 / (state.generic.length + 1)) : 100}%`}" 
+                :options="root.children" 
+                :props="{
+                    emitPath: false,
+                    checkStrictly: namespaceMap.length === 1,
+                    lazy: true,
+                    lazyLoad: lazyLoad
+                }" 
+                :placeholder="scalarNode.selectPlaceHolder"
+                :disabled="state.readonly || state.disable" :clearable="!state.require"
+                v-bind="$attrs">
+                <template #default="{ data }">
+                    <template v-if="namespaceMap.length === 1 || data.type === SchemaType.Namespace">
+                        <span>{{ data.label }}</span>
+                    </template>
+                    <template v-else>
+                        <el-popover
+                            placement="right-start"
+                            :title="data.value"
+                            width="width:fit-content"
+                            :open-delay="500"
+                            trigger="hover">
+                            <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
+                            <namespace-info-view style="min-width: 300px;" :type="data.value"/>
+                            <template #reference>
+                                <span style="width: 100%; display: inline-block;">{{ data.label }}</span>
+                            </template>
+                        </el-popover>
+                    </template>
                 </template>
-                <template v-else>
-                    <el-popover
-                        placement="right-start"
-                        :title="data.value"
-                        width="width:fit-content"
-                        :open-delay="500"
-                        trigger="hover">
-                        <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
-                        <namespace-info-view style="min-width: 300px;" :type="data.value"/>
-                        <template #reference>
-                            <span style="width: 100%; display: inline-block;">{{ data.label }}</span>
-                        </template>
-                    </el-popover>
+            </el-cascader>
+            <template v-if="state.generic?.length" >
+                <span>&lt;</span>
+                <template v-for="(genNode, index) in state.generic" :key="genNode.guid">
+                    <schema-view
+                        :node="genNode"
+                        :style="{width: `${Math.floor(98 / (state.generic.length))}%`}"
+                        no-generic
+                        v-bind="$attrs"
+                    ></schema-view>
+                    <span v-if="index < state.generic.length - 1">,</span>
                 </template>
+                <span>&gt;</span>
             </template>
-        </el-cascader>
+        </section>
 
         <!-- namespace editor -->
         <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body @closed="closeNamespaceEditor">
@@ -88,7 +103,7 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, registerSchema, RelationType, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
+import { ExpressionType, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -105,7 +120,7 @@ interface ICascaderOptionInfo {
 }
 //#endregion
 
-const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()
+const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean, noGeneric?: boolean }>()
 const scalarNode = toRaw(props.node)
 const type = scalarNode.config.type
 
@@ -116,7 +131,17 @@ const state = reactive<{
     disable?: boolean,
     require?: boolean,
     readonly?: boolean,
+    generic?: ScalarNode[],
 }>({})
+
+const setData = (value: any) => {
+    if (state.generic?.length)
+    {
+        value = `${value}<${state.generic.map(g => g.data || "").join(", ")}>`
+    }
+    console.log("Set data:", value)
+    scalarNode.data = value
+}
 
 // Data
 const data = computed({
@@ -124,7 +149,7 @@ const data = computed({
         return state.data
     },
     set(value: any) {
-        scalarNode.data = value
+        setData(value)
     }
 })
 
@@ -296,6 +321,16 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         }
         return blackList
     }
+    else if(props.noGeneric)
+    {
+        const blackList: string[] = ["system.schema"]
+        for(let i = 0; i < options.length; i++)
+        {
+            const genTypes = getGenericParameter(options[i].value)
+            if (genTypes?.length) blackList.push(options[i].value)
+        }
+        return blackList
+    }
     else {
         return ["system.schema"]
     }
@@ -455,11 +490,62 @@ onMounted(() => {
     }
 
     dataWatcher = scalarNode.subscribe(async() =>  {
-        const data = scalarNode.rawData
-        state.data = data
+        let data = scalarNode.rawData
+
+        // generic type check
+        if (!props.noGeneric && !(props.plainText && scalarNode.readonly))
+        {
+            let name = isNull(data) ? "" : data
+            const match = name.match(REGEX_GENERIC_IMPLEMENT)
+            const geneiricTypes = match && match.length >= 3 ? match[2].split(",").map((t:string) => t.trim()) : []
+            name = match && match.length >= 2 ? match[1] : name
+            const schema = name ? getCachedSchema(name) : undefined
+            const genTypes = schema ? getGenericParameter(schema) : []
+
+            if (genTypes?.length)
+            {
+                const genericNodes = [...state.generic || []]
+                while(genericNodes.length > genTypes.length)
+                    genericNodes.pop()?.dispose()
+
+                for (let i = 0; i < genericNodes.length; i++)
+                {
+                    genericNodes[i].data = geneiricTypes[i] || ""
+                }
+
+                while(genericNodes.length < genTypes.length)
+                {
+                    const node = new ScalarNode({ type: schema?.type === SchemaType.Array ? "system.schema.arrayeletype" : "system.schema.valuetype", display: _L.value("[GENERIC]") }, geneiricTypes[genericNodes.length] || "")
+                    node.subscribe(() => setData(state.data))
+                    genericNodes.push(node)
+                }
+                
+                state.data = name
+                state.generic = genericNodes
+                data = name
+            }
+            else
+            {
+                state.data = data
+                state.generic = undefined
+            }
+        }
+        else
+        {
+            state.data = data
+        }
         
+        // build display
         const paths = (isNull(data) ? "" : data).split(".")
         const display: string[] = []
+
+        // generic check for simple
+        while (paths.length > 1 && paths[paths.length - 1].endsWith(">") && !paths[paths.length - 1].includes("<"))
+        {
+            paths[paths.length - 2] = `${paths[paths.length - 2]}.${paths[paths.length - 1]}`
+            paths.pop()
+        }
+
         let option = root
         let rebuild = false
         for (let i = 0; i < paths.length; i++) {

@@ -208,28 +208,41 @@ registerSchema([
         return (previous && previous.length > 0) ? true : false
     }),
 
+    newSystemFunc("system.schema.hasworkflowargs", NS_SYSTEM_BOOL, [
+        { name: "type", type: "system.schema.workflowtype", nullable: true },
+    ], async (type: string) => {
+        if (!type) return null
+        const schema = await getSchema(type)
+        return schema?.workflow?.args?.length ? true : false
+    }),
+
     newSystemStruct("system.schema.appworkflownodeschema", [
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "fork", type: NS_SYSTEM_BOOL },
         { name: "type", type: "system.schema.workflowtype", require: true },
         { name: "mode", type: "system.schema.workflowmode", displayOnly: true, invisible: true },
+        { name: "fork", type: NS_SYSTEM_BOOL },
+        { name: "args", type: "system.schema.funccallargs" },
         { name: "previous", type: "system.schema.appworkflows" },
         { name: "func", type: "system.schema.functype" },
-        { name: "args", type: "system.schema.funcargs" },
+        { name: "funcArgs", type: "system.schema.funccallargs" },
         { name: "event", type: "system.schema.eventtype" },
         { name: "state", type: "system.schema.anyvalue" },
-        { name: "payload", type: "system.schema.valuetype", require: true },
-    ], [
+        { name: "payload", type: "system.schema.valuetype", require: true, readonly: true },
+    ], 
+    [
+        { field: "args", type: RelationType.Visible, func: "system.schema.hasworkflowargs", args: [ { name: "type" } ] },
         { field: "mode", type: RelationType.Default, func: "system.schema.getworkflowmode", args: [ { name: "type" } ]},
+        { field: "fork", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Event } ] },
         { field: "func", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Function } ] },
-        { field: "args", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "func" } ] },
+        { field: "funcArgs", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "func" } ] },
         { field: "event", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Event } ] },
         { field: "previous.$ele", type: RelationType.BlackList, func: "system.conv.assign", args: [ { name: "previous" } ] },
         { field: "state", type: RelationType.Type, func: "system.schema.getworkflowstatetype", args: [ { name: "type" } ] },
         { field: "state", type: RelationType.Visible, func: "system.schema.hasworkflowstatetype", args: [ { name: "type" } ] },
         { field: "payload", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "type" } ] },
         { field: "type", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.workflow" } ] },
+        { field: "event", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.event" } ] },
     ]),
     newSystemArray("system.schema.appworkflownodeschemas", "system.schema.appworkflownodeschema", "name"),
 
@@ -506,7 +519,6 @@ export function addAppTarget(app: string, target: string)
 
 //#region View
 
-import waterFallView from "./view/waterFallView.vue"
 import sourceappView from "./view/appSourceView.vue"
 import appInputView from "./view/appInputView.vue"
 import appsrcfldView from "./view/appSrcfldView.vue"
@@ -514,6 +526,7 @@ import appaccessfldView from "./view/appAccessfldView.vue"
 import appPushfldsView from "./view/appPushfldsView.vue"
 import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
+import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("system.schema.app", sourceappView)
@@ -524,5 +537,5 @@ regSchemaTypeView("system.schema.apppushfld", appaccessfldView)
 regSchemaTypeView("system.schema.apppushflds", appPushfldsView)
 regSchemaTypeView("system.schema.appfieldrelations", structfldrelationinfosView)
 regSchemaTypeView("system.schema.appfieldvalargs", structfldfuncargsView)
-regSchemaTypeView("system.schema.appworkflownodeschemas", waterFallView)
+regSchemaTypeView("system.schema.appworkflownodeschemas", appworkflownodeschemasView)
 //#endregion

@@ -178,7 +178,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
+import { _LS, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone, EnumNode } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
@@ -193,7 +193,9 @@ const schemaTypeOrder = {
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
     [SchemaType.Func]: 6,
-    [SchemaType.Json]: 7
+    [SchemaType.Json]: 7,
+    [SchemaType.Event]: 8,
+    [SchemaType.Workflow]: 9
 }
 
 const tryitTypes = [ SchemaType.Struct, SchemaType.Array ]
@@ -285,6 +287,8 @@ const handleNew = async () => {
     namespaceNode.value = new StructNode({
         type: "system.schema.nodeschema",
     }, {})
+    const typeField = namespaceNode.value.getField("type") as EnumNode
+    typeField.rule.blackList = [ SchemaType.Json, SchemaType.Event, SchemaType.Workflow]
     showNamespaceEditor.value = true
 
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {

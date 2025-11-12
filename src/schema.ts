@@ -648,7 +648,8 @@ registerSchema([
         { name: "mode", type: "system.schema.workflowmode", require: true, readonly: true },
         { name: "payload", type: "system.schema.valuetype", readonly: true },
         { name: "state", type: "system.schema.valuetype", readonly: true },
-        { name: "session", type: "system.schema.valuetype", readonly: true }
+        { name: "session", type: "system.schema.valuetype", readonly: true },
+        { name: "args", type: "system.schema.funcargs", readonly: true }
     ]),
     //#endregion
 

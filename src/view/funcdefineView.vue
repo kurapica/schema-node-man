@@ -571,8 +571,22 @@ const delayRefreshArgs = debounce(refreshArgs, 1000)
 // calc
 watch(argdatas, doCaclc)
 
-const argsHandlers: { guid: string, name: Function, type: Function }[] = []
-const expsHandlers: { guid: string, name: Function, return: Function, type: Function, func: Function, args: Function }[] = []
+interface IArgHandler { guid: string, name: Function, type: Function }
+interface IExpHandler { guid: string, name: Function, return: Function, type: Function, func: Function, args: Function }
+const clearArgHandler = (handler: IArgHandler | undefined) => {
+    handler?.name()
+    handler?.type()
+}
+const clearExpHandler = (handler: IExpHandler | undefined) => {
+    handler?.name()
+    handler?.return()
+    handler?.type()
+    handler?.func()
+    handler?.args()
+}
+
+const argsHandlers: IArgHandler[] = []
+const expsHandlers: IExpHandler[] = []
 
 onMounted(() => {
     stateHandler = funcNode.subscribeState(() => {
@@ -589,9 +603,7 @@ onMounted(() => {
         // clear
         for (let i = argsHandlers.length - 1; i >= argsNode.elements.length; i--)
         {
-            const handler = argsHandlers.pop()
-            handler?.name()
-            handler?.type()
+            clearArgHandler(argsHandlers.pop())
         }
 
         // subscribe
@@ -599,8 +611,7 @@ onMounted(() => {
             if (argsHandlers.length > i)
             {
                 if (argsHandlers[i].guid === e.guid) return
-                argsHandlers[i].name()
-                argsHandlers[i].type()
+                clearArgHandler(argsHandlers[i])
             }
 
             changed = true
@@ -624,12 +635,7 @@ onMounted(() => {
         // clear
         for (let i = expsHandlers.length - 1; i >= expslen; i--)
         {
-            const handler = expsHandlers.pop()
-            handler?.name()
-            handler?.return()
-            handler?.type()
-            handler?.func()
-            handler?.args()
+            clearExpHandler(expsHandlers.pop())
         }
 
         // subscribe
@@ -637,11 +643,7 @@ onMounted(() => {
             if (expsHandlers.length > i)
             {
                 if (expsHandlers[i].guid === e.guid) return
-                expsHandlers[i].name()
-                expsHandlers[i].return()
-                expsHandlers[i].type()
-                expsHandlers[i].func()
-                expsHandlers[i].args()
+                clearExpHandler(expsHandlers[i])
             }
 
             changed = true
@@ -661,21 +663,20 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-    argsHandlers.forEach(a => {
-        a.name()
-        a.type()
-    })
-    expsHandlers.forEach(a => {
-        a.name()
-        a.return()
-        a.type()
-        a.func()
-        a.args()
-    })
+    argsHandlers.forEach(clearArgHandler)
+    argsHandlers.length = 0
+    expsHandlers.forEach(clearExpHandler)
+    expsHandlers.length = 0
+
     if (stateHandler) stateHandler()
     if (retHandler) retHandler()
     if (argsHandler) argsHandler()
     if (expsHandler) expsHandler()
+    stateHandler = undefined
+    retHandler = undefined
+    argsHandler = undefined
+    expsHandler = undefined
+    
     clearDebounce(soonRefresh)
     clearDebounce(delayRefresh)
     clearDebounce(soonRefreshArgs)
