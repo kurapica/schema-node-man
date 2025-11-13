@@ -67,7 +67,7 @@
                         <el-button v-if="!scope.row.hasApps && !scope.row.apps?.length" type="primary" @click="showFields(scope.row)">
                             {{ _L["frontend.view.fields"] }}
                         </el-button>
-                        <el-button v-if="!scope.row.hasApps && !scope.row.apps?.length && enableWorkflow " type="warning" @click="showWorkflows(scope.row)">
+                        <el-button v-if="(scope.row.hasFields || scope.row.fields?.length) && enableWorkflow " type="warning" @click="showWorkflows(scope.row)">
                             {{ _L["frontend.view.workflow"] }}
                         </el-button>
                         <el-popconfirm

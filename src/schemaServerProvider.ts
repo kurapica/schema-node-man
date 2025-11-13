@@ -71,16 +71,16 @@ export interface ISchemaServerProvder extends IAppSchemaDataProvider
     /**
      * Save the app workflow schema to the server
      * @param app the app schema name
-     * @param workflow the workflow
+     * @param schema the workflow schema
      */
-    saveAppWorkflowSchema?(app: string, workflow: IAppWorkflowSchema): Promise<boolean>
+    saveAppWorkflowSchema(app: string, schema: IAppWorkflowSchema): Promise<boolean>
 
     /**
      * Delete the app workflow schema from the server
      * @param app the app schema name
      * @param workflow the workflow name
      */
-    deleteAppWorkflowSchema?(app: string, workflow: string): Promise<boolean>
+    deleteAppWorkflowSchema(app: string, workflow: string): Promise<boolean>
 
     /**
      * Toggle the app workflow
@@ -88,7 +88,7 @@ export interface ISchemaServerProvder extends IAppSchemaDataProvider
      * @param workflow the workflow name
      * @param active whether active
      */
-    toggleAppWorkflowSchema?(app: string, workflow: string, active: boolean): Promise<boolean>
+    toggleAppWorkflowSchema(app: string, workflow: string, active: boolean): Promise<boolean>
 }
 
 //#region Methods
@@ -146,9 +146,9 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         }))?.result
     },
 
-    saveAppWorkflowSchema: async function (app: string, workflow: IAppWorkflowSchema): Promise<boolean> {
+    saveAppWorkflowSchema: async function (app: string, schema: IAppWorkflowSchema): Promise<boolean> {
         return (await postSchemaApi("/save-app-workflow-schema", {
-            app, workflow
+            app, schema
         }))?.result
     },
     

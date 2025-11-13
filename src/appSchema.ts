@@ -217,18 +217,20 @@ registerSchema([
     }),
 
     newSystemStruct("system.schema.appworkflownodeschema", [
+        { name: "app", type: "system.schema.app", displayOnly: true, invisible: true },
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "type", type: "system.schema.workflowtype", require: true },
         { name: "mode", type: "system.schema.workflowmode", displayOnly: true, invisible: true },
         { name: "fork", type: NS_SYSTEM_BOOL },
+        { name: "forkKey", type: NS_SYSTEM_STRING},
         { name: "args", type: "system.schema.funccallargs" },
         { name: "previous", type: "system.schema.appworkflows" },
-        { name: "func", type: "system.schema.functype" },
-        { name: "funcArgs", type: "system.schema.funccallargs" },
         { name: "event", type: "system.schema.eventtype" },
         { name: "state", type: "system.schema.anyvalue" },
-        { name: "payload", type: "system.schema.valuetype", require: true, readonly: true },
+        { name: "func", type: "system.schema.functype" },
+        { name: "payload", type: "system.schema.valuetype", require: true },
+        { name: "funcArgs", type: "system.schema.funccallargs" },
     ], 
     [
         { field: "args", type: RelationType.Visible, func: "system.schema.hasworkflowargs", args: [ { name: "type" } ] },
@@ -243,6 +245,7 @@ registerSchema([
         { field: "payload", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "type" } ] },
         { field: "type", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.workflow" } ] },
         { field: "event", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.event" } ] },
+        { field: "forkKey", type: RelationType.Visible, func: "system.conv.assign", args: [ { name: "fork" } ] },
     ]),
     newSystemArray("system.schema.appworkflownodeschemas", "system.schema.appworkflownodeschema", "name"),
 
@@ -255,6 +258,7 @@ registerSchema([
     ],[
         { field: "nodes.previous", type: RelationType.Visible, func: "system.schema.haspreviousworkflow", args: [ { name: "nodes" } ] },
         { field: "nodes.previous.$ele", type: RelationType.WhiteList, func: "system.collection.getfields", args: [ { name: "nodes" }, { value: "name" } ] },
+        { field: "nodes.app", type: RelationType.Default, func: "system.conv.assign", args: [ { name: "app" } ] },
     ]),
 
     //#region frontend app schema

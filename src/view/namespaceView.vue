@@ -137,9 +137,8 @@ const state = reactive<{
 const setData = (value: any) => {
     if (state.generic?.length)
     {
-        value = `${value}<${state.generic.map(g => g.data || "").join(", ")}>`
+        value = state.generic.findIndex(g => g.data) >= 0 ? `${value}<${state.generic.map(g => g.data || "").join(", ")}>` : value
     }
-    console.log("Set data:", value)
     scalarNode.data = value
 }
 
@@ -517,6 +516,7 @@ onMounted(() => {
                 {
                     const node = new ScalarNode({ type: schema?.type === SchemaType.Array ? "system.schema.arrayeletype" : "system.schema.valuetype", display: _L.value("[GENERIC]") }, geneiricTypes[genericNodes.length] || "")
                     node.subscribe(() => setData(state.data))
+                    node.rule.disable = state.readonly || state.disable || props.disabled
                     genericNodes.push(node)
                 }
                 
@@ -526,7 +526,7 @@ onMounted(() => {
             }
             else
             {
-                state.data = data
+                state.data = name
                 state.generic = undefined
             }
         }
@@ -580,6 +580,11 @@ onMounted(() => {
             compatibleType = r
             reBuildOptions()
         }
+
+        state.generic?.forEach(g => {
+            g.rule.disable = state.readonly || state.disable || props.disabled
+            g.notifyState()
+        })
     }, true)
 
     // update display

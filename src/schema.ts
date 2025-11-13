@@ -192,7 +192,7 @@ registerSchema([
         { name: "type", type: "system.schema.valuetype" }
     ], async (type: string) => {
         const schema = await getSchema(type)
-        if (schema?.type === SchemaType.Array || schema?.type === SchemaType.Struct) return NS_SYSTEM_STRING        
+        if (schema?.type === SchemaType.Array || schema?.type === SchemaType.Struct) return NS_SYSTEM_STRINGS
         const arraySchema = await getArraySchema(type)
         return arraySchema?.name
     }),
