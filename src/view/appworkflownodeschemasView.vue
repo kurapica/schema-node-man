@@ -51,26 +51,21 @@ const spacialFuncHandlers: { [key: string]: Function } = {
         const field = (args.elements[1] as StructNode).getField("value").submitData as string
         const firstKey = args.elements[2] as StructNode
 
-        console.log("step 1")
         const appSchema = app ? await getAppSchema(app) : null
         if (!appSchema) return []
-        console.log("step 2")
+        
         const fieldSchema = appSchema.fields?.find(f => f.name === field)
         if (!fieldSchema) return []
         
-        console.log("step 3")
         const fieldType = await getSchema(fieldSchema.type)
         if (fieldType?.type === SchemaType.Array && fieldType.array?.primary?.length === 1)
         {
-        console.log("step 4")
             const eleType = await getSchema(fieldType.array.element)
             if (eleType?.type === SchemaType.Struct && eleType.struct?.fields)
             {
-        console.log("step 5")
                 const pkField = eleType.struct.fields.find(f => f.name === fieldType.array!.primary![0])
                 if (pkField)
                 {
-        console.log("step 6")
                     const display = firstKey.getField("display")
                     const type = firstKey.getField("type")
                     const nameField = firstKey.getField("name") as ScalarNode
@@ -79,7 +74,7 @@ const spacialFuncHandlers: { [key: string]: Function } = {
                     type.data = pkField.type
 
                     nameField.rule.whiteList = await getFieldAccessWhiteList(pkField.type, payloadTypes)
-                    nameField.notifyState()
+                    nameField.validation().then(() => nameField.notifyState())
                 }
             }
         }
@@ -167,7 +162,7 @@ const refreshWorkflows = async (from: string) => {
                     type.data = ctype
 
                     nameField.rule.whiteList = await getFieldAccessWhiteList(ctype, payloadTypes)
-                    nameField.notifyState()
+                    nameField.validation().then(() => nameField.notifyState())
                 }
 
                 if (spacialFuncHandlers[func])
@@ -288,7 +283,7 @@ const refreshWorkflows = async (from: string) => {
                 {
                     nameField.rule.whiteList = await getFieldAccessWhiteList(carg.type, payloadTypes)
                 }
-                nameField.notifyState()
+                nameField.validation().then(() => nameField.notifyState())
             }
         }
         else

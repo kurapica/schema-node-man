@@ -253,6 +253,9 @@
                                 <el-button type="info" @click="handleWorkflowEdit(scope.row, true)">
                                     {{ _L["frontend.view.view"] }}
                                 </el-button>
+                                <el-button type="warning" @click="toggleWorkflow(scope.row, !scope.row.active)">
+                                    {{ scope.row.active ? _L["DEACTIVE"] : _L["ACTIVE"] }}
+                                </el-button>
                                 <el-button type="success" @click="handleWorkflowEdit(scope.row, false)">
                                     {{ _L["frontend.view.edit"] }}
                                 </el-button>
@@ -766,6 +769,30 @@ const closeWorkflowEditor = () => {
     appWorkflowNode.value?.dispose()
     appWorkflowNode.value = undefined
     appWorkflowWatchHandler = null
+}
+
+// toggle
+const toggleWorkflow = async (row: any, active: boolean) =>
+{
+    const appSchema = await getAppSchema(currApp!)
+    if (!appSchema?.workflows) return
+    if ((appSchema.loadState || 0) & SchemaLoadState.Server)
+    {
+        const provider = getSchemaServerProvider()
+        if (provider)
+        {
+            const res = provider.toggleAppWorkflowSchema(appSchema.name, row.name, active)
+            if (!res) {
+                ElMessage.error(_L.value["frontend.view.error"])
+                return
+            }
+        }
+    }
+    const idx =  appSchema.workflows.findIndex(w => w.name === row.name)
+    if (idx! >= 0)
+        appSchema.workflows[idx].active = active
+    saveStorageAppSchema(appSchema)
+    workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
 }
 
 //#endregion

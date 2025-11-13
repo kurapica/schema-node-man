@@ -267,7 +267,7 @@ registerSchema([
     ], (app: string) => {
         if (isNull(app)) return []
         const appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}")
-        if (appTargets && typeof(appTargets) === "object") appTargets[app] || []
+        if (appTargets && typeof(appTargets) === "object") return appTargets[app] || []
         return []
     }),
 
