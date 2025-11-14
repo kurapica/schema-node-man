@@ -379,7 +379,7 @@ const refresh = async () => {
         if (fargs.elements.length > farglen) fargs.delRows(farglen, fargs.elements.length - farglen)
 
         const generic = finfo?.func?.generic ? (Array.isArray(finfo.func.generic) ? [...finfo.func.generic] : [ finfo.func.generic ]) : []
-        if (finfo.func?.return && /^[tT]\d*$/.test(finfo.func.return)) {
+        if (finfo?.func?.return && /^[tT]\d*$/.test(finfo.func.return)) {
             const gidx = finfo.func.return.length > 1 ? parseInt(finfo.func.return.substring(1)) - 1 : 0
             if (ret) generic[gidx] = ret
         }
