@@ -561,7 +561,7 @@ registerSchema([
     
     newSystemStruct("system.schema.funccallarg", [
         { name: "display", type: NS_SYSTEM_STRING, displayOnly: true},
-        { name: "type", type: "system.schema.valuetype", displayOnly: true, invisible: true},
+        { name: "type", type: "system.schema.valuetype", displayOnly: true, invisible: false},
         { name: "name", type: NS_SYSTEM_STRING, upLimit: 32},
         { name: "value", type: "system.schema.anyvalue"},
     ], [
