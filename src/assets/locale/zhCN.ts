@@ -141,32 +141,35 @@ importLanguage("zhCN", {
     "system.data.getappdatabythreekey": "根据三键值获取应用数据",
     "system.data.getappdatabyfourkey": "根据四键值获取应用数据",
     "system.data.incrappdata": "增量更新应用数据",
+    "system.data.getcontextitem": "获取请求上下文项",
 
     // system.event
     "system.event": "系统事件",
     "system.event.schema": "类型定义事件",
     "system.event.schema.change": "类型定义变更事件",
     "system.event.schema.delete": "类型定义删除事件",
+    "system.event.schema.appdelete": "应用定义删除事件",
+    "system.event.schema.appupdate": "应用定义更新事件",
 
-    "system.event.appschema": "应用定义事件",
-    "system.event.appschema.delete": "应用定义删除事件",
-    "system.event.appschema.update": "应用定义更新事件",
+    "system.event.app": "应用数据",
+    "system.event.app.data": "应用数据事件",
+    "system.event.app.data.create": "应用数据创建事件",
+    "system.event.app.data.update": "应用数据更新事件",
+    "system.event.app.data.delete": "应用数据删除事件",
+    "system.event.app.data.read": "应用数据读取事件",
 
-    "system.event.appdata": "应用数据事件",
-    "system.event.appdata.create": "应用数据创建事件",
-    "system.event.appdata.update": "应用数据更新事件",
-    "system.event.appdata.delete": "应用数据删除事件",
-    "system.event.appdata.read": "应用数据读取事件",
-
+    // system.workflow
     "system.workflow": "系统工作流",
     "system.workflow.node": "工作流节点",
 
-    "system.workflow.call": "函数调用节点",
-    "system.workflow.appcall": "应用函数调用",
-    "system.workflow.appcallstate": "应用函数调用状态",
-    "system.workflow.appcallstate.result": "必须返回结果",
-    "system.workflow.appcallstate.retry": "最大重试次数",
-    "system.workflow.appcallstate.delay": "延迟时间(秒)",
+    "system.workflow.func": "函数调用工作流",
+    "system.workflow.func.call": "函数调用节点",
+    "system.workflow.func.callstate": "应用函数调用状态",
+    "system.workflow.func.callstate.result": "必须返回结果",
+    "system.workflow.func.callstate.retry": "最大重试次数",
+    "system.workflow.func.callstate.delay": "延迟时间(秒)",
+    
+    "system.workflow.func.appcall": "应用函数调用",
 
     "system.workflow.control": "工作流控制节点",
     "system.workflow.control.goto": "跳转到指定节点",
@@ -175,18 +178,17 @@ importLanguage("zhCN", {
     "system.workflow.event.app": "应用事件触发事件",
 
     "system.workflow.event.apppayload": "应用事件触发事件负载",
-    "system.workflow.event.apppayload.application": "应用",
+    "system.workflow.event.apppayload.app": "应用",
 
     "system.workflow.event.appdata": "应用目标数据访问事件",
 
     "system.workflow.event.appdatapayload": "应用目标数据访问事件负载",
-    "system.workflow.event.appdatapayload.application": "应用",
+    "system.workflow.event.appdatapayload.app": "应用",
     "system.workflow.event.appdatapayload.target": "应用目标",
 
     "system.workflow.event.appfielddata": "应用字段数据变更事件",
-
     "system.workflow.event.appfielddatapayload": "应用字段数据变更事件负载",
-    "system.workflow.event.appfielddatapayload.application": "应用",
+    "system.workflow.event.appfielddatapayload.app": "应用",
     "system.workflow.event.appfielddatapayload.field": "应用字段",
     "system.workflow.event.appfielddatapayload.target": "应用目标",
     "system.workflow.event.appfielddatapayload.data": "更新数据",
@@ -220,6 +222,7 @@ importLanguage("zhCN", {
     "system.schema.schematype.json": "JSON类型",
     "system.schema.schematype.event": "事件类型",
     "system.schema.schematype.workflow": "工作流类型",
+    "system.schema.schematype.policy": "策略类型",
 
     "system.schema.relationtype": "字段计算结果用途",
     "system.schema.relationtype.default": "默认值计算",
@@ -269,6 +272,22 @@ importLanguage("zhCN", {
     "system.schema.structfieldflags.useoriginforuplimit": "使用原始值计算上限",
     "system.schema.structfieldflags.anylevel": "枚举值任意级可选",
     "system.schema.structfieldflags.singleflag": "单标志位",
+
+    "system.schema.policyscope": "策略范围",
+    "system.schema.policyscope.schemacreate": "创建数据结构",
+    "system.schema.policyscope.schemaread": "读取数据结构",
+    "system.schema.policyscope.schemaupdate": "更新数据结构",
+    "system.schema.policyscope.schemadelete": "删除数据结构",
+    "system.schema.policyscope.datacreate": "创建应用数据",
+    "system.schema.policyscope.dataread": "读取应用数据",
+    "system.schema.policyscope.dataupdate": "更新应用数据",
+    "system.schema.policyscope.datadelete": "删除应用数据",
+    "system.schema.policyscope.rowaccess": "行访问过滤",
+    "system.schema.policyscope.columnaccess": "列访问过滤",
+
+    "system.schema.policycombine": "策略组合方式",
+    "system.schema.policycombine.andalso": "且",
+    "system.schema.policycombine.orelse": "或",
 
     "system.schema.appfieldflags": "后端用应用字段标志位",
     "system.schema.appfieldflags.none": "无",
@@ -399,6 +418,7 @@ importLanguage("zhCN", {
     "system.schema.nodeschema.name": "名称",
     "system.schema.nodeschema.type": "类型",
     "system.schema.nodeschema.display": "描述",
+    "system.schema.nodeschema.auth": "权限",
     "system.schema.nodeschema.scalar": "基础数据类型定义",
     "system.schema.nodeschema.enum": "枚举类型定义",
     "system.schema.nodeschema.struct": "结构体类型定义",
@@ -424,11 +444,15 @@ importLanguage("zhCN", {
     "system.schema.appfieldschema.combines": "数据合并规则列表(结构体用)",
     "system.schema.appfieldschema.trackPush": "跟踪推送",
     "system.schema.appfieldschema.readonly": "只读",
+    "system.schema.appfieldschema.auths": "行权限列表",
+    "system.schema.appfieldschema.dataAuths": "列权限列表",
 
     "system.schema.appschema": "应用定义",
     "system.schema.appschema.name": "应用名",
     "system.schema.appschema.display": "应用展示",
     "system.schema.appschema.desc": "应用描述",
+    "system.schema.appschema.auth": "应用权限",
+    "system.schema.appschema.dataAuth": "应用数据权限",
     "system.schema.appschema.relations": "应用字段数据关联列表",
 
     "system.schema.eventschema": "事件定义",
@@ -442,14 +466,19 @@ importLanguage("zhCN", {
     "system.schema.workflowschema.session": "会话类型",
     "system.schema.workflowschema.args": "参数类型",
 
+    "system.schema.policyitem": "策略条目",
+    "system.schema.policyitem.scope": "策略范围",
+    "system.schema.policyitem.combine": "组合方式",
+    "system.schema.policyitem.evaluator": "评估函数",
+    "system.schema.policyitem.args": "函数参数",
+
+    "system.schema.policyschema": "策略定义",
+    "system.schema.policyschema.items": "策略条目列表",
+
     "system.schema.appworkflow": "应用工作流定义",
     "system.schema.eventtype": "事件类型",
     "system.schema.workflowtype": "工作流类型",
-    "system.schema.eventscope": "事件作用域",
-    "system.schema.eventscope.workflow": "工作流内",
-    "system.schema.eventscope.application": "应用内",
-    "system.schema.eventscope.server": "服务器内",
-    "system.schema.eventscope.cluster": "集群内",
+    "system.schema.policytype": "策略类型",
 
     "system.schema.workflowmode": "工作流模式",
     "system.schema.workflowmode.workflow": "工作流模式",
@@ -465,6 +494,7 @@ importLanguage("zhCN", {
     "system.schema.appworkflownodeschema": "应用工作流节点定义",
     "system.schema.appworkflownodeschema.name": "名称",
     "system.schema.appworkflownodeschema.display": "展示名",
+    "system.schema.appworkflownodeschema.auth": "权限",
     "system.schema.appworkflownodeschema.desc": "描述",
     "system.schema.appworkflownodeschema.type": "类型",
     "system.schema.appworkflownodeschema.args": "参数",
@@ -500,6 +530,11 @@ importLanguage("zhCN", {
     "system.schema.genarraydisplay": "生成数组显示文本",
     "system.schema.getscalarorenumtype": "获取基础数据类型或枚举类型",
     "system.schema.gettypedisplayorname": "获取类型显示名或名称",
+
+    "system.schema.appaccess": "应用访问",
+    "system.schema.appaccess.app": "应用",
+    "system.schema.appaccess.target": "应用目标",
+    "system.schema.appaccess.field": "应用字段",
 
     //#endregion
 
@@ -617,6 +652,7 @@ importLanguage("zhCN", {
     "system.schema.iscascadeenumtype": "是级联枚举值类型",
     "system.schema.isflagsenumtype": "是标志枚举值类型",
     "system.schema.isstructtype": "是结构体类型",
+    "system.schema.isstructorstructarray": "是结构体或结构体数组类型",
     "system.schema.notstructarraytype": "非结构体或结构体数组类型",
     "system.schema.getenumcascadewhitelist": "获取级联名称白名单",
     "system.schema.getwhiteblacklisttype": "获取黑白名单类型",

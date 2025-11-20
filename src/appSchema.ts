@@ -126,6 +126,12 @@ registerSchema([
         return true
     }),
 
+    newSystemStruct("system.schema.fieldpolicy", [
+        { name: "name", type: NS_SYSTEM_STRING, require: true, upLimit: 64 },
+        { name: "scope", type: "system.schema.policyitems", require: true },
+    ]),
+    newSystemArray("system.schema.fieldpolicys", "system.schema.fieldpolicy", "name"),
+
     newSystemStruct("system.schema.appfieldschema", [
         { name: "app", type: NS_SYSTEM_STRING, readonly: true, invisible: true },
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 } ,
@@ -143,6 +149,8 @@ registerSchema([
         { name: "args", type: "system.schema.apppushflds" },
         { name: "combine", type: "system.schema.datacombinetype" },
         { name: "combines", type: "system.schema.datacombines" },
+        { name: "auths", type: "system.schema.policyitems" },
+        { name: "fieldAuths", type: "system.schema.fieldpolicys" },
     ], [
         { field: "name", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "name" }, { name: "type" }] },
         { field: "display", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "display" }, { name: "type" }] },
@@ -157,7 +165,8 @@ registerSchema([
         { field: "combine", type: RelationType.Visible, func: "system.schema.appiscombineenable", args: [ { name: "type" }, { name: "func" }] },
         { field: "combines", type: RelationType.Visible, func: "system.schema.appiscombinesenable", args: [ { name: "type" }, { name: "func" }] },
         { field: "combines.field", type: RelationType.WhiteList, func: "system.schema.getstructnumbervaluefields", args: [ { name: "type" }] },
-        { field: "trackPush", type: RelationType.Visible, func: "system.schema.appistrackpushenable", args: [ { name: "sourceField" }, { name: "func" }] }
+        { field: "trackPush", type: RelationType.Visible, func: "system.schema.appistrackpushenable", args: [ { name: "sourceField" }, { name: "func" }] },
+        { field: "fieldAuths", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
     ]),
     
     newSystemFunc("system.schema.apphasfields", NS_SYSTEM_BOOL, [
@@ -172,6 +181,8 @@ registerSchema([
         { name: "name", require: true, type: "system.schema.appinput", upLimit: 32 },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "auth", type: "system.schema.policytype" },
+        { name: "dataAuth", type: "system.schema.policytype" },
         { name: "relations", type: "system.schema.appfieldrelations" },
     ], [
         { field: "relations.fieldType", type: RelationType.Default, func: "system.schema.appgetfieldtype", args: [ {     name: "name", }, {     name: "relations.field" } ] },

@@ -195,7 +195,8 @@ const schemaTypeOrder = {
     [SchemaType.Func]: 6,
     [SchemaType.Json]: 7,
     [SchemaType.Event]: 8,
-    [SchemaType.Workflow]: 9
+    [SchemaType.Workflow]: 9,
+    [SchemaType.Policy]: 10
 }
 
 const tryitTypes = [ SchemaType.Struct, SchemaType.Array ]

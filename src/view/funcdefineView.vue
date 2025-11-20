@@ -86,6 +86,8 @@
 import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
+import { getFieldAccessWhiteList } from 'schema-node';
+import { NS_SYSTEM_CONTEXT } from 'schema-node';
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
@@ -114,6 +116,10 @@ const fieldAccessFunc = [
     "system.collection.setfield",
 ]
 
+const contextItemFunc = [
+    "system.data.getcontextitem"
+]
+
 let stateHandler: Function | undefined = undefined
 let retHandler: Function | undefined = undefined
 let argsHandler: Function | undefined = undefined
@@ -137,9 +143,7 @@ const doCaclc = async () => {
         // record the array type map
         const schema = await getSchema(type)
         if (schema?.type === SchemaType.Array)
-        {
             arraymap[name] = schema.array?.element || ""
-        }
     }
 
     // clear
@@ -347,6 +351,7 @@ const refresh = async () => {
         let isarray = type !== ExpressionType.Call
         let arrIdx = -1
         let isfieldacess = fieldAccessFunc.includes(func || "")
+        let iscontextitem = contextItemFunc.includes(func || "")
         let fieldacesstype: INodeSchema | undefined = undefined
         
         switch (type) {
@@ -463,13 +468,29 @@ const refresh = async () => {
             }
 
             // field access check
-            const valueField = farg.getField("value") as ScalarNode           
-            if (k == 0 && isfieldacess)
+            const valueField = farg.getField("value") as ScalarNode
+            if (k == 0)
             {
-                fieldacesstype = exp?.schema
-                if (fieldacesstype?.type === SchemaType.Array && fieldacesstype.array?.element)
-                    fieldacesstype = await getSchema(fieldacesstype.array.element)
+                if (isfieldacess)
+                {
+                    fieldacesstype = exp?.schema
+                    if (fieldacesstype?.type === SchemaType.Array && fieldacesstype.array?.element)
+                        fieldacesstype = await getSchema(fieldacesstype.array.element)
+                }
+                
+                if (iscontextitem && ret)
+                {
+                    const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
+                    valueField.rule.whiteList = await getFieldAccessWhiteList(ret, contextSchema?.struct?.fields || [])
+                    valueField.validate().then(() => valueField.notifyState())
+                }
+                else if(valueField.rule.whiteList?.length)
+                {
+                    valueField.rule.whiteList = undefined
+                    valueField.notifyState()
+                }
             }
+
             if (k == 1)
             {
                 if (isfieldacess && fieldacesstype?.type === SchemaType.Struct && fieldacesstype.struct?.fields.length)

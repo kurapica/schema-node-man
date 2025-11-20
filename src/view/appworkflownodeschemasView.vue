@@ -17,6 +17,8 @@
 </template>
 
 <script lang="ts" setup>
+import { NS_SYSTEM_STRING } from 'schema-node';
+import { NODE_SELF } from 'schema-node';
 import { ArrayNode, clearDebounce, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString } from 'schema-node'
 import { _L, schemaView } from 'schema-node-vueview'
 import { onUnmounted, reactive, toRaw } from 'vue'
@@ -82,7 +84,7 @@ const spacialFuncHandlers: { [key: string]: Function } = {
 }
 
 const refreshWorkflows = async (from: string) => {
-    console.log(`Refresh workflows triggered by ${from}`)
+    // console.log(`Refresh workflows triggered by ${from}`)
     const appSchema = await getAppSchema(app)
     if (!appSchema) return
 
@@ -96,9 +98,7 @@ const refreshWorkflows = async (from: string) => {
         // for previous
         const previous = n.getField("previous") as ArrayNode
         if (names.length > 0 && !previous.submitData?.length)
-        {
             previous.data = [names[names.length - 1]]
-        }
 
         if (name) names.push(name)
         
@@ -293,8 +293,34 @@ const refreshWorkflows = async (from: string) => {
 
         // collect payload types
         if (name && payloadField.submitData)
-        {
             payloadTypes.push({ name: name as string, display: n.getField("display").data as ILocaleString, type: payloadField.submitData as string })
+
+        // fork && fork key
+        const forkKeyField = n.getField("forkKey") as ScalarNode
+        if (n.getField("fork").submitData === true && payloadField.submitData)
+        {
+            const paySchema = await getSchema(payloadField.submitData as string)
+            if (paySchema?.type === SchemaType.Struct && paySchema.struct?.fields)
+            {
+                forkKeyField.rule.whiteList = await getFieldAccessWhiteList(NS_SYSTEM_STRING, paySchema.struct.fields.map(f => ({ name: f.name, type: f.type, display: f.display as ILocaleString })))
+                forkKeyField.validation().then(() => forkKeyField.notifyState())
+            }
+            else if(paySchema?.type === SchemaType.Scalar || paySchema?.type === SchemaType.Enum)
+            {
+                forkKeyField.rule.whiteList = await getFieldAccessWhiteList(NS_SYSTEM_STRING, [{ name: NODE_SELF, type: paySchema.name, display: n.getField("display").data as ILocaleString }])
+                forkKeyField.validation().then(() => forkKeyField.notifyState())
+                continue
+            }
+            else if (forkKeyField.rule.whiteList)
+            {
+                forkKeyField.rule.whiteList = undefined
+                forkKeyField.validation().then(() => forkKeyField.notifyState())
+            }
+        }
+        else if(forkKeyField.rule.whiteList)
+        {
+            forkKeyField.rule.whiteList = undefined
+            forkKeyField.validation().then(() => forkKeyField.notifyState())
         }
     }
 }

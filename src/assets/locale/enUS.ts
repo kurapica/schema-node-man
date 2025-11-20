@@ -1,9 +1,7 @@
-import { importLanguage } from "schema-node";
+import { importLanguage } from "schema-node"
 
 importLanguage("enUS", {
     //#region System
-
-    //#endregion
 
     // system.conv
     "system.conv": "Number Conversion",
@@ -143,51 +141,54 @@ importLanguage("enUS", {
     "system.data.getappdatabythreekey": "Gets App Data by Three Keys",
     "system.data.getappdatabyfourkey": "Gets App Data by Four Keys",
     "system.data.incrappdata": "Incrementally Update App Data",
+    "system.data.getcontextitem": "Gets Request Context Item",
 
     // system.event
     "system.event": "System Event",
     "system.event.schema": "Schema Definition Event",
     "system.event.schema.change": "Schema Definition Change Event",
     "system.event.schema.delete": "Schema Definition Deletion Event",
+    "system.event.schema.appdelete": "App Definition Deletion Event",
+    "system.event.schema.appupdate": "App Definition Update Event",
 
-    "system.event.appschema": "App Definition Event",
-    "system.event.appschema.delete": "App Definition Deletion Event",
-    "system.event.appschema.update": "App Definition Update Event",
+    "system.event.app": "App Event",
+    "system.event.app.data": "App Data Event",
+    "system.event.app.data.create": "App Data Creation Event",
+    "system.event.app.data.update": "App Data Update Event",
+    "system.event.app.data.delete": "App Data Deletion Event",
+    "system.event.app.data.read": "App Data Read Event",
 
-    "system.event.appdata": "App Data Event",
-    "system.event.appdata.create": "App Data Creation Event",
-    "system.event.appdata.update": "App Data Update Event",
-    "system.event.appdata.delete": "App Data Deletion Event",
-    "system.event.appdata.read": "App Data Read Event",
-
+    // system.workflow
     "system.workflow": "System Workflow",
     "system.workflow.node": "Workflow Node",
 
-    "system.workflow.call": "Function Call Node",
-    "system.workflow.appcall": "Function Call With Target",
-    "system.workflow.appcallstate": "Function Call State",
-    "system.workflow.appcallstate.result": "Must Return Result",
-    "system.workflow.appcallstate.retry": "Maximum Retry Count",
-    "system.workflow.appcallstate.delay": "Delay Time (Seconds)",
+    "system.workflow.func": "The Function Call Workflow",
+    "system.workflow.func.call": "Call Function",
+    "system.workflow.func.callstate": "Application Function Call State",
+    "system.workflow.func.callstate.result": "Must Return Result",
+    "system.workflow.func.callstate.retry": "Maximum Retry Count",
+    "system.workflow.func.callstate.delay": "Delay Time (Seconds)",
+
+    "system.workflow.func.appcall": "Call Function Within App",
 
     "system.workflow.control": "Control Node",
     "system.workflow.control.goto": "Go to Node",
 
-    "system.workflow.event": "Event Trigger Node",
-    "system.workflow.event.app": "Application Event Trigger Event",
+    "system.workflow.event": "Event Trigger Workflow",
+    "system.workflow.event.app": "Application Event Trigger Workflow",
 
     "system.workflow.event.apppayload": "Application Data Event Payload",
-    "system.workflow.event.apppayload.application": "Application",
+    "system.workflow.event.apppayload.app": "Application",
 
     "system.workflow.event.appdata": "Application Target Data Access Event",
 
     "system.workflow.event.appdatapayload": "Application Target Data Access Event Payload",
-    "system.workflow.event.appdatapayload.application": "Application",
+    "system.workflow.event.appdatapayload.app": "Application",
     "system.workflow.event.appdatapayload.target": "Application Target",
 
     "system.workflow.event.appfielddata": "Application Field Data Change Event",
     "system.workflow.event.appfielddatapayload": "Application Field Data Change Event Payload",
-    "system.workflow.event.appfielddatapayload.application": "Application",
+    "system.workflow.event.appfielddatapayload.app": "Application",
     "system.workflow.event.appfielddatapayload.field": "Application Field",
     "system.workflow.event.appfielddatapayload.target": "Application Target",
     "system.workflow.event.appfielddatapayload.data": "Updated Data",
@@ -195,10 +196,7 @@ importLanguage("enUS", {
 
     "system.workflow.delay": "Wait for specified seconds",
 
-    // system.workflow
-
     // system.schema
-
     "system.schema": "Schema Definition Helper",
     "system.schema.namespace": "Namespace",
     "system.schema.scalartype": "Scalar Type",
@@ -224,6 +222,7 @@ importLanguage("enUS", {
     "system.schema.schematype.json": "Json",
     "system.schema.schematype.event": "Event",
     "system.schema.schematype.workflow": "Workflow",
+    "system.schema.schematype.policy": "Policy",
 
     "system.schema.relationtype": "Relation Purpose",
     "system.schema.relationtype.default": "Default Value",
@@ -273,6 +272,22 @@ importLanguage("enUS", {
     "system.schema.structfieldflags.useoriginforuplimit": "Use Original for Upper Limit",
     "system.schema.structfieldflags.anylevel": "Enum Any Level",
     "system.schema.structfieldflags.singleflag": "Single Flag",
+
+    "system.schema.policyscope": "Policy Scope",
+    "system.schema.policyscope.schemacreate": "Create Schema",
+    "system.schema.policyscope.schemaread": "Read Schema",
+    "system.schema.policyscope.schemaupdate": "Update Schema",
+    "system.schema.policyscope.schemadelete": "Delete Schema",
+    "system.schema.policyscope.datacreate": "Create Data",
+    "system.schema.policyscope.dataread": "Read Data",
+    "system.schema.policyscope.dataupdate": "Update Data",
+    "system.schema.policyscope.datadelete": "Delete Data",
+    "system.schema.policyscope.rowaccess": "Row Access Filter",
+    "system.schema.policyscope.columnaccess": "Column Access Filter",
+
+    "system.schema.policycombine": "Policy Combine Method",
+    "system.schema.policycombine.andalso": "And",
+    "system.schema.policycombine.orelse": "Or",
 
     "system.schema.appfieldflags": "Backend App Field Flags",
     "system.schema.appfieldflags.none": "None",
@@ -403,6 +418,7 @@ importLanguage("enUS", {
     "system.schema.nodeschema.name": "Name",
     "system.schema.nodeschema.type": "Type",
     "system.schema.nodeschema.display": "Description",
+    "system.schema.nodeschema.auth": "Authorization",
     "system.schema.nodeschema.scalar": "Scalar Definitions",
     "system.schema.nodeschema.enum": "Enum Definitions",
     "system.schema.nodeschema.struct": "Struct Definitions",
@@ -428,11 +444,15 @@ importLanguage("enUS", {
     "system.schema.appfieldschema.combines": "Data combine rules list (struct)",
     "system.schema.appfieldschema.trackPush": "Track push",
     "system.schema.appfieldschema.readonly": "Read-only",
+    "system.schema.appfieldschema.auths": "Row Authorization List",
+    "system.schema.appfieldschema.dataAuths": "Column Authorization List",
 
     "system.schema.appschema": "App definition",
     "system.schema.appschema.name": "App Name",
     "system.schema.appschema.display": "App display",
     "system.schema.appschema.desc": "App description",
+    "system.schema.appschema.auth": "App Authorization",
+    "system.schema.appschema.dataAuth": "App Data Authorization",
     "system.schema.appschema.relations": "App field associations list",
 
     "system.schema.eventschema": "Event Definition",
@@ -446,14 +466,19 @@ importLanguage("enUS", {
     "system.schema.workflowschema.session": "Session Type",
     "system.schema.workflowschema.args": "Arguments",
 
+    "system.schema.policyitem": "Policy Item",
+    "system.schema.policyitem.scope": "Policy Scope",
+    "system.schema.policyitem.combine": "Combine Method",
+    "system.schema.policyitem.evaluator": "Evaluator Function",
+    "system.schema.policyitem.args": "Function Arguments",
+
+    "system.schema.policyschema": "Policy Definition",
+    "system.schema.policyschema.items": "Policy Item List",
+
     "system.schema.appworkflow": "App Workflow Definition",
     "system.schema.eventtype": "Event Type",
     "system.schema.workflowtype": "Workflow Type",
-    "system.schema.eventscope": "Event Scope",
-    "system.schema.eventscope.workflow": "Within Workflow",
-    "system.schema.eventscope.application": "Within Application",
-    "system.schema.eventscope.server": "Within Server",
-    "system.schema.eventscope.cluster": "Within Cluster",
+    "system.schema.policytype": "Policy Type",
 
     "system.schema.workflowmode": "Workflow Mode",
     "system.schema.workflowmode.workflow": "Workflow Mode",
@@ -469,6 +494,7 @@ importLanguage("enUS", {
     "system.schema.appworkflownodeschema": "App Workflow Node Definition",
     "system.schema.appworkflownodeschema.name": "Name",
     "system.schema.appworkflownodeschema.display": "Display",
+    "system.schema.appworkflownodeschema.auth": "Authorization",
     "system.schema.appworkflownodeschema.desc": "Description",
     "system.schema.appworkflownodeschema.type": "Type",
     "system.schema.appworkflownodeschema.args": "Arguments",
@@ -504,6 +530,13 @@ importLanguage("enUS", {
     "system.schema.genarraydisplay": "Generate Array Display Text",
     "system.schema.getscalarorenumtype": "Get Scalar or Enum Type",
     "system.schema.gettypedisplayorname": "Get Type Display or Name",
+
+    "system.schema.appaccess": "App Data Access",
+    "system.schema.appaccess.app": "Application",
+    "system.schema.appaccess.target": "Target",
+    "system.schema.appaccess.field": "Field",
+
+    //#endregion
 
     //#region Frontend
 
@@ -618,6 +651,7 @@ importLanguage("enUS", {
     "system.schema.iscascadeenumtype": "Is Cascade Enum Type",
     "system.schema.isflagsenumtype": "Is Flags Enum Type",
     "system.schema.isstructtype": "Is Struct Type",
+    "system.schema.isstructorstructarray": "Is Struct or Struct-Array Type",
     "system.schema.notstructarraytype": "Non-Struct or Struct-Array Type",
     "system.schema.getenumcascadewhitelist": "Get Cascade Name Whitelist",
     "system.schema.getwhiteblacklisttype": "Get white/black list type",

@@ -161,7 +161,8 @@ const schemaTypeOrder = {
     [SchemaType.Func]: 6,
     [SchemaType.Event]: 7,
     [SchemaType.Workflow]: 8,
-    [SchemaType.Json]: 9    
+    [SchemaType.Policy]: 9,
+    [SchemaType.Json]: 10
 }
 
 // cascader root
@@ -189,6 +190,7 @@ const namespaceMap: any = {
     "system.schema.functype": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.eventtype": [SchemaType.Namespace, SchemaType.Event],
     "system.schema.workflowtype": [SchemaType.Namespace, SchemaType.Workflow],
+    "system.schema.policytype": [SchemaType.Namespace, SchemaType.Policy],
     "system.schema.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],

@@ -498,6 +498,16 @@ registerSchema([
         return schema?.type === SchemaType.Struct
     }),
 
+    newSystemFunc("system.schema.isstructorstructarray", NS_SYSTEM_BOOL, [
+        { name: "type", type: "system.schema.valuetype", nullable: true }
+    ], async (type: string) => {
+        if (!type) return false
+        let schema = await getSchema(type)
+        if (schema?.type === SchemaType.Array)
+            schema = schema.array?.element ? await getSchema(schema.array.element) : undefined
+        return schema?.type === SchemaType.Struct
+    }),
+
     newSystemFunc("system.schema.notstructarraytype", NS_SYSTEM_BOOL, [
         { name: "type", type: "system.schema.valuetype", nullable: true }
     ], async (type: string) => {
@@ -638,7 +648,6 @@ registerSchema([
 
     //#region event definition
     newSystemStruct("system.schema.eventschema", [
-        { name: "scope", type: "system.schema.eventscope", require: true, readonly: true },
         { name: "payload", type: "system.schema.valuetype", readonly: true }
     ]),
     //#endregion
@@ -653,6 +662,19 @@ registerSchema([
     ]),
     //#endregion
 
+    //#region policy definition
+    newSystemStruct("system.schema.policyitem", [
+        { name: "scope", type: "system.schema.policyscope", require: true },
+        { name: "combine", type: "system.schema.policycombine", require: true },
+        { name: "evaluator", type: "system.schema.functype", require: true },
+    ]),
+    newSystemArray("system.schema.policyitems", "system.schema.policyitem", "scope"),
+
+    newSystemStruct("system.schema.policyschema", [
+        { name: "items", type: "system.schema.policyitems", require: true }
+    ]),
+    //#endregion
+
     //#region namespace definition
     newSystemFunc("system.schema.genarraydisplay", NS_SYSTEM_STRING, [
         { name: "elementType", type: "system.schema.valuetype" }
@@ -662,13 +684,15 @@ registerSchema([
         { name: "name", type: "system.schema.namespaceinput", require: true, immutable: true },
         { name: "type", type: "system.schema.schematype", require: true, immutable: true, default: SchemaType.Namespace, blackList: [SchemaType.Json] },
         { name: "display", type: "system.localestring", require: true, upLimit: 128 },
+        { name: "auth", type: "system.schema.policytype"},
         { name: "scalar", type: "system.schema.scalarschema" },
         { name: "enum", type: "system.schema.enumschema" },
         { name: "struct", type: "system.schema.structschema" },
         { name: "array", type: "system.schema.arrayschema" },
         { name: "func", type: "system.schema.functionschema" },
         { name: "event", type: "system.schema.eventschema" },
-        { name: "workflow", type: "system.schema.workflowschema" }
+        { name: "workflow", type: "system.schema.workflowschema" },
+        { name: "policy", type: "system.schema.policyschema" },
     ], [
         { field: "scalar", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Scalar } ] },
         { field: "enum", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Enum } ] },
@@ -677,6 +701,7 @@ registerSchema([
         { field: "func", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Func } ] },
         { field: "event", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Event } ] },
         { field: "workflow", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Workflow } ] },
+        { field: "policy", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Policy } ] },
         { field: "display.key", type: RelationType.Default, func: "system.schema.genarraydisplay", args: [ { name: "array.element" } ] }
     ]),
     //#endregion
