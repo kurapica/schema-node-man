@@ -15,6 +15,9 @@ importLanguage("zhCN", {
     "system.str.concat": "合并字符串",
     "system.str.substr": "截取字符串",
     "system.str.split": "分割字符串",
+    "system.str.startswith": "以指定字符串开头",
+    "system.str.endswith": "以指定字符串结尾",
+    "system.str.contains": "包含指定字符串",
     "system.str.toentry": "转为字典项",
     "system.str.toentrys": "转为字典项列表",
     "system.str.tolocale": "本地化字符串",
@@ -535,6 +538,7 @@ importLanguage("zhCN", {
     "system.schema.appaccess.app": "应用",
     "system.schema.appaccess.target": "应用目标",
     "system.schema.appaccess.field": "应用字段",
+    "system.schema.appaccess.call": "调用函数",
 
     //#endregion
 

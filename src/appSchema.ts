@@ -128,7 +128,7 @@ registerSchema([
 
     newSystemStruct("system.schema.fieldpolicy", [
         { name: "name", type: NS_SYSTEM_STRING, require: true, upLimit: 64 },
-        { name: "scope", type: "system.schema.policyitems", require: true },
+        { name: "auths", type: "system.schema.policyitems", require: true },
     ]),
     newSystemArray("system.schema.fieldpolicys", "system.schema.fieldpolicy", "name"),
 
@@ -182,7 +182,7 @@ registerSchema([
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
         { name: "auth", type: "system.schema.policytype" },
-        { name: "dataAuth", type: "system.schema.policytype" },
+        { name: "auths", type: "system.schema.policyitems" },
         { name: "relations", type: "system.schema.appfieldrelations" },
     ], [
         { field: "relations.fieldType", type: RelationType.Default, func: "system.schema.appgetfieldtype", args: [ {     name: "name", }, {     name: "relations.field" } ] },

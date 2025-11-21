@@ -15,6 +15,9 @@ importLanguage("enUS", {
     "system.str.concat": "Concatenate Strings",
     "system.str.substr": "Substring",
     "system.str.split": "Split String",
+    "system.str.startswith": "Starts with specified string",
+    "system.str.endswith": "Ends with specified string",
+    "system.str.contains": "Contains specified string",
     "system.str.toentry": "To Entry",
     "system.str.toentrys": "To Entry List",
     "system.str.tolocale": "To Locale String",
@@ -535,6 +538,7 @@ importLanguage("enUS", {
     "system.schema.appaccess.app": "Application",
     "system.schema.appaccess.target": "Target",
     "system.schema.appaccess.field": "Field",
+    "system.schema.appaccess.call": "Call Function",
 
     //#endregion
 
