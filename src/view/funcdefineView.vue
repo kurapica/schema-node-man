@@ -83,11 +83,9 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode } from 'schema-node'
+import { _LS, getFieldAccessWhiteList, NS_SYSTEM_CONTEXT, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import { getFieldAccessWhiteList } from 'schema-node';
-import { NS_SYSTEM_CONTEXT } from 'schema-node';
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
@@ -110,7 +108,6 @@ const color = ref<string[]>([])
 // for white list in the 2nd argument
 const fieldAccessFunc = [
     "system.collection.delfield",
-    "system.collection.fieldequal",
     "system.collection.getfield",
     "system.collection.getfields",
     "system.collection.setfield",

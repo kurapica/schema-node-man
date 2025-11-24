@@ -65,12 +65,12 @@
                         <el-button v-else type="success" @click="handleEdit(scope.row, true)">
                             {{ _L["frontend.view.view"] }}
                         </el-button>
-                        <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
+                        <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System) || scope.row.type === SchemaType.Namespace" @click="handleEdit(scope.row, false)">
                             {{ _L["frontend.view.edit"] }}
                         </el-button>
                         <el-popconfirm
                             v-if="isSchemaDeletable(scope.row.name)" 
-                            :title="_L['frontend.view.confirmdelete']"                            
+                            :title="_L['frontend.view.confirmdelete']"
                             :confirm-button-text="_L['YES']"
                             :cancel-button-text="_L['NO']"
                             :icon="Delete"
@@ -331,10 +331,24 @@ const handleDelete = async (row: any) => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = await provider.deleteSchema(row.name)
-            if (!res)
+            try
             {
+                const res = await provider.deleteSchema(row.name)
+                if (!res)
+                {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }
@@ -358,13 +372,27 @@ const confirmNameSpace = async () => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = await provider.saveSchema(data)
-            if (!res)
+            try
             {
+                const res = await provider.saveSchema(data)
+                if (!res)
+                {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+                data.loadState = (data.loadState || 0) | SchemaLoadState.Server
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
-            data.loadState = (data.loadState || 0) | SchemaLoadState.Server
         }
     }
 

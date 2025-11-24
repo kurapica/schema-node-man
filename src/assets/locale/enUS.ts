@@ -115,7 +115,6 @@ importLanguage("enUS", {
     "system.collection.notcontainskey": "Object does not contain specified key",
     "system.collection.newarray": "Create Array",
     "system.collection.push": "Push Element to Array and Return New Array",
-    "system.collection.fieldequal": "Field Equals Specified Value",
     
     // system.logic
     "system.logic": "Logical Operations",
@@ -281,10 +280,8 @@ importLanguage("enUS", {
     "system.schema.policyscope.schemaread": "Read Schema",
     "system.schema.policyscope.schemaupdate": "Update Schema",
     "system.schema.policyscope.schemadelete": "Delete Schema",
-    "system.schema.policyscope.datacreate": "Create Data",
     "system.schema.policyscope.dataread": "Read Data",
-    "system.schema.policyscope.dataupdate": "Update Data",
-    "system.schema.policyscope.datadelete": "Delete Data",
+    "system.schema.policyscope.datawrite": "Write Data",
     "system.schema.policyscope.rowaccess": "Row Access Filter",
     "system.schema.policyscope.columnaccess": "Column Access Filter",
 
@@ -448,14 +445,14 @@ importLanguage("enUS", {
     "system.schema.appfieldschema.trackPush": "Track push",
     "system.schema.appfieldschema.readonly": "Read-only",
     "system.schema.appfieldschema.auths": "Row Authorization List",
-    "system.schema.appfieldschema.dataAuths": "Column Authorization List",
+    "system.schema.appfieldschema.fieldAuths": "Column Authorization List",
 
     "system.schema.appschema": "App definition",
     "system.schema.appschema.name": "App Name",
     "system.schema.appschema.display": "App display",
     "system.schema.appschema.desc": "App description",
     "system.schema.appschema.auth": "App Authorization",
-    "system.schema.appschema.dataAuth": "App Data Authorization",
+    "system.schema.appschema.auths": "App Data Authorization",
     "system.schema.appschema.relations": "App field associations list",
 
     "system.schema.eventschema": "Event Definition",
@@ -574,6 +571,7 @@ importLanguage("enUS", {
     "frontend.view.confirm": "Confirm",
     "frontend.view.upload": "Upload",
     "frontend.view.error": "Submit failed. Please check your data.",
+    "frontend.view.nopermission": "No permission to perform this action",
     "frontend.view.showdata": "Show Data",
     "frontend.view.showform": "Show Form",
     "frontend.view.tag": "Tag",
@@ -691,6 +689,9 @@ importLanguage("enUS", {
     "system.schema.appfieldrelations": "App field association list",
 
     "system.schema.appworkflownodeschema.mode": "Workflow Mode",
+
+    "system.schema.fieldpolicy.name": "Field Name",
+    "system.schema.fieldpolicy.auths": "Authorization List",
 
     "frontend.apptarget": "App and Target",
     "frontend.apptarget.app": "App",

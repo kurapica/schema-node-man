@@ -469,12 +469,26 @@ const confirmApp = async () => {
     {
         const provider = getSchemaServerProvider()
         if (provider){
-            const res = await provider.saveAppSchema(data)
-            if (!res) {
+            try
+            {
+                const res = await provider.saveAppSchema(data)
+                if (!res) {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+                data.loadState = (data.loadState || 0) | SchemaLoadState.Server
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
-            data.loadState = (data.loadState || 0) | SchemaLoadState.Server
         }
     }
     
@@ -568,9 +582,22 @@ const handleFieldDelete = async (row: any) => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = provider.deleteAppFieldSchema(appSchema.name, row.name)
-            if (!res) {
+            try {
+                const res = provider.deleteAppFieldSchema(appSchema.name, row.name)
+                if (!res) {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }
@@ -598,9 +625,23 @@ const moveFieldUp = async (row: any) => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = provider.swapAppFieldSchema(appSchema.name, row.name, temp.name)
-            if (!res) {
+            try
+            {
+                const res = provider.swapAppFieldSchema(appSchema.name, row.name, temp.name)
+                if (!res) {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }
@@ -626,9 +667,22 @@ const confirmField = async () => {
     {
         const provider = getSchemaServerProvider()
         if (provider){
-            const res = await provider.saveAppFieldSchema(appSchema.name, data)
-            if (!res) {
+            try {
+                const res = await provider.saveAppFieldSchema(appSchema.name, data)
+                if (!res) {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }
@@ -716,9 +770,23 @@ const handleWorkflowDelete = async (row: any) => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = provider.deleteAppWorkflowSchema(appSchema.name, row.name)
-            if (!res) {
+            try
+            {
+                const res = provider.deleteAppWorkflowSchema(appSchema.name, row.name)
+                if (!res) {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }
@@ -740,9 +808,26 @@ const confirmWorkflow = async () => {
     {
         const provider = getSchemaServerProvider()
         if (provider){
-            const res = await provider.saveAppWorkflowSchema(appSchema.name, data)
-            if (!res) {
+            try {
+                // save workflow schema
+                if (data.name && data.name !== appSchema.name)
+                {
+                    const res = await provider.saveAppWorkflowSchema(appSchema.name, data)
+                    if (!res) {
+                        ElMessage.error(_L.value["frontend.view.error"])
+                        return
+                    }
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }
@@ -781,9 +866,27 @@ const toggleWorkflow = async (row: any, active: boolean) =>
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = provider.toggleAppWorkflowSchema(appSchema.name, row.name, active)
-            if (!res) {
+            try
+            {
+                // toggle workflow schema
+                if (row.name && row.name !== appSchema.name)
+                {
+                    const res = provider.toggleAppWorkflowSchema(appSchema.name, row.name, active)
+                    if (!res) {
+                        ElMessage.error(_L.value["frontend.view.error"])
+                        return
+                    }
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }

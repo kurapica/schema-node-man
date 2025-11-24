@@ -115,7 +115,6 @@ importLanguage("zhCN", {
     "system.collection.notcontainskey": "结构体不包含指定值",
     "system.collection.newarray": "新建数组",
     "system.collection.push": "向数组追加元素返回新数组",
-    "system.collection.fieldequal": "字段等于指定值",
 
     // system.logic
     "system.logic": "逻辑操作",
@@ -281,10 +280,8 @@ importLanguage("zhCN", {
     "system.schema.policyscope.schemaread": "读取数据结构",
     "system.schema.policyscope.schemaupdate": "更新数据结构",
     "system.schema.policyscope.schemadelete": "删除数据结构",
-    "system.schema.policyscope.datacreate": "创建应用数据",
     "system.schema.policyscope.dataread": "读取应用数据",
-    "system.schema.policyscope.dataupdate": "更新应用数据",
-    "system.schema.policyscope.datadelete": "删除应用数据",
+    "system.schema.policyscope.datawrite": "写入应用数据",
     "system.schema.policyscope.rowaccess": "行访问过滤",
     "system.schema.policyscope.columnaccess": "列访问过滤",
 
@@ -448,14 +445,14 @@ importLanguage("zhCN", {
     "system.schema.appfieldschema.trackPush": "跟踪推送",
     "system.schema.appfieldschema.readonly": "只读",
     "system.schema.appfieldschema.auths": "行权限列表",
-    "system.schema.appfieldschema.dataAuths": "列权限列表",
+    "system.schema.appfieldschema.fieldAuths": "列权限列表",
 
     "system.schema.appschema": "应用定义",
     "system.schema.appschema.name": "应用名",
     "system.schema.appschema.display": "应用展示",
     "system.schema.appschema.desc": "应用描述",
     "system.schema.appschema.auth": "应用权限",
-    "system.schema.appschema.dataAuth": "应用数据权限",
+    "system.schema.appschema.auths": "应用数据权限",
     "system.schema.appschema.relations": "应用字段数据关联列表",
 
     "system.schema.eventschema": "事件定义",
@@ -574,6 +571,7 @@ importLanguage("zhCN", {
     "frontend.view.confirm": "确定",
     "frontend.view.upload": "上传",
     "frontend.view.error": "处理失败，请检查数据后重新提交",
+    "frontend.view.nopermission": "没有权限执行此操作",
     "frontend.view.showdata": "显示数据",
     "frontend.view.showform": "显示表单",
     "frontend.view.tag": "标签",
@@ -692,6 +690,9 @@ importLanguage("zhCN", {
     "system.schema.appfieldrelations": "应用字段数据关联列表",
 
     "system.schema.appworkflownodeschema.mode": "工作流模式",
+
+    "system.schema.fieldpolicy.name": "字段名",
+    "system.schema.fieldpolicy.auths": "权限列表",
 
     "frontend.apptarget": "应用及目标",
     "frontend.apptarget.app": "应用",

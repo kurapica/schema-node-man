@@ -103,7 +103,7 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue } from "schema-node"
+import { ExpressionType, PolicyScope, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -178,6 +178,7 @@ let compatibleType = ""
 let otherCompatibleType = ""
 let upLimit = 99
 let lowLimit = 0
+let rowAccessType = ""
 
 // namespace map
 const namespaceMap: any = {
@@ -192,6 +193,7 @@ const namespaceMap: any = {
     "system.schema.workflowtype": [SchemaType.Namespace, SchemaType.Workflow],
     "system.schema.policytype": [SchemaType.Namespace, SchemaType.Policy],
     "system.schema.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.policyfunctype": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
@@ -250,13 +252,26 @@ const confirmNameSpace = async () => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = await provider.saveSchema(data)
-            if (!res)
-            {
-                ElMessage.error(_L.value["frontend.view.error"])
-                return
+            try{
+                const res = await provider.saveSchema(data)
+                if (!res)
+                {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+                data.loadState |= SchemaLoadState.Server
             }
-            data.loadState |= SchemaLoadState.Server
+                catch (ex: any)
+                {
+                    if (ex && ex.status === 403)
+                    {
+                        ElMessage.error(_L.value["frontend.view.nopermission"])
+                        return
+                    }
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    console.error(ex)
+                    return
+                }
         }
     }
 
@@ -288,7 +303,11 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
             if (enableEntries.value && await isSchemaCanBeUseAs(f.func.return, NS_SYSTEM_ENTRIES))
                 continue
 
-            if (isscalarvalidfunc) {
+            if(f.func.args.length < lowLimit || f.func.args.length > upLimit)
+            {
+                blackList.push(f.name)
+            }
+            else if (isscalarvalidfunc) {
                 // for scalar value validation only
                 if (f.func.args?.length !== 1 || 
                     compatibleType && !/^[tT]\d*$/.test(f.func.args[0].type) && !await isSchemaCanBeUseAs(f.func.args[0].type, compatibleType))
@@ -315,7 +334,8 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
                 (!otherCompatibleType || !await isSchemaCanBeUseAs(f.func.return, otherCompatibleType))) {
                 blackList.push(f.name)
             }
-            else if(f.func.args.length < lowLimit || f.func.args.length > upLimit)
+            
+            if(rowAccessType && !blackList.includes(f.name) && f.func.args.length !== 1 && !await isSchemaCanBeUseAs(f.func.args[0].type, rowAccessType))
             {
                 blackList.push(f.name)
             }
@@ -456,6 +476,7 @@ let stateHandler: Function | null = null
 let langHandler: Function | null = null
 let exptypeHandler: Function | null = null
 let relationtypeHandler: Function | null = null
+let policyscopeHandler: Function | null = null
 
 onMounted(() => {
     const parent = scalarNode.parent
@@ -490,6 +511,53 @@ onMounted(() => {
         lowLimit = 0
     }
 
+    // policy scope
+    if (type === "system.schema.policyfunctype") {
+        const scopeNode = parent instanceof StructNode ? parent.getField("scope") : undefined
+        if (scopeNode){
+            policyscopeHandler = scopeNode.subscribe(async () => {
+                const scope = scopeNode.data
+                let access = ""
+                let limit = 0
+                if (scope == PolicyScope.RowAccess)
+                {
+                    limit = 1
+                    let fieldNode = parent
+                    while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
+                        fieldNode = fieldNode.parent
+
+                    if (fieldNode)
+                    {
+                        const app = (fieldNode as StructNode).getField("app").data
+                        const fld = (fieldNode as StructNode).getField("name").data
+                        if (app && fld)
+                        {
+                            const appSchema = await getAppSchema(app)
+                            const col = appSchema?.fields?.find((f: any) => f.name === fld)
+                            if (col) {
+                                access = col.type
+                                const schema = await getSchema(col.type)
+                                if (schema?.type == SchemaType.Array)
+                                {
+                                    access = schema.array?.element || ""
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (access !== rowAccessType || limit != upLimit)
+                {
+                    upLimit = limit
+                    lowLimit = limit
+                    rowAccessType = access
+                    reBuildOptions()
+                }
+            }, true)
+        }
+    }
+
+    // data watcher
     dataWatcher = scalarNode.subscribe(async() =>  {
         let data = scalarNode.rawData
 
@@ -571,6 +639,7 @@ onMounted(() => {
             await reBuildOptions()
     }, true)
 
+    // state watch
     stateHandler = scalarNode.subscribeState(() => {
         state.disable = scalarNode.rule.disable
         state.require = scalarNode.require
@@ -595,6 +664,7 @@ onMounted(() => {
         refreshOptions(root.children)
         root.children = [...root.children]
     })
+
 })
 
 onUnmounted(() => {
@@ -603,5 +673,6 @@ onUnmounted(() => {
     if (langHandler) langHandler()
     if (exptypeHandler) exptypeHandler()
     if (relationtypeHandler) relationtypeHandler()
+    if (policyscopeHandler) policyscopeHandler()
 })
 </script>

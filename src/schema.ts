@@ -1,8 +1,9 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_LOCALE_STRINGS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_LOCALE_STRINGS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, PolicyCombine, PolicyScope, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
     //#region system scalars
+    newSystemScalar("system.schema.policyfunctype", "system.schema.functype"),
     newSystemScalar("system.schema.pushfunctype", "system.schema.functype"),
     newSystemScalar("system.schema.namespaceinput", NS_SYSTEM_STRING, undefined, "^[a-z]\\w*(\.[a-z]\\w*)*$", { upLimit: 128 }),
     newSystemScalar("system.schema.reltarfield", NS_SYSTEM_STRING, undefined, undefined, { upLimit: 64 }),
@@ -665,14 +666,34 @@ registerSchema([
     //#region policy definition
     newSystemStruct("system.schema.policyitem", [
         { name: "scope", type: "system.schema.policyscope", require: true },
-        { name: "combine", type: "system.schema.policycombine", require: true },
-        { name: "evaluator", type: "system.schema.functype", require: true },
+        { name: "combine", type: "system.schema.policycombine", require: true, default: PolicyCombine.OrElse },
+        { name: "evaluator", type: "system.schema.policyfunctype", require: true },
+    ], [
+        { field: "evaluator", type: RelationType.Root, func: "system.conv.assign", args: [ { value: NS_SYSTEM_BOOL } ] },
     ]),
     newSystemArray("system.schema.policyitems", "system.schema.policyitem", "scope"),
 
     newSystemStruct("system.schema.policyschema", [
         { name: "items", type: "system.schema.policyitems", require: true }
+    ], [
+        { field: "items.scope", type: RelationType.WhiteList, func: "system.schema.getappschemapolicyscope", args: [] },
     ]),
+
+    newSystemFunc("system.schema.getschemapolicyscope", "system.schema.policyscopes", [], () => {
+        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead]
+    }),
+
+    newSystemFunc("system.schema.getappschemapolicyscope", "system.schema.policyscopes", [], () => {
+        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead, PolicyScope.DataRead, PolicyScope.DataWrite]
+    }),
+
+    newSystemFunc("system.schema.getrowpolicyscope", "system.schema.policyscopes", [], () => {
+        return [PolicyScope.DataRead, PolicyScope.DataWrite, PolicyScope.RowAccess]
+    }),
+
+    newSystemFunc("system.schema.getcolpolicyscope", "system.schema.policyscopes", [], () => {
+        return [PolicyScope.ColumnAccess]
+    }),
     //#endregion
 
     //#region namespace definition
@@ -702,7 +723,7 @@ registerSchema([
         { field: "event", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Event } ] },
         { field: "workflow", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Workflow } ] },
         { field: "policy", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Policy } ] },
-        { field: "display.key", type: RelationType.Default, func: "system.schema.genarraydisplay", args: [ { name: "array.element" } ] }
+        { field: "display.key", type: RelationType.Default, func: "system.schema.genarraydisplay", args: [ { name: "array.element" } ] },
     ]),
     //#endregion
 ], SchemaLoadState.System)
@@ -810,7 +831,7 @@ export function saveAllCustomSchemaToStroage(root: string = "")
 // export schema
 export function schemaToJson(f: INodeSchema): INodeSchema
 {
-    const r: INodeSchema = { name: f.name, type: f.type, display: deepClone(f.display) }
+    const r: INodeSchema = { name: f.name, type: f.type, display: deepClone(f.display), auth: f.auth }
 
     switch(f.type)
     {
@@ -838,6 +859,10 @@ export function schemaToJson(f: INodeSchema): INodeSchema
             r.func = { ...deepClone(f.func!, true), func: undefined }
             if (!r.func!.exps) r.func!.exps = []
             if (!r.func!.args) r.func!.args = []
+            break
+
+        case SchemaType.Policy:
+            r.policy = deepClone(f.policy, true)
             break
     }
     return r
@@ -869,6 +894,7 @@ regSchemaTypeView("system.schema.validfunc", namespaceView)
 regSchemaTypeView("system.schema.whitelistfunc", namespaceView)
 regSchemaTypeView("system.schema.arrayeletype", namespaceView)
 regSchemaTypeView("system.schema.valuetype", namespaceView)
+regSchemaTypeView("system.schema.policyfunctype", namespaceView)
 regSchemaTypeView("system.schema.namespaceinput", namespaceInputView)
 
 regSchemaTypeView("system.schema.enumvalueinfos", enumvalueinfosView)

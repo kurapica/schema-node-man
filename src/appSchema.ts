@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -129,8 +129,30 @@ registerSchema([
     newSystemStruct("system.schema.fieldpolicy", [
         { name: "name", type: NS_SYSTEM_STRING, require: true, upLimit: 64 },
         { name: "auths", type: "system.schema.policyitems", require: true },
+    ], [
+        { field: "auths.scope", type: RelationType.WhiteList, func: "system.schema.getcolpolicyscope", args: [] },
     ]),
     newSystemArray("system.schema.fieldpolicys", "system.schema.fieldpolicy", "name"),
+
+    newSystemFunc("system.schema.getfieldforauths", NS_SYSTEM_ARRAY, [
+        { name: "app", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "field", type: NS_SYSTEM_STRING, nullable: true },
+    ], async (app: string, field: string) => {
+        const appSchema = app ? await getAppSchema(app) : undefined
+        const fieldSchema = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === field)
+        let fieldType = fieldSchema ? await getSchema(fieldSchema?.type || "") : undefined
+        if (fieldType?.type === SchemaType.Array && fieldType.array?.element)
+            fieldType = await getSchema(fieldType.array.element)
+
+        if (fieldType?.type === SchemaType.Struct)
+        {
+            return fieldType.struct?.fields?.map((f: IStructFieldConfig) => ({
+               value: f.name,
+               label: _L(f.display) || f.name 
+            }))
+        }
+        return []
+    }),
 
     newSystemStruct("system.schema.appfieldschema", [
         { name: "app", type: NS_SYSTEM_STRING, readonly: true, invisible: true },
@@ -167,6 +189,8 @@ registerSchema([
         { field: "combines.field", type: RelationType.WhiteList, func: "system.schema.getstructnumbervaluefields", args: [ { name: "type" }] },
         { field: "trackPush", type: RelationType.Visible, func: "system.schema.appistrackpushenable", args: [ { name: "sourceField" }, { name: "func" }] },
         { field: "fieldAuths", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
+        { field: "auths.scope", type: RelationType.WhiteList, func: "system.schema.getrowpolicyscope", args: [ { name: "app" } ] },
+        { field: "fieldAuths.name", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
     ]),
     
     newSystemFunc("system.schema.apphasfields", NS_SYSTEM_BOOL, [
@@ -186,7 +210,8 @@ registerSchema([
         { name: "relations", type: "system.schema.appfieldrelations" },
     ], [
         { field: "relations.fieldType", type: RelationType.Default, func: "system.schema.appgetfieldtype", args: [ {     name: "name", }, {     name: "relations.field" } ] },
-        { field: "relations", type: RelationType.Visible, func: "system.schema.apphasfields", args: [ {     name: "name" } ] }
+        { field: "relations", type: RelationType.Visible, func: "system.schema.apphasfields", args: [ { name: "name" } ] },
+        { field: "auths.scope", type: RelationType.WhiteList, func: "system.schema.getappschemapolicyscope", args: [] },
     ]),
 
     newSystemFunc("system.schema.getworkflowmode", NS_SYSTEM_STRING, [
@@ -543,6 +568,7 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
+import { fi } from "element-plus/es/locales.mjs"
 
 regSchemaTypeView("system.schema.app", sourceappView)
 regSchemaTypeView("system.schema.appinput", appInputView)
