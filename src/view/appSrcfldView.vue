@@ -73,7 +73,7 @@ onMounted(() => {
         parent = parent.parent
     }
     let srcAppNode = parent?.fields?.find((f:AnySchemaNode) => f.schemaName === "system.schema.app") as ScalarNode
-
+    
     let appSchema: IAppSchema | undefined = undefined
     let type: string  = node.rule.root
 

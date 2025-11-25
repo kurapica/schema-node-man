@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, getFieldAccessWhiteList, NS_SYSTEM_CONTEXT, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode } from 'schema-node'
+import { _LS, getFieldAccessWhiteList, NS_SYSTEM_CONTEXT, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, getAppSchema, RuleSchema } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 
@@ -105,17 +105,90 @@ const result = ref<any[]>([])
 const argColor = ref<string[]>([])
 const color = ref<string[]>([])
 
-// for white list in the 2nd argument
-const fieldAccessFunc = [
-    "system.collection.delfield",
-    "system.collection.getfield",
-    "system.collection.getfields",
-    "system.collection.setfield",
-]
+interface ArgInfo {
+    type?: string,
+    display?: string,
+    whiteList?: any[],
+}
 
-const contextItemFunc = [
-    "system.data.getcontextitem"
-]
+const refreshFieldFunc = async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+    const expName = args[0].getField("name").rawData
+    let exp = typeMap.get(expName)
+    if (exp?.type === SchemaType.Array && exp.array?.element)
+        exp = await getSchema(exp.array.element)
+    if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
+        return [
+            {},
+            {
+                type: ret,
+                whiteList: await getFieldAccessWhiteList(ret || "", exp.struct.fields, undefined, true)
+            }
+        ]
+    }
+    return []
+}
+
+const refreshAppDataFetchFunc = async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+    const app = args[0].getField("value").rawData
+    const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
+    const result: ArgInfo[] = [{}]
+
+    if (!appSchema) return result
+    result.push({ whiteList: await getFieldAccessWhiteList("", appSchema.fields || [], undefined, true) })
+
+    const fname = args[1].getField("value").rawData
+    const field = !isNull(fname) ? appSchema.fields?.find(f => f.name === fname) : undefined
+
+    // field not selected
+    if (!field) return result
+
+    let fieldSchema = await getSchema(field.type)
+    if (fieldSchema?.type === SchemaType.Array && fieldSchema.array?.element && fieldSchema.array?.primary?.length)
+    {
+        const primarys = fieldSchema.array.primary
+        fieldSchema = await getSchema(fieldSchema.array.element)
+        if (fieldSchema?.type === SchemaType.Struct && fieldSchema.struct?.fields.length)
+        {
+            for (let i = 0; i < primarys.length; i++)
+            {
+                const f = fieldSchema.struct!.fields.find(f => f.name === primarys[i])
+                if (f) {
+                    result.push({ type: f.type })
+                }
+                else {
+                    result.push({})
+                }
+            }
+        }
+    }
+    return result
+}
+
+const specialFuncRefresh: { [key: string]: (args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => Promise<ArgInfo[]> } = {
+    // field access
+    "system.collection.delfield": refreshFieldFunc,
+    "system.collection.getfield": refreshFieldFunc,
+    "system.collection.getfields": refreshFieldFunc,
+    "system.collection.setfield": refreshFieldFunc,
+
+    // fetch context item
+    "system.data.getcontextitem": async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+        const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
+        return [
+            {
+                type: ret,
+                whiteList: await getFieldAccessWhiteList(ret || "", contextSchema?.struct?.fields || [])
+            }
+        ]
+    },
+
+    // app data fetch
+    "system.data.getappdata": refreshAppDataFetchFunc,
+    "system.data.getappdatabyonekey": refreshAppDataFetchFunc,
+    "system.data.getappdatabytwokey": refreshAppDataFetchFunc,
+    "system.data.getappdatabythreekey": refreshAppDataFetchFunc,
+    "system.data.getappdatabyfourkey": refreshAppDataFetchFunc,
+}
 
 let stateHandler: Function | undefined = undefined
 let retHandler: Function | undefined = undefined
@@ -307,6 +380,7 @@ const refresh = async () => {
     state.explen = expsNode.elements.length
 
     const retSchema = retType ? await getSchema(retType) : null
+    const typeMap: Map<string, INodeSchema> = new Map()
 
     // args refresh
     const args: { name: string, schema: INodeSchema }[] = []
@@ -317,6 +391,7 @@ const refresh = async () => {
             const schema = await getSchema(type)
             if (schema) {
                 args.push({ name, schema })
+                typeMap.set(name, schema)
             }
         }
     }
@@ -328,10 +403,7 @@ const refresh = async () => {
     if (retSchema && expcount)
     {
         const data = expsNode.elements[expcount - 1].rawData
-        if (data.return && await isSchemaCanBeUseAs(data.return, retSchema.name))
-        {
-            lastMatch = true
-        }
+        lastMatch = (data.return && await isSchemaCanBeUseAs(data.return, retSchema.name)) || false
     }
 
     // exps refresh
@@ -347,9 +419,6 @@ const refresh = async () => {
         let arrayEle = ""
         let isarray = type !== ExpressionType.Call
         let arrIdx = -1
-        let isfieldacess = fieldAccessFunc.includes(func || "")
-        let iscontextitem = contextItemFunc.includes(func || "")
-        let fieldacesstype: INodeSchema | undefined = undefined
         
         switch (type) {
             case ExpressionType.Filter:
@@ -386,18 +455,25 @@ const refresh = async () => {
             if (ret) generic[gidx] = ret
         }
 
+        // special func refresh trick
+        const specials: ArgInfo[] = specialFuncRefresh[func]
+            ? await specialFuncRefresh[func](fargs.elements as StructNode[], typeMap, ret)
+            : []
+
         // adjust type, white list and etc
         for (let k = 0; k < farglen; k++) {
             const farg = fargs.elements[k] as StructNode
-            const display = farg.getField("display")
-            const type = farg.getField("type")
-            const name = farg.getField("name")
+            const display = farg.getField("display") as ScalarNode
+            const type = farg.getField("type") as ScalarNode
+            const name = farg.getField("name") as ScalarNode
+            const valueField = farg.getField("value") as ScalarNode
+            const special = specials.length > k ? specials[k] : undefined
 
             const carg = finfo!.func!.args[k]
-            display.data = `${carg.nullable ? '? ' : '* '}${carg.name}`
+            display.data = `${carg.nullable ? '? ' : '* '}${special?.display || carg.name}`
 
             // call argument type
-            let ctype = await getSchema(carg.type, generic)
+            let ctype = await getSchema(special?.type || carg.type, generic)
             const choose = name.rawData
             const exp = choose ? args.find(a => a.name === choose) || exps.find(a => a.name === choose) : null
 
@@ -461,49 +537,14 @@ const refresh = async () => {
             }
             if (!isEqual((name.rule as ScalarRule).whiteList, whitelist)) {
                 (name.rule as ScalarRule).whiteList = whitelist
-                name.notifyState()
+                name.validate().then(() => name.notifyState())
             }
 
-            // field access check
-            const valueField = farg.getField("value") as ScalarNode
-            if (k == 0)
+            // value field
+            if (!isEqual(special?.whiteList, valueField.rule.whiteList))
             {
-                if (isfieldacess)
-                {
-                    fieldacesstype = exp?.schema
-                    if (fieldacesstype?.type === SchemaType.Array && fieldacesstype.array?.element)
-                        fieldacesstype = await getSchema(fieldacesstype.array.element)
-                }
-                
-                if (iscontextitem && ret)
-                {
-                    const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
-                    valueField.rule.whiteList = await getFieldAccessWhiteList(ret, contextSchema?.struct?.fields || [])
-                    valueField.validate().then(() => valueField.notifyState())
-                }
-                else if(valueField.rule.whiteList?.length)
-                {
-                    valueField.rule.whiteList = undefined
-                    valueField.notifyState()
-                }
-            }
-
-            if (k == 1)
-            {
-                if (isfieldacess && fieldacesstype?.type === SchemaType.Struct && fieldacesstype.struct?.fields.length)
-                {
-                    const valwhitelist: string[] = fieldacesstype.struct!.fields.map((f:any) => f.name) || []
-                    if (isEqual(valueField.rule.whiteList, valwhitelist) === false)
-                    {
-                        valueField.rule.whiteList = valwhitelist
-                        valueField.notifyState()
-                    }
-                }
-                else if (valueField.rule.whiteList?.length)
-                {
-                    valueField.rule.whiteList = undefined
-                    valueField.notifyState()
-                }
+                valueField.rule.whiteList = special?.whiteList
+                valueField.validate().then(() => valueField.notifyState())
             }
         }
 
@@ -512,6 +553,7 @@ const refresh = async () => {
             const schema = await getSchema(ret)
             if (schema) {
                 exps.push({ name, schema })
+                typeMap.set(name, schema)
             }
         }
 

@@ -588,6 +588,7 @@ importLanguage("zhCN", {
     "frontend.view.app": "应用",
     "frontend.view.tran": "翻译",
     "frontend.view.target": "应用目标",
+    "frontend.view.useempty": "使用空GUID",
     "frontend.view.genguid": "生成新GUID",
     "frontend.view.loaddata": "加载数据",
     "frontend.view.savedata": "保存数据",

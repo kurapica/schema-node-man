@@ -588,6 +588,7 @@ importLanguage("enUS", {
     "frontend.view.app": "Application",
     "frontend.view.tran": "Translate",
     "frontend.view.target": "App Target",
+    "frontend.view.useempty": "Use Empty GUID",
     "frontend.view.genguid": "Generate GUID",
     "frontend.view.loaddata": "Load Data",
     "frontend.view.savedata": "Save Data",

@@ -568,7 +568,6 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
-import { fi } from "element-plus/es/locales.mjs"
 
 regSchemaTypeView("system.schema.app", sourceappView)
 regSchemaTypeView("system.schema.appinput", appInputView)

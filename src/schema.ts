@@ -103,7 +103,7 @@ registerSchema([
     
     newSystemStruct("system.schema.structfldfuncarg", [
         { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
-        { name: "type", type: "system.schema.valuetype", displayOnly: true },
+        { name: "type", type: "system.schema.valuetype" },
         { name: "name", type: "system.schema.reltarfield" },
         { name: "value", type: "system.schema.anyvalue" },
     ], [
@@ -572,7 +572,7 @@ registerSchema([
     
     newSystemStruct("system.schema.funccallarg", [
         { name: "display", type: NS_SYSTEM_STRING, displayOnly: true},
-        { name: "type", type: "system.schema.valuetype", displayOnly: true, invisible: false},
+        { name: "type", type: "system.schema.valuetype", readonly: true},
         { name: "name", type: NS_SYSTEM_STRING, upLimit: 32},
         { name: "value", type: "system.schema.anyvalue"},
     ], [

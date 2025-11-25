@@ -39,7 +39,12 @@
              :header-cell-style="{ background: '#eee' }"
              @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
-                <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
+                <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
+                    <template #default="scope">
+                       <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{ scope.row.name }}</span>
+                       <span v-else>{{ scope.row.name }}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
                     <template #default="scope">
                         {{ _L['system.schema.schematype.' + scope.row.type] }}
@@ -178,7 +183,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone, EnumNode } from 'schema-node'
+import { _LS, getSchema, type INodeSchema, SchemaNodeStatus, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone, EnumNode } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
