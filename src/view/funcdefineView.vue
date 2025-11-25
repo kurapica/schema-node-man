@@ -117,13 +117,7 @@ const refreshFieldFunc = async(args: StructNode[], typeMap: Map<string, INodeSch
     if (exp?.type === SchemaType.Array && exp.array?.element)
         exp = await getSchema(exp.array.element)
     if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
-        return [
-            {},
-            {
-                type: ret,
-                whiteList: await getFieldAccessWhiteList(ret || "", exp.struct.fields, undefined, true)
-            }
-        ]
+        return [{}, { type: ret, whiteList: await getFieldAccessWhiteList(ret || "", exp.struct.fields, undefined, true) }]
     }
     return []
 }
@@ -168,18 +162,13 @@ const specialFuncRefresh: { [key: string]: (args: StructNode[], typeMap: Map<str
     // field access
     "system.collection.delfield": refreshFieldFunc,
     "system.collection.getfield": refreshFieldFunc,
-    "system.collection.getfields": refreshFieldFunc,
+    "system.collection.getfields":refreshFieldFunc,
     "system.collection.setfield": refreshFieldFunc,
 
     // fetch context item
     "system.data.getcontextitem": async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
         const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
-        return [
-            {
-                type: ret,
-                whiteList: await getFieldAccessWhiteList(ret || "", contextSchema?.struct?.fields || [])
-            }
-        ]
+        return [{ type: ret, whiteList: await getFieldAccessWhiteList(ret || "", contextSchema?.struct?.fields || [])}]
     },
 
     // app data fetch

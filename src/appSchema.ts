@@ -267,7 +267,7 @@ registerSchema([
         { name: "func", type: "system.schema.functype" },
         { name: "payload", type: "system.schema.valuetype", require: true },
         { name: "funcArgs", type: "system.schema.funccallargs" },
-    ], 
+    ],
     [
         { field: "args", type: RelationType.Visible, func: "system.schema.hasworkflowargs", args: [ { name: "type" } ] },
         { field: "mode", type: RelationType.Default, func: "system.schema.getworkflowmode", args: [ { name: "type" } ]},
