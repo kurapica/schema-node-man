@@ -680,7 +680,7 @@ registerSchema([
     ]),
 
     newSystemFunc("system.schema.getschemapolicyscope", "system.schema.policyscopes", [], () => {
-        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead]
+        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead, PolicyScope.FuncExecute ]
     }),
 
     newSystemFunc("system.schema.getappschemapolicyscope", "system.schema.policyscopes", [], () => {
