@@ -1,7 +1,4 @@
-import axios from "axios"
-import type { IAppDataFieldPushQuery, IAppDataPushResult, IBatchQueryAppDataResult } from "schema-node"
-import type { IAppDataQuery } from "schema-node"
-import { generateGuid, useAppDataProvider, type IAppFieldSchema, type IAppSchema, type IEnumValueAccess, type IEnumValueInfo, type INodeSchema, type IAppSchemaDataProvider } from "schema-node"
+import { useAppDataProvider, type IAppFieldSchema, type IAppWorkflowSchema, type IAppSchema, type IEnumValueInfo, type INodeSchema, type IAppSchemaDataProvider, defaultAppSchemaProvider, setSchemaApiBaseUrl, getSchemaApiBaseUrl, postSchemaApi } from "schema-node"
 
 /**
  * The schema server api provider interface
@@ -70,64 +67,36 @@ export interface ISchemaServerProvder extends IAppSchemaDataProvider
      * @param other the other app field schema name to swap
      */
     swapAppFieldSchema(app: string, field: string, other: string): Promise<boolean>
+
+    /**
+     * Save the app workflow schema to the server
+     * @param app the app schema name
+     * @param schema the workflow schema
+     */
+    saveAppWorkflowSchema(app: string, schema: IAppWorkflowSchema): Promise<boolean>
+
+    /**
+     * Delete the app workflow schema from the server
+     * @param app the app schema name
+     * @param workflow the workflow name
+     */
+    deleteAppWorkflowSchema(app: string, workflow: string): Promise<boolean>
+
+    /**
+     * Toggle the app workflow
+     * @param app the app schema name
+     * @param workflow the workflow name
+     * @param active whether active
+     */
+    toggleAppWorkflowSchema(app: string, workflow: string, active: boolean): Promise<boolean>
 }
 
 //#region Methods
 let schemaServerProvider: ISchemaServerProvder | null = null
 
-async function postSchemaApi(url: string, param: any): Promise<any> {
-    try
-    {
-        let site: string = localStorage["schema_server_url"] || ""
-        if (!site) return null
-        if (site.endsWith("/")) site = site.substring(0, site.length - 1)
-        if (url.startsWith("/")) url = url.substring(1)
-        const result: any = await axios.post(`${site}/${url}`, {
-            jsonrpc: "2.0",
-            method: "",
-            id: generateGuid(),
-            params: param
-        })
-        return result?.data?.result
-    }
-    catch(ex)
-    {
-        return null
-    }
-}
-
-// Default schema
+// Default schema server provider
 const defaultSchemaServerProvider: ISchemaServerProvder = {
-    loadSchema: async (names: string[]): Promise<INodeSchema[]> => {
-        return (await postSchemaApi("/load-schema", {
-            names: names
-        }))?.schemas || []
-    },
-
-    loadAppSchema: async (app: string, includeTypes?: boolean): Promise<IAppSchema | undefined> => {
-        return (await postSchemaApi("/load-app-schema", {
-            name: app,
-            includeTypes
-        }))?.schema
-    },
-
-    loadEnumSubList: async (name: string, value?: any, fullList?: boolean): Promise<IEnumValueInfo[]> => {
-        return (await postSchemaApi("/load-enum-sub-list", {
-            name, value, fullList
-        }))?.values
-    },
-
-    loadEnumAccessList: async (name: string, value: any, noSubList?: boolean, withSubList?: boolean): Promise<IEnumValueAccess[]> => {
-        return (await postSchemaApi("/load-enum-access-list", {
-            name, value, noSubList, withSubList
-        }))?.access
-    },
-
-    callFunction: async (name: string, args: any[], generic?: string | string[], target?: string): Promise<any> => {
-        return (await postSchemaApi("/call-function", {
-            name, args, generic, target
-        }))?.result
-    },
+    ...defaultAppSchemaProvider,
 
     saveSchema: async (schema: INodeSchema): Promise<boolean> => {
         return (await postSchemaApi("/save-schema", {
@@ -177,35 +146,27 @@ const defaultSchemaServerProvider: ISchemaServerProvder = {
         }))?.result
     },
 
-    batchQueryAppData: async function (queries: IAppDataQuery[]): Promise<IBatchQueryAppDataResult> {
-        return (await postSchemaApi("/batch-query-app-data", {
-            queries
-        }))
+    saveAppWorkflowSchema: async function (app: string, schema: IAppWorkflowSchema): Promise<boolean> {
+        return (await postSchemaApi("/save-app-workflow-schema", {
+            app, schema
+        }))?.result
     },
-
-    pushAppData: async function(app: string, target: string, datas: { [key:string]: IAppDataFieldPushQuery }): Promise<IAppDataPushResult>
-    {
-        return (await postSchemaApi("/push-app-data", {
-            app, target, datas
-        }))
-    },
-
-    setSourceTarget: async function(app: string, target: string, sourceApp: string, sourceTarget?: string): Promise<boolean>
-    {
-        return (await postSchemaApi("/set-source-target", {
-            app, target, sourceApp, sourceTarget
+    
+    deleteAppWorkflowSchema: async function (app: string, workflow: string): Promise<boolean> {
+        return (await postSchemaApi("/delete-app-workflow-schema", {
+            app, workflow
         }))?.result
     },
 
-    getSourceTarget: async function(app: string, target: string, sourceApp: string): Promise<string | undefined>
-    {
-        return (await postSchemaApi("/get-source-target", {
-            app, target, sourceApp
-        }))?.target
+    toggleAppWorkflowSchema: async function (app: string, workflow: string, active: boolean): Promise<boolean> {
+        return (await postSchemaApi("/toggle-app-workflow-schema", {
+            app, workflow, active
+        }))?.result
     }
 }
 
-if (localStorage["schema_server_url"]) useAppDataProvider(defaultSchemaServerProvider)
+if (localStorage["schema_server_url"]) 
+    setSchemaApiBaseUrl(localStorage["schema_server_url"])
 
 /**
  * Set the schema site url
@@ -213,7 +174,7 @@ if (localStorage["schema_server_url"]) useAppDataProvider(defaultSchemaServerPro
 export function setSchemaSite(url: string)
 {
     localStorage["schema_server_url"] = url
-    if (url && !schemaServerProvider) useAppDataProvider(defaultSchemaServerProvider)
+    setSchemaApiBaseUrl(url)
 }
 
 /**
@@ -238,5 +199,5 @@ export function useSchemaServerProvider(provider: ISchemaServerProvder): void{
  * @returns the schema server provider
  */
 export function getSchemaServerProvider() {
-    return localStorage["schema_server_url"] ? defaultSchemaServerProvider : schemaServerProvider
+    return schemaServerProvider ?? (getSchemaApiBaseUrl() ? defaultSchemaServerProvider : null)
 }

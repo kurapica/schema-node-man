@@ -16,39 +16,54 @@
                 </template>
             </el-popover>
         </template>
-        <el-cascader v-else
-            v-model="data" 
-            style="width: 100%" 
-            :options="root.children" 
-            :props="{
-                emitPath: false,
-                checkStrictly: namespaceMap.length === 1,
-                lazy: true,
-                lazyLoad: lazyLoad
-            }" 
-            :placeholder="scalarNode.selectPlaceHolder"
-            :disabled="state.readonly || state.disable" :clearable="!state.require"
-            v-bind="$attrs">
-            <template #default="{ data }">
-                <template v-if="namespaceMap.length === 1 || data.type === SchemaType.Namespace">
-                    <span>{{ data.label }}</span>
+        <section v-else style="display: flex;">
+            <el-cascader
+                v-model="data" 
+                :style="{width: `${state.generic?.length ? Math.floor(100 / (state.generic.length + 1)) : 100}%`}" 
+                :options="root.children" 
+                :props="{
+                    emitPath: false,
+                    checkStrictly: namespaceMap.length === 1,
+                    lazy: true,
+                    lazyLoad: lazyLoad
+                }" 
+                :placeholder="scalarNode.selectPlaceHolder"
+                :disabled="state.readonly || state.disable" :clearable="!state.require"
+                v-bind="$attrs">
+                <template #default="{ data }">
+                    <template v-if="namespaceMap.length === 1 || data.type === SchemaType.Namespace">
+                        <span>{{ data.label }}</span>
+                    </template>
+                    <template v-else>
+                        <el-popover
+                            placement="right-start"
+                            :title="data.value"
+                            width="width:fit-content"
+                            :open-delay="500"
+                            trigger="hover">
+                            <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
+                            <namespace-info-view style="min-width: 300px;" :type="data.value"/>
+                            <template #reference>
+                                <span style="width: 100%; display: inline-block;">{{ data.label }}</span>
+                            </template>
+                        </el-popover>
+                    </template>
                 </template>
-                <template v-else>
-                    <el-popover
-                        placement="right-start"
-                        :title="data.value"
-                        width="width:fit-content"
-                        :open-delay="500"
-                        trigger="hover">
-                        <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
-                        <namespace-info-view style="min-width: 300px;" :type="data.value"/>
-                        <template #reference>
-                            <span style="width: 100%; display: inline-block;">{{ data.label }}</span>
-                        </template>
-                    </el-popover>
+            </el-cascader>
+            <template v-if="state.generic?.length" >
+                <span>&lt;</span>
+                <template v-for="(genNode, index) in state.generic" :key="genNode.guid">
+                    <schema-view
+                        :node="genNode"
+                        :style="{width: `${Math.floor(98 / (state.generic.length))}%`}"
+                        no-generic
+                        v-bind="$attrs"
+                    ></schema-view>
+                    <span v-if="index < state.generic.length - 1">,</span>
                 </template>
+                <span>&gt;</span>
             </template>
-        </el-cascader>
+        </section>
 
         <!-- namespace editor -->
         <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body @closed="closeNamespaceEditor">
@@ -88,7 +103,7 @@
 import { saveStorageSchema } from "@/schema"
 import { getSchemaServerProvider } from "@/schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getArraySchema, getCachedSchema, getSchema, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, registerSchema, RelationType, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type ScalarNode, type SchemaTypeValue } from "schema-node"
+import { ExpressionType, PolicyScope, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -105,7 +120,7 @@ interface ICascaderOptionInfo {
 }
 //#endregion
 
-const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()
+const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean, noGeneric?: boolean }>()
 const scalarNode = toRaw(props.node)
 const type = scalarNode.config.type
 
@@ -116,7 +131,16 @@ const state = reactive<{
     disable?: boolean,
     require?: boolean,
     readonly?: boolean,
+    generic?: ScalarNode[],
 }>({})
+
+const setData = (value: any) => {
+    if (state.generic?.length)
+    {
+        value = state.generic.findIndex(g => g.data) >= 0 ? `${value}<${state.generic.map(g => g.data || "").join(", ")}>` : value
+    }
+    scalarNode.data = value
+}
 
 // Data
 const data = computed({
@@ -124,7 +148,7 @@ const data = computed({
         return state.data
     },
     set(value: any) {
-        scalarNode.data = value
+        setData(value)
     }
 })
 
@@ -135,7 +159,10 @@ const schemaTypeOrder = {
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
     [SchemaType.Func]: 6,
-    [SchemaType.Json]: 7
+    [SchemaType.Event]: 7,
+    [SchemaType.Workflow]: 8,
+    [SchemaType.Policy]: 9,
+    [SchemaType.Json]: 10
 }
 
 // cascader root
@@ -151,6 +178,7 @@ let compatibleType = ""
 let otherCompatibleType = ""
 let upLimit = 99
 let lowLimit = 0
+let rowAccessType = ""
 
 // namespace map
 const namespaceMap: any = {
@@ -161,7 +189,11 @@ const namespaceMap: any = {
     "system.schema.structtype": [SchemaType.Namespace, SchemaType.Struct],
     "system.schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
     "system.schema.functype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.eventtype": [SchemaType.Namespace, SchemaType.Event],
+    "system.schema.workflowtype": [SchemaType.Namespace, SchemaType.Workflow],
+    "system.schema.policytype": [SchemaType.Namespace, SchemaType.Policy],
     "system.schema.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.policyfunctype": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
@@ -220,13 +252,26 @@ const confirmNameSpace = async () => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = await provider.saveSchema(data)
-            if (!res)
-            {
-                ElMessage.error(_L.value["frontend.view.error"])
-                return
+            try{
+                const res = await provider.saveSchema(data)
+                if (!res)
+                {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+                data.loadState |= SchemaLoadState.Server
             }
-            data.loadState |= SchemaLoadState.Server
+                catch (ex: any)
+                {
+                    if (ex && ex.status === 403)
+                    {
+                        ElMessage.error(_L.value["frontend.view.nopermission"])
+                        return
+                    }
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    console.error(ex)
+                    return
+                }
         }
     }
 
@@ -258,7 +303,11 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
             if (enableEntries.value && await isSchemaCanBeUseAs(f.func.return, NS_SYSTEM_ENTRIES))
                 continue
 
-            if (isscalarvalidfunc) {
+            if(f.func.args.length < lowLimit || f.func.args.length > upLimit)
+            {
+                blackList.push(f.name)
+            }
+            else if (isscalarvalidfunc) {
                 // for scalar value validation only
                 if (f.func.args?.length !== 1 || 
                     compatibleType && !/^[tT]\d*$/.test(f.func.args[0].type) && !await isSchemaCanBeUseAs(f.func.args[0].type, compatibleType))
@@ -285,10 +334,21 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
                 (!otherCompatibleType || !await isSchemaCanBeUseAs(f.func.return, otherCompatibleType))) {
                 blackList.push(f.name)
             }
-            else if(f.func.args.length < lowLimit || f.func.args.length > upLimit)
+            
+            if(rowAccessType && !blackList.includes(f.name) && f.func.args.length !== 1 && !await isSchemaCanBeUseAs(f.func.args[0].type, rowAccessType))
             {
                 blackList.push(f.name)
             }
+        }
+        return blackList
+    }
+    else if(props.noGeneric)
+    {
+        const blackList: string[] = ["system.schema"]
+        for(let i = 0; i < options.length; i++)
+        {
+            const genTypes = getGenericParameter(options[i].value)
+            if (genTypes?.length) blackList.push(options[i].value)
         }
         return blackList
     }
@@ -317,7 +377,7 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
             value: v.name,
             type: v.type,
             display: v.display,
-            label: _L.value(v.display),
+            label: _L.value(v.display?.key ? v.display : v.name),
             loadState: v.loadState || 0,
             leaf: v.type !== SchemaType.Namespace || (nsOnly && (!v.schemas?.length || v.schemas.findIndex((s:INodeSchema) => s.type === SchemaType.Namespace) < 0)),
             children: null
@@ -340,13 +400,13 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
         const { value } = node
         if (!value) return resolve([])
 
-        const paths = value.toLowerCase().split(".")
+        const paths = (root.value?.length ? value.substring(root.value.length + 1) : value).toLowerCase().split(".")
         let ns = root
         for (let i = 0; i < paths.length; i++) {
-            const name = paths.slice(0, i + 1).join(".")
-            ns = ns.children!.find(c => c.value.toLowerCase() === name)!
+            const name = (root.value?.length ? `${root.value}.` : "") + paths.slice(0, i + 1).join(".")
+            ns = ns.children!.find((c: ICascaderOptionInfo) => c.value.toLowerCase() === name)!
         }
-
+        
         getSchema(value)
         .then((res?: INodeSchema) => {
             buildOptions([], res?.schemas || []).then(r => {
@@ -374,7 +434,8 @@ const reBuildOptions = async () => {
             root.value = enumRoot
             compatibleType = ""
         }
-        else {
+        else 
+        {
             root.value = ""
             compatibleType = "" + enumRoot
         }
@@ -415,6 +476,7 @@ let stateHandler: Function | null = null
 let langHandler: Function | null = null
 let exptypeHandler: Function | null = null
 let relationtypeHandler: Function | null = null
+let policyscopeHandler: Function | null = null
 
 onMounted(() => {
     const parent = scalarNode.parent
@@ -449,17 +511,116 @@ onMounted(() => {
         lowLimit = 0
     }
 
+    // policy scope
+    if (type === "system.schema.policyfunctype") {
+        const scopeNode = parent instanceof StructNode ? parent.getField("scope") : undefined
+        if (scopeNode){
+            policyscopeHandler = scopeNode.subscribe(async () => {
+                const scope = scopeNode.data
+                let access = ""
+                let limit = 0
+                if (scope == PolicyScope.RowAccess)
+                {
+                    limit = 1
+                    let fieldNode = parent
+                    while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
+                        fieldNode = fieldNode.parent
+
+                    if (fieldNode)
+                    {
+                        const app = (fieldNode as StructNode).getField("app").data
+                        const fld = (fieldNode as StructNode).getField("name").data
+                        if (app && fld)
+                        {
+                            const appSchema = await getAppSchema(app)
+                            const col = appSchema?.fields?.find((f: any) => f.name === fld)
+                            if (col) {
+                                access = col.type
+                                const schema = await getSchema(col.type)
+                                if (schema?.type == SchemaType.Array)
+                                {
+                                    access = schema.array?.element || ""
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (access !== rowAccessType || limit != upLimit)
+                {
+                    upLimit = limit
+                    lowLimit = limit
+                    rowAccessType = access
+                    reBuildOptions()
+                }
+            }, true)
+        }
+    }
+
+    // data watcher
     dataWatcher = scalarNode.subscribe(async() =>  {
-        const data = scalarNode.rawData
-        state.data = data
+        let data = scalarNode.rawData
+
+        // generic type check
+        if (!props.noGeneric && !(props.plainText && scalarNode.readonly))
+        {
+            let name = isNull(data) ? "" : data
+            const match = name.match(REGEX_GENERIC_IMPLEMENT)
+            const geneiricTypes = match && match.length >= 3 ? match[2].split(",").map((t:string) => t.trim()) : []
+            name = match && match.length >= 2 ? match[1] : name
+            const schema = name ? getCachedSchema(name) : undefined
+            const genTypes = schema ? getGenericParameter(schema) : []
+
+            if (genTypes?.length)
+            {
+                const genericNodes = [...state.generic || []]
+                while(genericNodes.length > genTypes.length)
+                    genericNodes.pop()?.dispose()
+
+                for (let i = 0; i < genericNodes.length; i++)
+                {
+                    genericNodes[i].data = geneiricTypes[i] || ""
+                }
+
+                while(genericNodes.length < genTypes.length)
+                {
+                    const node = new ScalarNode({ type: schema?.type === SchemaType.Array ? "system.schema.arrayeletype" : "system.schema.valuetype", display: _L.value("[GENERIC]") }, geneiricTypes[genericNodes.length] || "")
+                    node.subscribe(() => setData(state.data))
+                    node.rule.disable = state.readonly || state.disable || props.disabled
+                    genericNodes.push(node)
+                }
+                
+                state.data = name
+                state.generic = genericNodes
+                data = name
+            }
+            else
+            {
+                state.data = name
+                state.generic = undefined
+            }
+        }
+        else
+        {
+            state.data = data
+        }
         
-        const paths = (data || "").split(".")
+        // build display
+        const paths = (isNull(data) ? "" : data).split(".")
         const display: string[] = []
+
+        // generic check for simple
+        while (paths.length > 1 && paths[paths.length - 1].endsWith(">") && !paths[paths.length - 1].includes("<"))
+        {
+            paths[paths.length - 2] = `${paths[paths.length - 2]}.${paths[paths.length - 1]}`
+            paths.pop()
+        }
+
         let option = root
         let rebuild = false
         for (let i = 0; i < paths.length; i++) {
             const name = paths.slice(0, i + 1).join(".")
-            const match = option?.children?.find(c => c.value === name)
+            const match = option?.children?.find((c: ICascaderOptionInfo) => c.value === name)
             if (match)
             {
                 display.push(_L.value(match.label))
@@ -470,7 +631,7 @@ onMounted(() => {
                 rebuild = true
                 const schema = await getSchema(name)
                 if (!schema) break
-                display.push(_L.value(schema.display || paths[i]))
+                display.push(_L.value(schema.display?.key ? schema.display : paths[i]))
             }
         }
         state.display = display.join("/")
@@ -478,6 +639,7 @@ onMounted(() => {
             await reBuildOptions()
     }, true)
 
+    // state watch
     stateHandler = scalarNode.subscribeState(() => {
         state.disable = scalarNode.rule.disable
         state.require = scalarNode.require
@@ -489,6 +651,11 @@ onMounted(() => {
             compatibleType = r
             reBuildOptions()
         }
+
+        state.generic?.forEach(g => {
+            g.rule.disable = state.readonly || state.disable || props.disabled
+            g.notifyState()
+        })
     }, true)
 
     // update display
@@ -497,6 +664,7 @@ onMounted(() => {
         refreshOptions(root.children)
         root.children = [...root.children]
     })
+
 })
 
 onUnmounted(() => {
@@ -505,5 +673,6 @@ onUnmounted(() => {
     if (langHandler) langHandler()
     if (exptypeHandler) exptypeHandler()
     if (relationtypeHandler) relationtypeHandler()
+    if (policyscopeHandler) policyscopeHandler()
 })
 </script>

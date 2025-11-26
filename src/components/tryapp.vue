@@ -8,6 +8,7 @@
             <el-form v-if="enableAppData && appTargetNode" ref="form" label-width="140px" label-position="left" :model="appTargetNode.rawData">
                 <template v-if="activeTargetTab == 0">
                     <section style="float:right;margin-left: 1rem;">
+                        <el-button type="info" @click="useempty">{{ _L["frontend.view.useempty"] }}</el-button>
                         <el-button type="info" @click="genguid">{{ _L["frontend.view.genguid"] }}</el-button>
                         <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadData">{{ _L["frontend.view.loaddata"] }}</el-button>
                         <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveData">{{ _L["frontend.view.savedata"] }}</el-button>
@@ -98,13 +99,11 @@ const dataProvider = getAppDataProvider()
 const enableAppData = dataProvider ? true : false
 
 // app target node
+const empty_guid = "00000000-0000-0000-0000-000000000000"
 const appTargetNode = ref<StructNode | undefined>(undefined)
-const genguid = () => {
-    appTargetNode.value!.getField("target")!.data = crypto.randomUUID()
-}
-const gensourceguid = () => {
-    sourceAppNode.value!.getField("target")!.data = crypto.randomUUID()
-}
+const useempty = () => appTargetNode.value!.getField("target")!.data = empty_guid
+const genguid = () => appTargetNode.value!.getField("target")!.data = crypto.randomUUID()
+const gensourceguid = () => sourceAppNode.value!.getField("target")!.data = crypto.randomUUID()
 
 // source app and target
 const sourceAppNode = ref<StructNode | undefined>(undefined)
@@ -225,13 +224,13 @@ onMounted(async() => {
     if (!enableAppData) return
 
     appTargetNode.value = (await getSchemaNode({
-        type: "system.schema.apptarget"
+        type: "frontend.apptarget"
     }, { allowApps: [props.app],  app: props.app, target: ""})) as StructNode
 
     const sourceApps = appNode.value?.sourceApps || []
     if (sourceApps.length > 0)
         sourceAppNode.value = (await getSchemaNode({
-            type: "system.schema.apptarget"
+            type: "frontend.apptarget"
         }, { allowApps: sourceApps, app: sourceApps[0], target: "" })) as StructNode
 })
 

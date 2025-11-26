@@ -6,7 +6,7 @@
                 type: type,
                 display: _L['frontend.view.tryit']
             }"
-            :in-form="true"
+            in-form="expandall"
             v-model="data"
             :skin="skin"
         ></schema-view>

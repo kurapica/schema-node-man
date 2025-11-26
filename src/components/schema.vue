@@ -39,15 +39,20 @@
              :header-cell-style="{ background: '#eee' }"
              @selection-change="handleSelection">
                 <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
-                <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
-                <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
+                <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
                     <template #default="scope">
-                        {{ _L(scope.row.display.key ? scope.row.display : scope.row.name) }}
+                       <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{ scope.row.name }}</span>
+                       <span v-else>{{ scope.row.name }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
                     <template #default="scope">
                         {{ _L['system.schema.schematype.' + scope.row.type] }}
+                    </template>
+                </el-table-column>
+                <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
+                    <template #default="scope">
+                        {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
                     </template>
                 </el-table-column>
                 <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="280">
@@ -65,12 +70,12 @@
                         <el-button v-else type="success" @click="handleEdit(scope.row, true)">
                             {{ _L["frontend.view.view"] }}
                         </el-button>
-                        <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System)" @click="handleEdit(scope.row, false)">
+                        <el-button type="warning" v-if="!((scope.row.loadState || 0) & SchemaLoadState.System) || scope.row.type === SchemaType.Namespace" @click="handleEdit(scope.row, false)">
                             {{ _L["frontend.view.edit"] }}
                         </el-button>
                         <el-popconfirm
                             v-if="isSchemaDeletable(scope.row.name)" 
-                            :title="_L['frontend.view.confirmdelete']"                            
+                            :title="_L['frontend.view.confirmdelete']"
                             :confirm-button-text="_L['YES']"
                             :cancel-button-text="_L['NO']"
                             :icon="Delete"
@@ -123,7 +128,7 @@
         </el-drawer>
 
         <!-- try it -->
-        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)" direction="rtl" size="100%" append-to-body destroy-on-close>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <tryit-view :type="tryittype"></tryit-view>
@@ -154,7 +159,7 @@
                     </template>
 
                     <template v-if="currRow?.usedByApp?.length">
-                        <h3>{{ _L["system.schema.apptarget.app"] }}</h3>
+                        <h3>{{ _L["frontend.apptarget.app"] }}</h3>
                         <hr/>
                         <ul>
                             <li v-for="app in currRow?.usedByApp" :key="app">
@@ -178,7 +183,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, getSchema, type INodeSchema, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone } from 'schema-node'
+import { _LS, getSchema, type INodeSchema, SchemaNodeStatus, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone, EnumNode } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '@/schema'
 import { getSchemaServerProvider } from '@/schemaServerProvider'
@@ -193,7 +198,10 @@ const schemaTypeOrder = {
     [SchemaType.Struct]: 4,
     [SchemaType.Array]: 5,
     [SchemaType.Func]: 6,
-    [SchemaType.Json]: 7
+    [SchemaType.Json]: 7,
+    [SchemaType.Event]: 8,
+    [SchemaType.Workflow]: 9,
+    [SchemaType.Policy]: 10
 }
 
 const tryitTypes = [ SchemaType.Struct, SchemaType.Array ]
@@ -250,6 +258,7 @@ const refresh = async () => {
     const schema = await getSchema(state.namespace || "")
     if (schema?.type === SchemaType.Namespace) {
         let temp = [...schema.schemas || []]
+        temp = temp.filter(p => ((p.loadState || 0) & SchemaLoadState.Frontend) === 0) // hide frontend only schemas
         if (state.type) {
             temp = temp.filter(p => p.type === state.type)
         }
@@ -284,6 +293,8 @@ const handleNew = async () => {
     namespaceNode.value = new StructNode({
         type: "system.schema.nodeschema",
     }, {})
+    const typeField = namespaceNode.value.getField("type") as EnumNode
+    typeField.rule.blackList = [ SchemaType.Json, SchemaType.Event, SchemaType.Workflow]
     showNamespaceEditor.value = true
 
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
@@ -325,10 +336,24 @@ const handleDelete = async (row: any) => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = await provider.deleteSchema(row.name)
-            if (!res)
+            try
             {
+                const res = await provider.deleteSchema(row.name)
+                if (!res)
+                {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
         }
@@ -344,7 +369,7 @@ const confirmNameSpace = async () => {
     if (!res || !namespaceNode.value?.valid) return
 
     if (!namespaceNode.value?.valid) return
-    const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.data)))
+    const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.submitData)))
     const schema = getCachedSchema(data.name)
     
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
@@ -352,13 +377,27 @@ const confirmNameSpace = async () => {
         const provider = getSchemaServerProvider()
         if (provider)
         {
-            const res = await provider.saveSchema(data)
-            if (!res)
+            try
             {
+                const res = await provider.saveSchema(data)
+                if (!res)
+                {
+                    ElMessage.error(_L.value["frontend.view.error"])
+                    return
+                }
+                data.loadState = (data.loadState || 0) | SchemaLoadState.Server
+            }
+            catch (ex: any)
+            {
+                if (ex && ex.status === 403)
+                {
+                    ElMessage.error(_L.value["frontend.view.nopermission"])
+                    return
+                }
                 ElMessage.error(_L.value["frontend.view.error"])
+                console.error(ex)
                 return
             }
-            data.loadState = (data.loadState || 0) | SchemaLoadState.Server
         }
     }
 

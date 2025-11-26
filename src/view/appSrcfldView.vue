@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { AnySchemaNode } from 'schema-node';
 import { _L, getAppSchema, isNull, isSchemaCanBeUseAs, ScalarNode, StructNode, type IAppSchema } from 'schema-node'
 import { computed, onMounted, onUnmounted, reactive, toRaw } from 'vue'
 
@@ -67,7 +68,12 @@ let stateWatcher: Function | null = null
 
 onMounted(() => {
     const node = scalarNode
-    const srcAppNode = (node.parent as StructNode).getField('sourceApp') as ScalarNode
+    let parent = node.parent
+    while (parent && !(parent instanceof StructNode && parent.fields?.find((f:AnySchemaNode) => f.schemaName === "system.schema.app"))) {
+        parent = parent.parent
+    }
+    let srcAppNode = parent?.fields?.find((f:AnySchemaNode) => f.schemaName === "system.schema.app") as ScalarNode
+    
     let appSchema: IAppSchema | undefined = undefined
     let type: string  = node.rule.root
 
@@ -91,7 +97,7 @@ onMounted(() => {
         state.display = state.whiteList?.find(w => w.value === node.rawData)?.label || node.rawData
     }
 
-    appWatcher = srcAppNode.subscribe(async () => {
+    appWatcher = srcAppNode?.subscribe(async () => {
         const app = srcAppNode?.rawData || ""
         appSchema = app ? await getAppSchema(app) : undefined
         await refreshWhiteList()
