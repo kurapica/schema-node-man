@@ -1,7 +1,7 @@
 {
   "name": "schema-node-man",
   "private": true,
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,8 @@
   },
   "peerDependencies": {
     "vue": "^3.5.24",
-    "element-plus": "^2.11.8"
+    "element-plus": "^2.11.8",
+    "@element-plus/icons-vue": "^2.3.2"
   },
   "dependencies": {
     "@vitejs/plugin-legacy": "^6.0.0",
@@ -18,8 +19,8 @@
     "marked": "^15.0.5",
     "process": "^0.11.10",
     "rollup-plugin-copy": "^3.5.0",
-    "schema-node": "workspace:*",
-    "schema-node-vueview": "workspace:*",
+    "schema-node": "^1.0.9",
+    "schema-node-vueview": "^1.0.10",
     "showdown": "^2.1.0",
     "sortablejs": "^1.15.6",
     "vue-router": "^4.5.1"

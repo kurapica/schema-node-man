@@ -117,7 +117,7 @@ const refreshFieldFunc = async(args: StructNode[], typeMap: Map<string, INodeSch
     if (exp?.type === SchemaType.Array && exp.array?.element)
         exp = await getSchema(exp.array.element)
     if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
-        return [{}, { type: ret, whiteList: await getFieldAccessWhiteList(ret || "", exp.struct.fields, undefined, true) }]
+        return [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList(ret || "", exp.struct.fields, undefined, true) }]
     }
     return []
 }

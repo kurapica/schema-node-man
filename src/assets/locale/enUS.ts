@@ -104,6 +104,7 @@ importLanguage("enUS", {
     "system.collection.arrlen": "Get Array Length",
     "system.collection.newstruct": "Create Structure",
     "system.collection.getfield": "Get Field",
+    "system.collection.getfielddefault": "Get Field or Default Value",
     "system.collection.setfield": "Set Field and Return New Structure",
     "system.collection.delfield": "Delete Field and Return New Structure",
     "system.collection.getfields": "Extract Field from Each Element",
@@ -118,6 +119,7 @@ importLanguage("enUS", {
     
     // system.logic
     "system.logic": "Logical Operations",
+    "system.logic.ifret": "Conditional Return",
     "system.logic.andalso": "And Also",
     "system.logic.between": "Between",
     "system.logic.cond": "Conditional",

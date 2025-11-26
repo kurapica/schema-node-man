@@ -104,6 +104,7 @@ importLanguage("zhCN", {
     "system.collection.arrlen": "获取数组长度",
     "system.collection.newstruct": "新建结构体",
     "system.collection.getfield": "获取字段",
+    "system.collection.getfielddefault": "获取字段或默认值",
     "system.collection.setfield": "写入字段返回新结构体",
     "system.collection.delfield": "删除字段返回新结构体",
     "system.collection.getfields": "从数组各个元素获取字段构成新数组",
@@ -118,6 +119,7 @@ importLanguage("zhCN", {
 
     // system.logic
     "system.logic": "逻辑操作",
+    "system.logic.ifret": "条件返回",
     "system.logic.andalso": "同时满足",
     "system.logic.between": "在范围内",
     "system.logic.cond": "条件选择",
