@@ -35,6 +35,12 @@
             </el-form>
         </el-header>
         <el-main v-if="appNode" style="max-height: 55vh;margin-top:4rem;">
+            <!-- manual workflow-->
+            <template v-if="manualWorkflows.length">
+                <el-button v-for="wf in manualWorkflows" :key="wf.workflow" v-loading="startWorkflowing" style="margin-bottom: 1rem; margin-right: 1rem;" type="primary" @click="startWorkflow(wf.workflow)">
+                    {{ _L(wf.display) || wf.workflow }}
+                </el-button>
+            </template>
             <el-tabs v-model="activeTab" v-if="showref || showoutput">
                 <el-tab-pane :label="_L['frontend.view.inputfield']" :name="0"></el-tab-pane>
                 <el-tab-pane v-if="showref" :label="_L['frontend.view.reffield']" :name="1"></el-tab-pane>
@@ -85,7 +91,7 @@
 <script lang="ts" setup>
 import { addAppTarget } from "@/appSchema";
 import { ElMessage, type ElForm } from "element-plus"
-import { getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull } from "schema-node"
+import { getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, type ILocaleString, getSchema, WorkflowMode, _LS, getAppSchema } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"
 import { onMounted, ref } from "vue"
 
@@ -97,6 +103,7 @@ const activeTab = ref(0)
 const appNode = ref<AppNode | undefined>(undefined)
 const dataProvider = getAppDataProvider()
 const enableAppData = dataProvider ? true : false
+const manualWorkflows = ref<{ workflow: string, display: ILocaleString }[]>([])
 
 // app target node
 const empty_guid = "00000000-0000-0000-0000-000000000000"
@@ -112,6 +119,7 @@ const loading = ref(false)
 const saving = ref(false)
 const showref = ref(false)
 const showoutput = ref(false)
+const startWorkflowing = ref(false)
 
 const loadData = async() => {
     if (!appTargetNode.value) return
@@ -125,8 +133,29 @@ const loadData = async() => {
             fields: [],
             take: 5
         })
-    } catch(e) {
-        console.error(e)
+        const appSchema = await getAppSchema(props.app)
+        const manualflows: { workflow: string, display: ILocaleString }[] = []
+
+        for (const wf of appSchema!.workflows || [])
+        {
+            if (!wf.nodes?.length) continue
+            const startSchema = await getSchema(wf.nodes[0].type)
+            if (startSchema?.workflow?.mode === WorkflowMode.Interaction)
+            {
+                manualflows.push({ workflow: wf.name, display: wf.display || _LS(wf.name) })
+            }
+        }
+        manualWorkflows.value = manualflows
+    } catch(ex: any) {
+        manualWorkflows.value = []
+        if (ex && ex.status === 403)
+        {
+            ElMessage.error(_L.value["frontend.view.nopermission"])
+            return
+        }
+        ElMessage.error(_L.value["frontend.view.error"])
+        console.error(ex)
+        return
     }
     finally{
         loading.value = false
@@ -161,8 +190,15 @@ const saveData = async() => {
 
         // re-load data
         await loadData()
-    } catch(e) {
-        console.error(e)
+    } catch(ex: any) {
+        if (ex && ex.status === 403)
+        {
+            ElMessage.error(_L.value["frontend.view.nopermission"])
+            return
+        }
+        ElMessage.error(_L.value["frontend.view.error"])
+        console.log(JSON.stringify(appNode.value.fullerror))
+        return
     }
     finally{
         saving.value = false
@@ -178,8 +214,15 @@ const loadSourceTarget = async() => {
         loading.value = true
         const sourceTarget = await dataProvider!.getSourceTarget(props.app, target, sourceApp)
         sourceAppNode.value!.getField("target")!.data = sourceTarget || ""
-    } catch(e) {
-        console.error(e)
+     } catch(ex: any) {
+        if (ex && ex.status === 403)
+        {
+            ElMessage.error(_L.value["frontend.view.nopermission"])
+            return
+        }
+        ElMessage.error(_L.value["frontend.view.error"])
+        console.error(ex)
+        return
     }
     finally{
         loading.value = false
@@ -205,11 +248,48 @@ const saveSourceTarget = async() => {
             ElMessage.success(_L.value("frontend.view.savesuccess"))
         }
         if (sourceTarget) addAppTarget(sourceApp, sourceTarget)
-    } catch(e) {
-        console.error(e)
+     } catch(ex: any) {
+        if (ex && ex.status === 403)
+        {
+            ElMessage.error(_L.value["frontend.view.nopermission"])
+            return
+        }
+        ElMessage.error(_L.value["frontend.view.error"])
+        console.error(ex)
+        return
     }
     finally{
         saving.value = false
+    }
+}
+
+const startWorkflow = async (workflow: string) => {
+    if (!appTargetNode.value || !appNode.value) return
+    try {
+        const target = appTargetNode.value.getField("target")!.rawData as string
+        if (isNull(target)) return
+
+        startWorkflowing.value = true
+        const r = await appNode.value.activeWorkflow(workflow);
+        if (!r) {
+            ElMessage.error(_L.value("frontend.view.startworkflowfailed"))
+        }
+        else
+        {
+            ElMessage.success(_L.value("frontend.view.startworkflowsuccess"))
+        }
+    } catch(ex: any) {
+        if (ex && ex.status === 403)
+        {
+            ElMessage.error(_L.value["frontend.view.nopermission"])
+            return
+        }
+        ElMessage.error(_L.value["frontend.view.error"])
+        console.error(ex)
+        return
+    }
+    finally{
+        startWorkflowing.value = false
     }
 }
 

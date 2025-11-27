@@ -80,6 +80,28 @@ const spacialFuncHandlers: { [key: string]: Function } = {
                 }
             }
         }
+    },
+    "system.data.saveappdata": async (args: ArrayNode, payloadTypes: any) => {
+        if (args.elements.length < 3) return []
+        const app = (args.elements[0] as StructNode).getField("value").submitData as string
+        const field = (args.elements[1] as StructNode).getField("value").submitData as string
+        const data = args.elements[2] as StructNode
+
+        const appSchema = app ? await getAppSchema(app) : null
+        if (!appSchema) return []
+        
+        const fieldSchema = appSchema.fields?.find(f => f.name === field)
+        if (!fieldSchema) return []
+        
+        const display = data.getField("display")
+        const type = data.getField("type")
+        const nameField = data.getField("name") as ScalarNode
+
+        display.data = `* ${fieldSchema.display?.key ? _L.value(fieldSchema.display) : fieldSchema.name}`
+        type.data = fieldSchema.type
+
+        nameField.rule.whiteList = await getFieldAccessWhiteList(fieldSchema.type, payloadTypes)
+        nameField.validation().then(() => nameField.notifyState())
     }
 }
 

@@ -103,7 +103,7 @@ registerSchema([
     
     newSystemStruct("system.schema.structfldfuncarg", [
         { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
-        { name: "type", type: "system.schema.valuetype" },
+        { name: "type", type: "system.schema.valuetype", readonly: true },
         { name: "name", type: "system.schema.reltarfield" },
         { name: "value", type: "system.schema.anyvalue" },
     ], [
@@ -684,7 +684,7 @@ registerSchema([
     }),
 
     newSystemFunc("system.schema.getappschemapolicyscope", "system.schema.policyscopes", [], () => {
-        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead, PolicyScope.DataRead, PolicyScope.DataWrite]
+        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead, PolicyScope.FuncExecute, PolicyScope.DataRead, PolicyScope.DataWrite]
     }),
 
     newSystemFunc("system.schema.getrowpolicyscope", "system.schema.policyscopes", [], () => {
