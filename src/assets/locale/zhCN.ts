@@ -531,6 +531,7 @@ importLanguage("zhCN", {
     "system.schema.appworkflowschema.display": "展示名",
     "system.schema.appworkflowschema.desc": "描述",
     "system.schema.appworkflowschema.active": "激活状态",
+    "system.schema.appworkflowschema.auths": "权限",
     "system.schema.appworkflowschema.nodes": "工作流节点列表",
 
     "system.schema.enumflagvalueinfo": "枚举标志位字段信息",
