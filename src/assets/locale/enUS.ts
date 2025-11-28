@@ -174,7 +174,7 @@ importLanguage("enUS", {
     "system.workflow.func.callstate": "Application Function Call State",
     "system.workflow.func.callstate.result": "Must Return Result",
     "system.workflow.func.callstate.retry": "Maximum Retry Count",
-    "system.workflow.func.callstate.delay": "Delay Time (Seconds)",
+    "system.workflow.func.callstate.delay": "Delay Time (milliseconds)",
 
     "system.workflow.func.appcall": "Call Function Within App",
 

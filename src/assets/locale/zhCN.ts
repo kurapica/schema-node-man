@@ -174,7 +174,7 @@ importLanguage("zhCN", {
     "system.workflow.func.callstate": "应用函数调用状态",
     "system.workflow.func.callstate.result": "必须返回结果",
     "system.workflow.func.callstate.retry": "最大重试次数",
-    "system.workflow.func.callstate.delay": "延迟时间(秒)",
+    "system.workflow.func.callstate.delay": "延迟时间(毫秒)",
     
     "system.workflow.func.appcall": "应用函数调用",
 
