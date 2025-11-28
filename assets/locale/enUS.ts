@@ -23,6 +23,7 @@ importLanguage("enUS", {
     "system.str.tolocale": "To Locale String",
     "system.str.getlanguages": "Get Language List",
     "system.str.newguid": "Generate New GUID",
+    "system.str.replace": "Replace String",
     
     // system.math
     "system.math": "Math Operations",
@@ -106,7 +107,8 @@ importLanguage("enUS", {
     "system.collection.getfield": "Get Field",
     "system.collection.getfielddefault": "Get Field or Default Value",
     "system.collection.setfield": "Set Field and Return New Structure",
-    "system.collection.delfield": "Delete Field and Return New Structure",
+    "system.collection.delfield": "Delete Field and Return New Structure",    
+    "system.collection.fieldequal": "Field Equals Specified Value",
     "system.collection.getfields": "Extract Field from Each Element",
     "system.collection.sum": "Sum Array",
     "system.collection.average": "Average of Array",
@@ -145,6 +147,7 @@ importLanguage("enUS", {
     "system.data.getappdatabythreekey": "Gets App Data by Three Keys",
     "system.data.getappdatabyfourkey": "Gets App Data by Four Keys",
     "system.data.incrappdata": "Incrementally Update App Data",
+    "system.data.saveappdata": "Save App Data",
     "system.data.getcontextitem": "Gets Request Context Item",
 
     // system.event
@@ -197,6 +200,18 @@ importLanguage("enUS", {
     "system.workflow.event.appfielddatapayload.target": "Application Target",
     "system.workflow.event.appfielddatapayload.data": "Updated Data",
     "system.workflow.event.appfielddatapayload.origin": "Original Data",
+
+    "system.workflow.interaction": "User Interaction",
+    "system.workflow.interaction.start": "Manually Start Workflow",
+    "system.workflow.interaction.payload": "User Interaction Payload",
+    "system.workflow.interaction.payload.app": "Application",
+    "system.workflow.interaction.payload.target": "Application Target",
+
+    "system.workflow.interaction.form": "Form Workflow",
+    "system.workflow.interaction.formpayload": "Form Payload",
+    "system.workflow.interaction.formpayload.app": "Application",
+    "system.workflow.interaction.formpayload.target": "Application Target",
+    "system.workflow.interaction.formpayload.data": "Interaction Data",
 
     "system.workflow.delay": "Wait for specified seconds",
 
@@ -284,6 +299,7 @@ importLanguage("enUS", {
     "system.schema.policyscope.schemadelete": "Delete Schema",
     "system.schema.policyscope.dataread": "Read Data",
     "system.schema.policyscope.datawrite": "Write Data",
+    "system.schema.policyscope.funcexecute": "Execute Function",
     "system.schema.policyscope.rowaccess": "Row Access Filter",
     "system.schema.policyscope.columnaccess": "Column Access Filter",
 
@@ -607,6 +623,8 @@ importLanguage("enUS", {
     "frontend.view.copyschema": "Copy Schema Definition",
     "frontend.view.movetop": "Move to Top",
     "frontend.view.workflow": "Workflow",
+    "frontend.view.startworkflowfailed": "Start Workflow Failed",
+    "frontend.view.startworkflowsuccess": "Start Workflow Successfully",
 
     "frontend.catalog": "Catalog",
     "frontend.catalog.01.intro": "01. Intro",
@@ -700,6 +718,8 @@ importLanguage("enUS", {
     "frontend.apptarget.app": "App",
     "frontend.apptarget.target": "Target",
     "frontend.appgetapptargets": "Get Target List",
+
+    "frontend.view.manualworkflows": "Manual Workflows",
 
     //#endregion
 });
