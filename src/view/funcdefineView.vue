@@ -172,7 +172,7 @@ const specialFuncRefresh: { [key: string]: (args: StructNode[], typeMap: Map<str
         if (exp?.type === SchemaType.Array && exp.array?.element)
             exp = await getSchema(exp.array.element)
         if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
-            const result = [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", exp.struct.fields, undefined, true) }]
+            const result:any = [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", exp.struct.fields, undefined, true) }]
             const fldName = args[1].getField("value").rawData
             const field = !isNull(fldName) ? exp.struct.fields.find(f => f.name === fldName) : undefined
             if (field) {

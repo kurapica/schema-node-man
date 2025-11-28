@@ -49,8 +49,8 @@ const workflowHandlers: IWorkflowHandler[] = []
 const spacialFuncHandlers: { [key: string]: Function } = {
     "system.data.getappdatabyonekey": async (args: ArrayNode, payloadTypes: any) => {
         if (args.elements.length < 3) return []
-        const app = (args.elements[0] as StructNode).getField("value").submitData as string
-        const field = (args.elements[1] as StructNode).getField("value").submitData as string
+        const app = (args.elements[0] as StructNode).getField("value").data as string
+        const field = (args.elements[1] as StructNode).getField("value").data as string
         const firstKey = args.elements[2] as StructNode
 
         const appSchema = app ? await getAppSchema(app) : null
@@ -83,8 +83,8 @@ const spacialFuncHandlers: { [key: string]: Function } = {
     },
     "system.data.saveappdata": async (args: ArrayNode, payloadTypes: any) => {
         if (args.elements.length < 3) return []
-        const app = (args.elements[0] as StructNode).getField("value").submitData as string
-        const field = (args.elements[1] as StructNode).getField("value").submitData as string
+        const app = (args.elements[0] as StructNode).getField("value").data as string
+        const field = (args.elements[1] as StructNode).getField("value").data as string
         const data = args.elements[2] as StructNode
 
         const appSchema = app ? await getAppSchema(app) : null
@@ -115,11 +115,11 @@ const refreshWorkflows = async (from: string) => {
 
     for (let i = 0; i < arrayNode.elements.length; i++) {
         const n = arrayNode.elements[i] as StructNode
-        const { name, type, args } = n.submitData
+        const { name, type, args } = n.data
 
         // for previous
         const previous = n.getField("previous") as ArrayNode
-        if (names.length > 0 && !previous.submitData?.length)
+        if (names.length > 0 && !previous.data?.length)
             previous.data = [names[names.length - 1]]
 
         if (name) names.push(name)
@@ -138,7 +138,7 @@ const refreshWorkflows = async (from: string) => {
         if(workflowType.workflow?.mode === WorkflowMode.Function)
         {
             // function workflow
-            const func = n.getField("func").submitData as string
+            const func = n.getField("func").data as string
             const funcSchema = func ? await getSchema(func) : undefined
             if (funcSchema?.type === SchemaType.Func)
             {
@@ -156,7 +156,7 @@ const refreshWorkflows = async (from: string) => {
                 {
                     // enable payload input for generic return type
                     enablePayloadInput = true
-                    const payload = payloadField.submitData as string
+                    const payload = payloadField.data as string
                     if (payload){
                         const gidx = funcSchema.func?.return && funcSchema.func.return.length > 1 ? parseInt(funcSchema.func.return.substring(1)) - 1 : 0
                         generic[gidx] = payload
@@ -314,14 +314,14 @@ const refreshWorkflows = async (from: string) => {
         }
 
         // collect payload types
-        if (name && payloadField.submitData)
-            payloadTypes.push({ name: name as string, display: n.getField("display").data as ILocaleString, type: payloadField.submitData as string })
+        if (name && payloadField.data)
+            payloadTypes.push({ name: name as string, display: n.getField("display").data as ILocaleString, type: payloadField.data as string })
 
         // fork && fork key
         const forkKeyField = n.getField("forkKey") as ScalarNode
-        if (n.getField("fork").submitData === true && payloadField.submitData)
+        if (n.getField("fork").data === true && payloadField.data)
         {
-            const paySchema = await getSchema(payloadField.submitData as string)
+            const paySchema = await getSchema(payloadField.data as string)
             if (paySchema?.type === SchemaType.Struct && paySchema.struct?.fields)
             {
                 forkKeyField.rule.whiteList = await getFieldAccessWhiteList(NS_SYSTEM_STRING, paySchema.struct.fields.map(f => ({ name: f.name, type: f.type, display: f.display as ILocaleString })))
