@@ -14,7 +14,7 @@ registerSchema([
         { name: "value", type: "system.schema.anyvalue" },
     ], [
         { field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ] },
-        { field: "name", type: RelationType.Disable, func: "system.schema.isvaluenotnull", args: [ { name: "value" } ] },
+        { field: "name", type: RelationType.Disable, func: "system.logic.notempty", args: [ { name: "value" } ] },
         { field: "value", type: RelationType.Type, func: "system.schema.getexpvaluetype", args: [ { name: "type" } ] },
         { field: "value", type: RelationType.Disable, func: "system.schema.hideexpvalue", args: [ { name: "type" }, { name: "name" } ] },
     ]),
@@ -252,6 +252,12 @@ registerSchema([
         return schema?.workflow?.args?.length ? true : false
     }),
 
+    newSystemFunc("system.schema.showfork", NS_SYSTEM_BOOL, [
+        { name: "mode", type: "system.schema.workflowmode", nullable: true },
+    ], (mode: string) => {
+        return mode === WorkflowMode.Event || mode === WorkflowMode.Interaction
+    }),
+
     newSystemStruct("system.schema.appworkflownodeschema", [
         { name: "app", type: "system.schema.app", displayOnly: true, invisible: true },
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
@@ -271,7 +277,7 @@ registerSchema([
     [
         { field: "args", type: RelationType.Visible, func: "system.schema.hasworkflowargs", args: [ { name: "type" } ] },
         { field: "mode", type: RelationType.Default, func: "system.schema.getworkflowmode", args: [ { name: "type" } ]},
-        { field: "fork", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Event } ] },
+        { field: "fork", type: RelationType.Visible, func: "system.schema.showfork", args: [ { name: "mode" } ] },
         { field: "func", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Function } ] },
         { field: "funcArgs", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "func" } ] },
         { field: "event", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: WorkflowMode.Event } ] },

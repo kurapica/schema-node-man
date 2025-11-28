@@ -18,7 +18,7 @@
         <el-drawer v-model="showAuth" :title="_L['frontend.auth']" direction="rtl" size="80%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <schema-view v-if="authNode" :node="(authNode as StructNode)" :plainText="false" />
+                    <schema-view v-if="authNode" :key="authNode.guid" :node="(authNode as StructNode)" :plainText="false" />
                 </el-main>
                 <el-footer>
                     <br/>
@@ -54,12 +54,16 @@ const saveServer = () => setSchemaSite(url.value)
 const showAuth = ref(false)
 const authNode = ref<StructNode | null>(null)
 const openAuth = async () => {
-    authNode.value = new StructNode({ type: "frontend.auth" }, getFrontendAuth())
+    authNode.value?.dispose()
+    authNode.value = null
     showAuth.value = true
+    authNode.value = new StructNode({ type: "frontend.auth" }, getFrontendAuth())
 }
 const saveAuth = () => {
-    saveFrontendAuth(authNode.value?.submitData)
+    saveFrontendAuth(authNode.value?.data)
     showAuth.value = false
+    authNode.value?.dispose()
+    authNode.value = null
 }
 </script>
 

@@ -165,6 +165,24 @@ const specialFuncRefresh: { [key: string]: (args: StructNode[], typeMap: Map<str
     "system.collection.getfields":refreshFieldFunc,
     "system.collection.setfield": refreshFieldFunc,
 
+    // field equal
+    "system.collection.fieldequal":async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+        const expName = args[0].getField("name").rawData
+        let exp = typeMap.get(expName)
+        if (exp?.type === SchemaType.Array && exp.array?.element)
+            exp = await getSchema(exp.array.element)
+        if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
+            const result:any = [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", exp.struct.fields, undefined, true) }]
+            const fldName = args[1].getField("value").rawData
+            const field = !isNull(fldName) ? exp.struct.fields.find(f => f.name === fldName) : undefined
+            if (field) {
+                result.push({ type: field.type })
+            }
+            return result
+        }
+        return []
+    },
+
     // fetch context item
     "system.data.getcontextitem": async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
         const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
@@ -652,6 +670,7 @@ onMounted(() => {
         // clear
         for (let i = argsHandlers.length - 1; i >= argsNode.elements.length; i--)
         {
+            changed = true
             clearArgHandler(argsHandlers.pop())
         }
 
@@ -684,6 +703,7 @@ onMounted(() => {
         // clear
         for (let i = expsHandlers.length - 1; i >= expslen; i--)
         {
+            changed = true
             clearExpHandler(expsHandlers.pop())
         }
 

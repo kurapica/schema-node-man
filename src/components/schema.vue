@@ -369,7 +369,7 @@ const confirmNameSpace = async () => {
     if (!res || !namespaceNode.value?.valid) return
 
     if (!namespaceNode.value?.valid) return
-    const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.submitData)))
+    const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.data)))
     const schema = getCachedSchema(data.name)
     
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))

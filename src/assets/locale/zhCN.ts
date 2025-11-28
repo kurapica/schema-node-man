@@ -23,6 +23,7 @@ importLanguage("zhCN", {
     "system.str.tolocale": "本地化字符串",
     "system.str.getlanguages": "获取语言列表",
     "system.str.newguid": "生成新的GUID",
+    "system.str.replace": "替换字符串",
 
     // system.math
     "system.math": "算术运算",
@@ -107,6 +108,7 @@ importLanguage("zhCN", {
     "system.collection.getfielddefault": "获取字段或默认值",
     "system.collection.setfield": "写入字段返回新结构体",
     "system.collection.delfield": "删除字段返回新结构体",
+    "system.collection.fieldequal": "字段等于指定值",
     "system.collection.getfields": "从数组各个元素获取字段构成新数组",
     "system.collection.sum": "对数组进行合计",
     "system.collection.average": "对数组求平均值",
@@ -145,6 +147,7 @@ importLanguage("zhCN", {
     "system.data.getappdatabythreekey": "根据三键值获取应用数据",
     "system.data.getappdatabyfourkey": "根据四键值获取应用数据",
     "system.data.incrappdata": "增量更新应用数据",
+    "system.data.saveappdata": "保存应用数据",
     "system.data.getcontextitem": "获取请求上下文项",
 
     // system.event
@@ -197,6 +200,18 @@ importLanguage("zhCN", {
     "system.workflow.event.appfielddatapayload.target": "应用目标",
     "system.workflow.event.appfielddatapayload.data": "更新数据",
     "system.workflow.event.appfielddatapayload.origin": "原始数据",
+
+    "system.workflow.interaction": "用户交互",
+    "system.workflow.interaction.start": "手动启动工作流",
+    "system.workflow.interaction.payload": "用户交互负载",
+    "system.workflow.interaction.payload.app": "应用",
+    "system.workflow.interaction.payload.target": "应用目标",
+
+    "system.workflow.interaction.form": "表单工作流",
+    "system.workflow.interaction.formpayload": "表单负载",
+    "system.workflow.interaction.formpayload.app": "应用",
+    "system.workflow.interaction.formpayload.target": "应用目标",
+    "system.workflow.interaction.formpayload.data": "交互数据",
 
     "system.workflow.delay": "等待指定秒数",
 
@@ -284,6 +299,7 @@ importLanguage("zhCN", {
     "system.schema.policyscope.schemadelete": "删除数据结构",
     "system.schema.policyscope.dataread": "读取应用数据",
     "system.schema.policyscope.datawrite": "写入应用数据",
+    "system.schema.policyscope.funcexecute": "执行函数",
     "system.schema.policyscope.rowaccess": "行访问过滤",
     "system.schema.policyscope.columnaccess": "列访问过滤",
 
@@ -607,6 +623,8 @@ importLanguage("zhCN", {
     "frontend.view.copyschema": "复制类型定义",
     "frontend.view.movetop": "置顶",
     "frontend.view.workflow": "工作流",
+    "frontend.view.startworkflowfailed": "启动工作流失败",
+    "frontend.view.startworkflowsuccess": "启动工作流成功",
 
     "frontend.catalog": "目录",
     "frontend.catalog.01.intro": "01. 简介",
@@ -701,6 +719,8 @@ importLanguage("zhCN", {
     "frontend.apptarget.app": "应用",
     "frontend.apptarget.target": "目标",
     "frontend.appgetapptargets": "获取目标列表",
+    
+    "frontend.view.manualworkflows": "手动工作流",
 
     //#endregion
 })
