@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, PolicyScope } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -258,6 +258,10 @@ registerSchema([
         return mode === WorkflowMode.Event || mode === WorkflowMode.Interaction
     }),
 
+    newSystemFunc("system.schema.getworkflowpolicyscopes", "system.schema.policyscopes", [], () => {
+        return [ PolicyScope.FuncExecute ]
+    }),
+
     newSystemStruct("system.schema.appworkflownodeschema", [
         { name: "app", type: "system.schema.app", displayOnly: true, invisible: true },
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
@@ -296,11 +300,13 @@ registerSchema([
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "auths", type: "system.schema.policyitems" },
         { name: "nodes", type: "system.schema.appworkflownodeschemas" },
     ],[
         { field: "nodes.previous", type: RelationType.Visible, func: "system.schema.haspreviousworkflow", args: [ { name: "nodes" } ] },
         { field: "nodes.previous.$ele", type: RelationType.WhiteList, func: "system.collection.getfields", args: [ { name: "nodes" }, { value: "name" } ] },
         { field: "nodes.app", type: RelationType.Default, func: "system.conv.assign", args: [ { name: "app" } ] },
+        { field: "auths.scope", type: RelationType.WhiteList, func: "system.schema.getworkflowpolicyscopes", args: []}
     ]),
 
     //#region frontend app schema

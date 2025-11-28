@@ -530,6 +530,7 @@ importLanguage("enUS", {
     "system.schema.appworkflowschema.name": "Name",
     "system.schema.appworkflowschema.display": "Display",
     "system.schema.appworkflowschema.desc": "Description",
+    "system.schema.appworkflowschema.auths": "Authorization",
     "system.schema.appworkflowschema.active": "Active",
     "system.schema.appworkflowschema.nodes": "Workflow Node List",
 
