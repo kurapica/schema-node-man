@@ -149,12 +149,12 @@ onMounted(async () => {
     {
         if (parentNode.config.type === "system.schema.appfieldschema")
         {
-            app = (parentNode as StructNode).getField("app").rawData
+            app = (parentNode as StructNode).getField("app")?.rawData
             break
         }
         else if(parentNode.config.type === "system.schema.appschema")
         {
-            app = (parentNode as StructNode).getField("name").rawData
+            app = (parentNode as StructNode).getField("name")?.rawData
             break
         }
         parentNode = parentNode.parent

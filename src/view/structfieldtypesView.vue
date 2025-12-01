@@ -139,7 +139,7 @@ onMounted(() => {
 
     if (arrayNode.readonly) return
 
-    const base = (arrayNode.parent as StructNode).getField("base")
+    const base = (arrayNode.parent as StructNode).getField("base")!
     let orgbase = ""
     baseChangeHandler = base.subscribe(async () => {
         const currbase = toRaw(base.data)

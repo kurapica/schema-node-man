@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { addAppTarget } from "@/appSchema";
+import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
 import { getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, type ILocaleString, getSchema, WorkflowMode, _LS, getAppSchema } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"

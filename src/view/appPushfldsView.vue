@@ -26,8 +26,8 @@ let funcHandler: Function | undefined = undefined
 
 onMounted(() => {
     const fieldDefine = argsNode.parent as StructNode
-    const returnField = fieldDefine.getField("type")
-    const funcField = fieldDefine.getField("func")
+    const returnField = fieldDefine.getField("type")!
+    const funcField = fieldDefine.getField("func")!
     
     const refresh = async() => {
         let ret = returnField.rawData

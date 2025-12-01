@@ -112,7 +112,7 @@ interface ArgInfo {
 }
 
 const refreshFieldFunc = async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const expName = args[0].getField("name").rawData
+    const expName = args[0].getField("name")!.rawData
     let exp = typeMap.get(expName)
     if (exp?.type === SchemaType.Array && exp.array?.element)
         exp = await getSchema(exp.array.element)
@@ -123,14 +123,14 @@ const refreshFieldFunc = async(args: StructNode[], typeMap: Map<string, INodeSch
 }
 
 const refreshAppDataFetchFunc = async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const app = args[0].getField("value").rawData
+    const app = args[0].getField("value")!.rawData
     const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
     const result: ArgInfo[] = [{}]
 
     if (!appSchema) return result
     result.push({ whiteList: await getFieldAccessWhiteList("", appSchema.fields || [], undefined, true) })
 
-    const fname = args[1].getField("value").rawData
+    const fname = args[1].getField("value")!.rawData
     const field = !isNull(fname) ? appSchema.fields?.find(f => f.name === fname) : undefined
 
     // field not selected
@@ -167,13 +167,13 @@ const specialFuncRefresh: { [key: string]: (args: StructNode[], typeMap: Map<str
 
     // field equal
     "system.collection.fieldequal":async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-        const expName = args[0].getField("name").rawData
+        const expName = args[0].getField("name")!.rawData
         let exp = typeMap.get(expName)
         if (exp?.type === SchemaType.Array && exp.array?.element)
             exp = await getSchema(exp.array.element)
         if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
             const result:any = [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", exp.struct.fields, undefined, true) }]
-            const fldName = args[1].getField("value").rawData
+            const fldName = args[1].getField("value")!.rawData
             const field = !isNull(fldName) ? exp.struct.fields.find(f => f.name === fldName) : undefined
             if (field) {
                 result.push({ type: field.type })
@@ -686,8 +686,8 @@ onMounted(() => {
             const n = e as StructNode
             argsHandlers[i] = {
                 guid: e.guid,
-                name: n.getField("name").subscribe(delayRefreshArgs),
-                type: n.getField("type").subscribe(refreshArgs)
+                name: n.getField("name")!.subscribe(delayRefreshArgs),
+                type: n.getField("type")!.subscribe(refreshArgs)
             }
         })
 
@@ -719,11 +719,11 @@ onMounted(() => {
             const n = e as StructNode
             expsHandlers[i] = {
                 guid: e.guid,
-                name: n.getField("name").subscribe(delayRefresh),
-                return: n.getField("return").subscribe(soonRefresh),
-                type: n.getField("type").subscribe(soonRefresh),
-                func: n.getField("func").subscribe(soonRefresh),
-                args: n.getField("args").subscribe(delayRefresh)
+                name: n.getField("name")!.subscribe(delayRefresh),
+                return: n.getField("return")!.subscribe(soonRefresh),
+                type: n.getField("type")!.subscribe(soonRefresh),
+                func: n.getField("func")!.subscribe(soonRefresh),
+                args: n.getField("args")!.subscribe(delayRefresh)
             }
         })
 

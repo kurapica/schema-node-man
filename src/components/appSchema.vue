@@ -344,9 +344,9 @@ import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { _LS, type IAppSchema, type IAppFieldSchema, SchemaNodeStatus, getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema, type IAppWorkflowSchema, NS_SYSTEM_BOOL } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
-import { appSchemaToJson, clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '@/appSchema'
+import { appSchemaToJson, clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'
 import tryapp from './tryapp.vue'
-import { getSchemaServerProvider } from '@/schemaServerProvider'
+import { getSchemaServerProvider } from '../schemaServerProvider'
 
 //#region View
 

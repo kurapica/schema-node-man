@@ -208,8 +208,8 @@ onMounted(() => {
                     }
                     fieldsHandlers[i] = {
                         guid: ele.guid,
-                        name: ele.getField("name").subscribe(rebuildOptions),
-                        type: ele.getField("type").subscribe(rebuildOptions)
+                        name: ele.getField("name")!.subscribe(rebuildOptions),
+                        type: ele.getField("type")!.subscribe(rebuildOptions)
                     }
                 }
                 for(let i = fieldsHandlers.length - 1; i >= currlen; i--)

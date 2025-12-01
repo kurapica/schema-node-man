@@ -7,7 +7,7 @@
             v-model="prefix"
             :config="{
                 type:'system.schema.app',
-                display: _L['frontend.view.upapp']
+                display: _LS('frontend.view.upapp')
             }"
         ></schema-view>
         <el-input
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { type ScalarNode } from 'schema-node'
+import { _LS, type ScalarNode } from 'schema-node'
 import { schemaView, _L } from 'schema-node-vueview';
 import { ref, onMounted, onUnmounted, reactive, toRaw, watch } from 'vue'
 

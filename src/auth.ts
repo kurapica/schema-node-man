@@ -1,4 +1,3 @@
-import axios from "axios"
 import { setSchemaApiHeaders } from "schema-node"
 import { _LS, deepClone, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerSchema, SchemaLoadState, SchemaType } from "schema-node"
 

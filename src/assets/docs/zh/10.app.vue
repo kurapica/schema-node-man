@@ -10,6 +10,6 @@
 </template>
 
 <script lang="ts" setup>
-import markdown from '@/components/markdown.vue'
-import showandtryapp from '@/components/showandtryapp.vue';
+import markdown from '../../../components/markdown.vue'
+import showandtryapp from '../../../components/showandtryapp.vue';
 </script>

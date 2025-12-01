@@ -43,8 +43,8 @@ class SectionNode {
     constructor(name: string, nodes?: SectionNode[])
     {
         this.label = `frontend.catalog.${name}`
-        this.zh = () => import(`@/assets/docs/zh/${name}.vue`)
-        this.en = () => import(`@/assets/docs/en/${name}.vue`)
+        this.zh = () => import(`../assets/docs/zh/${name}.vue`)
+        this.en = () => import(`../assets/docs/en/${name}.vue`)
         this.com = shallowRef(null)
         this.children = nodes
     }

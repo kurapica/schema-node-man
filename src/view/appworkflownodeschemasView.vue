@@ -31,7 +31,7 @@ const state = reactive({
 })
 
 const appworkflow = arrayNode.parent as StructNode
-const app = appworkflow.getField("app").data as string // always exist
+const app = appworkflow.getField("app")!.data as string // always exist
 
 // workflow data watcher
 interface IWorkflowHandler { guid: string, name: Function, type: Function, args: Function, func: Function, funcArgs: Function, event: Function, payload: Function }
@@ -49,8 +49,8 @@ const workflowHandlers: IWorkflowHandler[] = []
 const spacialFuncHandlers: { [key: string]: Function } = {
     "system.data.getappdatabyonekey": async (args: ArrayNode, payloadTypes: any) => {
         if (args.elements.length < 3) return []
-        const app = (args.elements[0] as StructNode).getField("value").data as string
-        const field = (args.elements[1] as StructNode).getField("value").data as string
+        const app = (args.elements[0] as StructNode).getField("value")?.data as string
+        const field = (args.elements[1] as StructNode).getField("value")?.data as string
         const firstKey = args.elements[2] as StructNode
 
         const appSchema = app ? await getAppSchema(app) : null
@@ -68,8 +68,8 @@ const spacialFuncHandlers: { [key: string]: Function } = {
                 const pkField = eleType.struct.fields.find(f => f.name === fieldType.array!.primary![0])
                 if (pkField)
                 {
-                    const display = firstKey.getField("display")
-                    const type = firstKey.getField("type")
+                    const display = firstKey.getField("display")!
+                    const type = firstKey.getField("type")!
                     const nameField = firstKey.getField("name") as ScalarNode
 
                     display.data = `* ${pkField.display?.key ? _L.value(pkField.display) : pkField.name}`
@@ -83,8 +83,8 @@ const spacialFuncHandlers: { [key: string]: Function } = {
     },
     "system.data.saveappdata": async (args: ArrayNode, payloadTypes: any) => {
         if (args.elements.length < 3) return []
-        const app = (args.elements[0] as StructNode).getField("value").data as string
-        const field = (args.elements[1] as StructNode).getField("value").data as string
+        const app = (args.elements[0] as StructNode).getField("value")?.data as string
+        const field = (args.elements[1] as StructNode).getField("value")?.data as string
         const data = args.elements[2] as StructNode
 
         const appSchema = app ? await getAppSchema(app) : null
@@ -93,8 +93,8 @@ const spacialFuncHandlers: { [key: string]: Function } = {
         const fieldSchema = appSchema.fields?.find(f => f.name === field)
         if (!fieldSchema) return []
         
-        const display = data.getField("display")
-        const type = data.getField("type")
+        const display = data.getField("display")!
+        const type = data.getField("type")!
         const nameField = data.getField("name") as ScalarNode
 
         display.data = `* ${fieldSchema.display?.key ? _L.value(fieldSchema.display) : fieldSchema.name}`
@@ -138,7 +138,7 @@ const refreshWorkflows = async (from: string) => {
         if(workflowType.workflow?.mode === WorkflowMode.Function)
         {
             // function workflow
-            const func = n.getField("func").data as string
+            const func = n.getField("func")?.data as string
             const funcSchema = func ? await getSchema(func) : undefined
             if (funcSchema?.type === SchemaType.Func)
             {
@@ -167,8 +167,8 @@ const refreshWorkflows = async (from: string) => {
                 for (let j = 0; j < len; j++){
                     const carg = funcSchema.func!.args![j]
                     const farg = funcArgsField.elements[j] as StructNode
-                    const display = farg.getField("display")
-                    const type = farg.getField("type")
+                    const display = farg.getField("display")!
+                    const type = farg.getField("type")!
                     const nameField = farg.getField("name") as ScalarNode
                     let ctype = carg.type
 
@@ -291,8 +291,8 @@ const refreshWorkflows = async (from: string) => {
             for (let j = 0; j < len; j++){
                 const carg = workflowType.workflow.args[j]
                 const farg = argsField.elements[j] as StructNode
-                const display = farg.getField("display")
-                const type = farg.getField("type")
+                const display = farg.getField("display")!
+                const type = farg.getField("type")!
                 const nameField = farg.getField("name") as ScalarNode
 
                 display.data = `${carg.nullable ? '? ' : '* '}${carg.name}`
@@ -315,11 +315,11 @@ const refreshWorkflows = async (from: string) => {
 
         // collect payload types
         if (name && payloadField.data)
-            payloadTypes.push({ name: name as string, display: n.getField("display").data as ILocaleString, type: payloadField.data as string })
+            payloadTypes.push({ name: name as string, display: n.getField("display")?.data as ILocaleString, type: payloadField.data as string })
 
         // fork && fork key
         const forkKeyField = n.getField("forkKey") as ScalarNode
-        if (n.getField("fork").data === true && payloadField.data)
+        if (n.getField("fork")!.data === true && payloadField.data)
         {
             const paySchema = await getSchema(payloadField.data as string)
             if (paySchema?.type === SchemaType.Struct && paySchema.struct?.fields)
@@ -329,7 +329,7 @@ const refreshWorkflows = async (from: string) => {
             }
             else if(paySchema?.type === SchemaType.Scalar || paySchema?.type === SchemaType.Enum)
             {
-                forkKeyField.rule.whiteList = await getFieldAccessWhiteList(NS_SYSTEM_STRING, [{ name: NODE_SELF, type: paySchema.name, display: n.getField("display").data as ILocaleString }])
+                forkKeyField.rule.whiteList = await getFieldAccessWhiteList(NS_SYSTEM_STRING, [{ name: NODE_SELF, type: paySchema.name, display: n.getField("display")?.data as ILocaleString }])
                 forkKeyField.validation().then(() => forkKeyField.notifyState())
                 continue
             }
@@ -373,13 +373,13 @@ let handler: Function | undefined = arrayNode.subscribe((action:string) => {
         const n = e as StructNode
         workflowHandlers[i] = {
             guid: e.guid,
-            name: n.getField("name").subscribe(() => soonRefresh("name")),
-            type: n.getField("type").subscribe(() => soonRefresh("type")),
-            args: n.getField("args").subscribe(() => soonRefresh("args")),
-            func: n.getField("func").subscribe(() => soonRefresh("func")),
-            funcArgs: n.getField("funcArgs").subscribe(() => soonRefresh("funcArgs")),
-            event: n.getField("event").subscribe(() => soonRefresh("event")),
-            payload: n.getField("payload").subscribe(() => soonRefresh("payload"))
+            name: n.getField("name")!.subscribe(() => soonRefresh("name")),
+            type: n.getField("type")!.subscribe(() => soonRefresh("type")),
+            args: n.getField("args")!.subscribe(() => soonRefresh("args")),
+            func: n.getField("func")!.subscribe(() => soonRefresh("func")),
+            funcArgs: n.getField("funcArgs")!.subscribe(() => soonRefresh("funcArgs")),
+            event: n.getField("event")!.subscribe(() => soonRefresh("event")),
+            payload: n.getField("payload")!.subscribe(() => soonRefresh("payload"))
         }
     })
 

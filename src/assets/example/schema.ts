@@ -1,5 +1,5 @@
 import {_LS, importLanguage, registerAppSchema, registerSchema, SchemaLoadState, type IStructScalarFieldConfig } from "schema-node"
-import waterFallView from "@/view/waterFallView.vue"
+import waterFallView from "../../view/waterFallView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
 registerSchema([

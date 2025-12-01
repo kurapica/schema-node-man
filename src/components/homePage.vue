@@ -35,8 +35,8 @@ import { ref } from "vue"
 import NavHeader from "./navHeader.vue"
 import { setLanguage, getLanguage, StructNode } from "schema-node"
 import { _L } from "schema-node-vueview"
-import { getSchemaSite, setSchemaSite } from "@/schemaServerProvider"
-import { getFrontendAuth, saveFrontendAuth } from "@/auth"
+import { getSchemaSite, setSchemaSite } from "../schemaServerProvider"
+import { getFrontendAuth, saveFrontendAuth } from "../auth"
 import { schemaView } from "schema-node-vueview"
 
 const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'

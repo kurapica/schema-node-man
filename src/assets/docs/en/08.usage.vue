@@ -131,5 +131,5 @@
 </template>
 
 <script setup lang="ts">
-import markdown from '@/components/markdown.vue'
+import markdown from '../../../components/markdown.vue'
 </script>

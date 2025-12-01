@@ -4,7 +4,7 @@
             plain-text="left"
             :config="{
                 type: type,
-                display: _L['frontend.view.tryit']
+                display: _LS('frontend.view.tryit')
             }"
             in-form="expandall"
             v-model="data"
@@ -20,7 +20,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ElForm } from "element-plus";
+import { _LS } from "schema-node"
+import type { ElForm } from "element-plus"
 import { schemaView, _L } from "schema-node-vueview"
 import { ref } from "vue"
 

@@ -21,9 +21,9 @@ let funcHandler: Function | undefined = undefined
 
 onMounted(() => {
     const relationInfo = argsNode.parent as StructNode
-    const typeField = relationInfo.getField("type")
-    const returnField = relationInfo.getField("return")
-    const funcField = relationInfo.getField("func")
+    const typeField = relationInfo.getField("type")!
+    const returnField = relationInfo.getField("return")!
+    const funcField = relationInfo.getField("func")!
     
     const refresh = async() => {
         const type = typeField.rawData
@@ -58,13 +58,13 @@ onMounted(() => {
             const aschema = await getSchema(args[i].type, generic)
             if (matchEntrys)
             {
-                row.getField("type").data = NS_SYSTEM_ARRAY
+                row.getField("type")!.data = NS_SYSTEM_ARRAY
             }
             else 
             {
-                row.getField("type").data = aschema?.name || NS_SYSTEM_STRING
+                row.getField("type")!!.data = aschema?.name || NS_SYSTEM_STRING
             }
-            if (row.getField("label")) row.getField("label").data = args[i].name
+            if (row.getField("label")) row.getField("label")!.data = args[i].name
         }
     }
     

@@ -13,5 +13,5 @@
 </template>
 
 <script lang="ts" setup>
-import markdown from '@/components/markdown.vue'
+import markdown from '../../../components/markdown.vue'
 </script>

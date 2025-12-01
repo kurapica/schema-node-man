@@ -8,9 +8,9 @@
         <template #operator="{ row, index }">
             <template v-if="!readonly">
                 <a href="javascript:void(0)" v-if="!isflags && index" @click="arrayNode.swapRow(index, index - 1)">{{ _L["system.schema.enumschema.moveup"] }}</a>
-                <a href="javascript:void(0)" v-if="customEnum || !(row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="arrayNode.delRows(index)">{{ _L["DEL"] }}</a>
+                <a href="javascript:void(0)" v-if="customEnum || !(row as StructNode).getField('value')!.readonly" style="padding-left: 1rem;" @click="arrayNode.delRows(index)">{{ _L["DEL"] }}</a>
             </template>
-            <a href="javascript:void(0)" v-if="cascade.length > 1 && (row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[1] || "system.schema.enumschema.downlevel") }}</a>
+            <a href="javascript:void(0)" v-if="cascade.length > 1 && (row as StructNode).getField('value')!.readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[1] || "system.schema.enumschema.downlevel") }}</a>
         </template>
     </table-view>
 
@@ -30,9 +30,9 @@
                     <template #operator="{ row, index }">
                         <template v-if="!readonly">
                             <a href="javascript:void(0)" v-if="index" @click="swapSubListRow(index, index - 1)">{{ _L["system.schema.enumschema.moveup"] }}</a>
-                            <a href="javascript:void(0)" v-if="customEnum || !(row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="delSubListRow(index)">{{ _L["DEL"] }}</a>
+                            <a href="javascript:void(0)" v-if="customEnum || !(row as StructNode).getField('value')!.readonly" style="padding-left: 1rem;" @click="delSubListRow(index)">{{ _L["DEL"] }}</a>
                         </template>
-                        <a href="javascript:void(0)" v-if="(cascade.length > subListStack.length + 1) && (row as StructNode).getField('value').readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[subListStack.length + 1] || "system.schema.enumschema.downlevel") }}</a>
+                        <a href="javascript:void(0)" v-if="(cascade.length > subListStack.length + 1) && (row as StructNode).getField('value')!.readonly" style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[subListStack.length + 1] || "system.schema.enumschema.downlevel") }}</a>
                     </template>
                 </table-view>
             </el-main>
@@ -49,8 +49,8 @@
 </template>
 
 <script setup lang="ts">
-import { saveStorageSchema } from '@/schema';
-import { getSchemaServerProvider } from '@/schemaServerProvider';
+import { saveStorageSchema } from '../schema';
+import { getSchemaServerProvider } from '../schemaServerProvider';
 import { ElMessage } from 'element-plus';
 import { ArrayNode, EnumValueType, getCachedSchema, getEnumSubList, jsonClone, saveEnumSubList, SchemaLoadState, type StructNode } from 'schema-node'
 import { _L, tableView } from 'schema-node-vueview'
@@ -65,8 +65,8 @@ let cascadeWatcher: Function | undefined = undefined
 let valueFieldHandler: Function | undefined = undefined
 
 const enumdefine = arrayNode.parent as StructNode
-const namefield = (enumdefine.parent as StructNode).getField("name")
-const valueTypefield = enumdefine.getField("type")
+const namefield = (enumdefine.parent as StructNode).getField("name")!
+const valueTypefield = enumdefine.getField("type")!
 
 let customEnum = false
 if (namefield.readonly)
@@ -74,7 +74,7 @@ if (namefield.readonly)
     const schema = getCachedSchema(namefield.data)
     customEnum = !(schema?.loadState && (schema.loadState & (SchemaLoadState.Server | SchemaLoadState.System)))
 
-    const cascadeField = enumdefine.getField("cascade")
+    const cascadeField = enumdefine.getField("cascade")!
     cascadeWatcher = cascadeField.subscribe(() => {
         console.log("cascasde", cascadeField)
         cascade.value = cascadeField.data.slice(0)
@@ -129,7 +129,7 @@ const saveSubList = async () => {
         const res = await serverProvider.saveEnumSubList(namefield.data, stack.value, data)
         if (!res)
         {
-            ElMessage.error(_L["frontend.view.savefailed"])
+            ElMessage.error(_L.value["frontend.view.savefailed"])
             return
         }
     }

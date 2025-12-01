@@ -6,13 +6,13 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import 'element-plus/dist/index.css'
 import { routes } from './routes'
 import Markdown from './components/markdown.vue'
-import "@/assets/locale/zhCN"
-import "@/assets/locale/enUS"
-import "@/auth"
+import "./assets/locale/zhCN"
+import "./assets/locale/enUS"
+import "./auth"
 import { setLanguage } from 'schema-node'
-import { reloadStorageSchemas } from '@/schema'
+import { reloadStorageSchemas } from './schema'
 import { reloadStorageAppSchemas } from './appSchema'
-import "@/assets/example/schema"
+import "./assets/example/schema"
 import { setSchemaSite } from './schemaServerProvider'
 
 const app = createApp(App)

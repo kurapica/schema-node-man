@@ -54,7 +54,7 @@
                 <span>&lt;</span>
                 <template v-for="(genNode, index) in state.generic" :key="genNode.guid">
                     <schema-view
-                        :node="genNode"
+                        :node="genNode as any"
                         :style="{width: `${Math.floor(98 / (state.generic.length))}%`}"
                         no-generic
                         v-bind="$attrs"
@@ -100,10 +100,10 @@
 </template>
 
 <script lang="ts" setup>
-import { saveStorageSchema } from "@/schema"
-import { getSchemaServerProvider } from "@/schemaServerProvider"
+import { saveStorageSchema } from "../schema"
+import { getSchemaServerProvider } from "../schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, PolicyScope, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema } from "schema-node"
+import { ExpressionType, PolicyScope, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema, _LS } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -500,8 +500,8 @@ onMounted(() => {
     else if (parent instanceof StructNode && parent.getField("type")?.config?.type === "system.schema.relationtype")
     {
         const typeNode = parent.getField("type")
-        relationtypeHandler = typeNode.subscribe(() => {
-            enableEntries.value = typeNode.data == RelationType.WhiteList
+        relationtypeHandler = typeNode!.subscribe(() => {
+            enableEntries.value = typeNode?.data == RelationType.WhiteList
         })
     }
 
@@ -528,8 +528,8 @@ onMounted(() => {
 
                     if (fieldNode)
                     {
-                        const app = (fieldNode as StructNode).getField("app").data
-                        const fld = (fieldNode as StructNode).getField("name").data
+                        const app = (fieldNode as StructNode).getField("app")!.data
+                        const fld = (fieldNode as StructNode).getField("name")!.data
                         if (app && fld)
                         {
                             const appSchema = await getAppSchema(app)
@@ -584,7 +584,7 @@ onMounted(() => {
 
                 while(genericNodes.length < genTypes.length)
                 {
-                    const node = new ScalarNode({ type: schema?.type === SchemaType.Array ? "system.schema.arrayeletype" : "system.schema.valuetype", display: _L.value("[GENERIC]") }, geneiricTypes[genericNodes.length] || "")
+                    const node = new ScalarNode({ type: schema?.type === SchemaType.Array ? "system.schema.arrayeletype" : "system.schema.valuetype", display: _LS("[GENERIC]") }, geneiricTypes[genericNodes.length] || "")
                     node.subscribe(() => setData(state.data))
                     node.rule.disable = state.readonly || state.disable || props.disabled
                     genericNodes.push(node)
