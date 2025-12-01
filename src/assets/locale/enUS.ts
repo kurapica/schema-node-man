@@ -523,6 +523,8 @@ importLanguage("enUS", {
     "system.schema.appworkflownodeschema.event": "Event",
     "system.schema.appworkflownodeschema.fork": "Fork",
     "system.schema.appworkflownodeschema.forkKey": "Fork Key",
+    "system.schema.appworkflownodeschema.unCancelable": "Un-cancelable",
+    "system.schema.appworkflownodeschema.cancelPre": "Cancel Previous Fork Branches",
     "system.schema.appworkflownodeschema.state": "State",
 
     "system.schema.appworkflowschema": "App Workflow Definition",
@@ -549,12 +551,6 @@ importLanguage("enUS", {
     "system.schema.genarraydisplay": "Generate Array Display Text",
     "system.schema.getscalarorenumtype": "Get Scalar or Enum Type",
     "system.schema.gettypedisplayorname": "Get Type Display or Name",
-
-    "system.schema.appaccess": "App Data Access",
-    "system.schema.appaccess.app": "Application",
-    "system.schema.appaccess.target": "Target",
-    "system.schema.appaccess.field": "Field",
-    "system.schema.appaccess.call": "Call Function",
 
     //#endregion
 

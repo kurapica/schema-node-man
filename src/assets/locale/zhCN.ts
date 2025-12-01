@@ -523,6 +523,8 @@ importLanguage("zhCN", {
     "system.schema.appworkflownodeschema.event": "事件",
     "system.schema.appworkflownodeschema.fork": "分叉",
     "system.schema.appworkflownodeschema.forkKey": "分叉键",
+    "system.schema.appworkflownodeschema.unCancelable": "不可取消",
+    "system.schema.appworkflownodeschema.cancelPre": "取消同分叉键的分支",
     "system.schema.appworkflownodeschema.state": "状态",
 
     "system.schema.appworkflowschema": "应用工作流定义",
@@ -549,12 +551,6 @@ importLanguage("zhCN", {
     "system.schema.genarraydisplay": "生成数组显示文本",
     "system.schema.getscalarorenumtype": "获取基础数据类型或枚举类型",
     "system.schema.gettypedisplayorname": "获取类型显示名或名称",
-
-    "system.schema.appaccess": "应用访问",
-    "system.schema.appaccess.app": "应用",
-    "system.schema.appaccess.target": "应用目标",
-    "system.schema.appaccess.field": "应用字段",
-    "system.schema.appaccess.call": "调用函数",
 
     //#endregion
 
