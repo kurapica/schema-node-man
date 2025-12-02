@@ -24,6 +24,7 @@ importLanguage("zhCN", {
     "system.str.getlanguages": "获取语言列表",
     "system.str.newguid": "生成新的GUID",
     "system.str.replace": "替换字符串",
+    "system.str.rectifylocale": "矫正本地化字符串",
 
     // system.math
     "system.math": "算术运算",
@@ -508,6 +509,7 @@ importLanguage("zhCN", {
     "system.schema.workflowstatus.running": "执行中",
     "system.schema.workflowstatus.done": "完成",
     "system.schema.workflowstatus.error": "错误",
+    "system.schema.workflowstatus.terminated": "已终止",
 
     "system.schema.appworkflownodeschema": "应用工作流节点定义",
     "system.schema.appworkflownodeschema.name": "名称",

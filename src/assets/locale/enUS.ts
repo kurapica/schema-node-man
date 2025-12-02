@@ -24,6 +24,7 @@ importLanguage("enUS", {
     "system.str.getlanguages": "Get Language List",
     "system.str.newguid": "Generate New GUID",
     "system.str.replace": "Replace String",
+    "system.str.rectifylocale": "Rectify Locale String",
     
     // system.math
     "system.math": "Math Operations",
@@ -508,6 +509,7 @@ importLanguage("enUS", {
     "system.schema.workflowstatus.running": "Running",
     "system.schema.workflowstatus.done": "Done",
     "system.schema.workflowstatus.error": "Error",
+    "system.schema.workflowstatus.terminated": "Terminated",
 
     "system.schema.appworkflownodeschema": "App Workflow Node Definition",
     "system.schema.appworkflownodeschema.name": "Name",

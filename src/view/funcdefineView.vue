@@ -407,6 +407,7 @@ const refresh = async () => {
     let lastMatch = false
     let isStructRet = retSchema?.type === SchemaType.Struct && retSchema.struct?.fields.length
     const expcount = expsNode.elements.length
+    const structFields = retSchema?.struct?.fields.map(f => f) || []
     if (retSchema && expcount)
     {
         const data = expsNode.elements[expcount - 1].rawData
@@ -419,14 +420,40 @@ const refresh = async () => {
     for (let i = 0; i < expcount; i++) {
         const e = expsNode.elements[i] as StructNode
         const { name, type, func } = e.rawData
-        const ret = e.rawData.return
+        let ret = e.rawData.return
 
+        // struct field support
+        if (isStructRet)
+        {
+            const nameNode = e.getField("name") as ScalarNode
+            if (name){
+                const index = structFields.findIndex((f:any) => f.name === name)
+                if (index >= 0)
+                {
+                    const fld = structFields[index]
+                    structFields.splice(index, 1)
+                    if (!ret){
+                        ret = fld.type
+                        e.getField("return")!.data = ret
+                    }
+                }
+                nameNode.rule.whiteList = undefined
+                nameNode.notifyState()
+            }
+            else
+            {
+                nameNode.rule.asSuggest = true
+                nameNode.rule.whiteList = structFields.map((f:any) => ({ value: f.name, label: _L.value(f.display || f.name) }))
+                nameNode.notifyState()
+            }
+        }
+        
         let funcret = ret
         let arrayType = ""
         let arrayEle = ""
         let isarray = type !== ExpressionType.Call
         let arrIdx = -1
-        
+
         switch (type) {
             case ExpressionType.Filter:
                 funcret = NS_SYSTEM_BOOL
