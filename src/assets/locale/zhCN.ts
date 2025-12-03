@@ -542,6 +542,11 @@ importLanguage("zhCN", {
     "system.schema.enumintvalueinfo": "枚举整型字段信息",
     "system.schema.workflowcontextsnapshot": "工作流上下文快照",
     "system.schema.workflowsnapshot": "工作流快照",
+
+    "system.schema.access": "服务访问",
+    "system.schema.access.app": "访问应用",
+    "system.schema.access.target": "访问目标",
+    "system.schema.access.field": "访问字段",
    
     "system.schema.appgetfieldtype": "获取应用字段类型",
     "system.schema.appgetsourceappblacklist": "获取应用字段引用应用黑名单",

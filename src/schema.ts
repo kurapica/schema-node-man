@@ -701,6 +701,10 @@ registerSchema([
         { name: "elementType", type: "system.schema.valuetype" }
     ], (elementType: string) => `{[LIST.PREFIX]}{@${elementType}}{[LIST.SUFFIX]}`),
 
+    newSystemFunc("system.schema.genarrayname", NS_SYSTEM_STRING, [
+        { name: "elementType", type: "system.schema.valuetype" }
+    ], (elementType: string) => `${elementType.split('.').pop()}s`),
+
     newSystemStruct("system.schema.nodeschema", [
         { name: "name", type: "system.schema.namespaceinput", require: true, immutable: true },
         { name: "type", type: "system.schema.schematype", require: true, immutable: true, default: SchemaType.Namespace, blackList: [SchemaType.Json] },
@@ -715,6 +719,7 @@ registerSchema([
         { name: "workflow", type: "system.schema.workflowschema" },
         { name: "policy", type: "system.schema.policyschema" },
     ], [
+        { field: "name", type: RelationType.Default, func: "system.schema.genarrayname", args: [ { "name": "array.element" } ] },
         { field: "scalar", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Scalar } ] },
         { field: "enum", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Enum } ] },
         { field: "struct", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "type" }, { value: SchemaType.Struct } ] },

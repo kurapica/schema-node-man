@@ -19,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+import { isNull } from 'schema-node';
 import { type ScalarNode, _LS } from 'schema-node'
 import { schemaView, _L } from 'schema-node-vueview';
 import { ref, onMounted, onUnmounted, reactive, toRaw, watch } from 'vue'
@@ -62,6 +63,10 @@ onMounted(() => {
         state.disable = scalarNode.rule.disable
         state.require = scalarNode.require
         state.readonly = scalarNode.readonly
+        const dft = scalarNode.rule.default
+        if (isNull(name.value) && !isNull(dft)) {
+            name.value = dft
+        }
     }, true)
 })
 

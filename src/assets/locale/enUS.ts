@@ -543,6 +543,11 @@ importLanguage("enUS", {
     "system.schema.workflowcontextsnapshot": "Workflow Context Snapshot",
     "system.schema.workflowsnapshot": "Workflow Snapshot",
 
+    "system.schema.access": "Service Access",
+    "system.schema.access.app": "Access App",
+    "system.schema.access.target": "Access Target",
+    "system.schema.access.field": "Access Field",
+   
     "system.schema.appgetfieldtype": "Get App Field Type",
     "system.schema.appgetsourceappblacklist": "Get App Field Reference App Blacklist",
     "system.schema.appgetsourceappfldinfo": "Get App Field Reference App Field Info",

@@ -294,6 +294,8 @@ registerSchema([
         { field: "type", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.workflow" } ] },
         { field: "event", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.event" } ] },
         { field: "forkKey", type: RelationType.Visible, func: "system.conv.assign", args: [ { name: "fork" } ] },
+        { field: "cancelPre", type: RelationType.Visible, func: "system.conv.assign", args: [ { name: "fork" } ] },
+        { field: "unCancelable", type: RelationType.Invisible, func: "system.conv.assign", args: [ { name: "fork" } ] },
     ]),
     newSystemArray("system.schema.appworkflownodeschemas", "system.schema.appworkflownodeschema", "name"),
 
