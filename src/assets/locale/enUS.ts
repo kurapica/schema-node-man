@@ -695,6 +695,7 @@ importLanguage("enUS", {
 
     "system.schema.app": "App",
     "system.schema.appfield": "App Field",
+    "system.schema.apptarget": "App Target",
     "system.schema.appaccessfld": "Access Field",
     "system.schema.appinput": "App(Input)",
     "system.schema.apppushfld": "Push Field",

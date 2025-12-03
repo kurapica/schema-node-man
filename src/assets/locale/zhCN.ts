@@ -696,6 +696,7 @@ importLanguage("zhCN", {
 
     "system.schema.app": "应用",
     "system.schema.appfield": "应用字段",
+    "system.schema.apptarget": "应用目标",
     "system.schema.appaccessfld": "访问字段",
     "system.schema.appinput": "应用名(输入用)",
     "system.schema.apppushfld": "推送用字段",
