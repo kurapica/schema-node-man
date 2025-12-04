@@ -445,17 +445,27 @@ const copySchema = async () => {
     schema.name = ""
     localStorage["schema_new_namespace"] = state.namespace
 
+    const ret = schema.func?.return
+    if (ret) schema.func!.return = ""
+
     namespaceNode.value = new StructNode({
         type: "system.schema.nodeschema",
     }, jsonClone(schema))
 
     namespaceNode.value.getField("name")!.data = name
-
     if (namesapceWatchHandler) namesapceWatchHandler()
     namesapceWatchHandler = namespaceNode.value.subscribe(() => {
         operation.value = _L.value["frontend.view.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
     }, true)
     showNamespaceEditor.value = true
+
+    if (schema.type === SchemaType.Func && ret)
+    {
+        const relationInfo = (namespaceNode.value.getField("func")! as StructNode)
+        const returnField = relationInfo.getField("return")!
+        returnField.data = ret
+    }
+
 }
 
 //#endregion

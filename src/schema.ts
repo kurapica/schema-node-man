@@ -470,11 +470,12 @@ registerSchema([
     newSystemStruct("system.schema.structfieldrelation", [
         { name: "field", type: "system.schema.reltarfield", require: true },
         { name: "fieldType", type : "system.schema.valuetype", displayOnly: true, invisible: true },
-        { name: "return", type: "system.schema.valuetype", displayOnly: true, invisible: true },
         { name: "type", type: "system.schema.relationtype", require: true },
+        { name: "return", type: "system.schema.valuetype", displayOnly: true },
         { name: "func", type: "system.schema.functype", require: true },
         { name: "args", type: "system.schema.structfldfuncargs" },
     ], [
+        { field: "return", type: RelationType.Visible, func: "system.logic.notempty", args: [ { name: "type" } ] },
         { field: "type", type: RelationType.WhiteList, func: "system.schema.getrelationwhitelist", args: [ { name: "fieldType" } ] },
         { field: "return", type: RelationType.Default, func: "system.schema.getrelationfuncreturn", args: [ { name: "fieldType" }, { name: "type" } ] },
         { field: "func", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "return" } ] }

@@ -580,7 +580,7 @@ import appInputView from "./view/appInputView.vue"
 import appsrcfldView from "./view/appSrcfldView.vue"
 import appaccessfldView from "./view/appAccessfldView.vue"
 import appPushfldsView from "./view/appPushfldsView.vue"
-import structfldrelationinfosView from "./view/structfldrelationinfosView.vue"
+import apprelationinfosView from "./view/apprelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
@@ -591,7 +591,7 @@ regSchemaTypeView("system.schema.appfield", appsrcfldView)
 regSchemaTypeView("system.schema.appaccessfld", appaccessfldView)
 regSchemaTypeView("system.schema.apppushfld", appaccessfldView)
 regSchemaTypeView("system.schema.apppushflds", appPushfldsView)
-regSchemaTypeView("system.schema.appfieldrelations", structfldrelationinfosView)
+regSchemaTypeView("system.schema.appfieldrelations", apprelationinfosView)
 regSchemaTypeView("system.schema.appfieldvalargs", structfldfuncargsView)
 regSchemaTypeView("system.schema.appworkflownodeschemas", appworkflownodeschemasView)
 //#endregion
