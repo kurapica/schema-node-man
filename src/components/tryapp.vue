@@ -131,7 +131,8 @@ const loadData = async() => {
             app: props.app,
             target: target,
             fields: [],
-            take: 5
+            take: 5,
+            schemaOnly: true
         })
         const appSchema = await getAppSchema(props.app)
         const manualflows: { workflow: string, display: ILocaleString }[] = []
@@ -297,7 +298,8 @@ onMounted(async() => {
     appNode.value = await getAppNode({
         app: props.app,
         target: "",
-        fields: []
+        fields: [],
+        schemaOnly: true
     })
     showref.value = appNode.value?.refInputFields.length ? true : false
     showoutput.value = appNode.value?.pushFields.length ? true : false

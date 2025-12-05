@@ -122,7 +122,10 @@ importLanguage("zhCN", {
 
     // system.logic
     "system.logic": "逻辑操作",
-    "system.logic.ifret": "条件返回",
+    "system.logic.ifret": "满足条件返回",
+    "system.logic.ifnot": "不满足条件返回",
+    "system.logic.ifnull": "值为null返回",
+    "system.logic.ifempty": "值为空返回",
     "system.logic.andalso": "同时满足",
     "system.logic.between": "在范围内",
     "system.logic.cond": "条件选择",

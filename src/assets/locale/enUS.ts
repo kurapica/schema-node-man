@@ -122,7 +122,10 @@ importLanguage("enUS", {
     
     // system.logic
     "system.logic": "Logical Operations",
-    "system.logic.ifret": "Conditional Return",
+    "system.logic.ifret": "If match return",
+    "system.logic.ifnot": "Not match return",
+    "system.logic.ifnull": "If null return",
+    "system.logic.ifempty": "If empty return",
     "system.logic.andalso": "And Also",
     "system.logic.between": "Between",
     "system.logic.cond": "Conditional",

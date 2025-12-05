@@ -427,10 +427,8 @@ const refresh = async () => {
                 if (exp) {
                     ctype = exp.schema
                     generic[gidx] = exp.schema.name
-                    if (isarray && arrIdx < 0)
-                    {
-                        if (exp.schema.type === SchemaType.Array && exp.schema.array?.element)
-                        {
+                    if (isarray && arrIdx < 0) {
+                        if (exp.schema.type === SchemaType.Array && exp.schema.array?.element) {
                             ctype = await getSchema(exp.schema.array.element)
                             arrIdx = k
                             generic[gidx] = ctype!.name
@@ -441,16 +439,14 @@ const refresh = async () => {
                     ctype = await getSchema(generic[gidx])
                 }
             }
-            else if (isarray && arrIdx < 0 && exp && ctype)
-            {
-                if (exp.schema.type === SchemaType.Array && exp.schema.array?.element && await isSchemaCanBeUseAs(exp.schema.array.element, ctype!.name))
-                {
+            else if (isarray && arrIdx < 0 && exp && ctype) {
+                if (exp.schema.type === SchemaType.Array && exp.schema.array?.element && await isSchemaCanBeUseAs(exp.schema.array.element, ctype!.name)) {
                     arrIdx = k
                 }
             }
 
             // type value
-            type.data = ctype?.name || NS_SYSTEM_STRING
+            type.data = ctype?.name || "system.schema.anyvalue"
 
             // name white list
             const whitelist: string[] = []
@@ -459,8 +455,7 @@ const refresh = async () => {
                     if (await isSchemaCanBeUseAs(args[j].schema.name, ctype.name)) {
                         whitelist.push(args[j].name)
                     }
-                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && args[j].schema.array?.element && await isSchemaCanBeUseAs(args[j].schema.array!.element, ctype.name))
-                    {
+                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && args[j].schema.array?.element && await isSchemaCanBeUseAs(args[j].schema.array!.element, ctype.name)) {
                         whitelist.push(args[j].name)
                     }
                 }
@@ -468,8 +463,7 @@ const refresh = async () => {
                     if (await isSchemaCanBeUseAs(exps[j].schema.name, ctype.name)) {
                         whitelist.push(exps[j].name)
                     }
-                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && exps[j].schema.array?.element && await isSchemaCanBeUseAs(exps[j].schema.array!.element, ctype.name))
-                    {
+                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && exps[j].schema.array?.element && await isSchemaCanBeUseAs(exps[j].schema.array!.element, ctype.name)) {
                         whitelist.push(exps[j].name)
                     }
                 }
