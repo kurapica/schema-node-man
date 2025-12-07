@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, PolicyScope } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -11,7 +11,7 @@ registerSchema([
         { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
         { name: "type", type: "system.schema.valuetype", invisible: false, displayOnly: true },
         { name: "name", type: "system.schema.appaccessfld" },
-        { name: "value", type: "system.schema.anyvalue" },
+        { name: "value", type: NS_SYSTEM_OBJECT },
     ], [
         { field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ] },
         { field: "name", type: RelationType.Disable, func: "system.logic.notempty", args: [ { name: "value" } ] },
@@ -227,7 +227,7 @@ registerSchema([
     ], async (type: string) => {
         if (!type) return null
         const schema = await getSchema(type)
-        return schema?.workflow?.state || "system.schema.anyvalue"
+        return schema?.workflow?.state || NS_SYSTEM_OBJECT
     }),
 
     newSystemFunc("system.schema.hasworkflowstatetype", NS_SYSTEM_BOOL, [
@@ -275,7 +275,7 @@ registerSchema([
         { name: "args", type: "system.schema.funccallargs" },
         { name: "previous", type: "system.schema.appworkflows" },
         { name: "event", type: "system.schema.eventtype" },
-        { name: "state", type: "system.schema.anyvalue" },
+        { name: "state", type: NS_SYSTEM_OBJECT },
         { name: "func", type: "system.schema.functype" },
         { name: "payload", type: "system.schema.valuetype", require: true },
         { name: "funcArgs", type: "system.schema.funccallargs" },

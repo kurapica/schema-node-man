@@ -2,6 +2,7 @@ import { importLanguage } from "schema-node"
 
 importLanguage("enUS", {
     //#region System
+    "system.object": "Object",
 
     // system.conv
     "system.conv": "Number Conversion",
@@ -237,7 +238,6 @@ importLanguage("enUS", {
     "system.schema.arrayeletype": "Non-array Data Type",
     "system.schema.valuetype": "Any Data Type",
     "system.schema.varname": "Field Name",
-    "system.schema.anyvalue": "Any Value",
     "system.schema.anytype": "Any Type",
 
     "system.schema.schematype": "Data Type",

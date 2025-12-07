@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode } from 'schema-node'
+import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
@@ -152,21 +152,20 @@ const doCaclc = async () => {
             if (exp.args?.length) {
                 let value = null
                 for (let j = 0; j < exp.args.length; j++) {
+                    const arg = fargs.length > j ? fargs[j] : fargs[fargs.length - 1]
                     if (exp.args[j].name) {
                         value = values[exp.args[j].name!]
 
                         // check array
-                        let atype = fargs[j].type
+                        let atype = arg.type
                         if (/^[tT]\d*$/.test(atype))
                         {
                             const gidx = atype.length > 1 ? parseInt(atype.substring(1)) - 1 : 0
                             atype = (Array.isArray(funcinfo?.func?.generic) ? funcinfo.func.generic[gidx] : gidx === 0 ? funcinfo?.func?.generic : "") || ""
                         }
 
-                        if (isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!atype || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], atype)))
-                        {
+                        if (!arg.params && isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!atype || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], atype)))
                             arrIdx = j
-                        }
                     }
                     else {
                         value = exp.args[j].value
@@ -388,7 +387,22 @@ const refresh = async () => {
         // args
         const fargs = e.getField("args") as ArrayNode
         const finfo = func ? await getSchema(func) : null
-        const farglen = finfo?.func?.args.length || 0
+        let rarglen = finfo?.func?.args.length || 0
+        let farglen = rarglen
+
+        // params support
+        if (farglen && finfo?.func?.args[farglen - 1].params){
+            for (let i = fargs.elements.length; i >= farglen; i--) {
+                const ele = fargs.elements[i - 1] as StructNode
+                const { name, value } = ele.rawData
+                if (!isNull(name) || !isNull(value))
+                {
+                    farglen = i + 1
+                    break
+                }
+            }
+        }
+        
         while (fargs.elements.length < farglen) fargs.addRow()
         if (fargs.elements.length > farglen) fargs.delRows(farglen, fargs.elements.length - farglen)
 
@@ -412,8 +426,8 @@ const refresh = async () => {
             const valueField = farg.getField("value") as ScalarNode
             const special = specials.length > k ? specials[k] : undefined
 
-            const carg = finfo!.func!.args[k]
-            display.data = `${carg.nullable ? '? ' : '* '}${special?.display || carg.name}`
+            const carg = k >= rarglen ? finfo!.func!.args[rarglen - 1] : finfo!.func!.args[k]
+            display.data = `${(carg.params || carg.nullable) ? '? ' : '* '}${special?.display || carg.name}`
 
             // call argument type
             let ctype = await getSchema(special?.type || carg.type, generic)
@@ -446,7 +460,7 @@ const refresh = async () => {
             }
 
             // type value
-            type.data = ctype?.name || "system.schema.anyvalue"
+            type.data = ctype?.name || NS_SYSTEM_OBJECT
 
             // name white list
             const whitelist: string[] = []

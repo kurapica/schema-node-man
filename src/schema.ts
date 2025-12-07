@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_LOCALE_STRINGS, NS_SYSTEM_NUMBER, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, PolicyCombine, PolicyScope, registerSchema, RelationType, SchemaLoadState, SchemaType, type ILocaleString, type INodeSchema, type IStructFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_LOCALE_STRINGS, NS_SYSTEM_NUMBER, NS_SYSTEM_OBJECT, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, PolicyCombine, PolicyScope, registerSchema, RelationType, SchemaLoadState, SchemaType, type IFunctionExpression, type ILocaleString, type INodeSchema, type IStructFieldConfig } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -105,7 +105,7 @@ registerSchema([
         { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
         { name: "type", type: "system.schema.valuetype", readonly: true },
         { name: "name", type: "system.schema.reltarfield" },
-        { name: "value", type: "system.schema.anyvalue" },
+        { name: "value", type: NS_SYSTEM_OBJECT },
     ], [
         { field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ]},
         { field: "name", type: RelationType.Disable, func: "system.logic.notempty", args: [ { name: "value" } ]},
@@ -575,7 +575,7 @@ registerSchema([
         { name: "display", type: NS_SYSTEM_STRING, displayOnly: true},
         { name: "type", type: "system.schema.valuetype", readonly: true},
         { name: "name", type: NS_SYSTEM_STRING, upLimit: 32},
-        { name: "value", type: "system.schema.anyvalue"},
+        { name: "value", type: NS_SYSTEM_OBJECT},
     ], [
         { field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ] },
         { field: "name", type: RelationType.Disable, func: "system.logic.notempty", args: [ { name: "value" } ] },
@@ -865,6 +865,16 @@ export function schemaToJson(f: INodeSchema): INodeSchema
             r.func = { ...deepClone(f.func!, true), func: undefined }
             if (!r.func!.exps) r.func!.exps = []
             if (!r.func!.args) r.func!.args = []
+            // clear empty params exps
+            r.func?.exps.forEach((exp: IFunctionExpression) => {
+                const funcInfo = getCachedSchema(exp.func)
+                const args = funcInfo?.func?.args || []
+                if (!args.length || !args[args.length - 1].params) return
+
+                while (exp.args.length > args.length && isNull(exp.args[exp.args.length - 1].value) && isNull(exp.args[exp.args.length - 1].name)) {
+                    exp.args.pop()
+                }
+            })
             break
 
         case SchemaType.Policy:

@@ -2,6 +2,7 @@ import { importLanguage } from "schema-node"
 
 importLanguage("zhCN", {
     //#region System
+    "system.object": "任意数据",
 
     // system.conv
     "system.conv": "数值转换",
@@ -237,7 +238,6 @@ importLanguage("zhCN", {
     "system.schema.arrayeletype": "非数组数据类型",
     "system.schema.valuetype": "任意数据类型",
     "system.schema.varname": "字段名",
-    "system.schema.anyvalue": "任意数据",
     "system.schema.anytype": "任意类型",
     
     "system.schema.schematype": "数据类型",
