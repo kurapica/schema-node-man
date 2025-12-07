@@ -392,7 +392,7 @@ export function saveStorageAppSchema(schema: IAppSchema)
             field: r.field,
             func: r.func,
             type: r.type,
-            args: r.args?.map((a: IFunctionCallArgument)  => ({
+            args: r.args?.filter(a => !isNull(a.name) || !isNull(a.value)).map((a: IFunctionCallArgument)  => ({
                 name: a.name,
                 value: a.value
             }))

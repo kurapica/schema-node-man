@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayNode, getSchema, NS_SYSTEM_STRING, StructNode, RelationType, NS_SYSTEM_ARRAY, ScalarNode, type INodeSchema, isEqual, debounce } from 'schema-node'
+import { ArrayNode, getSchema, NS_SYSTEM_STRING, StructNode, RelationType, NS_SYSTEM_ARRAY, ScalarNode, type INodeSchema, isEqual, debounce, type AnySchemaNode, isNull } from 'schema-node'
 import { onMounted, onUnmounted, toRaw } from 'vue'
 import { SchemaNodeFormType, tableView } from 'schema-node-vueview'
 import { specialFuncRefresh, type ArgInfo } from '@/specialFuncHandler';
@@ -30,7 +30,7 @@ onMounted(async () => {
     const funcField = relationInfo.getField("func")! as ScalarNode
 
     let typeMap = new Map<string, INodeSchema>()
-    let parent = relationInfo
+    let parent: AnySchemaNode | undefined = relationInfo
     let app: string | undefined = undefined
     while (parent)
     {
@@ -68,7 +68,7 @@ onMounted(async () => {
 
     if (app)
     {
-        let appFields = (await getAppSchema(app)).fields || []
+        let appFields = (await getAppSchema(app))?.fields || []
         for(const fld of appFields)
         {
             const fschema = await getSchema(fld.type)
@@ -93,13 +93,29 @@ onMounted(async () => {
             if (ret) generic[gidx] = ret
         }
 
-        if (argsNode.elements.length > args.length)
-        {
-            argsNode.delRows(args.length, argsNode.elements.length - args.length)
+        let rarglen = schema?.func?.args.length || 0
+        let farglen = rarglen
+
+        // params support
+        if (farglen && schema?.func?.args[farglen - 1].params){
+            for (let i = argsNode.elements.length; i >= farglen; i--) {
+                const ele = argsNode.elements[i - 1] as StructNode
+                const { name, value } = ele.rawData
+                if (!isNull(name) || !isNull(value))
+                {
+                    farglen = i + 1
+                    break
+                }
+            }
         }
-        else if (argsNode.elements.length < args.length)
+
+        if (argsNode.elements.length > farglen)
         {
-            while (argsNode.elements.length < args.length)
+            argsNode.delRows(farglen, argsNode.elements.length - farglen)
+        }
+        else if (argsNode.elements.length < farglen)
+        {
+            while (argsNode.elements.length < farglen)
                 argsNode.addRow()
         }
 
@@ -107,10 +123,11 @@ onMounted(async () => {
             ? await specialFuncRefresh[func](funcField, argsNode.elements as StructNode[], typeMap, ret) 
             : []
 
-        for(let i = 0; i < args.length; i++)
+        for(let i = 0; i < farglen; i++)
         {
             const row = argsNode.elements[i] as StructNode
-            const aschema = await getSchema(args[i].type, generic)
+            const arg = i < args.length ? args[i] : args[args.length - 1]
+            const aschema = await getSchema(arg.type, generic)
             if (matchEntrys)
             {
                 row.getField("type")!.data = NS_SYSTEM_ARRAY
@@ -120,7 +137,7 @@ onMounted(async () => {
                 row.getField("type")!.data = aschema?.name || NS_SYSTEM_STRING
             }
             if (row.getField("label")) 
-                row.getField("label")!.data = specials[i]?.display || args[i].name
+                row.getField("label")!.data = specials[i]?.display || arg.name
 
             // value field
             const valueField = row.getField("value") as ScalarNode

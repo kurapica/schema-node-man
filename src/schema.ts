@@ -1,4 +1,4 @@
-import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_LOCALE_STRINGS, NS_SYSTEM_NUMBER, NS_SYSTEM_OBJECT, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, PolicyCombine, PolicyScope, registerSchema, RelationType, SchemaLoadState, SchemaType, type IFunctionExpression, type ILocaleString, type INodeSchema, type IStructFieldConfig } from "schema-node"
+import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, ExpressionType, getArraySchema, getCachedSchema, getSchema, isNull, isSchemaCanBeUseAs, isStructFieldIndexable, newSystemArray, newSystemFunc, newSystemRelArray, newSystemScalar, newSystemStruct, NS_SYSTEM_ARRAY, NS_SYSTEM_BOOL, NS_SYSTEM_INT, NS_SYSTEM_INTS, NS_SYSTEM_LOCALE_STRING, NS_SYSTEM_LOCALE_STRINGS, NS_SYSTEM_NUMBER, NS_SYSTEM_OBJECT, NS_SYSTEM_STRING, NS_SYSTEM_STRINGS, PolicyCombine, PolicyScope, registerSchema, RelationType, SchemaLoadState, SchemaType, type IFunctionExpression, type ILocaleString, type INodeSchema, type IStructFieldConfig, type IStructFieldRelation } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -855,6 +855,19 @@ export function schemaToJson(f: INodeSchema): INodeSchema
 
         case SchemaType.Struct:
             r.struct = deepClone(f.struct, true)
+            if (r.struct?.relations)
+            {
+                r.struct.relations.forEach((r: IStructFieldRelation) => {
+                    const funcInfo = getCachedSchema(r.func)
+                    const args = funcInfo?.func?.args || []
+                    if (!args.length || !args[args.length - 1].params) return
+                    
+                    // clear empty args
+                    while (r.args && r.args.length > args.length && isNull(r.args[r.args.length - 1].value) && isNull(r.args[r.args.length - 1].name)) {
+                        r.args.pop()
+                    }
+                })
+            }
             break
 
         case SchemaType.Array:
