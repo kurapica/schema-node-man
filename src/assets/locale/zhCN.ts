@@ -154,6 +154,7 @@ importLanguage("zhCN", {
 
     // system.data
     "system.data": "数据操作",
+    "system.data.getdatasource": "获取数据源",
     "system.data.getappdata": "获取应用数据",
     "system.data.getappdatabyonekey": "根据单一键值获取应用数据",
     "system.data.getappdatabytwokey": "根据双键值获取应用数据",

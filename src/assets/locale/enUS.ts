@@ -154,6 +154,7 @@ importLanguage("enUS", {
 
     // system.data
     "system.data": "Data Operations",
+    "system.data.getdatasource": "Gets Data Source",
     "system.data.getappdata": "Gets App Data",
     "system.data.getappdatabyonekey": "Gets App Data by Single Key",
     "system.data.getappdatabytwokey": "Gets App Data by Two Keys",

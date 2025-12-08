@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT } from 'schema-node'
+import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT, getFieldAccessWhiteList, type IStructFieldConfig } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
@@ -298,14 +298,14 @@ const refresh = async () => {
     const typeMap: Map<string, INodeSchema> = new Map()
 
     // args refresh
-    const args: { name: string, schema: INodeSchema }[] = []
+    const argMap: { name: string, type: string, schema: INodeSchema }[] = []
     for (let i = 0; i < argsNode.elements.length; i++) {
         const a = argsNode.elements[i]
         const { name, type } = a.rawData
         if (name && type) {
             const schema = await getSchema(type)
             if (schema) {
-                args.push({ name, schema })
+                argMap.push({ name, type: schema.name, schema })
                 typeMap.set(name, schema)
             }
         }
@@ -323,7 +323,6 @@ const refresh = async () => {
     }
 
     // exps refresh
-    const exps: { name: string, schema: INodeSchema }[] = []
     const retColor: string[] = []
     for (let i = 0; i < expcount; i++) {
         const e = expsNode.elements[i] as StructNode
@@ -431,8 +430,26 @@ const refresh = async () => {
 
             // call argument type
             let ctype = await getSchema(special?.type || carg.type, generic)
-            const choose = name.rawData
-            const exp = choose ? args.find(a => a.name === choose) || exps.find(a => a.name === choose) : null
+            const choose = (name.rawData || "").split('.').filter((f: string) => !isNull(f))
+            let exp = choose.length && choose[0] ? argMap.find(a => a.name === choose[0]) : null
+            if (choose.length > 1 && exp) {
+                for (let m = 1; m < choose.length; m++) {
+                    if (exp && exp.schema.type === SchemaType.Struct) {
+                        const fld: IStructFieldConfig | undefined = exp.schema.struct?.fields.find(f => f.name === choose[m])
+                        if (fld) {
+                            exp = { name: fld.name, type: fld.type, schema: (await getSchema(fld.type))! }
+                        }
+                        else {
+                            exp = null
+                            break
+                        }
+                    }
+                    else {
+                        exp = null
+                        break
+                    }
+                }
+            }
 
             // match type and array index
             if (!ctype && /^[tT]\d*$/.test(carg.type)) {
@@ -463,29 +480,20 @@ const refresh = async () => {
             type.data = ctype?.name || NS_SYSTEM_OBJECT
 
             // name white list
-            const whitelist: string[] = []
-            if (ctype) {
-                for (let j = 0; j < args.length; j++) {
-                    if (await isSchemaCanBeUseAs(args[j].schema.name, ctype.name)) {
-                        whitelist.push(args[j].name)
+            const whitelist = await getFieldAccessWhiteList(ctype?.name || "", argMap, "", true, isarray && (arrIdx === k || arrIdx < 0))
+            /*if (ctype) {
+                for (let j = 0; j < argMap.length; j++) {
+                    if (await isSchemaCanBeUseAs(argMap[j].schema.name, ctype.name)) {
+                        whitelist.push(argMap[j].name)
                     }
-                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && args[j].schema.array?.element && await isSchemaCanBeUseAs(args[j].schema.array!.element, ctype.name)) {
-                        whitelist.push(args[j].name)
-                    }
-                }
-                for (let j = 0; j < exps.length; j++) {
-                    if (await isSchemaCanBeUseAs(exps[j].schema.name, ctype.name)) {
-                        whitelist.push(exps[j].name)
-                    }
-                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && exps[j].schema.array?.element && await isSchemaCanBeUseAs(exps[j].schema.array!.element, ctype.name)) {
-                        whitelist.push(exps[j].name)
+                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && argMap[j].schema.array?.element && await isSchemaCanBeUseAs(argMap[j].schema.array!.element, ctype.name)) {
+                        whitelist.push(argMap[j].name)
                     }
                 }
             }
             else {
-                args.forEach(a => whitelist.push(a.name))
-                exps.forEach(a => whitelist.push(a.name))
-            }
+                argMap.forEach(a => whitelist.push(a.name))
+            }*/
             if (!isEqual((name.rule as ScalarRule).whiteList, whitelist)) {
                 (name.rule as ScalarRule).whiteList = whitelist
                 name.validate().then(() => name.notifyState())
@@ -511,7 +519,7 @@ const refresh = async () => {
         if (name && ret) {
             const schema = await getSchema(ret)
             if (schema) {
-                exps.push({ name, schema })
+                argMap.push({ name, schema, type: schema.name })
                 typeMap.set(name, schema)
             }
         }
