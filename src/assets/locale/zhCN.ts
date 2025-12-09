@@ -119,6 +119,11 @@ importLanguage("zhCN", {
     "system.collection.setfield": "写入字段返回新结构体",
     "system.collection.delfield": "删除字段返回新结构体",
     "system.collection.fieldequal": "字段等于指定值",
+    "system.collection.fieldnotequal": "字段不等于指定值",
+    "system.collection.fieldgreateequal": "字段大于等于指定值",
+    "system.collection.fieldgreatethan": "字段大于指定值",
+    "system.collection.fieldlessequal": "字段小于等于指定值",
+    "system.collection.fieldlessthan": "字段小于指定值",
     "system.collection.getfields": "从数组各个元素获取字段构成新数组",
     "system.collection.sum": "对数组进行合计",
     "system.collection.average": "对数组求平均值",
@@ -128,6 +133,9 @@ importLanguage("zhCN", {
     "system.collection.notcontainskey": "结构体不包含指定值",
     "system.collection.newarray": "新建数组",
     "system.collection.push": "向数组追加元素返回新数组",
+    "system.collection.orderby": "数组排序",
+    "system.collection.take": "获取数组前N个元素",
+    "system.collection.skip": "跳过数组前N个元素",
 
     // system.logic
     "system.logic": "逻辑操作",
