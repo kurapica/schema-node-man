@@ -686,11 +686,11 @@ registerSchema([
     }),
 
     newSystemFunc("system.schema.getappschemapolicyscope", "system.schema.policyscopes", [], () => {
-        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead, PolicyScope.FuncExecute, PolicyScope.DataRead, PolicyScope.DataWrite]
+        return [PolicyScope.SchemaCreate, PolicyScope.SchemaUpdate, PolicyScope.SchemaDelete, PolicyScope.SchemaRead, PolicyScope.FuncExecute, PolicyScope.DataCreate, PolicyScope.DataRead, PolicyScope.DataUpdate, PolicyScope.DataDelete]
     }),
 
     newSystemFunc("system.schema.getrowpolicyscope", "system.schema.policyscopes", [], () => {
-        return [PolicyScope.DataRead, PolicyScope.DataWrite, PolicyScope.RowAccess]
+        return [ PolicyScope.DataCreate, PolicyScope.DataRead, PolicyScope.DataUpdate, PolicyScope.DataDelete, PolicyScope.RowAccess]
     }),
 
     newSystemFunc("system.schema.getcolpolicyscope", "system.schema.policyscopes", [], () => {

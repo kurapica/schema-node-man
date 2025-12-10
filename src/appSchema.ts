@@ -202,7 +202,7 @@ registerSchema([
     }),
     
     newSystemStruct("system.schema.appschema", [
-        { name: "name", require: true, type: "system.schema.appinput", upLimit: 32 },
+        { name: "name", require: true, type: "system.schema.appinput", upLimit: 32, immutable: true },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
         { name: "auth", type: "system.schema.policytype" },
