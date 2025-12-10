@@ -678,6 +678,7 @@ registerSchema([
         { name: "items", type: "system.schema.policyitems", require: true }
     ], [
         { field: "items.scope", type: RelationType.WhiteList, func: "system.schema.getappschemapolicyscope", args: [] },
+        { field: "items.scope", type: RelationType.BlackList, func: "system.collection.getfields", args: [ { name: "items" }, { value: "scope"} ] }
     ]),
 
     newSystemFunc("system.schema.getschemapolicyscope", "system.schema.policyscopes", [], () => {

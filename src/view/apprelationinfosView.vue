@@ -1,7 +1,12 @@
 <template>
     <el-container style="width: 100%;">
         <el-aside>
-            <el-tree :data="options" :default-props="{ children: 'children', label: 'label' }" @node-click="handleNodeClick" accordion></el-tree>
+            <el-tree :data="options" :default-props="{ children: 'children', label: 'label' }" @node-click="handleNodeClick" accordion>
+                <template #default="{ node, data }">
+                    <span>{{ data.label }}</span>
+                    <span v-if="countMap[data.value]" style="position: absolute; right: 10px;color:blue">({{ countMap[data.value] }})</span>
+                </template>
+            </el-tree>
         </el-aside>
         <el-main>
             <template v-if="activeField">
@@ -77,6 +82,7 @@ const activeField = ref("")
 const activeCol = ref(0)
 const elements = ref<StructNode[]>([])
 const elementDisplay = reactive<{ guid: string, field: string, handler: Function, type: string }[]>([])
+const countMap = ref<{ [key: string]: number }>({})
 
 // add/del
 const handleTabsEdit = (target: any, action: string) => {
@@ -99,11 +105,24 @@ const handleTabsEdit = (target: any, action: string) => {
 
 const refresh = () => {
     const eles: StructNode[] = []
+    const map: { [key: string]: number } = {}
     
     let index = 0;
     for(let i = 0; i < arrayNode.elements.length; i++) {
         const ele = arrayNode.elements[i] as StructNode
-        if (ele.getField("field")?.data !== activeField.value) continue
+        const name = ele.getField("field")?.data
+        if (!name) continue
+
+        // count
+        map[name] = (map[name] || 0) + 1
+        if (name.includes("."))
+        {
+            const fld = name.split(".")[0]
+            map[fld] = (map[fld] || 0) + 1
+        }
+
+        // active field only
+        if (name !== activeField.value) continue
         eles.push(ele)
 
         if (elementDisplay.length > index)
@@ -136,6 +155,8 @@ const refresh = () => {
     for(let i = elementDisplay.length - 1; i >= eles.length; i--)
         elementDisplay.pop()?.handler()
     elements.value = eles
+
+    countMap.value = map
 }
 
 // node click
