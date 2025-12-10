@@ -254,6 +254,7 @@ importLanguage("enUS", {
     "system.schema.arraytype": "Array Types",
     "system.schema.functype": "Function Type",
     "system.schema.whitelistfunc": "Scalar WhiteList Function",
+    "system.schema.predicatefunc": "Row Filter Function",
     "system.schema.validfunc": "Scalar Valid Function Type",
     "system.schema.arrayeletype": "Non-array Data Type",
     "system.schema.valuetype": "Any Data Type",
@@ -331,9 +332,7 @@ importLanguage("enUS", {
     "system.schema.policyscope.dataupdate": "Update App Data",
     "system.schema.policyscope.datadelete": "Delete App Data",
     "system.schema.policyscope.funcexecute": "Execute Function",
-    "system.schema.policyscope.rowaccess": "Row Access Filter",
-    "system.schema.policyscope.columnaccess": "Column Access Filter",
-
+    
     "system.schema.policycombine": "Policy Combine Method",
     "system.schema.policycombine.andalso": "And",
     "system.schema.policycombine.orelse": "Or",
@@ -493,8 +492,9 @@ importLanguage("enUS", {
     "system.schema.appfieldschema.combines": "Data combine rules list (struct)",
     "system.schema.appfieldschema.trackPush": "Track push",
     "system.schema.appfieldschema.readonly": "Read-only",
-    "system.schema.appfieldschema.auths": "Row Authorization List",
-    "system.schema.appfieldschema.fieldAuths": "Column Authorization List",
+    "system.schema.appfieldschema.auths": "Authorization List",
+    "system.schema.appfieldschema.rowAuths": "Row Authorization List",
+    "system.schema.appfieldschema.colAuths": "Column Authorization List",
 
     "system.schema.appschema": "App definition",
     "system.schema.appschema.name": "App Name",
@@ -523,6 +523,14 @@ importLanguage("enUS", {
 
     "system.schema.policyschema": "Policy Definition",
     "system.schema.policyschema.items": "Policy Item List",
+
+    "system.schema.rowpolicyitem": "Row Policy Item",
+    "system.schema.rowpolicyitem.evaluator": "Evaluator Function",
+    "system.schema.rowpolicyitem.filter": "Row Filter Function",
+
+    "system.schema.colpolicyitem": "Column Policy Item",
+    "system.schema.colpolicyitem.name": "Name",
+    "system.schema.colpolicyitem.evaluators": "Evaluator Functions",
 
     "system.schema.appworkflow": "App Workflow Definition",
     "system.schema.eventtype": "Event Type",

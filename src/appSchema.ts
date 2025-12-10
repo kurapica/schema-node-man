@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope, PolicyCombine, newSystemRelArray } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -126,13 +126,17 @@ registerSchema([
         return true
     }),
 
-    newSystemStruct("system.schema.fieldpolicy", [
-        { name: "name", type: NS_SYSTEM_STRING, require: true, upLimit: 64 },
-        { name: "auths", type: "system.schema.policyitems", require: true },
-    ], [
-        { field: "auths.scope", type: RelationType.WhiteList, func: "system.schema.getcolpolicyscope", args: [] },
+    newSystemStruct("system.schema.rowpolicyitem", [
+        { name: "evaluator", type: "system.schema.evaluatorfunc", require: true },
+        { name: "filter", type: "system.schema.predicatefunc"}
     ]),
-    newSystemArray("system.schema.fieldpolicys", "system.schema.fieldpolicy", "name"),
+    newSystemArray("system.schema.rowpolicyitems", "system.schema.rowpolicyitem", "evaluator"),
+
+    newSystemStruct("system.schema.colpolicyitem", [
+        { name: "name", type: NS_SYSTEM_STRING, require: true },
+        { name: "evaluators", type: "system.schema.evaluatorfuncs", require: true },
+    ]),
+    newSystemArray("system.schema.colpolicyitems", "system.schema.colpolicyitem", "name"),
 
     newSystemFunc("system.schema.getfieldforauths", NS_SYSTEM_ARRAY, [
         { name: "app", type: NS_SYSTEM_STRING, nullable: true },
@@ -172,7 +176,8 @@ registerSchema([
         { name: "combine", type: "system.schema.datacombinetype" },
         { name: "combines", type: "system.schema.datacombines" },
         { name: "auths", type: "system.schema.policyitems" },
-        { name: "fieldAuths", type: "system.schema.fieldpolicys" },
+        { name: "rowAuths", type: "system.schema.rowpolicyitems" },
+        { name: "colAuths", type: "system.schema.colpolicyitems" },
     ], [
         { field: "name", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "name" }, { name: "type" }] },
         { field: "display", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "display" }, { name: "type" }] },
@@ -188,9 +193,8 @@ registerSchema([
         { field: "combines", type: RelationType.Visible, func: "system.schema.appiscombinesenable", args: [ { name: "type" }, { name: "func" }] },
         { field: "combines.field", type: RelationType.WhiteList, func: "system.schema.getstructnumbervaluefields", args: [ { name: "type" }] },
         { field: "trackPush", type: RelationType.Visible, func: "system.schema.appistrackpushenable", args: [ { name: "sourceField" }, { name: "func" }] },
-        { field: "fieldAuths", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
-        { field: "auths.scope", type: RelationType.WhiteList, func: "system.schema.getrowpolicyscope", args: [ { name: "app" } ] },
-        { field: "fieldAuths.name", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
+        { field: "colAuths", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
+        { field: "colAuths.name", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
     ]),
     
     newSystemFunc("system.schema.apphasfields", NS_SYSTEM_BOOL, [

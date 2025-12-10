@@ -193,7 +193,8 @@ const namespaceMap: any = {
     "system.schema.workflowtype": [SchemaType.Namespace, SchemaType.Workflow],
     "system.schema.policytype": [SchemaType.Namespace, SchemaType.Policy],
     "system.schema.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
-    "system.schema.policyfunctype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.evaluatorfunc": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.predicatefunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
@@ -204,7 +205,7 @@ const namespaceMap: any = {
 const ispushfunctype = type === "system.schema.pushfunctype"
 const isscalarvalidfunc = type === "system.schema.validfunc"
 const isscalarwhitelist = type === "system.schema.whitelistfunc"
-const enableEntries = ref(true)
+const enableEntries = ref(false)
 
 // view
 
@@ -502,7 +503,7 @@ onMounted(() => {
         const typeNode = parent.getField("type")
         relationtypeHandler = typeNode!.subscribe(() => {
             enableEntries.value = typeNode?.data == RelationType.WhiteList
-        })
+        }, true)
     }
 
     // scalar white list, zero or 1-arg for the base type
@@ -511,8 +512,14 @@ onMounted(() => {
         lowLimit = 0
     }
 
-    // policy scope
-    if (type === "system.schema.policyfunctype") {
+    // evaluator func no arg, account should be fetched from context
+    if (type === "system.schema.evaluatorfunc")
+    {
+        upLimit = 0
+        lowLimit = 0
+    }
+    // row access type for predicate func
+    else if (type === "system.schema.predicatefunc") {
         const scopeNode = parent instanceof StructNode ? parent.getField("scope") : undefined
         if (scopeNode){
             policyscopeHandler = scopeNode.subscribe(async () => {

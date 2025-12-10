@@ -255,6 +255,7 @@ importLanguage("zhCN", {
     "system.schema.functype": "函数类型",
     "system.schema.validfunc": "基础数据校验用函数类型",
     "system.schema.whitelistfunc": "基础数据类型白名单用",
+    "system.schema.predicatefunc": "行过滤用函数类型",
     "system.schema.arrayeletype": "非数组数据类型",
     "system.schema.valuetype": "任意数据类型",
     "system.schema.varname": "字段名",
@@ -331,9 +332,7 @@ importLanguage("zhCN", {
     "system.schema.policyscope.dataupdate": "更新应用数据",
     "system.schema.policyscope.datadelete": "删除应用数据",
     "system.schema.policyscope.funcexecute": "执行函数",
-    "system.schema.policyscope.rowaccess": "行访问过滤",
-    "system.schema.policyscope.columnaccess": "列访问过滤",
-
+    
     "system.schema.policycombine": "策略组合方式",
     "system.schema.policycombine.andalso": "且",
     "system.schema.policycombine.orelse": "或",
@@ -493,8 +492,9 @@ importLanguage("zhCN", {
     "system.schema.appfieldschema.combines": "数据合并规则列表(结构体用)",
     "system.schema.appfieldschema.trackPush": "跟踪推送",
     "system.schema.appfieldschema.readonly": "只读",
-    "system.schema.appfieldschema.auths": "行权限列表",
-    "system.schema.appfieldschema.fieldAuths": "列权限列表",
+    "system.schema.appfieldschema.auths": "权限列表",
+    "system.schema.appfieldschema.rowAuths": "行权限列表",
+    "system.schema.appfieldschema.colAuths": "列权限列表",
 
     "system.schema.appschema": "应用定义",
     "system.schema.appschema.name": "应用名",
@@ -523,6 +523,14 @@ importLanguage("zhCN", {
 
     "system.schema.policyschema": "策略定义",
     "system.schema.policyschema.items": "策略条目列表",
+
+    "system.schema.rowpolicyitem": "行策略条目",
+    "system.schema.rowpolicyitem.evaluator": "评估函数",
+    "system.schema.rowpolicyitem.filter": "行过滤函数",
+
+    "system.schema.colpolicyitem": "列策略条目",
+    "system.schema.colpolicyitem.name": "名称",
+    "system.schema.colpolicyitem.evaluators": "评估函数",
 
     "system.schema.appworkflow": "应用工作流定义",
     "system.schema.eventtype": "事件类型",

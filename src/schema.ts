@@ -3,7 +3,6 @@ import { _L, _LS, ARRAY_ELEMENT, ARRAY_ITSELF, deepClone, EnumValueType, Express
 // Schema for definition
 registerSchema([
     //#region system scalars
-    newSystemScalar("system.schema.policyfunctype", "system.schema.functype"),
     newSystemScalar("system.schema.pushfunctype", "system.schema.functype"),
     newSystemScalar("system.schema.namespaceinput", NS_SYSTEM_STRING, undefined, "^[a-z]\\w*(\.[a-z]\\w*)*$", { upLimit: 128 }),
     newSystemScalar("system.schema.reltarfield", NS_SYSTEM_STRING, undefined, undefined, { upLimit: 64 }),
@@ -668,9 +667,9 @@ registerSchema([
     newSystemStruct("system.schema.policyitem", [
         { name: "scope", type: "system.schema.policyscope", require: true },
         { name: "combine", type: "system.schema.policycombine", require: true, default: PolicyCombine.OrElse },
-        { name: "evaluator", type: "system.schema.policyfunctype", require: true },
+        { name: "evaluator", type: "system.schema.evaluatorfunc", require: true },
     ], [
-        { field: "evaluator", type: RelationType.Root, func: "system.conv.assign", args: [ { value: NS_SYSTEM_BOOL } ] },
+        { field: "evaluator", type: RelationType.Root, func: "system.conv.assign", args: [ { value: NS_SYSTEM_BOOL } ], },
     ]),
     newSystemArray("system.schema.policyitems", "system.schema.policyitem", "scope"),
 
@@ -690,11 +689,7 @@ registerSchema([
     }),
 
     newSystemFunc("system.schema.getrowpolicyscope", "system.schema.policyscopes", [], () => {
-        return [ PolicyScope.DataCreate, PolicyScope.DataRead, PolicyScope.DataUpdate, PolicyScope.DataDelete, PolicyScope.RowAccess]
-    }),
-
-    newSystemFunc("system.schema.getcolpolicyscope", "system.schema.policyscopes", [], () => {
-        return [PolicyScope.ColumnAccess]
+        return [ PolicyScope.DataCreate, PolicyScope.DataRead, PolicyScope.DataUpdate, PolicyScope.DataDelete]
     }),
     //#endregion
 
@@ -922,9 +917,10 @@ regSchemaTypeView("system.schema.functype", namespaceView)
 regSchemaTypeView("system.schema.pushfunctype", namespaceView)
 regSchemaTypeView("system.schema.validfunc", namespaceView)
 regSchemaTypeView("system.schema.whitelistfunc", namespaceView)
+regSchemaTypeView("system.schema.predicatefunc", namespaceView)
+regSchemaTypeView("system.schema.evaluatorfunc", namespaceView)
 regSchemaTypeView("system.schema.arrayeletype", namespaceView)
 regSchemaTypeView("system.schema.valuetype", namespaceView)
-regSchemaTypeView("system.schema.policyfunctype", namespaceView)
 regSchemaTypeView("system.schema.namespaceinput", namespaceInputView)
 
 regSchemaTypeView("system.schema.enumvalueinfos", enumvalueinfosView)
