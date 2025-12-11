@@ -54,7 +54,7 @@ registerSchema([
 
     newSystemStruct("system.schema.appfieldrelation", [
         { name: "field", require: true, type: "system.schema.appaccessfld", },
-        { name: "fieldType", displayOnly: true, invisible: false, type : "system.schema.valuetype", },
+        { name: "fieldType", displayOnly: true, invisible: true, type : "system.schema.valuetype", },
         { name: "return", displayOnly: true, invisible: true, type: "system.schema.valuetype", },
         { name: "type", require: true, type: "system.schema.relationtype", },
         { name: "func", require: true, type: "system.schema.functype", },

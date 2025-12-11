@@ -290,6 +290,7 @@ importLanguage("zhCN", {
     "system.schema.relationtype.cascade": "级联限制",
     "system.schema.relationtype.singleflag": "单标志位",
     "system.schema.relationtype.validation": "联合校验",
+    "system.schema.relationtype.reference": "应用字段引用",
 
     "system.schema.expressiontype": "函数表达式调用方式",
     "system.schema.expressiontype.call": "直接调用",
@@ -541,6 +542,7 @@ importLanguage("zhCN", {
     "system.schema.workflowmode.workflow": "工作流模式",
     "system.schema.workflowmode.function": "函数模式",
     "system.schema.workflowmode.event": "事件模式",
+    "system.schema.workflowmode.interaction": "交互模式",
 
     "system.schema.workflowstatus": "工作流状态",
     "system.schema.workflowstatus.waiting": "等待",
@@ -763,6 +765,8 @@ importLanguage("zhCN", {
     "frontend.appgetapptargets": "获取目标列表",
     
     "frontend.view.manualworkflows": "手动工作流",
+    "frontend.view.schemanameexists": "类型名称已存在",
+    "frontend.view.appnameexists": "应用名称已存在",
 
     //#endregion
 })

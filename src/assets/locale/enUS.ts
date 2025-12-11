@@ -290,6 +290,7 @@ importLanguage("enUS", {
     "system.schema.relationtype.cascade": "Cascade Limit",    
     "system.schema.relationtype.singleflag": "Single Flag Value",
     "system.schema.relationtype.validation": "Union validation",
+    "system.schema.relationtype.reference": "App Field Reference",
 
     "system.schema.expressiontype": "Function Expression Mode",
     "system.schema.expressiontype.call": "Direct Call",
@@ -541,6 +542,7 @@ importLanguage("enUS", {
     "system.schema.workflowmode.workflow": "Workflow Mode",
     "system.schema.workflowmode.function": "Function Mode",
     "system.schema.workflowmode.event": "Event Mode",
+    "system.schema.workflowmode.interaction": "Interaction Mode",
 
     "system.schema.workflowstatus": "Workflow Status",
     "system.schema.workflowstatus.waiting": "Waiting",
@@ -762,6 +764,9 @@ importLanguage("enUS", {
     "frontend.appgetapptargets": "Get Target List",
 
     "frontend.view.manualworkflows": "Manual Workflows",
+
+    "frontend.view.schemanameexists": "Schema name already exists",
+    "frontend.view.appnameexists": "App name already exists",
 
     //#endregion
 });

@@ -96,7 +96,7 @@ const handleTabsEdit = (target: any, action: string) => {
             confirmButtonText: _L.value["YES"],
             cancelButtonText: _L.value["NO"]
         }).then(() => {
-            const index = elements.value.findIndex(v => v.guid === delRow.guid)
+            const index = arrayNode.elements.findIndex(v => v.guid === delRow.guid)
             if (index < 0) return
             arrayNode.delRows(index)
         })
@@ -117,8 +117,12 @@ const refresh = () => {
         map[name] = (map[name] || 0) + 1
         if (name.includes("."))
         {
-            const fld = name.split(".")[0]
-            map[fld] = (map[fld] || 0) + 1
+            const paths = name.split(".").filter((v: string) => !isNull(v))
+            for (let j = 0; j < paths.length - 1; j++)
+            {
+                const fld = paths.slice(0, j + 1).join(".")
+                map[fld] = (map[fld] || 0) + 1
+            }
         }
 
         // active field only

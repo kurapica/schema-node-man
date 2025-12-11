@@ -335,8 +335,9 @@ registerSchema([
             case RelationType.Disable:
             case RelationType.AnyLevel:
             case RelationType.SingleFlag:
+            case RelationType.Validation:
+            case RelationType.Reference:
                 return NS_SYSTEM_BOOL
-
         }
     }),
 
@@ -386,7 +387,8 @@ registerSchema([
                 RelationType.Visible,
                 RelationType.Disable,
                 RelationType.Assign,
-                RelationType.Type
+                RelationType.Type,
+                RelationType.Reference
             ]
         }
         return [
@@ -402,7 +404,8 @@ registerSchema([
             RelationType.Type,
             RelationType.AnyLevel,
             RelationType.Cascade,
-            RelationType.Validation
+            RelationType.Validation,
+            RelationType.Reference
         ]
     }),
 

@@ -283,11 +283,13 @@ const showNamespaceEditor = ref(false)
 const namespaceNode = ref<StructNode | undefined>(undefined)
 const operation = ref("")
 const showViewRef = ref(false)
+let isNewType = false
 
 let namesapceWatchHandler: Function | null = null
 
 // create
 const handleNew = async () => {
+    isNewType = true
     localStorage["schema_new_namespace"] = state.namespace
 
     namespaceNode.value = new StructNode({
@@ -305,6 +307,7 @@ const handleNew = async () => {
 // update
 const currRow = ref<INodeSchema | null>(null)
 const handleEdit = async (row: any, readonly?: boolean) => {
+    isNewType = false
     currRow.value = row
     const schema = await getSchema(row.name)
 
@@ -369,8 +372,15 @@ const confirmNameSpace = async () => {
     if (!res || !namespaceNode.value?.valid) return
 
     if (!namespaceNode.value?.valid) return
+
     const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.data)))
     const schema = getCachedSchema(data.name)
+
+    if (isNewType && (schema || await getSchema(data.name)))
+    {
+        ElMessage.error(_L.value["frontend.view.schemanameexists"])
+        return
+    }
     
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
     {

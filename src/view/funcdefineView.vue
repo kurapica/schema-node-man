@@ -87,6 +87,7 @@ import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, Expression
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
+import { mockSchemaData } from 'schema-node';
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
@@ -119,7 +120,7 @@ const doCaclc = async () => {
 
     for (let i = 0; i < argsNode.elements.length; i++) {
         const { name, nullable, type } = argsNode.elements[i].rawData
-        const data = toRaw(argdatas[i].data)
+        const data = toRaw(argdatas[i]?.data)
         if (isNull(type) || isNull(name) || (isNull(data) && !nullable)) {
             fullfill = false
             break
@@ -154,7 +155,15 @@ const doCaclc = async () => {
                 for (let j = 0; j < exp.args.length; j++) {
                     const arg = fargs.length > j ? fargs[j] : fargs[fargs.length - 1]
                     if (exp.args[j].name) {
-                        value = values[exp.args[j].name!]
+                        const paths = exp.args[j].name!.split(".").filter((v: string) => !isNull(v))
+                        value = values[paths[0]]
+                        for (let k = 1; k < paths.length; k++) {
+                            if (isNull(value)) {
+                                value = null
+                                break
+                            }
+                            value = value[paths[k]]
+                        }
 
                         // check array
                         let atype = arg.type
@@ -343,9 +352,18 @@ const refresh = async () => {
                         ret = fld.type
                         e.getField("return")!.data = ret
                     }
+                    if (nameNode.rule.whiteList?.length !== 1 || nameNode.rule.whiteList[0].value !== fld.name)
+                    {
+                        nameNode.rule.asSuggest = true
+                        nameNode.rule.whiteList = [ { value: fld.name, label: _L.value(fld.display || fld.name) } ]
+                        nameNode.notifyState()
+                    }
                 }
-                nameNode.rule.whiteList = undefined
-                nameNode.notifyState()
+                else
+                {
+                    nameNode.rule.whiteList = undefined
+                    nameNode.notifyState()
+                }
             }
             else
             {
@@ -377,6 +395,7 @@ const refresh = async () => {
 
             case ExpressionType.Map:
                 funcret = (await getSchema(ret))!.array!.element
+                arrayEle = funcret
                 break
         }
 
@@ -413,7 +432,7 @@ const refresh = async () => {
 
         // special func refresh trick
         const specials: ArgInfo[] = specialFuncRefresh[func]
-            ? await specialFuncRefresh[func](e.getField("func") as ScalarNode, fargs.elements as StructNode[], typeMap, ret)
+            ? await specialFuncRefresh[func](e.getField("func") as ScalarNode, fargs.elements as StructNode[], typeMap, arrayEle || ret)
             : []
 
         // adjust type, white list and etc
@@ -480,7 +499,7 @@ const refresh = async () => {
             type.data = ctype?.name || NS_SYSTEM_OBJECT
 
             // name white list
-            const whitelist = await getFieldAccessWhiteList(ctype?.name || "", argMap, "", true, isarray && (arrIdx === k || arrIdx < 0))
+            const whitelist = await getFieldAccessWhiteList(ctype?.name || "", argMap, "", false, isarray && (arrIdx === k || arrIdx < 0))
             /*if (ctype) {
                 for (let j = 0; j < argMap.length; j++) {
                     if (await isSchemaCanBeUseAs(argMap[j].schema.name, ctype.name)) {
@@ -570,11 +589,11 @@ const refreshArgs = async () => {
             argdatas[i].key = `${name}-${type}`
             if (type !== argdatas[i].type) {
                 argdatas[i].type = type
-                argdatas[i].data = null
+                argdatas[i].data = mockSchemaData(type)
             }
         }
         else {
-            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null, showdata: false })
+            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: mockSchemaData(type), showdata: false })
         }
 
         acolor[i] = ""

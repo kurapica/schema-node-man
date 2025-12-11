@@ -413,9 +413,11 @@ const appNode = ref<StructNode | undefined>(undefined)
 const operation = ref("")
 
 let appWatchHandler: Function | null = null
+let isNewApp = false
 
 // create
 const handleNew = async () => {
+    isNewApp = true
     localStorage["schema_new_app"] = state.app
 
     appNode.value = new StructNode({
@@ -430,6 +432,7 @@ const handleNew = async () => {
 
 // update
 const handleEdit = async (row: any, readonly?: boolean) => {
+    isNewApp = false
     const schema = await getAppSchema(row.name)
     appNode.value = new StructNode({
         type: "system.schema.appschema",
@@ -474,6 +477,12 @@ const confirmApp = async () => {
     if (!appNode.value?.valid) return
     const data = jsonClone(toRaw(appNode.value.data))
     const schema = getAppCachedSchema(data.name)
+
+    if (isNewApp && (schema || await getAppSchema(data.name)))
+    {
+        ElMessage.error(_L.value["frontend.view.appnameexists"])
+        return
+    }
 
     if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server))
     {
