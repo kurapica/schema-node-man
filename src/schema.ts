@@ -204,6 +204,16 @@ registerSchema([
         return schema?.type === SchemaType.Scalar || schema?.type === SchemaType.Enum ? type : NS_SYSTEM_STRING
     }),
 
+    newSystemFunc("system.schema.getdefaultfieldinfo", NS_SYSTEM_STRING, [
+        { name: "type", type: "system.schema.valuetype" }
+    ], async (type: string, prop: string) => {
+        const schema = await getSchema(type)
+        if (!schema || schema?.type === SchemaType.Scalar) return null
+        if (prop === "display") return schema.display?.key ? _LS(_L(schema.display)) : null
+        if (prop === "name") return type.split(".").pop() || type
+        return schema[prop as keyof INodeSchema] as string
+    }),
+
     newSystemStruct("system.schema.structfieldconfig", [
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
         { name: "type", type: "system.schema.valuetype", require: true },
@@ -232,6 +242,12 @@ registerSchema([
         { name: "anyLevel", type: NS_SYSTEM_BOOL },
         { name: "singleFlag", type: NS_SYSTEM_BOOL },
     ], [
+        // name
+        { field: "name", type: RelationType.Default, func: "system.schema.getdefaultfieldinfo", args: [ { name: "type" }, { value: "name" } ] },
+
+        // display
+        { field: "display", type: RelationType.Default, func: "system.schema.getdefaultfieldinfo", args: [ { name: "type" }, { value: "display" } ] },
+
         // default
         { field: "default", type: RelationType.Visible, func: "system.schema.isscalarenumtype", args: [ { name: "type" } ] },
         { field: "default", type: RelationType.Type, func: "system.schema.getscalarorenumtype", args: [ { name: "type" } ] },

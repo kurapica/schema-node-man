@@ -523,36 +523,30 @@ onMounted(() => {
         const scopeNode = parent instanceof StructNode ? parent.getField("scope") : undefined
         if (scopeNode){
             policyscopeHandler = scopeNode.subscribe(async () => {
-                const scope = scopeNode.data
                 let access = ""
-                let limit = 0
-                if (scope == PolicyScope.RowAccess)
-                {
-                    limit = 1
-                    let fieldNode = parent
-                    while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
-                        fieldNode = fieldNode.parent
+                let limit = 1
+                let fieldNode = parent
+                while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
+                    fieldNode = fieldNode.parent
 
-                    if (fieldNode)
+                if (fieldNode)
+                {
+                    const app = (fieldNode as StructNode).getField("app")!.data
+                    const fld = (fieldNode as StructNode).getField("name")!.data
+                    if (app && fld)
                     {
-                        const app = (fieldNode as StructNode).getField("app")!.data
-                        const fld = (fieldNode as StructNode).getField("name")!.data
-                        if (app && fld)
-                        {
-                            const appSchema = await getAppSchema(app)
-                            const col = appSchema?.fields?.find((f: any) => f.name === fld)
-                            if (col) {
-                                access = col.type
-                                const schema = await getSchema(col.type)
-                                if (schema?.type == SchemaType.Array)
-                                {
-                                    access = schema.array?.element || ""
-                                }
+                        const appSchema = await getAppSchema(app)
+                        const col = appSchema?.fields?.find((f: any) => f.name === fld)
+                        if (col) {
+                            access = col.type
+                            const schema = await getSchema(col.type)
+                            if (schema?.type == SchemaType.Array)
+                            {
+                                access = schema.array?.element || ""
                             }
                         }
                     }
                 }
-
                 if (access !== rowAccessType || limit != upLimit)
                 {
                     upLimit = limit
