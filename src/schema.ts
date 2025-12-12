@@ -352,8 +352,9 @@ registerSchema([
             case RelationType.AnyLevel:
             case RelationType.SingleFlag:
             case RelationType.Validation:
-            case RelationType.Reference:
                 return NS_SYSTEM_BOOL
+            case RelationType.Reference:
+                return fieldType
         }
     }),
 

@@ -49,7 +49,7 @@
 
             <el-form v-show="activeTab === 0" ref="form" label-width="140px" :model="appNode.rawData">
                 <template v-for="f in appNode.inputFields" :key="f.guid">
-                    <h2>{{ _L(f.display) || f.name }}</h2>
+                    <h2 v-if="!invisibleFields[f.name]">{{ _L(f.display) || f.name }}</h2>
                     <schema-view
                         plain-text="left"
                         :node="(f as AnySchemaNode)"
@@ -61,7 +61,7 @@
 
             <el-form v-show="activeTab === 1 && showref" label-width="140px" :model="appNode.rawData">
                 <template v-for="f in appNode.refInputFields" :key="f.guid">
-                    <h2>{{ _L(f.display) || f.name }}</h2>
+                    <h2 v-if="!invisibleFields[f.name]">{{ _L(f.display) || f.name }}</h2>
                     <schema-view
                         plain-text="left"
                         :node="(f as AnySchemaNode)"
@@ -74,7 +74,7 @@
 
             <el-form v-show="activeTab === 2 && showoutput" label-width="140px" :model="appNode.rawData">
                 <template v-for="f in appNode.pushFields" :key="f.guid">
-                    <h2>{{ _L(f.display) || f.name }}</h2>
+                    <h2 v-if="!invisibleFields[f.name]">{{ _L(f.display) || f.name }}</h2>
                     <schema-view
                         plain-text="left"
                         :node="(f as AnySchemaNode)"
@@ -89,11 +89,12 @@
 </template>
 
 <script lang="ts" setup>
+import { fa } from "element-plus/es/locales.mjs";
 import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
 import { getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, type ILocaleString, getSchema, WorkflowMode, _LS, getAppSchema } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"
-import { onMounted, ref } from "vue"
+import { onMounted, onUnmounted, reactive, ref } from "vue"
 
 const props = defineProps<{ app: string, skin?: string }>()
 const form = ref<InstanceType<typeof ElForm>>()
@@ -120,6 +121,8 @@ const saving = ref(false)
 const showref = ref(false)
 const showoutput = ref(false)
 const startWorkflowing = ref(false)
+const statusWatcher: Function[] = []
+const invisibleFields = reactive<{[key: string]: boolean}>({})
 
 const loadData = async() => {
     if (!appTargetNode.value) return
@@ -136,6 +139,15 @@ const loadData = async() => {
         })
         const appSchema = await getAppSchema(props.app)
         const manualflows: { workflow: string, display: ILocaleString }[] = []
+
+        // visible check
+        statusWatcher.forEach(f => f())
+        statusWatcher.length = 0
+        appNode.value?.fields.forEach(f => {
+            statusWatcher.push(f.subscribeState(() => {
+                invisibleFields[f.name] = f.invisible || false
+            }, true))
+        })
 
         for (const wf of appSchema!.workflows || [])
         {
@@ -314,6 +326,11 @@ onMounted(async() => {
         sourceAppNode.value = (await getSchemaNode({
             type: "frontend.apptarget"
         }, { allowApps: sourceApps, app: sourceApps[0], target: "" })) as StructNode
+})
+
+onUnmounted(() => {
+    statusWatcher.forEach(f => f())
+    statusWatcher.length = 0
 })
 
 </script>
