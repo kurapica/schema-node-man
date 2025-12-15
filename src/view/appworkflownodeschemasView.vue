@@ -129,6 +129,7 @@ interface IWorkflowNode {
     display: string,
     children: IWorkflowNode[],
     node: StructNode,
+    previous: string[],
     depth: number, // for layout
     x: number,
     y: number,
@@ -180,6 +181,7 @@ const refreshWorkflows = async () => {
             display: _L.value(display?.key ? display : name) || name,
             node: n,
             children: [],
+            previous: previous && Array.isArray(previous) ? previous : [],
             depth: 0, x: 0, y: 0,
             width: 0
         }
@@ -214,7 +216,10 @@ const refreshWorkflows = async () => {
         const levelNodes: IWorkflowNode[] = []
         levels[d - 1].forEach(n => {
             if (n.children.length) {
-                n.children.forEach(cn => levelNodes.push(cn))
+                n.children.forEach(cn => {
+                    if (levelNodes.includes(cn)) return
+                    levelNodes.push(cn)
+                })
                 if (n.children.length === 1)
                 {
                     n.children[0].width = Math.max(n.width, n.children[0].width)
@@ -246,9 +251,13 @@ const refreshWorkflows = async () => {
         lastY -= V_SPACING
         levelNodes.forEach(n => {
             n.y = lastY
-            if (n.children.length)
-                n.x = n.children.reduce((pre, cur) => pre + cur.x + cur.width / 2, 0) / n.children.length - n.width / 2
+            const selfOnlyChildren = n.children.filter(c => c.previous.length === 1)
+            if (selfOnlyChildren.length)
+                n.x = selfOnlyChildren.reduce((pre, cur) => pre + cur.x + cur.width / 2, 0) / selfOnlyChildren.length - n.width / 2
+            else if(n.children.length)
+                n.x = n.children[0].x + n.children[0].width / 2 - n.width / 2
         })
+        levelNodes.sort((a, b) => a.x - b.x)
     }
 
     displayLevels.value = levels
