@@ -256,6 +256,15 @@ registerSchema([
         return schema?.workflow?.args?.length ? true : false
     }),
 
+    newSystemFunc("system.schema.showforkkey", NS_SYSTEM_BOOL, [
+        { name: "fork", type: NS_SYSTEM_BOOL, nullable: true },
+        { name: "payload", type: "system.schema.valuetype", nullable: true },
+    ], async(fork?: boolean, payload?: string) => {
+        if (!fork || isNull(payload)) return false
+        const schema = await getSchema(payload!)
+        return schema && schema.type !== SchemaType.Array
+    }),
+
     newSystemFunc("system.schema.showfork", NS_SYSTEM_BOOL, [
         { name: "mode", type: "system.schema.workflowmode", nullable: true },
     ], (mode: string) => {
@@ -266,6 +275,17 @@ registerSchema([
         return [ PolicyScope.FuncExecute ]
     }),
 
+    { 
+        name: "system.schema.forkeys", 
+        type: SchemaType.Array, 
+        display: _LS("system.schema.forkeys"), 
+        loadState: SchemaLoadState.System, 
+        array: { 
+            element: NS_SYSTEM_STRING,
+            single: true
+        } 
+    },
+
     newSystemStruct("system.schema.appworkflownodeschema", [
         { name: "app", type: "system.schema.app", displayOnly: true, invisible: true },
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 },
@@ -273,7 +293,7 @@ registerSchema([
         { name: "type", type: "system.schema.workflowtype", require: true },
         { name: "mode", type: "system.schema.workflowmode", displayOnly: true, invisible: true },
         { name: "fork", type: NS_SYSTEM_BOOL },
-        { name: "forkKey", type: NS_SYSTEM_STRING },
+        { name: "forkKey", type: "system.schema.forkeys" },
         { name: "unCancelable", type: NS_SYSTEM_BOOL },
         { name: "cancelPre", type: NS_SYSTEM_BOOL },
         { name: "args", type: "system.schema.funccallargs" },
@@ -297,8 +317,8 @@ registerSchema([
         { field: "payload", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "type" } ] },
         { field: "type", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.workflow" } ] },
         { field: "event", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.event" } ] },
-        { field: "forkKey", type: RelationType.Visible, func: "system.conv.assign", args: [ { name: "fork" } ] },
-        { field: "cancelPre", type: RelationType.Visible, func: "system.conv.assign", args: [ { name: "fork" } ] },
+        { field: "forkKey", type: RelationType.Visible, func: "system.schema.showforkkey", args: [ { name: "fork" }, { name: "payload" } ] },
+        { field: "cancelPre", type: RelationType.Visible, func: "system.logic.notempty", args: [ { name: "forkKey" } ] },
         { field: "unCancelable", type: RelationType.Invisible, func: "system.conv.assign", args: [ { name: "fork" } ] },
     ]),
     newSystemArray("system.schema.appworkflownodeschemas", "system.schema.appworkflownodeschema", "name"),
@@ -587,6 +607,7 @@ import appPushfldsView from "./view/appPushfldsView.vue"
 import apprelationinfosView from "./view/apprelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue"
+import forkKeyView from "./view/forkKeyView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
 regSchemaTypeView("system.schema.app", sourceappView)
@@ -598,4 +619,5 @@ regSchemaTypeView("system.schema.apppushflds", appPushfldsView)
 regSchemaTypeView("system.schema.appfieldrelations", apprelationinfosView)
 regSchemaTypeView("system.schema.appfieldvalargs", structfldfuncargsView)
 regSchemaTypeView("system.schema.appworkflownodeschemas", appworkflownodeschemasView)
+regSchemaTypeView("system.schema.forkeys", forkKeyView)
 //#endregion
