@@ -89,7 +89,6 @@
 </template>
 
 <script lang="ts" setup>
-import { fa } from "element-plus/es/locales.mjs";
 import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
 import { getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, type ILocaleString, getSchema, WorkflowMode, _LS, getAppSchema } from "schema-node"
@@ -316,6 +315,15 @@ onMounted(async() => {
     showref.value = appNode.value?.refInputFields.length ? true : false
     showoutput.value = appNode.value?.pushFields.length ? true : false
     if (!enableAppData) return
+
+    // visible check
+    statusWatcher.forEach(f => f())
+    statusWatcher.length = 0
+    appNode.value?.fields.forEach(f => {
+        statusWatcher.push(f.subscribeState(() => {
+            invisibleFields[f.name] = f.invisible || false
+        }, true))
+    })
 
     appTargetNode.value = (await getSchemaNode({
         type: "frontend.apptarget"

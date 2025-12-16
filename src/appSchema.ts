@@ -332,7 +332,7 @@ registerSchema([
         { name: "nodes", type: "system.schema.appworkflownodeschemas" },
     ],[
         { field: "nodes.previous", type: RelationType.Visible, func: "system.schema.haspreviousworkflow", args: [ { name: "nodes" } ] },
-        { field: "nodes.previous.$ele", type: RelationType.WhiteList, func: "system.collection.getfields", args: [ { name: "nodes" }, { value: "name" } ] },
+        { field: "nodes.previous.$ele", type: RelationType.WhiteList, func: "system.str.toentrys", args: [ { name: "nodes" }, { value: "name" }, { value: "display" } ] },
         { field: "nodes.app", type: RelationType.Default, func: "system.conv.assign", args: [ { name: "app" } ] },
         { field: "auths.scope", type: RelationType.WhiteList, func: "system.schema.getworkflowpolicyscopes", args: []}
     ]),
