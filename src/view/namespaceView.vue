@@ -40,6 +40,7 @@
                             :title="data.value"
                             width="width:fit-content"
                             :open-delay="500"
+                            :offset="42"
                             trigger="hover">
                             <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
                             <namespace-info-view style="min-width: 300px;" :type="data.value"/>
