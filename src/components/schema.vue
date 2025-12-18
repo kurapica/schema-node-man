@@ -259,6 +259,7 @@ const refresh = async () => {
     if (schema?.type === SchemaType.Namespace) {
         let temp = [...schema.schemas || []]
         temp = temp.filter(p => ((p.loadState || 0) & SchemaLoadState.Frontend) === 0) // hide frontend only schemas
+        temp = temp.filter(p => !p.name.includes("<"))
         if (state.type) {
             temp = temp.filter(p => p.type === state.type)
         }

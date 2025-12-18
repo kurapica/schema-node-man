@@ -1,10 +1,8 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope, PolicyCombine, newSystemRelArray } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope, PolicyCombine, newSystemRelArray, getFieldAccessWhiteList } from "schema-node"
 
 // Schema for definition
 registerSchema([
     newSystemScalar("system.schema.appaccessfld", NS_SYSTEM_STRING),
-    newSystemScalar("system.schema.apppushfld", "system.schema.appaccessfld"),
-    newSystemArray ("system.schema.apppushflds", "system.schema.apppushfld"),
     newSystemScalar("system.schema.appinput", NS_SYSTEM_STRING),
 
     newSystemStruct("system.schema.appfieldvalarg", [
@@ -158,6 +156,18 @@ registerSchema([
         return []
     }),
 
+    newSystemFunc("system.schema.getapppushsourcewhitelist", NS_SYSTEM_ARRAY, [
+        { name: "app", type: NS_SYSTEM_STRING },
+        { name: "name", type: NS_SYSTEM_STRING },
+        { name: "func", type: NS_SYSTEM_STRING },
+    ], async (app: string, name: string, func: string) => {
+        const appSchema = await getAppSchema(app)
+        const fields = (appSchema?.fields || []).filter(f => f.name !== name)
+        const funcSchema = await getSchema(func)
+        if (!funcSchema || funcSchema.type !== SchemaType.Func || !funcSchema.func || funcSchema.func.args?.length !== 1) return []
+        return await getFieldAccessWhiteList(funcSchema.func.args[0].type, fields, "", true, true)
+    }),
+
     newSystemStruct("system.schema.appfieldschema", [
         { name: "app", type: NS_SYSTEM_STRING, readonly: true, invisible: true },
         { name: "name", type: "system.schema.varname", require: true, upLimit: 32 } ,
@@ -172,7 +182,7 @@ registerSchema([
         { name: "disable", type: NS_SYSTEM_BOOL },
         { name: "readonly", type: NS_SYSTEM_BOOL },
         { name: "func", type: "system.schema.pushfunctype" },
-        { name: "args", type: "system.schema.apppushflds" },
+        { name: "arg", type: NS_SYSTEM_STRING },
         { name: "combine", type: "system.schema.datacombinetype" },
         { name: "combines", type: "system.schema.datacombines" },
         { name: "auths", type: "system.schema.policyitems" },
@@ -187,7 +197,8 @@ registerSchema([
         { field: "sourceField", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "sourceApp" }] },
         { field: "sourceField", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" }] },
         { field: "func", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" }] },
-        { field: "args", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "func" }] },
+        { field: "arg", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "func" }] },
+        { field: "arg", type: RelationType.WhiteList, func: "system.schema.getapppushsourcewhitelist", args: [ { name: "app" }, { name: "name" }, { name: "func" }] },
         { field: "frontend", type: RelationType.Visible, func: "system.logic.isnull", args: [ { name: "sourceApp" }] },
         { field: "combine", type: RelationType.Visible, func: "system.schema.appiscombineenable", args: [ { name: "type" }, { name: "func" }] },
         { field: "combines", type: RelationType.Visible, func: "system.schema.appiscombinesenable", args: [ { name: "type" }, { name: "func" }] },
@@ -407,7 +418,7 @@ export function saveStorageAppSchema(schema: IAppSchema)
             sourceApp: f.sourceApp,
             sourceField: f.sourceField,
             func: f.func,
-            args: f.args ? [...f.args] : undefined,
+            arg: f.arg,
             incrUpdate: f.incrUpdate,
             frontend: f.frontend,
             disable: f.disable,
@@ -603,7 +614,6 @@ import sourceappView from "./view/appSourceView.vue"
 import appInputView from "./view/appInputView.vue"
 import appsrcfldView from "./view/appSrcfldView.vue"
 import appaccessfldView from "./view/appAccessfldView.vue"
-import appPushfldsView from "./view/appPushfldsView.vue"
 import apprelationinfosView from "./view/apprelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue"
@@ -614,8 +624,6 @@ regSchemaTypeView("system.schema.app", sourceappView)
 regSchemaTypeView("system.schema.appinput", appInputView)
 regSchemaTypeView("system.schema.appfield", appsrcfldView)
 regSchemaTypeView("system.schema.appaccessfld", appaccessfldView)
-regSchemaTypeView("system.schema.apppushfld", appaccessfldView)
-regSchemaTypeView("system.schema.apppushflds", appPushfldsView)
 regSchemaTypeView("system.schema.appfieldrelations", apprelationinfosView)
 regSchemaTypeView("system.schema.appfieldvalargs", structfldfuncargsView)
 regSchemaTypeView("system.schema.appworkflownodeschemas", appworkflownodeschemasView)

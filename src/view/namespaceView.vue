@@ -363,6 +363,7 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
     const nsOnly = namespaceMap.length === 1
 
     values = values?.filter(v => namespaceMap.includes(v.type)) || []
+    values = values.filter(v => !v.name.includes("<")) // filter generic implement types
 
     // sort
     values.sort((a, b) => {
@@ -511,6 +512,12 @@ onMounted(() => {
     if (isscalarwhitelist) {
         upLimit = 1
         lowLimit = 0
+    }
+
+    // push func only allow 1-arg
+    if (ispushfunctype) {
+        upLimit = 1
+        lowLimit = 1
     }
 
     // evaluator func no arg, account should be fetched from context

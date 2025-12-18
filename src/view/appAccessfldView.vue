@@ -33,7 +33,6 @@ interface ICascaderOptionInfo {
 
 const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()
 const scalarNode = toRaw(props.node)
-const ispush = scalarNode.config.type === "system.schema.apppushfld"
 
 // display state
 const state = reactive<{
@@ -71,17 +70,6 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
         {
             if (!await isSchemaCanBeUseAs(f.type, root))
             {
-                if (ispush && schema?.type === SchemaType.Array && schema.array?.element && await isSchemaCanBeUseAs(schema.array.element, root))
-                {
-                    result.push({
-                        value: `${prefix}${f.name}`,
-                        label: `${_L(f.display) || f.name}`,
-                        leaf: true,
-                        children: null
-                    })
-                    continue
-                }
-
                 const isArray = schema?.type === SchemaType.Array
                 if (isArray)
                 {
