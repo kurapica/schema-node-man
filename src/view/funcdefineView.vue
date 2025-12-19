@@ -1,5 +1,6 @@
 <template>
     <section style="width: 100%;">
+        <schema-view :node="nocacheNode" in-form="nest" plain-text="left"></schema-view>
         <schema-view :node="returnNode" in-form="nest" plain-text="left"></schema-view>
         
         <!-- Arguments -->
@@ -83,17 +84,17 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT, getFieldAccessWhiteList, type IStructFieldConfig } from 'schema-node'
+import { _LS, mockSchemaData, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT, getFieldAccessWhiteList, type IStructFieldConfig } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
-import { mockSchemaData } from 'schema-node';
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
 const returnNode = funcNode.getField("return") as ScalarNode
 const argsNode = funcNode.getField("args") as ArrayNode
 const expsNode = funcNode.getField("exps") as ArrayNode
+const nocacheNode = funcNode.getField("nocache") as ScalarNode
 
 const state = reactive({
     readonly: false,
@@ -324,7 +325,7 @@ const refresh = async () => {
     let lastMatch = false
     let isStructRet = retSchema?.type === SchemaType.Struct && retSchema.struct?.fields.length
     const expcount = expsNode.elements.length
-    const structFields = retSchema?.struct?.fields.map(f => f) || []
+    const structFields = retSchema?.struct?.fields.map((f: IStructFieldConfig) => f) || []
     if (retSchema && expcount)
     {
         const data = expsNode.elements[expcount - 1].rawData
@@ -454,7 +455,7 @@ const refresh = async () => {
             if (choose.length > 1 && exp) {
                 for (let m = 1; m < choose.length; m++) {
                     if (exp && exp.schema.type === SchemaType.Struct) {
-                        const fld: IStructFieldConfig | undefined = exp.schema.struct?.fields.find(f => f.name === choose[m])
+                        const fld: IStructFieldConfig | undefined = exp.schema.struct?.fields.find((f: IStructFieldConfig) => f.name === choose[m])
                         if (fld) {
                             exp = { name: fld.name, type: fld.type, schema: (await getSchema(fld.type))! }
                         }
