@@ -95,6 +95,7 @@
 
 <script lang="ts" setup>
 import { Delete } from '@element-plus/icons-vue'
+import { chdir } from 'process'
 import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
 import { _L, schemaView } from 'schema-node-vueview'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
@@ -104,6 +105,7 @@ const BASE_HEIGHT = 15
 const H_SPACING = 20
 const V_SPACING = 200
 const WORD_WIDTH = 16
+const MIN_WORD_WIDTH = 60
 
 const hexagonPoints = `60,0 120,24 120,48 60,72 0,48 0,24`
 const diamondPoints = `60,0 120,24 60,48 0,24`
@@ -143,7 +145,7 @@ const getTextWidth = (text: string) =>
     text ??= ""
     const length = text.length
     const nonWrodLength = text.replace(/\w+/g, "").length
-    return Math.floor(nonWrodLength * WORD_WIDTH + (length - nonWrodLength) * WORD_WIDTH / 2)
+    return Math.max(MIN_WORD_WIDTH, Math.floor(nonWrodLength * WORD_WIDTH + (length - nonWrodLength) * WORD_WIDTH / 2))
 }
 
 // Workflow -> SVG nodes
@@ -191,6 +193,7 @@ const refreshWorkflows = async () => {
 
         if (previous && Array.isArray(previous) && previous.length)
         {
+            let parentWidths = 0
             previous.forEach((p: string) => {
                 const parentNode = getParent(nodes, p)
                 if (parentNode)
@@ -199,8 +202,12 @@ const refreshWorkflows = async () => {
                         parentNode.type = undefined
                     wfNode.depth = Math.max(parentNode.depth + 1, wfNode.depth)
                     parentNode.children.push(wfNode)
+                    if (parentNode.previous.length <= 1)
+                        parentWidths += parentNode.width
                 }
             })
+            // adjust width for parent nodes
+            wfNode.width = Math.max(wfNode.width, parentWidths + (previous.length - 1) * H_SPACING)
         }
         else
         {
@@ -220,10 +227,6 @@ const refreshWorkflows = async () => {
                     if (levelNodes.includes(cn)) return
                     levelNodes.push(cn)
                 })
-                if (n.children.length === 1)
-                {
-                    n.children[0].width = Math.max(n.width, n.children[0].width)
-                }
             } else
                 levelNodes.push(n) // keep the node in the level for alignment
         })
@@ -249,13 +252,19 @@ const refreshWorkflows = async () => {
     {
         const levelNodes = levels[d]
         lastY -= V_SPACING
+        const childPos: { [key: string]: number } = {}
         levelNodes.forEach(n => {
             n.y = lastY
-            const selfOnlyChildren = n.children.filter(c => c.previous.length === 1)
-            if (selfOnlyChildren.length)
-                n.x = selfOnlyChildren.reduce((pre, cur) => pre + cur.x + cur.width / 2, 0) / selfOnlyChildren.length - n.width / 2
-            else if(n.children.length)
-                n.x = n.children[0].x + n.children[0].width / 2 - n.width / 2
+            if (!n.children.length) return // keep the x for single node
+
+            const centers: { begin: number, end: number }[] = n.children.map(c => {
+                if (c.previous.length === 1) return { begin: c.x, end: c.x + c.width }
+                const begin = childPos[c.guid] || c.x
+                const end = begin + n.width
+                childPos[c.guid] = end + H_SPACING
+                return { begin, end }
+            })
+            n.x = Math.min(...centers.map(c => c.begin)) + (Math.max(...centers.map(c => c.end)) - Math.min(...centers.map(c => c.begin))) / 2 - n.width / 2
         })
         levelNodes.sort((a, b) => a.x - b.x)
     }

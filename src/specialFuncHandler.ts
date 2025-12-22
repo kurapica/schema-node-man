@@ -181,6 +181,7 @@ export const specialFuncRefresh: { [key: string]: (func: ScalarNode, args: Struc
     "system.collection.getfield": refreshFieldFunc,
     "system.collection.getfields":refreshFieldFunc,
     "system.collection.setfield": refreshFieldFunc,
+    "system.collection.getfielddefault": refreshFieldFunc,
 
     // field equal
     "system.collection.fieldequal":refreshFieldCompare,
