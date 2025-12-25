@@ -312,7 +312,7 @@ registerSchema([
         { name: "event", type: "system.schema.eventtype" },
         { name: "state", type: NS_SYSTEM_OBJECT },
         { name: "func", type: "system.schema.functype" },
-        { name: "payload", type: "system.schema.valuetype", require: true },
+        { name: "payload", type: "system.schema.valuetype" },
         { name: "funcArgs", type: "system.schema.funccallargs" },
     ],
     [
@@ -327,7 +327,7 @@ registerSchema([
         { field: "state", type: RelationType.Visible, func: "system.schema.hasworkflowstatetype", args: [ { name: "type" } ] },
         { field: "payload", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "type" } ] },
         { field: "type", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.workflow" } ] },
-        { field: "event", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.event" } ] },
+        //{ field: "event", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.event" } ] },
         { field: "forkKey", type: RelationType.Visible, func: "system.schema.showforkkey", args: [ { name: "fork" }, { name: "payload" } ] },
         { field: "cancelPre", type: RelationType.Visible, func: "system.logic.notempty", args: [ { name: "forkKey" } ] },
         { field: "unCancelable", type: RelationType.Invisible, func: "system.conv.assign", args: [ { name: "fork" } ] },

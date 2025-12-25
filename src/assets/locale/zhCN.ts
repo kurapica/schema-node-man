@@ -210,8 +210,11 @@ importLanguage("zhCN", {
 
     "system.workflow.control": "工作流控制节点",
     "system.workflow.control.goto": "跳转到指定节点",
+    "system.workflow.control.delay": "延时等待节点(ms)",
+    "system.workflow.control.exit": "满足即退出工作流",
 
     "system.workflow.event": "事件触发节点",
+    "system.workflow.event.message": "消息事件触发事件",
     "system.workflow.event.app": "应用事件触发事件",
 
     "system.workflow.event.apppayload": "应用事件触发事件负载",
@@ -766,6 +769,7 @@ importLanguage("zhCN", {
     "frontend.view.manualworkflows": "手动工作流",
     "frontend.view.schemanameexists": "类型名称已存在",
     "frontend.view.appnameexists": "应用名称已存在",
+    "frontend.view.selectnamespace": "请选择类型",
 
     //#endregion
 })

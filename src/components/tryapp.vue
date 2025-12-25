@@ -178,7 +178,7 @@ const saveData = async() => {
     if (!appTargetNode.value || !appNode.value) return
     try {
         await form.value?.validate()
-        if (!appNode.value.valid) return
+        // if (!appNode.value.valid) return
 
         const target = appTargetNode.value.getField("target")!.rawData as string
         if (isNull(target)) return
@@ -186,8 +186,7 @@ const saveData = async() => {
         saving.value = true
         const r = await appNode.value.submit();
         if (!r?.result) {
-            if (r?.error)
-                ElMessage.error(_L.value(r?.error || "frontend.view.savefailed"))
+            ElMessage.error(_L.value(r?.error || "frontend.view.savefailed"))
             return
         }
         else
@@ -199,9 +198,6 @@ const saveData = async() => {
         appTargetNode.value.getField("app")!.data = ""
         await new Promise(resolve => setTimeout(resolve, 100))
         appTargetNode.value.getField("app")!.data = props.app
-
-        // re-load data
-        await loadData()
     } catch(ex: any) {
         if (ex && ex.status === 403)
         {
@@ -282,7 +278,7 @@ const startWorkflow = async (workflow: string) => {
         if (isNull(target)) return
 
         startWorkflowing.value = true
-        const r = await appNode.value.activeWorkflow(workflow);
+        const r = await appNode.value.activeWorkflow(workflow, undefined, undefined, undefined, true);
         if (!r) {
             ElMessage.error(_L.value("frontend.view.startworkflowfailed"))
         }

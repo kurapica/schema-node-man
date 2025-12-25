@@ -818,9 +818,13 @@ const handleWorkflowDelete = async (row: any) => {
 // save
 const confirmWorkflow = async () => {
     const res = await workflowEditorRef.value?.validate()
-    if (!res || !appWorkflowNode.value?.valid) return
+    if (!res || !appWorkflowNode.value?.valid) {
+        ElMessage.error(appWorkflowNode.value?.error)
+        return
+    }
     if (!appWorkflowNode.value?.valid) return
     const data = jsonClone(toRaw(appWorkflowNode.value.data))
+    console.log("workflow data:", data)
     const appSchema = await getAppSchema(currApp!)
     if (!appSchema) return
     if ((appSchema.loadState || 0) & SchemaLoadState.Server)

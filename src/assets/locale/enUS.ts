@@ -210,8 +210,11 @@ importLanguage("enUS", {
 
     "system.workflow.control": "Control Node",
     "system.workflow.control.goto": "Go to Node",
+    "system.workflow.control.delay": "Delay Wait Node(ms)",
+    "system.workflow.control.exit": "Exit Workflow if Matched",
 
     "system.workflow.event": "Event Trigger Workflow",
+    "system.workflow.event.message": "Message Event Trigger Workflow",
     "system.workflow.event.app": "Application Event Trigger Workflow",
 
     "system.workflow.event.apppayload": "Application Data Event Payload",
@@ -766,6 +769,7 @@ importLanguage("enUS", {
 
     "frontend.view.schemanameexists": "Schema name already exists",
     "frontend.view.appnameexists": "App name already exists",
+    "frontend.view.selectnamespace": "Please select a type",
 
     //#endregion
 });

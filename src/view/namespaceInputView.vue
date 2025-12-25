@@ -4,7 +4,8 @@
     </span>
     <section v-else style="display: flex; width:100%;">
         <schema-view
-            v-model="prefix"
+            v-model="prefix" 
+            expand
             :config="{
                 type:'system.schema.namespace',
                 display: _LS('frontend.view.upnamespace')

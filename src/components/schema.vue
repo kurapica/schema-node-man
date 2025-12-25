@@ -2,7 +2,7 @@
     <el-container class="main">
         <el-header style="height: fit-content; width: 100%;">
             <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
-                <schema-view v-model="state.namespace" in-form :config="{
+                <schema-view v-model="state.namespace" in-form expand :config="{
                     type: 'system.schema.namespace',
                     display: _LS('system.schema.namespace')
                 }"></schema-view>

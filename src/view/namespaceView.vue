@@ -1,21 +1,19 @@
 <template>
     <section style="width: 100%;">
-        <template v-if="state.readonly && plainText">
-            <el-popover
-                placement="bottom-start"
-                :title="state.data"
-                width="width:fit-content"
-                trigger="hover">
-                <namespace-info-view :type="state.data"/>
-                <template #reference>
-                    <a :style="{'width': '100%', 'color': 'green', 'text-align': plainText === true ? 'center' : plainText }"
-                        href="javascript:void(0)"
-                        @click="handleEdit(state.data, true)">
-                        {{ state.display }}
-                    </a>
-                </template>
-            </el-popover>
-        </template>
+        <el-popover v-if="!expanded"
+            placement="bottom-start"
+            :title="state.data"
+            width="width:fit-content"
+            trigger="hover">
+            <namespace-info-view :type="state.data"/>
+            <template #reference>
+                <a :style="{'width': '100%', 'color': 'green', 'text-align': plainText === true ? 'center' : plainText }"
+                    href="javascript:void(0)"
+                    @click="handleEdit(state.data, true)">
+                    {{ state.display || _L["frontend.view.selectnamespace"] }}
+                </a>
+            </template>
+        </el-popover>
         <section v-else style="display: flex;">
             <el-cascader
                 v-model="data" 
@@ -104,7 +102,7 @@
 import { saveStorageSchema } from "../schema"
 import { getSchemaServerProvider } from "../schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, PolicyScope, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema, _LS } from "schema-node"
+import { ExpressionType, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema, _LS, debounce } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -121,7 +119,7 @@ interface ICascaderOptionInfo {
 }
 //#endregion
 
-const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean, noGeneric?: boolean }>()
+const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean, noGeneric?: boolean, expand?: boolean }>()
 const scalarNode = toRaw(props.node)
 const type = scalarNode.config.type
 
@@ -132,8 +130,13 @@ const state = reactive<{
     disable?: boolean,
     require?: boolean,
     readonly?: boolean,
-    generic?: ScalarNode[],
-}>({})
+    generic?: ScalarNode[]
+}>({ 
+    disable: scalarNode.rule.disable,
+    require: scalarNode.require,
+    readonly: scalarNode.readonly 
+})
+const expanded = ref(props.expand || false)
 
 const setData = (value: any) => {
     if (state.generic?.length)
@@ -222,6 +225,12 @@ let namesapceWatchHandler: Function | null = null
 
 // update
 const handleEdit = async (name: string, readonly?: boolean) => {
+    if (!state.readonly && !expanded.value) {
+        expanded.value = true
+        reBuildOptions()
+        return
+    }
+
     const schema = await getSchema(name)
     handletype.value = name
     editable.value = (readonly || false) && ((schema?.loadState || 0) & SchemaLoadState.System) === 0
@@ -360,6 +369,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
 }
 
 const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[]) => {
+    if (!expanded.value) return options
     const nsOnly = namespaceMap.length === 1
 
     values = values?.filter(v => namespaceMap.includes(v.type)) || []
@@ -399,6 +409,8 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
 }
 
 const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
+    if (!expanded.value) return resolve([])
+
     try {
         const { value } = node
         if (!value) return resolve([])
@@ -426,6 +438,7 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
 }
 
 const reBuildOptions = async () => {
+    if (!expanded.value) return
     const enumRoot = scalarNode.rule?.root
     if (enumRoot) {
         const rootType = await getSchema(enumRoot)
@@ -466,6 +479,8 @@ const reBuildOptions = async () => {
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])
 }
 
+const delayRebuildOptions = debounce(reBuildOptions, 300)
+
 const refreshOptions = (options: ICascaderOptionInfo[]) => {
     options.forEach(o => {
         o.label = _L.value(o.display)
@@ -497,7 +512,7 @@ onMounted(() => {
                 upLimit = 99
                 lowLimit = 0
             }
-            reBuildOptions()
+            delayRebuildOptions()
         }, true)
     }
     else if (parent instanceof StructNode && parent.getField("type")?.config?.type === "system.schema.relationtype")
@@ -560,7 +575,7 @@ onMounted(() => {
                     upLimit = limit
                     lowLimit = limit
                     rowAccessType = access
-                    reBuildOptions()
+                    delayRebuildOptions()
                 }
             }, true)
         }
@@ -571,7 +586,7 @@ onMounted(() => {
         let data = scalarNode.rawData
 
         // generic type check
-        if (!props.noGeneric && !(props.plainText && scalarNode.readonly))
+        if (!props.noGeneric && !scalarNode.readonly)
         {
             let name = isNull(data) ? "" : data
             const match = name.match(REGEX_GENERIC_IMPLEMENT)
@@ -613,6 +628,9 @@ onMounted(() => {
         {
             state.data = data
         }
+
+        if (isNull(data))
+            expanded.value = true
         
         // build display
         const paths = (isNull(data) ? "" : data).split(".")
@@ -645,7 +663,7 @@ onMounted(() => {
         }
         state.display = display.join("/")
         if (rebuild)
-            await reBuildOptions()
+            delayRebuildOptions()
     }, true)
 
     // state watch
@@ -658,7 +676,7 @@ onMounted(() => {
         if (r !== compatibleType)
         {
             compatibleType = r
-            reBuildOptions()
+            delayRebuildOptions()
         }
 
         state.generic?.forEach(g => {

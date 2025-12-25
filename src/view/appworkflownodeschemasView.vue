@@ -95,7 +95,6 @@
 
 <script lang="ts" setup>
 import { Delete } from '@element-plus/icons-vue'
-import { chdir } from 'process'
 import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
 import { _L, schemaView } from 'schema-node-vueview'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
@@ -194,10 +193,12 @@ const refreshWorkflows = async () => {
         if (previous && Array.isArray(previous) && previous.length)
         {
             let parentWidths = 0
+            let hasParent = false
             previous.forEach((p: string) => {
                 const parentNode = getParent(nodes, p)
                 if (parentNode)
                 {
+                    hasParent = true
                     if (parentNode.type === 'end')
                         parentNode.type = undefined
                     wfNode.depth = Math.max(parentNode.depth + 1, wfNode.depth)
@@ -206,6 +207,10 @@ const refreshWorkflows = async () => {
                         parentWidths += parentNode.width
                 }
             })
+            if (!hasParent)
+            {
+                nodes.push(wfNode)
+            }
             // adjust width for parent nodes
             wfNode.width = Math.max(wfNode.width, parentWidths + (previous.length - 1) * H_SPACING)
         }
@@ -379,7 +384,7 @@ const refreshWorkflowNode = async() => {
     const node = workflowNode.value?.node
     if (!node) return
 
-    const { name, type, args, previous } = node.data
+    const { name, type, args, previous, event } = node.data
     
     // for payload and args
     if (!type) return
@@ -465,7 +470,7 @@ const refreshWorkflowNode = async() => {
         if (workflowType.workflow?.mode === WorkflowMode.Event)
         {
             // event workflow
-            if (workflowType.workflow.payload){
+            if (workflowType.workflow.payload && !/^[tT]\d*$/.test(workflowType.workflow.payload)){
                 const generics = getGenericParameter(workflowType.workflow.payload)
                 if (generics?.length){
                     // app event only for now
@@ -496,6 +501,19 @@ const refreshWorkflowNode = async() => {
                 else
                 {
                     payloadField.data = workflowType.workflow.payload
+                }
+            }
+            // message workflow
+            else
+            {
+                const eventType = event ? await getSchema(event) : undefined
+                if (eventType?.type === SchemaType.Event && eventType.event?.payload)
+                {
+                    payloadField.data = eventType.event.payload
+                }
+                else
+                {
+                    noPayload = true
                 }
             }
         }
