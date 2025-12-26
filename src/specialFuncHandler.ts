@@ -148,7 +148,7 @@ const refreshAppFieldDataFetchFunc = async(func: ScalarNode, args: StructNode[],
 }
 
 const refreshAppDataSource = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const app = args[0].getField("value")!.rawData
+    const app = `${args[0].getField("value")!.rawData}`
     const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
     const result: ArgInfo[] = [{}]
 

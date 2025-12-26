@@ -212,6 +212,7 @@ importLanguage("enUS", {
     "system.workflow.control.goto": "Go to Node",
     "system.workflow.control.delay": "Delay Wait Node(ms)",
     "system.workflow.control.exit": "Exit Workflow if Matched",
+    "system.workflow.control.break": "Break Branch if Condition Met ",
 
     "system.workflow.event": "Event Trigger Workflow",
     "system.workflow.event.message": "Message Event Trigger Workflow",

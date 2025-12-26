@@ -212,6 +212,7 @@ importLanguage("zhCN", {
     "system.workflow.control.goto": "跳转到指定节点",
     "system.workflow.control.delay": "延时等待节点(ms)",
     "system.workflow.control.exit": "满足即退出工作流",
+    "system.workflow.control.break": "满足条件跳出当前分支",
 
     "system.workflow.event": "事件触发节点",
     "system.workflow.event.message": "消息事件触发事件",

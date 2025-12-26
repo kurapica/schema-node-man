@@ -28,7 +28,7 @@
                         @click="openWorkflowNode(node)"
                         class="workflow-node"
                     >
-                        {{ node.display }}
+                        {{ node.display || "Anonymous" }}
                     </text>
                     <text 
                         v-if="!state.readonly"
@@ -95,6 +95,7 @@
 
 <script lang="ts" setup>
 import { Delete } from '@element-plus/icons-vue'
+import type { AnySchemaNode } from 'schema-node'
 import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
 import { _L, schemaView } from 'schema-node-vueview'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
@@ -619,7 +620,8 @@ const closeWorkflowNode = () => {
 const addWorkflowNode = async (parentNode: IWorkflowNode) => {
     if (state.readonly) return
 
-    const newNode = arrayNode.addRow() as StructNode
+    const index = arrayNode.elements.findIndex((e: AnySchemaNode) => e.guid === parentNode.guid)
+    const newNode = arrayNode.addRow(index + 1) as StructNode
     newNode.data = {
         name: `${parentNode.name}_child${parentNode.children.length + 1}`,
         type: "",
