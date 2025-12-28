@@ -192,7 +192,7 @@ export const specialFuncRefresh: { [key: string]: (func: ScalarNode, args: Struc
     "system.collection.fieldlessequal":refreshFieldCompare,
     "system.collection.fieldstartswith":refreshFieldCompare,
     "system.collection.fieldendswith":refreshFieldCompare,
-    "system.collection.fieldcontains":refreshFieldCompare,
+    "system.collection.fieldmatch":refreshFieldCompare,
 
     // to entry
     "system.str.toentry": toEntryFunc,
