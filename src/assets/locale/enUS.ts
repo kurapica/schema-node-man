@@ -197,6 +197,8 @@ importLanguage("enUS", {
 
     // system.workflow
     "system.workflow": "System Workflow",
+    "system.workflow.id": "Workflow Id",
+    "system.workflow.cron": "Cron Expression",
     "system.workflow.node": "Workflow Node",
 
     "system.workflow.func": "The Function Call Workflow",
@@ -206,13 +208,14 @@ importLanguage("enUS", {
     "system.workflow.func.callstate.retry": "Maximum Retry Count",
     "system.workflow.func.callstate.delay": "Delay Time (milliseconds)",
 
-    "system.workflow.func.appcall": "Call Function Within App",
-
     "system.workflow.control": "Control Node",
     "system.workflow.control.goto": "Go to Node",
     "system.workflow.control.delay": "Delay Wait Node(ms)",
     "system.workflow.control.exit": "Exit Workflow if Matched",
-    "system.workflow.control.break": "Break Branch if Condition Met ",
+    "system.workflow.control.break": "Break Branch if Condition Me",
+    "system.workflow.control.interaction": "Start User Interaction Workflow",
+    "system.workflow.control.scheduler": "Scheduler",
+    "system.workflow.control.schedule": "Schedule",
 
     "system.workflow.event": "Event Trigger Workflow",
     "system.workflow.event.message": "Message Event Trigger Workflow",

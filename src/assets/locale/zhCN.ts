@@ -197,6 +197,8 @@ importLanguage("zhCN", {
 
     // system.workflow
     "system.workflow": "系统工作流",
+    "system.workflow.id": "工作流",
+    "system.workflow.cron": "Cron表达式",
     "system.workflow.node": "工作流节点",
 
     "system.workflow.func": "函数调用工作流",
@@ -206,13 +208,14 @@ importLanguage("zhCN", {
     "system.workflow.func.callstate.retry": "最大重试次数",
     "system.workflow.func.callstate.delay": "延迟时间(毫秒)",
     
-    "system.workflow.func.appcall": "应用函数调用",
-
     "system.workflow.control": "工作流控制节点",
     "system.workflow.control.goto": "跳转到指定节点",
     "system.workflow.control.delay": "延时等待节点(ms)",
     "system.workflow.control.exit": "满足即退出工作流",
     "system.workflow.control.break": "满足条件跳出当前分支",
+    "system.workflow.control.interaction": "启动用户交互工作流",
+    "system.workflow.control.scheduler": "定时调度节点",
+    "system.workflow.control.schedule": "定时调度配置",
 
     "system.workflow.event": "事件触发节点",
     "system.workflow.event.message": "消息事件触发事件",

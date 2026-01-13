@@ -406,7 +406,7 @@ const refresh = async () => {
         // args
         const fargs = e.getField("args") as ArrayNode
         const finfo = func ? await getSchema(func) : null
-        let rarglen = finfo?.func?.args.length || 0
+        const rarglen = finfo?.func?.args.length || 0
         let farglen = rarglen
 
         // params support
@@ -445,7 +445,7 @@ const refresh = async () => {
             const valueField = farg.getField("value") as ScalarNode
             const special = specials.length > k ? specials[k] : undefined
 
-            const carg = k >= rarglen ? finfo!.func!.args[rarglen - 1] : finfo!.func!.args[k]
+            const carg =  finfo!.func!.args[k >= rarglen ? rarglen - 1 : k]
             display.data = `${(carg.params || carg.nullable) ? '? ' : '* '}${special?.display || carg.name}`
 
             // call argument type
@@ -501,19 +501,7 @@ const refresh = async () => {
 
             // name white list
             const whitelist = await getFieldAccessWhiteList(ctype?.name || "", argMap, "", false, isarray && (arrIdx === k || arrIdx < 0))
-            /*if (ctype) {
-                for (let j = 0; j < argMap.length; j++) {
-                    if (await isSchemaCanBeUseAs(argMap[j].schema.name, ctype.name)) {
-                        whitelist.push(argMap[j].name)
-                    }
-                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && argMap[j].schema.array?.element && await isSchemaCanBeUseAs(argMap[j].schema.array!.element, ctype.name)) {
-                        whitelist.push(argMap[j].name)
-                    }
-                }
-            }
-            else {
-                argMap.forEach(a => whitelist.push(a.name))
-            }*/
+
             if (!isEqual((name.rule as ScalarRule).whiteList, whitelist)) {
                 (name.rule as ScalarRule).whiteList = whitelist
                 name.validate().then(() => name.notifyState())

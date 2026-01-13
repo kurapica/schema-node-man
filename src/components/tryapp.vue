@@ -134,7 +134,8 @@ const loadData = async() => {
             target: target,
             fields: [],
             take: 5,
-            schemaOnly: true
+            schemaOnly: true,
+            workflow: true
         })
         const appSchema = await getAppSchema(props.app)
         const manualflows: { workflow: string, display: ILocaleString }[] = []

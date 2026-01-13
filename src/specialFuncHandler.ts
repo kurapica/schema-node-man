@@ -175,6 +175,39 @@ const refreshFieldCompare = async(func: ScalarNode, args: StructNode[], typeMap:
     return []
 }
 
+const refreshSaveAppData = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+    const app = `${args[0].getField("value")!.rawData}`
+    const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
+    const result: ArgInfo[] = [{}]
+
+    if (!appSchema) return result
+    result.push({ whiteList: await getFieldAccessWhiteList(ret || "", appSchema.fields || [], undefined, true) })
+
+    const field = `${args[1].getField("value")!.rawData}`
+    const fieldSchema = appSchema.fields?.find(f => f.name === field)
+    const fieldType = fieldSchema?.type ? await getSchema(fieldSchema.type) : undefined
+    if (!fieldType || fieldType.type !== SchemaType.Array || !fieldType.array?.primary?.length) return result
+    result.push({ type: fieldType?.name || "" }) // value type
+
+    // pass onlyAdd and target
+    result.push({})
+    result.push({})
+
+    // overrides
+    const elementType = fieldType.array.element ? await getSchema(fieldType.array.element) : undefined
+    if (!elementType || elementType.type !== SchemaType.Struct || !elementType.struct?.fields.length) return result
+    let whiteList = await getFieldAccessWhiteList("", elementType.struct.fields.filter(f => !fieldType.array!.primary!.includes(f.name)), undefined, true)
+    for (let i = 5; i < args.length; i++) {
+        result.push({ whiteList: whiteList })
+
+        // remove used field
+        const fname = args[i].getField("value")!.rawData
+        whiteList = whiteList.filter(w => w.value !== fname)
+    }
+
+    return result
+}
+
 export const specialFuncRefresh: { [key: string]: (func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => Promise<ArgInfo[]> } = {
     // field access
     "system.collection.delfield": refreshFieldFunc,
@@ -219,4 +252,6 @@ export const specialFuncRefresh: { [key: string]: (func: ScalarNode, args: Struc
     "system.data.getappfdatabytwokey": refreshAppFieldDataFetchFunc,
     "system.data.getappfdatabythreekey": refreshAppFieldDataFetchFunc,
     "system.data.getappfdatabyfourkey": refreshAppFieldDataFetchFunc,
+
+    "system.data.saveappdata": refreshSaveAppData,
 }

@@ -25,7 +25,7 @@
                         font-size="14" 
                         fill="#000000" 
                         text-anchor="middle"
-                        @click="openWorkflowNode(node)"
+                        @click="openWorkflowNode(node as any)"
                         class="workflow-node"
                     >
                         {{ node.display || "Anonymous" }}
@@ -39,7 +39,7 @@
                         fill="#ff0000" 
                         text-anchor="middle"
                         class="workflow-node"
-                        @click="addWorkflowNode(node)"
+                        @click="addWorkflowNode(node as any)"
                         >
                         +
                     </text>
@@ -64,7 +64,7 @@
                     <schema-view 
                         v-if="workflowNode"
                         :key="workflowNode.guid"
-                        :node="workflowNode.node" 
+                        :node="workflowNode.node as any" 
                         in-form="expandall"
                         :plain-text="plainText"
                         no-add no-del
@@ -94,9 +94,10 @@
 </template>
 
 <script lang="ts" setup>
+import { specialFuncRefresh, type ArgInfo } from '@/specialFuncHandler'
 import { Delete } from '@element-plus/icons-vue'
-import type { AnySchemaNode } from 'schema-node'
-import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
+import type { AnySchemaNode, INodeSchema, ScalarRule } from 'schema-node'
+import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, isEqual, isNull, NS_SYSTEM_OBJECT, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
 import { _L, schemaView } from 'schema-node-vueview'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 
@@ -107,8 +108,8 @@ const V_SPACING = 200
 const WORD_WIDTH = 16
 const MIN_WORD_WIDTH = 60
 
-const hexagonPoints = `60,0 120,24 120,48 60,72 0,48 0,24`
-const diamondPoints = `60,0 120,24 60,48 0,24`
+//const hexagonPoints = `60,0 120,24 120,48 60,72 0,48 0,24`
+//const diamondPoints = `60,0 120,24 60,48 0,24`
 
 const props = defineProps<{ node: ArrayNode, plainText?: any, inForm?: any }>()
 const arrayNode = toRaw(props.node)
@@ -319,65 +320,6 @@ const getAllPrevious = (prevs: any): string[] => {
     return []
 }
 
-const spacialFuncHandlers: { [key: string]: Function } = {
-    "system.data.getappdatabyonekey": async (args: ArrayNode, payloadTypes: any) => {
-        if (args.elements.length < 3) return []
-        const app = (args.elements[0] as StructNode).getField("value")?.data as string
-        const field = (args.elements[1] as StructNode).getField("value")?.data as string
-        const firstKey = args.elements[2] as StructNode
-
-        const appSchema = app ? await getAppSchema(app) : null
-        if (!appSchema) return []
-        
-        const fieldSchema = appSchema.fields?.find(f => f.name === field)
-        if (!fieldSchema) return []
-        
-        const fieldType = await getSchema(fieldSchema.type)
-        if (fieldType?.type === SchemaType.Array && fieldType.array?.primary?.length === 1)
-        {
-            const eleType = await getSchema(fieldType.array.element)
-            if (eleType?.type === SchemaType.Struct && eleType.struct?.fields)
-            {
-                const pkField = eleType.struct.fields.find(f => f.name === fieldType.array!.primary![0])
-                if (pkField)
-                {
-                    const display = firstKey.getField("display")!
-                    const type = firstKey.getField("type")!
-                    const nameField = firstKey.getField("name") as ScalarNode
-
-                    display.data = `* ${pkField.display?.key ? _L.value(pkField.display) : pkField.name}`
-                    type.data = pkField.type
-
-                    nameField.rule.whiteList = await getFieldAccessWhiteList(pkField.type, payloadTypes)
-                    nameField.validation().then(() => nameField.notifyState())
-                }
-            }
-        }
-    },
-    "system.data.saveappdata": async (args: ArrayNode, payloadTypes: any) => {
-        if (args.elements.length < 3) return []
-        const app = (args.elements[0] as StructNode).getField("value")?.data as string
-        const field = (args.elements[1] as StructNode).getField("value")?.data as string
-        const data = args.elements[2] as StructNode
-
-        const appSchema = app ? await getAppSchema(app) : null
-        if (!appSchema) return []
-        
-        const fieldSchema = appSchema.fields?.find(f => f.name === field)
-        if (!fieldSchema) return []
-        
-        const display = data.getField("display")!
-        const type = data.getField("type")!
-        const nameField = data.getField("name") as ScalarNode
-
-        display.data = `* ${fieldSchema.display?.key ? _L.value(fieldSchema.display) : fieldSchema.name}`
-        type.data = fieldSchema.type
-
-        nameField.rule.whiteList = await getFieldAccessWhiteList(fieldSchema.type, payloadTypes)
-        nameField.validation().then(() => nameField.notifyState())
-    }
-}
-
 const refreshWorkflowNode = async() => {
     const appSchema = await getAppSchema(app)
     if (!appSchema) return
@@ -385,13 +327,10 @@ const refreshWorkflowNode = async() => {
     const node = workflowNode.value?.node
     if (!node) return
 
-    const { name, type, args, previous, event } = node.data
+    const { type, args, event } = node.data
     
     // for payload and args
     if (!type) return
-
-    const prevs = getAllPrevious(previous)
-    const payloads = payloadTypes.filter(p => prevs.indexOf(p.name) >= 0)
 
     const payloadField = node.getField("payload") as ScalarNode
     const funcArgsField = node.getField("funcArgs") as ArrayNode
@@ -403,66 +342,7 @@ const refreshWorkflowNode = async() => {
 
     if(workflowType.workflow?.mode === WorkflowMode.Function)
     {
-        // function workflow
-        const func = node.getField("func")?.data as string
-        const funcSchema = func ? await getSchema(func) : undefined
-        if (funcSchema?.type === SchemaType.Func)
-        {
-            const len = funcSchema.func?.args?.length || 0
-            while (funcArgsField.elements.length < len) funcArgsField.addRow()
-            if (funcArgsField.elements.length > len) funcArgsField.delRows(len, funcArgsField.elements.length - len)
-
-            // check return
-            const generic = funcSchema?.func?.generic ? (Array.isArray(funcSchema.func.generic) ? [...funcSchema.func.generic] : [ funcSchema.func.generic ]) : []
-            if (funcSchema.func?.return && !/^[tT]\d*$/.test(funcSchema.func?.return))
-            {
-                payloadField.data = funcSchema.func?.return
-            }
-            else 
-            {
-                // enable payload input for generic return type
-                enablePayloadInput = true
-                const payload = payloadField.data as string
-                if (payload){
-                    const gidx = funcSchema.func?.return && funcSchema.func.return.length > 1 ? parseInt(funcSchema.func.return.substring(1)) - 1 : 0
-                    generic[gidx] = payload
-                }
-            }
-
-
-            // adjust arguments
-            for (let j = 0; j < len; j++){
-                const carg = funcSchema.func!.args![j]
-                const farg = funcArgsField.elements[j] as StructNode
-                const display = farg.getField("display")!
-                const type = farg.getField("type")!
-                const nameField = farg.getField("name") as ScalarNode
-                let ctype = carg.type
-
-                if (/^[tT]\d*$/.test(ctype)){
-                    // generic type
-                    const gidx = ctype.length > 1 ? parseInt(ctype.substring(1)) - 1 : 0
-                    if (generic.length > gidx){
-                        ctype = generic[gidx]
-                    }
-                }
-
-                display.data = `${carg.nullable ? '? ' : '* '}${carg.name}`
-                type.data = ctype
-
-                nameField.rule.whiteList = await getFieldAccessWhiteList(ctype, payloads)
-                nameField.validation().then(() => nameField.notifyState())
-            }
-
-            if (spacialFuncHandlers[func])
-            {
-                await spacialFuncHandlers[func](funcArgsField, payloadTypes)
-            }
-        }
-        else
-        {
-            funcArgsField.data = [] // clear func args
-        }
+        enablePayloadInput = await refreshFuncArgs(true)
     }
     else 
     {
@@ -521,7 +401,13 @@ const refreshWorkflowNode = async() => {
         else
         {
             // normal workflow
-            if (workflowType.workflow?.payload && !/^[tT]\d*$/.test(workflowType.workflow.payload)){
+            if (getGenericParameter(workflowType.workflow.payload)?.length)
+            {
+                // generic payload type
+                enablePayloadInput = true
+                payloadField.data ||= workflowType.workflow.payload
+            }
+            else if (workflowType.workflow?.payload && !/^[tT]\d*$/.test(workflowType.workflow.payload)){
                 payloadField.data = workflowType.workflow.payload
             }
             else if (workflowType.workflow?.payload)
@@ -590,7 +476,128 @@ const refreshWorkflowNode = async() => {
     }
 }
 
+const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
+    const node = workflowNode.value?.node
+    let enablePayloadInput = false // If we can't determine payload type
+    if (!node) return enablePayloadInput
+
+    const payloadField = node.getField("payload") as ScalarNode
+    const funcArgsField = node.getField("funcArgs") as ArrayNode
+
+    const { previous } = node.data
+    const prevs = getAllPrevious(previous)
+    const payloads = payloadTypes.filter(p => prevs.indexOf(p.name) >= 0)
+
+    // function workflow
+    const func = node.getField("func")?.data as string
+    const funcSchema = func ? await getSchema(func) : undefined
+    if (funcSchema?.type === SchemaType.Func)
+    {
+        const rarglen = funcSchema.func?.args?.length || 0
+        let farglen = rarglen
+
+        // params support
+        if (farglen && funcSchema.func?.args[farglen - 1].params)
+        {
+            for (let i = funcArgsField.elements.length; i >= farglen; i--)
+            {
+                const ele = funcArgsField.elements[i - 1] as StructNode
+                const { name, value } = ele.rawData
+                if (!isNull(name) || !isNull(value))
+                {
+                    farglen = i + 1
+                    break
+                }
+            }
+        }
+
+        while (funcArgsField.elements.length < farglen) funcArgsField.addRow()
+        if (funcArgsField.elements.length > farglen) funcArgsField.delRows(farglen, funcArgsField.elements.length - farglen)
+
+        // check return
+        const generic = funcSchema?.func?.generic ? (Array.isArray(funcSchema.func.generic) ? [...funcSchema.func.generic] : [ funcSchema.func.generic ]) : []
+        if (funcSchema.func?.return && !/^[tT]\d*$/.test(funcSchema.func?.return))
+        {
+            payloadField.data = funcSchema.func?.return
+        }
+        else 
+        {
+            // enable payload input for generic return type
+            enablePayloadInput = true
+            const payload = payloadField.data as string
+            if (payload){
+                const gidx = funcSchema.func?.return && funcSchema.func.return.length > 1 ? parseInt(funcSchema.func.return.substring(1)) - 1 : 0
+                generic[gidx] = payload
+            }
+        }
+
+        // special func refresh trick
+        const specials: ArgInfo[] = specialFuncRefresh[func]
+            ? await specialFuncRefresh[func](node.getField("func") as ScalarNode, funcArgsField.elements as StructNode[], new Map<string, INodeSchema>(), funcSchema.func?.return)
+            : []
+
+        // adjust arguments
+        for (let j = 0; j < farglen; j++){
+            const carg =  funcSchema.func!.args[j >= rarglen ? rarglen - 1 : j]
+            const farg = funcArgsField.elements[j] as StructNode
+            const display = farg.getField("display")!
+            const type = farg.getField("type")!
+            const nameField = farg.getField("name") as ScalarNode
+            const valueField = farg.getField("value") as ScalarNode
+            const special = specials.length > j ? specials[j] : undefined
+
+            display.data = `${(carg.params || carg.nullable) ? '? ' : '* '}${special?.display || carg.name}`
+
+            // call argument type
+            let ctype = await getSchema(special?.type || carg.type, generic)
+
+            type.data = ctype?.name || NS_SYSTEM_OBJECT
+
+            // name white list
+            const whitelist = await getFieldAccessWhiteList(ctype?.name || "", payloads, "", false)
+
+            if (!isEqual((nameField.rule as ScalarRule).whiteList, whitelist)) {
+                (nameField.rule as ScalarRule).whiteList = whitelist
+                nameField.validate().then(() => nameField.notifyState())
+            }
+
+            // value field
+            if (!isEqual(special?.whiteList, valueField.rule.whiteList))
+            {
+                valueField.rule.whiteList = special?.whiteList
+                valueField.validate().then(() => valueField.notifyState())
+            }
+        }
+    }
+    else
+    {
+        funcArgsField.data = [] // clear func args
+    }
+
+    // Enable or disable payload input
+    if (!inner)
+    {
+        // enable or disable payload input
+        if (enablePayloadInput)
+        {
+            if (payloadField.rule.disable)
+            {
+                payloadField.rule.disable = false
+                payloadField.notifyState()
+            }
+        }
+        else if(!payloadField.rule.disable)
+        {
+            payloadField.rule.disable = true
+            payloadField.notifyState()
+        }
+    }
+
+    return enablePayloadInput
+}
+
 const soonRefresh = debounce(refreshWorkflowNode, 50)
+const delayRefreshArgs = debounce(refreshFuncArgs, 200)
 
 const openWorkflowNode = async (node: IWorkflowNode) => {
     clearWorkflowHandler(refreshHandler)
@@ -599,8 +606,8 @@ const openWorkflowNode = async (node: IWorkflowNode) => {
         name: n.getField("name")!.subscribe(() => soonRefresh("name")),
         type: n.getField("type")!.subscribe(() => soonRefresh("type")),
         args: n.getField("args")!.subscribe(() => soonRefresh("args")),
-        func: n.getField("func")!.subscribe(() => soonRefresh("func")),
-        funcArgs: n.getField("funcArgs")!.subscribe(() => soonRefresh("funcArgs")),
+        func: n.getField("func")!.subscribe(() => delayRefreshArgs()),
+        funcArgs: n.getField("funcArgs")!.subscribe(() => delayRefreshArgs()),
         event: n.getField("event")!.subscribe(() => soonRefresh("event")),
         payload: n.getField("payload")!.subscribe(() => soonRefresh("payload"))
     }
@@ -633,7 +640,7 @@ const addWorkflowNode = async (parentNode: IWorkflowNode) => {
     
     const addedNode = displayLevels.value.flat().find(n => n.guid === newNode.guid)
     if (addedNode)
-       await openWorkflowNode(addedNode)
+       await openWorkflowNode(addedNode as any)
 }
 
 const deleteNode = () => {

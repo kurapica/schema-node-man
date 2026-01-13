@@ -279,7 +279,7 @@ registerSchema([
     newSystemFunc("system.schema.showfork", NS_SYSTEM_BOOL, [
         { name: "mode", type: "system.schema.workflowmode", nullable: true },
     ], (mode: string) => {
-        return mode === WorkflowMode.Event || mode === WorkflowMode.Interaction
+        return mode !== WorkflowMode.Function
     }),
 
     newSystemFunc("system.schema.getworkflowpolicyscopes", "system.schema.policyscopes", [], () => {
@@ -617,6 +617,7 @@ import appaccessfldView from "./view/appAccessfldView.vue"
 import apprelationinfosView from "./view/apprelationinfosView.vue"
 import structfldfuncargsView from "./view/structfldfuncargsView.vue"
 import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue"
+import appWorkflowIdView from "./components/appWorkflowIdView.vue"
 import forkKeyView from "./view/forkKeyView.vue"
 import { regSchemaTypeView } from "schema-node-vueview"
 
@@ -627,5 +628,6 @@ regSchemaTypeView("system.schema.appaccessfld", appaccessfldView)
 regSchemaTypeView("system.schema.appfieldrelations", apprelationinfosView)
 regSchemaTypeView("system.schema.appfieldvalargs", structfldfuncargsView)
 regSchemaTypeView("system.schema.appworkflownodeschemas", appworkflownodeschemasView)
+regSchemaTypeView("system.workflow.id", appWorkflowIdView)
 regSchemaTypeView("system.schema.forkeys", forkKeyView)
 //#endregion
