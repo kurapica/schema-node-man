@@ -675,6 +675,9 @@ importLanguage("zhCN", {
     "frontend.view.workflow": "工作流",
     "frontend.view.startworkflowfailed": "启动工作流失败",
     "frontend.view.startworkflowsuccess": "启动工作流成功",
+    "frontend.view.turnoffworkflow": "终止",
+    "frontend.view.turnoffworkflowfailed": "终止工作流失败",
+    "frontend.view.turnoffworkflowsuccess": "终止工作流成功",
 
     "frontend.catalog": "目录",
     "frontend.catalog.01.intro": "01. 简介",

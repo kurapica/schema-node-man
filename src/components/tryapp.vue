@@ -36,8 +36,14 @@
         </el-header>
         <el-main v-if="appNode" style="max-height: 55vh;margin-top:4rem;">
             <!-- manual workflow-->
-            <template v-if="manualWorkflows.length">
-                <el-button v-for="wf in manualWorkflows" :key="wf.workflow" v-loading="startWorkflowing" style="margin-bottom: 1rem; margin-right: 1rem;" type="primary" @click="startWorkflow(wf.workflow)">
+            <template v-for="wf in manualWorkflows" :key="wf.name">
+                <!-- Turn off workflow -->
+                <el-button v-if="wf.togglable && wf.workflowId" v-loading="startWorkflowing" style="margin-bottom: 1rem; margin-right: 1rem;" type="danger" @click="turnOffWorkflow(wf.name)">
+                    {{ _L["frontend.view.turnoffworkflow"] }} - {{ _L(wf.display) || wf.workflow }}
+                </el-button>
+
+                <!-- Turn on workflow -->
+                <el-button v-else v-loading="startWorkflowing" style="margin-bottom: 1rem; margin-right: 1rem;" type="primary" @click="startWorkflow(wf.name)">
                     {{ _L(wf.display) || wf.workflow }}
                 </el-button>
             </template>
@@ -85,13 +91,33 @@
                 </template>
             </el-form>
         </el-main>
+
+        <el-drawer v-model="showInteraction" :title="_L(interactionWorkflow?.display || '')" direction="rtl" size="80%" append-to-body>
+            <el-container class="main" style="height: 80vh;">
+                <el-main>
+                    <schema-view 
+                        v-if="interactionData"
+                        :key="interactionData.guid"
+                        :node="interactionData" 
+                        in-form="expandall"
+                        plain-text="left"
+                        v-bind="$attrs"
+                    ></schema-view>
+                </el-main>
+                <el-footer>
+                    <el-button type="success" @click="startWorkflow(interactionWorkflow!.name, interactionData?.data)">
+                        {{ _L["CONFIRM"] }}
+                    </el-button>
+                </el-footer>
+            </el-container>
+        </el-drawer>
     </el-container>
 </template>
 
 <script lang="ts" setup>
 import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
-import { getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, type ILocaleString, getSchema, WorkflowMode, _LS, getAppSchema } from "schema-node"
+import { SchemaType, type INodeSchema, getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, type ILocaleString, getSchema, WorkflowMode, _LS, getAppSchema, IAppInteractionWorkflow } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"
 import { onMounted, onUnmounted, reactive, ref } from "vue"
 
@@ -103,7 +129,7 @@ const activeTab = ref(0)
 const appNode = ref<AppNode | undefined>(undefined)
 const dataProvider = getAppDataProvider()
 const enableAppData = dataProvider ? true : false
-const manualWorkflows = ref<{ workflow: string, display: ILocaleString }[]>([])
+const manualWorkflows = ref<IAppInteractionWorkflow[]>([])
 
 // app target node
 const empty_guid = "00000000-0000-0000-0000-000000000000"
@@ -158,7 +184,7 @@ const loadData = async() => {
                 manualflows.push({ workflow: wf.name, display: wf.display || _LS(wf.name) })
             }
         }
-        manualWorkflows.value = manualflows
+        manualWorkflows.value = appNode.value.interactionWorkflows
     } catch(ex: any) {
         manualWorkflows.value = []
         if (ex && ex.status === 403)
@@ -272,14 +298,39 @@ const saveSourceTarget = async() => {
     }
 }
 
-const startWorkflow = async (workflow: string) => {
+const interactionData = ref<StructNode | undefined>(undefined)
+const showInteraction = ref(false)
+const interactionWorkflow = ref<IAppInteractionWorkflow | undefined>(undefined)
+
+const startWorkflow = async (name: string, data: any = undefined) => {
     if (!appTargetNode.value || !appNode.value) return
+    showInteraction.value = false
     try {
         const target = appTargetNode.value.getField("target")!.rawData as string
         if (isNull(target)) return
+        
+        const workflow = manualWorkflows.value.find(wf => wf.name === name)
+        if (!workflow?.nodes?.length) return
+
+        const payloadType = workflow.nodes[0].payload
+        if (isNull(data) && !isNull(payloadType))
+        {
+            const payloadSchema = await getSchema(payloadType) as INodeSchema
+            if (payloadSchema.type === SchemaType.Struct && payloadSchema.struct.fields.length > 2)
+            {
+                const dataField = payloadSchema.struct.fields.find(f => f.name === "data")
+                if (dataField)
+                {
+                    interactionWorkflow.value = workflow
+                    interactionData.value = await getSchemaNode({ type: dataField.type }, { }) as StructNode
+                    showInteraction.value = true
+                    return
+                }
+            }
+        }
 
         startWorkflowing.value = true
-        const r = await appNode.value.activeWorkflow(workflow, undefined, undefined, undefined, true);
+        const r = await appNode.value.activeWorkflow(name, undefined, undefined, data, true);
         if (!r) {
             ElMessage.error(_L.value("frontend.view.startworkflowfailed"))
         }
@@ -294,6 +345,33 @@ const startWorkflow = async (workflow: string) => {
             return
         }
         ElMessage.error(_L.value["frontend.view.error"])
+        console.error(ex)
+        return
+    }
+    finally{
+        startWorkflowing.value = false
+    }
+}
+
+const turnOffWorkflow = async (workflow: string) => {
+    if (!appTargetNode.value || !appNode.value) return
+    try {
+        const target = appTargetNode.value.getField("target")!.rawData as string
+        if (isNull(target)) return
+
+        startWorkflowing.value = true
+        await appNode.value.turnOffWorkflow(workflow);
+        ElMessage.success(_L.value("frontend.view.turnoffworkflowsuccess"))
+
+        // refresh manual workflows
+        manualWorkflows.value = appNode.value.interactionWorkflows
+    } catch(ex: any) {
+        if (ex && ex.status === 403)
+        {
+            ElMessage.error(_L.value["frontend.view.nopermission"])
+            return
+        }
+        ElMessage.error(_L.value("frontend.view.turnoffworkflowfailed"))
         console.error(ex)
         return
     }

@@ -4,6 +4,7 @@ export interface ArgInfo {
     type?: string,
     display?: string,
     whiteList?: any[],
+    matchArray?: boolean
 }
 
 const refreshFieldFunc = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
@@ -187,7 +188,16 @@ const refreshSaveAppData = async(func: ScalarNode, args: StructNode[], typeMap: 
     const fieldSchema = appSchema.fields?.find(f => f.name === field)
     const fieldType = fieldSchema?.type ? await getSchema(fieldSchema.type) : undefined
     if (!fieldType || fieldType.type !== SchemaType.Array || !fieldType.array?.primary?.length) return result
-    result.push({ type: fieldType?.name || "" }) // value type
+
+    // value type
+    const chooseValue = args[2].getField("name")!.rawData
+    if (!isNull(chooseValue) && typeMap.has(chooseValue)) {
+        result.push({ type: typeMap.get(chooseValue)!.name }) // value type
+    }
+    else
+    {
+        result.push({ type: fieldType.array.element, matchArray: true }) // value type
+    }
 
     // pass onlyAdd and target
     result.push({})

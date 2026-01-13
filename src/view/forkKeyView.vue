@@ -67,7 +67,7 @@ onMounted(() => {
         state.disable = node.rule.disable
     }, true)
 
-    payloadWatcher = payload.subscribe(async () => {
+    payloadWatcher = payload?.subscribe(async () => {
         const val = payload.rawData
         const schema = !isNull(val) ? await getSchema(val) : undefined
         if (schema?.type === SchemaType.Struct) {

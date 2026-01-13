@@ -675,6 +675,9 @@ importLanguage("enUS", {
     "frontend.view.workflow": "Workflow",
     "frontend.view.startworkflowfailed": "Start Workflow Failed",
     "frontend.view.startworkflowsuccess": "Start Workflow Successfully",
+    "frontend.view.turnoffworkflow": "Turn Off",
+    "frontend.view.turnoffworkflowfailed": "Turn Off Workflow Failed",
+    "frontend.view.turnoffworkflowsuccess": "Turn Off Workflow Successfully",
 
     "frontend.catalog": "Catalog",
     "frontend.catalog.01.intro": "01. Intro",

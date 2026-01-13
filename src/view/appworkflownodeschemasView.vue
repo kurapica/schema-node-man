@@ -487,6 +487,10 @@ const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
     const { previous } = node.data
     const prevs = getAllPrevious(previous)
     const payloads = payloadTypes.filter(p => prevs.indexOf(p.name) >= 0)
+    const typeMaps = new Map<string, INodeSchema>()
+    payloads.forEach(p => {
+        typeMaps.set(p.name, getCachedSchema(p.type)!)
+    })
 
     // function workflow
     const func = node.getField("func")?.data as string
@@ -533,7 +537,7 @@ const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
 
         // special func refresh trick
         const specials: ArgInfo[] = specialFuncRefresh[func]
-            ? await specialFuncRefresh[func](node.getField("func") as ScalarNode, funcArgsField.elements as StructNode[], new Map<string, INodeSchema>(), funcSchema.func?.return)
+            ? await specialFuncRefresh[func](node.getField("func") as ScalarNode, funcArgsField.elements as StructNode[], typeMaps, funcSchema.func?.return)
             : []
 
         // adjust arguments
@@ -554,7 +558,7 @@ const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
             type.data = ctype?.name || NS_SYSTEM_OBJECT
 
             // name white list
-            const whitelist = await getFieldAccessWhiteList(ctype?.name || "", payloads, "", false)
+            const whitelist = await getFieldAccessWhiteList(ctype?.name || "", payloads, "", false, special?.matchArray)
 
             if (!isEqual((nameField.rule as ScalarRule).whiteList, whitelist)) {
                 (nameField.rule as ScalarRule).whiteList = whitelist
