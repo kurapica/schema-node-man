@@ -353,6 +353,19 @@ importLanguage("enUS", {
     "system.schema.appfieldflags.incrupdate": "Incr-update",
     "system.schema.appfieldflags.trackpush": "Track push",
 
+    "system.schema.fieldfiltermode": "Field Filter Mode",
+    "system.schema.fieldfiltermode.exactly": "Exact Match",
+    "system.schema.fieldfiltermode.prefix": "Prefix Match",
+    "system.schema.fieldfiltermode.suffix": "Suffix Match",
+    "system.schema.fieldfiltermode.contains": "Contains Match",
+    "system.schema.fieldfiltermode.function": "Function Match",
+
+    "system.schema.fieldfilter": "Field Filter",
+    "system.schema.fieldfilter.field": "Field Name",
+    "system.schema.fieldfilter.mode": "Filter Mode",
+    "system.schema.fieldfilter.func": "Filter Function",
+    "system.schema.fieldfilter.args": "Filter Arguments",
+
     "system.schema.scalarschema": "Scalar Definition",
     "system.schema.scalarschema.base": "Base Scalar Type",
     "system.schema.scalarschema.unit": "Unit Literal",
@@ -503,6 +516,7 @@ importLanguage("enUS", {
     "system.schema.appfieldschema.auths": "Authorization List",
     "system.schema.appfieldschema.rowAuths": "Row Authorization List",
     "system.schema.appfieldschema.colAuths": "Column Authorization List",
+    "system.schema.appfieldschema.filters": "Field Filters",
 
     "system.schema.appschema": "App definition",
     "system.schema.appschema.name": "App Name",
@@ -574,6 +588,7 @@ importLanguage("enUS", {
     "system.schema.appworkflownodeschema.forkKey": "Fork Key",
     "system.schema.appworkflownodeschema.unCancelable": "Un-cancelable",
     "system.schema.appworkflownodeschema.cancelPre": "Cancel Previous Fork Branches",
+    "system.schema.appworkflownodeschema.payloadSave": "Payload Persistent",
     "system.schema.appworkflownodeschema.state": "State",
 
     "system.schema.appworkflowschema": "App Workflow Definition",

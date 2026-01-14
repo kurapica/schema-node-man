@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope, PolicyCombine, newSystemRelArray, getFieldAccessWhiteList } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope, PolicyCombine, newSystemRelArray, getFieldAccessWhiteList, FieldFilterMode } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -17,6 +17,17 @@ registerSchema([
         { field: "value", type: RelationType.Disable, func: "system.schema.hideexpvalue", args: [ { name: "type" }, { name: "name" } ] },
     ]),
     newSystemArray("system.schema.appfieldvalargs", "system.schema.appfieldvalarg"),
+
+    newSystemStruct("system.schema.fieldfilter", [
+        { name: "field", type: NS_SYSTEM_STRING, upLimit:128, require: true },
+        { name: "mode", type: "system.schema.fieldfiltermode", require: true, default: FieldFilterMode.Exactly },
+        { name: "func", type: "system.schema.functype" },
+        { name: "args", type: "system.strings" },
+    ], [
+        { field: "func", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: FieldFilterMode.Function } ] },
+        { field: "args", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: FieldFilterMode.Function } ] },
+    ]),
+    newSystemArray("system.schema.fieldfilters", "system.schema.fieldfilter", "field"),
 
     newSystemFunc("system.schema.appgetfieldtype", "system.schema.valuetype", [
         { name: "app", type: NS_SYSTEM_STRING },
@@ -188,6 +199,7 @@ registerSchema([
         { name: "auths", type: "system.schema.policyitems" },
         { name: "rowAuths", type: "system.schema.rowpolicyitems" },
         { name: "colAuths", type: "system.schema.colpolicyitems" },
+        { name: "filters", type: "system.schema.fieldfilters" },
     ], [
         { field: "name", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "name" }, { name: "type" }] },
         { field: "display", type: RelationType.Default, func: "system.schema.appgetsourceappfldinfo", args: [ { name: "sourceApp" }, { name: "sourceField" }, { value: "display" }, { name: "type" }] },
@@ -206,6 +218,8 @@ registerSchema([
         { field: "trackPush", type: RelationType.Visible, func: "system.schema.appistrackpushenable", args: [ { name: "sourceField" }, { name: "func" }] },
         { field: "colAuths", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
         { field: "colAuths.name", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
+        { field: "filters", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
+        { field: "filters.field", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
     ]),
     
     newSystemFunc("system.schema.apphasfields", NS_SYSTEM_BOOL, [
@@ -307,6 +321,7 @@ registerSchema([
         { name: "forkKey", type: "system.schema.forkeys" },
         { name: "unCancelable", type: NS_SYSTEM_BOOL },
         { name: "cancelPre", type: NS_SYSTEM_BOOL },
+        { name: "payloadSave", type: NS_SYSTEM_BOOL },
         { name: "args", type: "system.schema.funccallargs" },
         { name: "previous", type: "system.schema.appworkflows" },
         { name: "event", type: "system.schema.eventtype" },
@@ -331,6 +346,7 @@ registerSchema([
         { field: "forkKey", type: RelationType.Visible, func: "system.schema.showforkkey", args: [ { name: "fork" }, { name: "payload" } ] },
         { field: "cancelPre", type: RelationType.Visible, func: "system.logic.notempty", args: [ { name: "forkKey" } ] },
         { field: "unCancelable", type: RelationType.Invisible, func: "system.conv.assign", args: [ { name: "fork" } ] },
+        { field: "payloadSave", type: RelationType.Visible, func: "system.logic.notnull", args: [ { name: "payload" } ] },
     ]),
     newSystemArray("system.schema.appworkflownodeschemas", "system.schema.appworkflownodeschema", "name"),
 

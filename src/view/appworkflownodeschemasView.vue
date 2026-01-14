@@ -1,86 +1,42 @@
 <template>
     <el-container>
-        <svg :style="{width: state.svgWidth, height: state.svgHeight, display: 'block', 'margin-left': 'auto', 'margin-right': 'auto'}" xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <svg :style="{ width: state.svgWidth, height: state.svgHeight, display: 'block', 'margin-left': 'auto', 'margin-right': 'auto' }"
+            xmlns="http://www.w3.org/2000/svg" version="1.1">
             <g v-for="(level, levelIndex) in displayLevels" :key="`level-${levelIndex}`">
-                <g 
-                    v-for="node in level"
-                    :key="node.guid"
-                >
-                    <rect
-                        :x="node.x" 
-                        :y="node.y" 
-                        :width="node.width + 14" 
-                        height="40" 
-                        rx="10" ry="10" 
-                        fill="#f0f8ff" 
-                        stroke="#4682b4" 
-                        stroke-width="2"
-                    />
-                    
+                <g v-for="node in level" :key="node.guid">
+                    <rect :x="node.x" :y="node.y" :width="node.width + 14" height="40" rx="10" ry="10" fill="#f0f8ff"
+                        stroke="#4682b4" stroke-width="2" />
+
                     <!-- Node text -->
-                    <text 
-                        :x="node.x + (node.width) / 2" 
-                        :y="node.y + 25" 
-                        font-family="Arial, sans-serif" 
-                        font-size="14" 
-                        fill="#000000" 
-                        text-anchor="middle"
-                        @click="openWorkflowNode(node as any)"
-                        class="workflow-node"
-                    >
+                    <text :x="node.x + (node.width) / 2" :y="node.y + 25" font-family="Arial, sans-serif" font-size="14"
+                        fill="#000000" text-anchor="middle" @click="openWorkflowNode(node as any)"
+                        class="workflow-node">
                         {{ node.display || "Anonymous" }}
                     </text>
-                    <text 
-                        v-if="!state.readonly"
-                        :x="node.x + node.width + 4" 
-                        :y="node.y + 25" 
-                        font-family="Arial, sans-serif" 
-                        font-size="24" 
-                        fill="#ff0000" 
-                        text-anchor="middle"
-                        class="workflow-node"
-                        @click="addWorkflowNode(node as any)"
-                        >
+                    <text v-if="!state.readonly" :x="node.x + node.width + 4" :y="node.y + 25"
+                        font-family="Arial, sans-serif" font-size="24" fill="#ff0000" text-anchor="middle"
+                        class="workflow-node" @click="addWorkflowNode(node as any)">
                         +
                     </text>
 
                     <!-- Connections -->
-                    <line 
-                        v-for="child in node.children" 
-                        :key="`line-${node.guid}-${child.guid}`"
-                        :x1="node.x + (node.width + 20) / 2" 
-                        :y1="node.y + 40" 
-                        :x2="child.x + (child.width + 20) / 2" 
-                        :y2="child.y" 
-                        stroke="#4682b4" 
-                        stroke-width="2"
-                    ></line>
+                    <line v-for="child in node.children" :key="`line-${node.guid}-${child.guid}`"
+                        :x1="node.x + (node.width + 20) / 2" :y1="node.y + 40" :x2="child.x + (child.width + 20) / 2"
+                        :y2="child.y" stroke="#4682b4" stroke-width="2"></line>
                 </g>
             </g>
         </svg>
-        <el-drawer v-model="showWorkflowNode" :title="workflowNodeDisplay" direction="rtl" size="80%" append-to-body @closed="closeWorkflowNode">
+        <el-drawer v-model="showWorkflowNode" :title="workflowNodeDisplay" direction="rtl" size="80%" append-to-body
+            @closed="closeWorkflowNode">
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <schema-view 
-                        v-if="workflowNode"
-                        :key="workflowNode.guid"
-                        :node="workflowNode.node as any" 
-                        in-form="expandall"
-                        :plain-text="plainText"
-                        no-add no-del
-                        v-bind="$attrs"
-                    ></schema-view>
+                    <schema-view v-if="workflowNode" :key="workflowNode.guid" :node="workflowNode.node as any"
+                        in-form="expandall" :plain-text="plainText" no-add no-del v-bind="$attrs"></schema-view>
                 </el-main>
                 <el-footer>
-                    <el-popconfirm
-                        v-if="!workflowNode?.children?.length && !state.readonly" 
-                        :title="_L['frontend.view.confirmdelete']"
-                        :confirm-button-text="_L['YES']"
-                        :cancel-button-text="_L['NO']"
-                        :icon="Delete"
-                        @confirm="deleteNode"
-                        style="float:right;"
-                        >
+                    <el-popconfirm v-if="!workflowNode?.children?.length && !state.readonly"
+                        :title="_L['frontend.view.confirmdelete']" :confirm-button-text="_L['YES']"
+                        :cancel-button-text="_L['NO']" :icon="Delete" @confirm="deleteNode" style="float:right;">
                         <template #reference>
                             <el-button type="danger">
                                 {{ _L["frontend.view.delete"] }}
@@ -94,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { specialFuncRefresh, type ArgInfo } from '@/specialFuncHandler'
+import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
 import { Delete } from '@element-plus/icons-vue'
 import type { AnySchemaNode, INodeSchema, ScalarRule } from 'schema-node'
 import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, isEqual, isNull, NS_SYSTEM_OBJECT, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
@@ -139,10 +95,9 @@ interface IWorkflowNode {
     width: number,
 }
 const displayLevels = ref<IWorkflowNode[][]>([])
-let payloadTypes:{ name: string, display?: ILocaleString, type: string }[] = []
+let payloadTypes: { name: string, display?: ILocaleString, type: string }[] = []
 
-const getTextWidth = (text: string) =>
-{
+const getTextWidth = (text: string) => {
     text ??= ""
     const length = text.length
     const nonWrodLength = text.replace(/\w+/g, "").length
@@ -154,14 +109,12 @@ const refreshWorkflows = async () => {
     const appSchema = await getAppSchema(app)
     if (!appSchema) return
 
-    const payloads:{ name: string, display?: ILocaleString, type: string }[] = []
+    const payloads: { name: string, display?: ILocaleString, type: string }[] = []
     const nodes: IWorkflowNode[] = []
     let maxDepth: number = 0
 
-    const getParent = (nodes: IWorkflowNode[], name: string): IWorkflowNode | undefined =>
-    {
-        for(const n of nodes)
-        {
+    const getParent = (nodes: IWorkflowNode[], name: string): IWorkflowNode | undefined => {
+        for (const n of nodes) {
             if (n.name === name) return n
             const p = getParent(n.children, name)
             if (p) return p
@@ -169,8 +122,7 @@ const refreshWorkflows = async () => {
         return undefined
     }
 
-    for(let i = 0; i< arrayNode.elements.length; i++)
-    {
+    for (let i = 0; i < arrayNode.elements.length; i++) {
         const n = arrayNode.elements[i] as StructNode
         const { name, type, display, previous, payload } = n.data
         const workflowType = type ? await getSchema(type) : undefined
@@ -192,14 +144,12 @@ const refreshWorkflows = async () => {
 
         if (name && payload) payloads.push({ name, type: payload, display })
 
-        if (previous && Array.isArray(previous) && previous.length)
-        {
+        if (previous && Array.isArray(previous) && previous.length) {
             let parentWidths = 0
             let hasParent = false
             previous.forEach((p: string) => {
                 const parentNode = getParent(nodes, p)
-                if (parentNode)
-                {
+                if (parentNode) {
                     hasParent = true
                     if (parentNode.type === 'end')
                         parentNode.type = undefined
@@ -209,15 +159,13 @@ const refreshWorkflows = async () => {
                         parentWidths += parentNode.width
                 }
             })
-            if (!hasParent)
-            {
+            if (!hasParent) {
                 nodes.push(wfNode)
             }
             // adjust width for parent nodes
             wfNode.width = Math.max(wfNode.width, parentWidths + (previous.length - 1) * H_SPACING)
         }
-        else
-        {
+        else {
             nodes.push(wfNode)
         }
         maxDepth = Math.max(wfNode.depth, maxDepth)
@@ -225,8 +173,7 @@ const refreshWorkflows = async () => {
 
     // build display levels
     const levels: IWorkflowNode[][] = [nodes]
-    for(let d = 1; d <= maxDepth; d++)
-    {
+    for (let d = 1; d <= maxDepth; d++) {
         const levelNodes: IWorkflowNode[] = []
         levels[d - 1].forEach(n => {
             if (n.children.length) {
@@ -244,7 +191,7 @@ const refreshWorkflows = async () => {
     const maxWdith = levels[maxDepth].reduce((pre, cur) => pre + cur.width, 0) + (levels[maxDepth].length - 1) * H_SPACING
     state.svgWidth = Math.max(MIN_SVG_WIDTH, maxWdith)
     state.svgHeight = BASE_HEIGHT + (maxDepth + 1) * V_SPACING
-    
+
     // calc the last level
     let lastY = BASE_HEIGHT + maxDepth * V_SPACING
     let offsetX = (state.svgWidth - maxWdith) / 2
@@ -255,8 +202,7 @@ const refreshWorkflows = async () => {
     })
 
     // calc other levels
-    for(let d = maxDepth - 1; d >= 0; d--)
-    {
+    for (let d = maxDepth - 1; d >= 0; d--) {
         const levelNodes = levels[d]
         lastY -= V_SPACING
         const childPos: { [key: string]: number } = {}
@@ -298,16 +244,13 @@ const clearWorkflowHandler = (h: IWorkflowHandler | undefined) => {
 let refreshHandler: IWorkflowHandler | undefined = undefined
 
 const getAllPrevious = (prevs: any): string[] => {
-    if (prevs && Array.isArray(prevs)) 
-    {
+    if (prevs && Array.isArray(prevs)) {
         const result = [...prevs]
         prevs.forEach((p: string) => {
             const node = arrayNode.elements.find(e => (e as StructNode).data.name === p) as StructNode | undefined
-            if (node)
-            {
+            if (node) {
                 const { previous } = node.data
-                if (previous && Array.isArray(previous))
-                {
+                if (previous && Array.isArray(previous)) {
                     const pprevs = getAllPrevious(previous)
                     pprevs.forEach(pp => {
                         if (result.indexOf(pp) < 0) result.push(pp)
@@ -320,7 +263,7 @@ const getAllPrevious = (prevs: any): string[] => {
     return []
 }
 
-const refreshWorkflowNode = async() => {
+const refreshWorkflowNode = async () => {
     const appSchema = await getAppSchema(app)
     if (!appSchema) return
 
@@ -328,7 +271,7 @@ const refreshWorkflowNode = async() => {
     if (!node) return
 
     const { type, args, event } = node.data
-    
+
     // for payload and args
     if (!type) return
 
@@ -340,33 +283,28 @@ const refreshWorkflowNode = async() => {
     const workflowType = getCachedSchema(type)
     if (workflowType?.type !== SchemaType.Workflow) return
 
-    if(workflowType.workflow?.mode === WorkflowMode.Function)
-    {
+    if (workflowType.workflow?.mode === WorkflowMode.Function) {
         enablePayloadInput = await refreshFuncArgs(true)
     }
-    else 
-    {
+    else {
         funcArgsField.data = [] // clear func args
 
-        if (workflowType.workflow?.mode === WorkflowMode.Event)
-        {
+        if (workflowType.workflow?.mode === WorkflowMode.Event) {
             // event workflow
-            if (workflowType.workflow.payload && !/^[tT]\d*$/.test(workflowType.workflow.payload)){
+            if (workflowType.workflow.payload && !/^[tT]\d*$/.test(workflowType.workflow.payload)) {
                 const generics = getGenericParameter(workflowType.workflow.payload)
-                if (generics?.length){
+                if (generics?.length) {
                     // app event only for now
                     enablePayloadInput = true
 
-                    if (generics?.length === 1){
-                        const index = workflowType.workflow.args 
+                    if (generics?.length === 1) {
+                        const index = workflowType.workflow.args
                             ? workflowType.workflow.args.findIndex(a => a.type === "system.schema.appfield")
                             : -1
 
-                        if (index >= 0 && args && args[index] && args[index].value)
-                        {
+                        if (index >= 0 && args && args[index] && args[index].value) {
                             const field = appSchema.fields?.find(f => f.name === args[index].value)
-                            if (field?.type)
-                            {
+                            if (field?.type) {
                                 let payloadType = field.type
                                 const ftypeSchema = await getSchema(payloadType)
                                 if (ftypeSchema?.type === SchemaType.Array) payloadType = ftypeSchema.array!.element
@@ -379,82 +317,69 @@ const refreshWorkflowNode = async() => {
                     if (enablePayloadInput)
                         payloadField.data = workflowType.workflow.payload
                 }
-                else
-                {
+                else {
                     payloadField.data = workflowType.workflow.payload
                 }
             }
             // message workflow
-            else
-            {
+            else {
                 const eventType = event ? await getSchema(event) : undefined
-                if (eventType?.type === SchemaType.Event && eventType.event?.payload)
-                {
+                if (eventType?.type === SchemaType.Event && eventType.event?.payload) {
                     payloadField.data = eventType.event.payload
                 }
-                else
-                {
+                else {
                     noPayload = true
                 }
             }
         }
-        else
-        {
+        else {
             // normal workflow
-            if (getGenericParameter(workflowType.workflow.payload)?.length)
-            {
+            if (workflowType.workflow?.payload && getGenericParameter(workflowType.workflow.payload)?.length) {
                 // generic payload type
                 enablePayloadInput = true
                 payloadField.data ||= workflowType.workflow.payload
             }
-            else if (workflowType.workflow?.payload && !/^[tT]\d*$/.test(workflowType.workflow.payload)){
+            else if (workflowType.workflow?.payload && !/^[tT]\d*$/.test(workflowType.workflow.payload)) {
                 payloadField.data = workflowType.workflow.payload
             }
-            else if (workflowType.workflow?.payload)
-            {
+            else if (workflowType.workflow?.payload) {
                 enablePayloadInput = true
             }
-            else
-            {
+            else {
                 noPayload = true
             }
         }
     }
 
     // enable or disable payload input
-    if (enablePayloadInput)
-    {
-        if (payloadField.rule.disable)
-        {
+    if (enablePayloadInput) {
+        if (payloadField.rule.disable) {
             payloadField.rule.disable = false
             payloadField.notifyState()
         }
     }
-    else if(!payloadField.rule.disable)
-    {
+    else if (!payloadField.rule.disable) {
         payloadField.rule.disable = true
         payloadField.notifyState()
     }
 
-    if (noPayload)
-    {
+    if (noPayload) {
         payloadField.rule.invisible = true
         payloadField.notifyState()
     }
-    else if (payloadField.rule.invisible)
-    {
+    else if (payloadField.rule.invisible) {
         payloadField.rule.invisible = false
         payloadField.notifyState()
     }
 
     // args field
     const argsField = node.getField("args") as ArrayNode
-    if (workflowType.workflow?.args?.length){
+    if (workflowType.workflow?.args?.length) {
         const len = workflowType.workflow.args.length
         while (argsField.elements.length < len) argsField.addRow()
         if (argsField.elements.length > len) argsField.delRows(len, argsField.elements.length - len)
-    
-        for (let j = 0; j < len; j++){
+
+        for (let j = 0; j < len; j++) {
             const carg = workflowType.workflow.args[j]
             const farg = argsField.elements[j] as StructNode
             const display = farg.getField("display")!
@@ -470,13 +395,12 @@ const refreshWorkflowNode = async() => {
             nameField.validation().then(() => nameField.notifyState())
         }
     }
-    else
-    {
+    else {
         argsField.data = [] // clear args
     }
 }
 
-const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
+const refreshFuncArgs = async (inner: boolean = false): Promise<boolean> => {
     const node = workflowNode.value?.node
     let enablePayloadInput = false // If we can't determine payload type
     if (!node) return enablePayloadInput
@@ -495,20 +419,16 @@ const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
     // function workflow
     const func = node.getField("func")?.data as string
     const funcSchema = func ? await getSchema(func) : undefined
-    if (funcSchema?.type === SchemaType.Func)
-    {
+    if (funcSchema?.type === SchemaType.Func) {
         const rarglen = funcSchema.func?.args?.length || 0
         let farglen = rarglen
 
         // params support
-        if (farglen && funcSchema.func?.args[farglen - 1].params)
-        {
-            for (let i = funcArgsField.elements.length; i >= farglen; i--)
-            {
+        if (farglen && funcSchema.func?.args[farglen - 1].params) {
+            for (let i = funcArgsField.elements.length; i >= farglen; i--) {
                 const ele = funcArgsField.elements[i - 1] as StructNode
                 const { name, value } = ele.rawData
-                if (!isNull(name) || !isNull(value))
-                {
+                if (!isNull(name) || !isNull(value)) {
                     farglen = i + 1
                     break
                 }
@@ -519,17 +439,15 @@ const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
         if (funcArgsField.elements.length > farglen) funcArgsField.delRows(farglen, funcArgsField.elements.length - farglen)
 
         // check return
-        const generic = funcSchema?.func?.generic ? (Array.isArray(funcSchema.func.generic) ? [...funcSchema.func.generic] : [ funcSchema.func.generic ]) : []
-        if (funcSchema.func?.return && !/^[tT]\d*$/.test(funcSchema.func?.return))
-        {
+        const generic = funcSchema?.func?.generic ? (Array.isArray(funcSchema.func.generic) ? [...funcSchema.func.generic] : [funcSchema.func.generic]) : []
+        if (funcSchema.func?.return && !/^[tT]\d*$/.test(funcSchema.func?.return)) {
             payloadField.data = funcSchema.func?.return
         }
-        else 
-        {
+        else {
             // enable payload input for generic return type
             enablePayloadInput = true
             const payload = payloadField.data as string
-            if (payload){
+            if (payload) {
                 const gidx = funcSchema.func?.return && funcSchema.func.return.length > 1 ? parseInt(funcSchema.func.return.substring(1)) - 1 : 0
                 generic[gidx] = payload
             }
@@ -541,8 +459,8 @@ const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
             : []
 
         // adjust arguments
-        for (let j = 0; j < farglen; j++){
-            const carg =  funcSchema.func!.args[j >= rarglen ? rarglen - 1 : j]
+        for (let j = 0; j < farglen; j++) {
+            const carg = funcSchema.func!.args[j >= rarglen ? rarglen - 1 : j]
             const farg = funcArgsField.elements[j] as StructNode
             const display = farg.getField("display")!
             const type = farg.getField("type")!
@@ -566,32 +484,26 @@ const refreshFuncArgs = async(inner:boolean = false) : Promise<boolean> => {
             }
 
             // value field
-            if (!isEqual(special?.whiteList, valueField.rule.whiteList))
-            {
+            if (!isEqual(special?.whiteList, valueField.rule.whiteList)) {
                 valueField.rule.whiteList = special?.whiteList
                 valueField.validate().then(() => valueField.notifyState())
             }
         }
     }
-    else
-    {
+    else {
         funcArgsField.data = [] // clear func args
     }
 
     // Enable or disable payload input
-    if (!inner)
-    {
+    if (!inner) {
         // enable or disable payload input
-        if (enablePayloadInput)
-        {
-            if (payloadField.rule.disable)
-            {
+        if (enablePayloadInput) {
+            if (payloadField.rule.disable) {
                 payloadField.rule.disable = false
                 payloadField.notifyState()
             }
         }
-        else if(!payloadField.rule.disable)
-        {
+        else if (!payloadField.rule.disable) {
             payloadField.rule.disable = true
             payloadField.notifyState()
         }
@@ -636,15 +548,15 @@ const addWorkflowNode = async (parentNode: IWorkflowNode) => {
     newNode.data = {
         name: `${parentNode.name}_child${parentNode.children.length + 1}`,
         type: "",
-        previous: [ parentNode.name ],
+        previous: [parentNode.name],
         args: [],
         funcArgs: []
     }
     await refreshWorkflows()
-    
+
     const addedNode = displayLevels.value.flat().find(n => n.guid === newNode.guid)
     if (addedNode)
-       await openWorkflowNode(addedNode as any)
+        await openWorkflowNode(addedNode as any)
 }
 
 const deleteNode = () => {
@@ -659,7 +571,7 @@ const deleteNode = () => {
     closeWorkflowNode()
 }
 
-let handler: Function | undefined = arrayNode.subscribe((action:string) => {
+let handler: Function | undefined = arrayNode.subscribe((action: string) => {
     const len = arrayNode.elements.length
     if (action !== "swap" && len == state.length) return;
 
@@ -672,8 +584,7 @@ let stateHandler: Function | undefined = arrayNode.subscribeState(() => {
 }, true)
 
 onMounted(() => {
-    if (!arrayNode.elements.length && !state.readonly)
-    {
+    if (!arrayNode.elements.length && !state.readonly) {
         // add initial node
         const newNode = arrayNode.addRow() as StructNode
         newNode.data = {
@@ -698,16 +609,16 @@ onUnmounted(() => {
 
 <style scoped>
 .workflow-svg {
-  background: #fafafa;
+    background: #fafafa;
 }
 
 .workflow-node {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .node-text {
-  font-size: 12px;
-  fill: #303133;
-  pointer-events: none;
+    font-size: 12px;
+    fill: #303133;
+    pointer-events: none;
 }
 </style>

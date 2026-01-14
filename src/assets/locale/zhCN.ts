@@ -353,6 +353,19 @@ importLanguage("zhCN", {
     "system.schema.appfieldflags.incrupdate": "增量数据",
     "system.schema.appfieldflags.trackpush": "跟踪推送",
 
+    "system.schema.fieldfiltermode": "字段过滤模式",
+    "system.schema.fieldfiltermode.exactly": "完全匹配",
+    "system.schema.fieldfiltermode.prefix": "前缀匹配",
+    "system.schema.fieldfiltermode.suffix": "后缀匹配",
+    "system.schema.fieldfiltermode.contains": "包含匹配",
+    "system.schema.fieldfiltermode.function": "函数匹配",
+
+    "system.schema.fieldfilter": "字段过滤",
+    "system.schema.fieldfilter.field": "字段名",
+    "system.schema.fieldfilter.mode": "过滤模式",
+    "system.schema.fieldfilter.func": "过滤函数",
+    "system.schema.fieldfilter.args": "过滤函数参数",
+
     "system.schema.scalarschema": "基础结构体类型定义",
     "system.schema.scalarschema.base": "原始基础数据类型",
     "system.schema.scalarschema.unit": "字面量单位",
@@ -503,6 +516,7 @@ importLanguage("zhCN", {
     "system.schema.appfieldschema.auths": "权限列表",
     "system.schema.appfieldschema.rowAuths": "行权限列表",
     "system.schema.appfieldschema.colAuths": "列权限列表",
+    "system.schema.appfieldschema.filters": "字段过滤规则",
 
     "system.schema.appschema": "应用定义",
     "system.schema.appschema.name": "应用名",
@@ -574,6 +588,7 @@ importLanguage("zhCN", {
     "system.schema.appworkflownodeschema.forkKey": "分叉键",
     "system.schema.appworkflownodeschema.unCancelable": "不可取消",
     "system.schema.appworkflownodeschema.cancelPre": "取消同分叉键的分支",
+    "system.schema.appworkflownodeschema.payloadSave": "负载持久化",
     "system.schema.appworkflownodeschema.state": "状态",
 
     "system.schema.appworkflowschema": "应用工作流定义",
