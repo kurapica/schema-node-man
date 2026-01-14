@@ -1,4 +1,4 @@
-import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope, PolicyCombine, newSystemRelArray, getFieldAccessWhiteList, FieldFilterMode } from "schema-node"
+import { type IStructFieldConfig, type IFunctionArgumentInfo, type IFunctionExpression, type IStructFieldRelation, type IFunctionCallArgument, type IAppFieldSchema, _LS, getAppCachedSchema, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerAppSchema, registerSchema, SchemaLoadState, SchemaType, type IAppSchema, RelationType, NS_SYSTEM_STRINGS, getAppSchema, getSchema, ARRAY_ELEMENT, deepClone, type INodeSchema, isNull, getCachedSchema, _L, newSystemArray, newSystemFunc, newSystemScalar, newSystemStruct, NS_SYSTEM_LOCALE_STRING, WorkflowMode, NS_SYSTEM_ARRAY, NS_SYSTEM_OBJECT, PolicyScope, getFieldAccessWhiteList, FieldFilterMode } from "schema-node"
 
 // Schema for definition
 registerSchema([
@@ -21,11 +21,6 @@ registerSchema([
     newSystemStruct("system.schema.fieldfilter", [
         { name: "field", type: NS_SYSTEM_STRING, upLimit:128, require: true },
         { name: "mode", type: "system.schema.fieldfiltermode", require: true, default: FieldFilterMode.Exactly },
-        { name: "func", type: "system.schema.functype" },
-        { name: "args", type: "system.strings" },
-    ], [
-        { field: "func", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: FieldFilterMode.Function } ] },
-        { field: "args", type: RelationType.Visible, func: "system.logic.equal", args: [ { name: "mode" }, { value: FieldFilterMode.Function } ] },
     ]),
     newSystemArray("system.schema.fieldfilters", "system.schema.fieldfilter", "field"),
 

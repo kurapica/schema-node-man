@@ -82,7 +82,7 @@
       append-to-body>
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <schema-view v-if="interactionData" :key="interactionData.guid" :node="interactionData" in-form="expandall"
+          <schema-view v-if="interactionData" :key="interactionData.guid" :node="interactionData as any" in-form="expandall"
             plain-text="left" v-bind="$attrs"></schema-view>
         </el-main>
         <el-footer>
@@ -98,7 +98,7 @@
 <script lang="ts" setup>
 import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
-import { SchemaType, type INodeSchema, getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, type ILocaleString, getSchema, WorkflowMode, _LS, getAppSchema, type IAppInteractionWorkflow, generateGuid } from "schema-node"
+import { SchemaType, type INodeSchema, getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, getSchema, _LS, type IAppInteractionWorkflow, generateGuid } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"
 import { onMounted, onUnmounted, reactive, ref } from "vue"
 
