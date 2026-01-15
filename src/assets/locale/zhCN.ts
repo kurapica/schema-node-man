@@ -362,7 +362,6 @@ importLanguage("zhCN", {
 
     "system.schema.fieldfilter": "字段过滤",
     "system.schema.fieldfilter.mode": "过滤模式",
-    "system.schema.fieldfilter.field": "字段名",
     "system.schema.fieldfilter.filter": "过滤",
 
     "system.schema.scalarschema": "基础结构体类型定义",

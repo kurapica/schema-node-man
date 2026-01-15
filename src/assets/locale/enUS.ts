@@ -362,7 +362,6 @@ importLanguage("enUS", {
 
     "system.schema.fieldfilter": "Field Filter",
     "system.schema.fieldfilter.mode": "Filter Mode",
-    "system.schema.fieldfilter.field": "Field Name",
     "system.schema.fieldfilter.filter": "Filter",
 
     "system.schema.scalarschema": "Scalar Definition",
