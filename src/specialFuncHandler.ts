@@ -199,7 +199,8 @@ const refreshSaveAppData = async(func: ScalarNode, args: StructNode[], typeMap: 
         result.push({ type: fieldType.array.element, matchArray: true }) // value type
     }
 
-    // pass onlyAdd and target
+    // pass onlyAdd and target and raiseEvent
+    result.push({})
     result.push({})
     result.push({})
 
