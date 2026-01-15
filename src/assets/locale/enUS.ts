@@ -358,13 +358,12 @@ importLanguage("enUS", {
     "system.schema.fieldfiltermode.prefix": "Prefix Match",
     "system.schema.fieldfiltermode.suffix": "Suffix Match",
     "system.schema.fieldfiltermode.contains": "Contains Match",
-    "system.schema.fieldfiltermode.function": "Function Match",
+    "system.schema.fieldfiltermode.filter": "Filter Function",
 
     "system.schema.fieldfilter": "Field Filter",
-    "system.schema.fieldfilter.field": "Field Name",
     "system.schema.fieldfilter.mode": "Filter Mode",
-    "system.schema.fieldfilter.func": "Filter Function",
-    "system.schema.fieldfilter.args": "Filter Arguments",
+    "system.schema.fieldfilter.field": "Field Name",
+    "system.schema.fieldfilter.filter": "Filter",
 
     "system.schema.scalarschema": "Scalar Definition",
     "system.schema.scalarschema.base": "Base Scalar Type",
@@ -461,6 +460,7 @@ importLanguage("enUS", {
     "system.schema.funcarg.name": "Name",
     "system.schema.funcarg.type": "Type",
     "system.schema.funcarg.nullable": "Nullable",
+    "system.schema.funcarg.display": "Display",
 
     "system.schema.funccallarg": "Function Call Argument",
     "system.schema.funccallarg.name": "Expression",

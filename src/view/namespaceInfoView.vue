@@ -253,7 +253,7 @@ watch(() => props.type, async () => {
 
             for (let i = 0; i < state.schema.func.args.length; i++) {
                 const arg = state.schema.func.args[i]
-                const info: ITypeStructInfo = { label: arg.name }
+                const info: ITypeStructInfo = { label: arg.display?.key ? _L.value(arg.display) : arg.name }
 
                 if (/^[tT]\d*$/.test(arg.type))
                 {

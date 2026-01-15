@@ -346,7 +346,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
                 blackList.push(f.name)
             }
             
-            if(rowAccessType && !blackList.includes(f.name) && f.func.args.length !== 1 && !await isSchemaCanBeUseAs(f.func.args[0].type, rowAccessType))
+            if(rowAccessType && !blackList.includes(f.name) && !await isSchemaCanBeUseAs(f.func.args[0]?.type, rowAccessType))
             {
                 blackList.push(f.name)
             }
@@ -543,37 +543,23 @@ onMounted(() => {
     }
     // row access type for predicate func
     else if (type === "system.schema.predicatefunc") {
-        const scopeNode = parent instanceof StructNode ? parent.getField("scope") : undefined
-        if (scopeNode){
-            policyscopeHandler = scopeNode.subscribe(async () => {
-                let access = ""
-                let limit = 1
-                let fieldNode = parent
-                while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
-                    fieldNode = fieldNode.parent
+         let fieldNode = parent
+        while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
+            fieldNode = fieldNode.parent
 
-                if (fieldNode)
+        if (fieldNode)
+        {
+            const typeField = (fieldNode as StructNode).getField("type") as ScalarNode
+            policyscopeHandler = typeField.subscribe(async() => {
+                let access = typeField.rawData
+                const schema = await getSchema(access)
+                if (schema?.type == SchemaType.Array)
+                    access = schema.array?.element || ""
+
+                if (access !== rowAccessType || scalarNode.upLimit != upLimit)
                 {
-                    const app = (fieldNode as StructNode).getField("app")!.data
-                    const fld = (fieldNode as StructNode).getField("name")!.data
-                    if (app && fld)
-                    {
-                        const appSchema = await getAppSchema(app)
-                        const col = appSchema?.fields?.find((f: any) => f.name === fld)
-                        if (col) {
-                            access = col.type
-                            const schema = await getSchema(col.type)
-                            if (schema?.type == SchemaType.Array)
-                            {
-                                access = schema.array?.element || ""
-                            }
-                        }
-                    }
-                }
-                if (access !== rowAccessType || limit != upLimit)
-                {
-                    upLimit = limit
-                    lowLimit = limit
+                    upLimit = scalarNode.upLimit
+                    lowLimit = Math.min(2, scalarNode.upLimit)
                     rowAccessType = access
                     delayRebuildOptions()
                 }

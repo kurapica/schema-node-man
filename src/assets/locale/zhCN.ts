@@ -358,13 +358,12 @@ importLanguage("zhCN", {
     "system.schema.fieldfiltermode.prefix": "前缀匹配",
     "system.schema.fieldfiltermode.suffix": "后缀匹配",
     "system.schema.fieldfiltermode.contains": "包含匹配",
-    "system.schema.fieldfiltermode.function": "函数匹配",
+    "system.schema.fieldfiltermode.filter": "过滤函数",
 
     "system.schema.fieldfilter": "字段过滤",
-    "system.schema.fieldfilter.field": "字段名",
     "system.schema.fieldfilter.mode": "过滤模式",
-    "system.schema.fieldfilter.func": "过滤函数",
-    "system.schema.fieldfilter.args": "过滤函数参数",
+    "system.schema.fieldfilter.field": "字段名",
+    "system.schema.fieldfilter.filter": "过滤",
 
     "system.schema.scalarschema": "基础结构体类型定义",
     "system.schema.scalarschema.base": "原始基础数据类型",
@@ -461,6 +460,7 @@ importLanguage("zhCN", {
     "system.schema.funcarg.name": "名称",
     "system.schema.funcarg.type": "类型",
     "system.schema.funcarg.nullable": "允许为空",
+    "system.schema.funcarg.display": "描述",
 
     "system.schema.funccallarg": "函数调用参数",
     "system.schema.funccallarg.name": "表达式",

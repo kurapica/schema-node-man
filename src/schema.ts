@@ -584,7 +584,8 @@ registerSchema([
     newSystemStruct("system.schema.funcarg", [
         { name: "name", require: true, type: NS_SYSTEM_STRING, upLimit: 32 },
         { name: "type", require: true, type: "system.schema.valuetype" },
-        { name: "nullable", type: NS_SYSTEM_BOOL }
+        { name: "nullable", type: NS_SYSTEM_BOOL },
+        { name: "display", type: NS_SYSTEM_LOCALE_STRING },
     ], [
         { field: "name", type: RelationType.Default, func: "system.schema.gettypedisplayorname", args: [ { name: "type" } ] }
     ]),

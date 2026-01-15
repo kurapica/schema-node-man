@@ -19,10 +19,14 @@ registerSchema([
     newSystemArray("system.schema.appfieldvalargs", "system.schema.appfieldvalarg"),
 
     newSystemStruct("system.schema.fieldfilter", [
-        { name: "field", type: NS_SYSTEM_STRING, upLimit:128, require: true },
         { name: "mode", type: "system.schema.fieldfiltermode", require: true, default: FieldFilterMode.Exactly },
+        { name: "isFilter", type: NS_SYSTEM_BOOL, displayOnly: true, invisible: true },
+        { name: "filter", type: NS_SYSTEM_STRING, lowLimit: 0, upLimit:128, asSuggest: true },
+    ], [
+        { field: "isFilter", type: RelationType.Default, func: "system.logic.equal", args: [ { name: "mode" }, { value: FieldFilterMode.Filter } ] },
+        { field: "filter", type: RelationType.Type, func: "system.logic.cond", args: [ { name: "isFilter" }, { value: "system.schema.predicatefunc" }, { value: NS_SYSTEM_STRING } ] },
     ]),
-    newSystemArray("system.schema.fieldfilters", "system.schema.fieldfilter", "field"),
+    newSystemArray("system.schema.fieldfilters", "system.schema.fieldfilter", "filter"),
 
     newSystemFunc("system.schema.appgetfieldtype", "system.schema.valuetype", [
         { name: "app", type: NS_SYSTEM_STRING },
@@ -132,7 +136,7 @@ registerSchema([
 
     newSystemStruct("system.schema.rowpolicyitem", [
         { name: "evaluator", type: "system.schema.evaluatorfunc", require: true },
-        { name: "filter", type: "system.schema.predicatefunc"}
+        { name: "filter", type: "system.schema.predicatefunc", lowLimit: 1, upLimit: 1 }
     ]),
     newSystemArray("system.schema.rowpolicyitems", "system.schema.rowpolicyitem", "evaluator"),
 
@@ -214,7 +218,7 @@ registerSchema([
         { field: "colAuths", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
         { field: "colAuths.name", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
         { field: "filters", type: RelationType.Visible, func: "system.schema.isstructorstructarray", args: [ { name: "type" } ] },
-        { field: "filters.field", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
+        { field: "filters.filter", type: RelationType.WhiteList, func: "system.schema.getfieldforauths", args: [ { name: "app" }, { name: "name" }]},
     ]),
     
     newSystemFunc("system.schema.apphasfields", NS_SYSTEM_BOOL, [
