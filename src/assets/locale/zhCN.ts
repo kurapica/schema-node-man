@@ -306,6 +306,9 @@ importLanguage("zhCN", {
     "system.schema.expressiontype.first": "首先满足",
     "system.schema.expressiontype.last": "最后满足",
     "system.schema.expressiontype.filter": "过滤",
+    "system.schema.expressiontype.count": "计数",
+    "system.schema.expressiontype.all": "全部满足",
+    "system.schema.expressiontype.any": "任一满足",
 
     "system.schema.enumvaluetype": "枚举值数据类型",
     "system.schema.enumvaluetype.string": "字符串",

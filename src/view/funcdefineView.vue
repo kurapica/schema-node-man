@@ -280,6 +280,69 @@ const doCaclc = async () => {
                         }
                     }
                     break
+
+                case ExpressionType.Count:
+                    {
+                        res = 0
+                        if (arrIdx >= 0)
+                        {
+                            const array = callargs[arrIdx]
+                            if (Array.isArray(array))
+                            {
+                                for(let l = 0; l < array.length; l++)
+                                {
+                                    callargs[arrIdx] = array[l]
+                                    if (await callSchemaFunction(exp.func, callargs))
+                                        res++
+                                }
+                            }
+                        }
+                    }
+                    break
+
+                case ExpressionType.All:
+                    {
+                        res = true
+                        if (arrIdx >= 0)
+                        {
+                            const array = callargs[arrIdx]
+                            if (Array.isArray(array))
+                            {
+                                for(let l = 0; l < array.length; l++)
+                                {
+                                    callargs[arrIdx] = array[l]
+                                    if (!await callSchemaFunction(exp.func, callargs))
+                                    {
+                                        res = false
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break
+
+                case ExpressionType.Any:
+                    {
+                        res = false
+                        if (arrIdx >= 0)
+                        {
+                            const array = callargs[arrIdx]
+                            if (Array.isArray(array))
+                            {
+                                for(let l = 0; l < array.length; l++)
+                                {
+                                    callargs[arrIdx] = array[l]
+                                    if (await callSchemaFunction(exp.func, callargs))
+                                    {
+                                        res = true
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break
             }
 
             if (isNull(res)) res = null
@@ -397,6 +460,12 @@ const refresh = async () => {
             case ExpressionType.Map:
                 funcret = (await getSchema(ret))!.array!.element
                 arrayEle = funcret
+                break
+
+            case ExpressionType.Count:
+            case ExpressionType.All:
+            case ExpressionType.Any:
+                funcret = NS_SYSTEM_BOOL
                 break
         }
 

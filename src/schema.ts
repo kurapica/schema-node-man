@@ -616,6 +616,22 @@ registerSchema([
                 ExpressionType.Map
             ]
         }
+        else if(await isSchemaCanBeUseAs(ret, NS_SYSTEM_BOOL))
+        {
+            return [
+                ExpressionType.Call,
+                ExpressionType.All,
+                ExpressionType.Any,
+            ]
+        }
+        else if(await isSchemaCanBeUseAs(ret, NS_SYSTEM_INT))
+        {
+            return [
+                ExpressionType.Call,
+                ExpressionType.Count,
+                ExpressionType.Reduce
+            ]
+        }
         return [
             ExpressionType.Call,
             ExpressionType.First,
@@ -642,6 +658,9 @@ registerSchema([
             case ExpressionType.Filter:
             case ExpressionType.First:
             case ExpressionType.Last:
+            case ExpressionType.Count:
+            case ExpressionType.All:
+            case ExpressionType.Any:
                 return NS_SYSTEM_BOOL
         }
     }),

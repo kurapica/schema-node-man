@@ -306,6 +306,9 @@ importLanguage("enUS", {
     "system.schema.expressiontype.first": "First Match",
     "system.schema.expressiontype.last": "Last Match",
     "system.schema.expressiontype.filter": "Filter",
+    "system.schema.expressiontype.count": "Count",
+    "system.schema.expressiontype.all": "All Match",
+    "system.schema.expressiontype.any": "Any Match",
 
     "system.schema.enumvaluetype": "Enum Value Type",
     "system.schema.enumvaluetype.string": "String",

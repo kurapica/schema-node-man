@@ -543,23 +543,25 @@ onMounted(() => {
     }
     // row access type for predicate func
     else if (type === "system.schema.predicatefunc") {
-         let fieldNode = parent
+        let fieldNode = parent
+        const isPolicyItem = fieldNode?.config.type === "system.schema.rowpolicyitem"
         while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
             fieldNode = fieldNode.parent
 
         if (fieldNode)
         {
             const typeField = (fieldNode as StructNode).getField("type") as ScalarNode
+            const limit = isPolicyItem ? 1 : 128
             policyscopeHandler = typeField.subscribe(async() => {
                 let access = typeField.rawData
                 const schema = await getSchema(access)
                 if (schema?.type == SchemaType.Array)
                     access = schema.array?.element || ""
 
-                if (access !== rowAccessType || scalarNode.upLimit != upLimit)
+                if (access !== rowAccessType || limit != upLimit)
                 {
-                    upLimit = scalarNode.upLimit
-                    lowLimit = Math.min(2, scalarNode.upLimit)
+                    upLimit = limit
+                    lowLimit = Math.min(2, limit)
                     rowAccessType = access
                     delayRebuildOptions()
                 }

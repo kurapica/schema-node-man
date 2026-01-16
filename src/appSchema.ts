@@ -21,7 +21,7 @@ registerSchema([
     newSystemStruct("system.schema.fieldfilter", [
         { name: "mode", type: "system.schema.fieldfiltermode", require: true, default: FieldFilterMode.Exactly },
         { name: "isFilter", type: NS_SYSTEM_BOOL, displayOnly: true, invisible: true },
-        { name: "filter", type: NS_SYSTEM_STRING, lowLimit: 0, upLimit:128, asSuggest: true },
+        { name: "filter", type: NS_SYSTEM_STRING, asSuggest: true },
     ], [
         { field: "isFilter", type: RelationType.Default, func: "system.logic.equal", args: [ { name: "mode" }, { value: FieldFilterMode.Filter } ] },
         { field: "filter", type: RelationType.Type, func: "system.logic.cond", args: [ { name: "isFilter" }, { value: "system.schema.predicatefunc" }, { value: NS_SYSTEM_STRING } ] },
@@ -136,7 +136,7 @@ registerSchema([
 
     newSystemStruct("system.schema.rowpolicyitem", [
         { name: "evaluator", type: "system.schema.evaluatorfunc", require: true },
-        { name: "filter", type: "system.schema.predicatefunc", lowLimit: 1, upLimit: 1 }
+        { name: "filter", type: "system.schema.predicatefunc" }
     ]),
     newSystemArray("system.schema.rowpolicyitems", "system.schema.rowpolicyitem", "evaluator"),
 
