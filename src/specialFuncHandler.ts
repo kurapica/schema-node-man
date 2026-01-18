@@ -159,23 +159,6 @@ const refreshAppDataSource = async(func: ScalarNode, args: StructNode[], typeMap
     return result
 }
 
-const refreshFieldCompare = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const expName = args[0].getField("name")!.rawData
-    let exp = typeMap.get(expName)
-    if (exp?.type === SchemaType.Array && exp.array?.element)
-        exp = await getSchema(exp.array.element)
-    if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
-        const result:any = [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", exp.struct.fields, undefined, true) }]
-        const fldName = args[1].getField("value")!.rawData
-        const field = !isNull(fldName) ? exp.struct.fields.find(f => f.name === fldName) : undefined
-        if (field) {
-            result.push({ type: field.type })
-        }
-        return result
-    }
-    return []
-}
-
 const refreshSaveAppData = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
     const app = `${args[0].getField("value")!.rawData}`
     const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
@@ -226,17 +209,6 @@ export const specialFuncRefresh: { [key: string]: (func: ScalarNode, args: Struc
     "system.collection.getfields":refreshFieldFunc,
     "system.collection.setfield": refreshFieldFunc,
     "system.collection.getfielddefault": refreshFieldFunc,
-
-    // field equal
-    "system.collection.fieldequal":refreshFieldCompare,
-    "system.collection.fieldnotequal":refreshFieldCompare,
-    "system.collection.fieldgreatethan":refreshFieldCompare,
-    "system.collection.fieldgreaterequal":refreshFieldCompare,
-    "system.collection.fieldlessthan":refreshFieldCompare,
-    "system.collection.fieldlessequal":refreshFieldCompare,
-    "system.collection.fieldstartswith":refreshFieldCompare,
-    "system.collection.fieldendswith":refreshFieldCompare,
-    "system.collection.fieldmatch":refreshFieldCompare,
 
     // to entry
     "system.str.toentry": toEntryFunc,
