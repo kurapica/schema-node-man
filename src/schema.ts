@@ -400,6 +400,7 @@ registerSchema([
         }
         else if (typeInfo?.type === SchemaType.Struct) {
             return [
+                RelationType.Default,
                 RelationType.Invisible,
                 RelationType.Visible,
                 RelationType.Disable,
