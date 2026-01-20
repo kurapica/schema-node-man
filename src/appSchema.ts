@@ -5,13 +5,17 @@ registerSchema([
     newSystemScalar("system.schema.appaccessfld", NS_SYSTEM_STRING),
     newSystemScalar("system.schema.appinput", NS_SYSTEM_STRING),
 
+    newSystemFunc("system.schema.getappfieldnametype", "system.schema.valuetype", [], async (type: string, relation: RelationType) => {
+        return relation === RelationType.Type && type == "system.schema.valuetype" ? NS_SYSTEM_ARRAY : type
+    }),
+
     newSystemStruct("system.schema.appfieldvalarg", [
         { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
         { name: "type", type: "system.schema.valuetype", invisible: false, displayOnly: true },
         { name: "name", type: "system.schema.appaccessfld" },
         { name: "value", type: NS_SYSTEM_OBJECT },
     ], [
-        { field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ] },
+        //{ field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ] },
         { field: "name", type: RelationType.Disable, func: "system.logic.notempty", args: [ { name: "value" } ] },
         { field: "value", type: RelationType.Type, func: "system.schema.getexpvaluetype", args: [ { name: "type" } ] },
         { field: "value", type: RelationType.Disable, func: "system.schema.hideexpvalue", args: [ { name: "type" }, { name: "name" } ] },
@@ -70,7 +74,8 @@ registerSchema([
     ], [
         { field: "type", type: RelationType.WhiteList, func: "system.schema.getrelationwhitelist", args: [ { name: "fieldType" } ] },
         { field: "return", type: RelationType.Default, func: "system.schema.getrelationfuncreturn", args: [ { name: "fieldType" }, { name: "type" } ] },
-        { field: "func", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "return" } ] }
+        { field: "func", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "return" } ] },
+        { field: "args.name", type: RelationType.Root, func: "system.schema.getappfieldnametype", args: [ { name: "args.type" }, { name: "type" } ] },
     ]),
     newSystemArray("system.schema.appfieldrelations", "system.schema.appfieldrelation", "field", "type" ),
 

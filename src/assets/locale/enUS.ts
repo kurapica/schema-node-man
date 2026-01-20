@@ -9,8 +9,6 @@ importLanguage("enUS", {
     "system.conv.assign": "=",
     "system.conv.default": "Default",
     "system.conv.null": "Null",
-    "system.conv.tostructtype": "Convert to Struct Type",
-    "system.conv.toschematype": "Convert to Schema Type",
 
     // system.str
     "system.str": "String Operations",
