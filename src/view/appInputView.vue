@@ -19,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+import { isNull } from 'schema-node';
 import { _LS, type ScalarNode } from 'schema-node'
 import { schemaView, _L } from 'schema-node-vueview';
 import { ref, onMounted, onUnmounted, reactive, toRaw, watch } from 'vue'
@@ -40,7 +41,16 @@ const name = ref("")
 
 const refreshData = () => {
     if (props.node.readonly) return
-    props.node.data = name.value ? (prefix.value ? `${prefix.value}.${name.value}` : name.value) : ""
+    const p = `${prefix.value}`
+    let result = `${name.value}`
+    if (isNull(result)) {
+        props.node.data = ""
+        return
+    }
+    if (!isNull(p) && p !== "" && p !== "null" && p !== "undefined") {
+        result = `${p}.${result}`
+    }
+    props.node.data = result
 }
 
 watch(prefix, refreshData)

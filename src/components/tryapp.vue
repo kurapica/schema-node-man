@@ -129,6 +129,7 @@ const showoutput = ref(false)
 const startWorkflowing = ref(false)
 const statusWatcher: Function[] = []
 const invisibleFields = reactive<{ [key: string]: boolean }>({})
+let prevNode: any = null;
 
 const loadData = async () => {
   if (!appTargetNode.value) return
@@ -136,6 +137,11 @@ const loadData = async () => {
     const target = appTargetNode.value.getField("target")!.rawData as string
     if (isNull(target)) return
     loading.value = true
+    prevNode = appNode.value;
+    appNode.value = undefined;
+    // appNode.value?.dispose()
+
+    // load app node
     appNode.value = await getAppNode({
       app: props.app,
       target: target,
@@ -144,6 +150,7 @@ const loadData = async () => {
       schemaOnly: true,
       workflow: true
     })
+    
     // visible check
     statusWatcher.forEach(f => f())
     statusWatcher.length = 0

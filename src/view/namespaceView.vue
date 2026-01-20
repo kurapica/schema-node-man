@@ -202,7 +202,7 @@ const namespaceMap: any = {
     "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],
     "system.schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
-    "system.schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
+    "system.schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Json],
 }[type as string]
 
 // Push function allow both value type and array type of the value type
@@ -304,7 +304,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
     // check compatible type
     if (namespaceMap.includes(SchemaType.Func)) {
         const funcList = options.filter(r => r.type === SchemaType.Func)
-        const blackList: string[] = ["system.schema"]
+        const blackList: string[] = [] //"system.schema"]
         for(let i = 0; i < funcList.length; i++)
         {
             const f = await getSchema(funcList[i].value)
@@ -355,7 +355,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
     }
     else if(props.noGeneric)
     {
-        const blackList: string[] = ["system.schema"]
+        const blackList: string[] = []//"system.schema"]
         for(let i = 0; i < options.length; i++)
         {
             const genTypes = getGenericParameter(options[i].value)
@@ -364,7 +364,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         return blackList
     }
     else {
-        return ["system.schema"]
+        return []//"system.schema"]
     }
 }
 

@@ -9,6 +9,8 @@ importLanguage("zhCN", {
     "system.conv.assign": "=",
     "system.conv.default": "缺省",
     "system.conv.null": "空值",
+    "system.conv.tostructtype": "转换为结构体类型",
+    "system.conv.toschematype": "转换为数据类型",
 
     // system.str
     "system.str": "字符串运算",
