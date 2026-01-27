@@ -21,6 +21,7 @@ import {
   NS_SYSTEM_BOOL,
   NS_SYSTEM_INT,
   NS_SYSTEM_INTS,
+  NS_SYSTEM_JSON,
   NS_SYSTEM_LOCALE_STRING,
   NS_SYSTEM_LOCALE_STRINGS,
   NS_SYSTEM_NUMBER,
@@ -476,6 +477,7 @@ registerSchema(
         { name: "displayOnly", type: NS_SYSTEM_BOOL },
         { name: "unit", type: NS_SYSTEM_LOCALE_STRING },
         { name: "default", type: NS_SYSTEM_STRING, asSuggest: true },
+        { name: "unpack", type: NS_SYSTEM_BOOL },
 
         // scalar config
         { name: "whiteList", type: NS_SYSTEM_STRINGS, anyLevel: true },
@@ -679,6 +681,12 @@ registerSchema(
           func: "system.schema.isflagsenumtype",
           args: [{ name: "type" }],
         },
+        {
+          field: "unpack",
+          type: RelationType.Visible,
+          func: "system.logic.equal",
+          args: [{ name: "type" }, { value: NS_SYSTEM_JSON }],
+        }
       ],
     ),
     newSystemArray(

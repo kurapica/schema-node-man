@@ -419,6 +419,7 @@ importLanguage("zhCN", {
   "system.schema.structfieldconfig.root": "根值",
   "system.schema.structfieldconfig.anyLevel": "枚举值任意级可选",
   "system.schema.structfieldconfig.singleFlag": "单标志位",
+  "system.schema.structfieldconfig.unpack": "解包附加属性",
 
   "system.schema.structfieldrelation": "字段数据关联",
   "system.schema.structfieldrelation.field": "目标字段",

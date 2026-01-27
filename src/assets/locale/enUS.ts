@@ -427,6 +427,7 @@ importLanguage("enUS", {
   "system.schema.structfieldconfig.root": "Enum Root Value",
   "system.schema.structfieldconfig.anyLevel": "Any Level Selectable",
   "system.schema.structfieldconfig.singleFlag": "Single Flag",
+  "system.schema.structfieldconfig.unpack": "Unpack Additional Properties",
 
   "system.schema.structfieldrelation": "Field Relation",
   "system.schema.structfieldrelation.field": "Target Field",
