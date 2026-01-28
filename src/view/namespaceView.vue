@@ -102,7 +102,7 @@
 import { saveStorageSchema } from "../schema"
 import { getSchemaServerProvider } from "../schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema, _LS, debounce } from "schema-node"
+import { ExpressionType, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, _LS, debounce } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -460,7 +460,7 @@ const reBuildOptions = async () => {
         compatibleType = ""
         root.value = ""
     }
-
+    
     if (compatibleType && ispushfunctype)
     {
         const ctype = await getSchema(compatibleType)
@@ -474,6 +474,11 @@ const reBuildOptions = async () => {
     else if (compatibleType && isscalarwhitelist)
     {
         otherCompatibleType = (await getArraySchema(compatibleType))?.name || ""
+    }
+    if (compatibleType === "system.schema.valuetype" && !otherCompatibleType)
+    {
+        otherCompatibleType = "system.schema.structfieldconfigs"
+        console.log("Set other compatible type to structfieldconfigs", otherCompatibleType)
     }
 
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])
