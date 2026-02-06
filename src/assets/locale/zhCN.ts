@@ -287,6 +287,7 @@ importLanguage("zhCN", {
   "system.schema.relationtype.anylevel": "枚举值任意级可选",
   "system.schema.relationtype.cascade": "级联限制",
   "system.schema.relationtype.singleflag": "单标志位",
+  "system.schema.relationtype.display": "显示文本",
   "system.schema.relationtype.validation": "联合校验",
   "system.schema.relationtype.reference": "应用字段引用",
 

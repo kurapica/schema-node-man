@@ -293,6 +293,7 @@ importLanguage("enUS", {
   "system.schema.relationtype.anylevel": "Enum Any Level",
   "system.schema.relationtype.cascade": "Cascade Limit",
   "system.schema.relationtype.singleflag": "Single Flag Value",
+  "system.schema.relationtype.display": "Display Text",
   "system.schema.relationtype.validation": "Union validation",
   "system.schema.relationtype.reference": "App Field Reference",
 

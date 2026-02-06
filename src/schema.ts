@@ -686,7 +686,7 @@ registerSchema(
           type: RelationType.Visible,
           func: "system.logic.equal",
           args: [{ name: "type" }, { value: NS_SYSTEM_JSON }],
-        }
+        },
       ],
     ),
     newSystemArray(
@@ -780,6 +780,8 @@ registerSchema(
             return NS_SYSTEM_BOOL;
           case RelationType.Reference:
             return fieldType;
+          case RelationType.Display:
+            return NS_SYSTEM_STRING;
         }
       },
     ),
@@ -805,6 +807,7 @@ registerSchema(
             RelationType.Assign,
             RelationType.InitOnly,
             RelationType.Type,
+            RelationType.Display,
             RelationType.Validation,
           ];
         } else if (typeInfo?.type === SchemaType.Enum) {
@@ -822,6 +825,7 @@ registerSchema(
             RelationType.AnyLevel,
             RelationType.Cascade,
             RelationType.SingleFlag,
+            RelationType.Display,
             RelationType.Validation,
           ];
         } else if (typeInfo?.type === SchemaType.Struct) {
@@ -832,6 +836,7 @@ registerSchema(
             RelationType.Disable,
             RelationType.Assign,
             RelationType.Type,
+            RelationType.Display,
             RelationType.Reference,
           ];
         }
@@ -848,6 +853,7 @@ registerSchema(
           RelationType.Type,
           RelationType.AnyLevel,
           RelationType.Cascade,
+          RelationType.Display,
           RelationType.Validation,
           RelationType.Reference,
         ];
