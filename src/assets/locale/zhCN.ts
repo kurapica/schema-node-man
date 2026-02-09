@@ -359,6 +359,10 @@ importLanguage("zhCN", {
   "system.schema.fieldfilter.mode": "过滤模式",
   "system.schema.fieldfilter.filter": "过滤",
 
+  "system.schema.fieldstoragetopology": "字段存储拓扑",
+  "system.schema.fieldstoragetopology.colocated": "同表存储",
+  "system.schema.fieldstoragetopology.attributebased": "属性存储",
+
   "system.schema.scalarschema": "基础结构体类型定义",
   "system.schema.scalarschema.base": "原始基础数据类型",
   "system.schema.scalarschema.unit": "字面量单位",
@@ -501,6 +505,7 @@ importLanguage("zhCN", {
   "system.schema.appfieldschema.sourceField": "引用字段",
   "system.schema.appfieldschema.func": "推送函数",
   "system.schema.appfieldschema.arg": "推送数据源",
+  "system.schema.appfieldschema.topology": "字段存储拓扑",
   "system.schema.appfieldschema.incrUpdate": "增量数据",
   "system.schema.appfieldschema.frontend": "仅前端用",
   "system.schema.appfieldschema.disable": "禁用",

@@ -398,6 +398,22 @@ registerSchema(
       },
     ),
 
+    newSystemFunc(
+      "system.schema.hasjsonfield",
+      NS_SYSTEM_BOOL,
+      [{ name: "type", type: NS_SYSTEM_STRING, nullable: true }],
+      async (type: string) => {
+        if (!type) return false;
+        let schema = await getSchema(type);
+        if (schema?.type !== SchemaType.Array || !schema.array?.element) return false
+        schema = await getSchema(schema.array.element);
+        if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
+          return schema.struct.fields.some((f: IStructFieldConfig) => f.type === "system.json");
+        }
+        return false;
+      },
+    ),
+
     newSystemStruct(
       "system.schema.appfieldschema",
       [
@@ -418,6 +434,7 @@ registerSchema(
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
         { name: "sourceApp", type: "system.schema.app" },
         { name: "sourceField", type: "system.schema.appfield" },
+        { name: "topology", type: "system.schema.fieldstoragetopology" },
         { name: "trackPush", type: NS_SYSTEM_BOOL },
         { name: "incrUpdate", type: NS_SYSTEM_BOOL },
         { name: "frontend", type: NS_SYSTEM_BOOL },
@@ -492,6 +509,12 @@ registerSchema(
           field: "sourceField",
           type: RelationType.Root,
           func: "system.conv.assign",
+          args: [{ name: "type" }],
+        },
+        {
+          field: "topology",
+          type: RelationType.Visible,
+          func: "system.schema.hasjsonfield",
           args: [{ name: "type" }],
         },
         {

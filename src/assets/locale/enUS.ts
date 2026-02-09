@@ -366,6 +366,10 @@ importLanguage("enUS", {
   "system.schema.fieldfilter.mode": "Filter Mode",
   "system.schema.fieldfilter.filter": "Filter",
 
+  "system.schema.fieldstoragetopology": "Field Storage Topology",
+  "system.schema.fieldstoragetopology.colocated": "Co-located Storage",
+  "system.schema.fieldstoragetopology.attributebased": "Attribute-based Storage",
+
   "system.schema.scalarschema": "Scalar Definition",
   "system.schema.scalarschema.base": "Base Scalar Type",
   "system.schema.scalarschema.unit": "Unit Literal",
@@ -509,6 +513,7 @@ importLanguage("enUS", {
   "system.schema.appfieldschema.sourceField": "Reference field",
   "system.schema.appfieldschema.func": "Push func",
   "system.schema.appfieldschema.arg": "Push data souce",
+  "system.schema.appfieldschema.topology": "Field storage topology",
   "system.schema.appfieldschema.incrUpdate": "Incremental data",
   "system.schema.appfieldschema.frontend": "Frontend only",
   "system.schema.appfieldschema.disable": "Disabled",
