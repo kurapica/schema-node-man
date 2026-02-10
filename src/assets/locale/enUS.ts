@@ -361,6 +361,7 @@ importLanguage("enUS", {
   "system.schema.fieldfiltermode.suffix": "Suffix Match",
   "system.schema.fieldfiltermode.contains": "Contains Match",
   "system.schema.fieldfiltermode.filter": "Filter Function",
+  "system.schema.fieldfilter.resolve": "Resolve Strategy",
 
   "system.schema.fieldfilter": "Field Filter",
   "system.schema.fieldfilter.mode": "Filter Mode",
@@ -369,6 +370,9 @@ importLanguage("enUS", {
   "system.schema.fieldstoragetopology": "Field Storage Topology",
   "system.schema.fieldstoragetopology.colocated": "Co-located Storage",
   "system.schema.fieldstoragetopology.attributebased": "Attribute-based Storage",
+
+  "system.schema.fieldfilterresolve": "Resolve Strategy",
+  "system.schema.fieldfilterresolve.cascadeparent": "Cascade Parent",
 
   "system.schema.scalarschema": "Scalar Definition",
   "system.schema.scalarschema.base": "Base Scalar Type",

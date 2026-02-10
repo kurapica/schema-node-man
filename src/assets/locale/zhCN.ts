@@ -354,6 +354,7 @@ importLanguage("zhCN", {
   "system.schema.fieldfiltermode.suffix": "后缀匹配",
   "system.schema.fieldfiltermode.contains": "包含匹配",
   "system.schema.fieldfiltermode.filter": "过滤函数",
+  "system.schema.fieldfilter.resolve": "解析方式",
 
   "system.schema.fieldfilter": "字段过滤",
   "system.schema.fieldfilter.mode": "过滤模式",
@@ -362,6 +363,9 @@ importLanguage("zhCN", {
   "system.schema.fieldstoragetopology": "字段存储拓扑",
   "system.schema.fieldstoragetopology.colocated": "同表存储",
   "system.schema.fieldstoragetopology.attributebased": "属性存储",
+
+  "system.schema.fieldfilterresolve": "字段解析方式",
+  "system.schema.fieldfilterresolve.cascadeparent": "级联父字段",
 
   "system.schema.scalarschema": "基础结构体类型定义",
   "system.schema.scalarschema.base": "原始基础数据类型",

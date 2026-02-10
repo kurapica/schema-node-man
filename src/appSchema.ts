@@ -35,6 +35,7 @@ import {
   PolicyScope,
   getFieldAccessWhiteList,
   FieldFilterMode,
+  type FieldFilterModeValue,
 } from "schema-node";
 
 // Schema for definition
@@ -111,6 +112,7 @@ registerSchema(
           invisible: true,
         },
         { name: "filter", type: NS_SYSTEM_STRING, asSuggest: true },
+        { name: "resolve", type: "system.schema.fieldfilterresolve" },
       ],
       [
         {
@@ -370,6 +372,32 @@ registerSchema(
     ),
 
     newSystemFunc(
+      "system.schema.showfieldfilterresolve",
+      NS_SYSTEM_BOOL,
+      [
+        { name: "app", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "field", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "mode", type: "system.schema.fieldfiltermode", nullable: true },
+        { name: "filter", type: NS_SYSTEM_STRING, nullable: true },
+      ],
+      async (app: string, field: string, mode: FieldFilterModeValue | undefined, filter: string) => {
+        if (mode !== FieldFilterMode.Exactly) return false;
+        const appSchema = app ? await getAppSchema(app) : undefined;
+        const fieldSchema = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === field);
+        let fieldType = fieldSchema ? await getSchema(fieldSchema?.type || ""): undefined;
+        if (fieldType?.type === SchemaType.Array && fieldType.array?.element)
+          fieldType = await getSchema(fieldType.array.element);
+
+        if (fieldType?.type === SchemaType.Struct) {
+          const filterField = fieldType.struct?.fields?.find((f: IStructFieldConfig) => f.name === filter);
+          const filterType = filterField ? await getSchema(filterField.type) : undefined;
+          return filterType?.type === SchemaType.Enum && filterType.enum?.cascade?.length ? true : false;
+        }
+        return false
+      }
+    ),
+
+    newSystemFunc(
       "system.schema.getapppushsourcewhitelist",
       NS_SYSTEM_ARRAY,
       [
@@ -588,6 +616,12 @@ registerSchema(
           type: RelationType.WhiteList,
           func: "system.schema.getfieldforauths",
           args: [{ name: "app" }, { name: "name" }],
+        },
+        {
+          field: "filters.resolve",
+          type: RelationType.Visible,
+          func: "system.schema.showfieldfilterresolve",
+          args: [{ name: "app" }, { name: "name" }, { name: "filters.mode" }, { name: "filters.filter" }],
         },
         {
           field: "template",
@@ -1229,6 +1263,7 @@ import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue";
 import appWorkflowIdView from "./components/appWorkflowIdView.vue";
 import forkKeyView from "./view/forkKeyView.vue";
 import { regSchemaTypeView } from "schema-node-vueview";
+import { fa } from "element-plus/es/locales.mjs";
 
 regSchemaTypeView("system.schema.app", sourceappView);
 regSchemaTypeView("system.schema.appinput", appInputView);
