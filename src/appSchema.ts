@@ -36,6 +36,8 @@ import {
   getFieldAccessWhiteList,
   FieldFilterMode,
   type FieldFilterModeValue,
+  NS_SYSTEM_CONTEXT,
+  AppScopeType,
 } from "schema-node";
 
 // Schema for definition
@@ -55,6 +57,43 @@ registerSchema(
           : type;
       },
     ),
+
+    newSystemFunc("system.schema.getcontextwhitelist", "system.array", [], async() => {
+      const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
+        return [{ type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", contextSchema?.struct?.fields || [])}]
+    }),
+
+    newSystemStruct("system.schema.appscopecontextmap", [
+      { name: "contextItem", type: NS_SYSTEM_STRING },
+      { name: "mapKey", type: NS_SYSTEM_STRING }
+    ], [
+      {
+        field: "contextItem",
+        type: RelationType.WhiteList,
+        func: "system.schema.getcontextwhitelist",
+        args: []
+      }
+    ]),
+    newSystemArray("system.schema.appscopecontextmaps", "system.schema.appscopecontextmap", "contextItem"),
+
+    newSystemStruct("system.schema.appscopepolicy", [
+      { name: "type", type: "system.schema.appscopetype", require: true, default: AppScopeType.BusinessTarget },
+      { name: "contextMaps", type: "system.schema.appscopecontextmaps" },
+      { name: "businessKey", type: NS_SYSTEM_STRING }
+    ], [
+      {
+        field: "contextMaps", 
+        type: RelationType.Visible, 
+        func: "system.logic.equal", 
+        args: [{ name: "type" }, { value: AppScopeType.IsolationContext }]
+      },
+      {
+        field: "businessKey",
+        type: RelationType.Visible,
+        func: "system.logic.equal",
+        args: [{ name: "type" }, { value: AppScopeType.BusinessTarget }]
+      }
+    ]),
 
     newSystemStruct(
       "system.schema.appfieldvalarg",
@@ -463,6 +502,8 @@ registerSchema(
         { name: "sourceApp", type: "system.schema.app" },
         { name: "sourceField", type: "system.schema.appfield" },
         { name: "topology", type: "system.schema.fieldstoragetopology" },
+        { name: "tableName", type: NS_SYSTEM_STRING },
+        { name: "attrTableName", type: NS_SYSTEM_STRING },
         { name: "trackPush", type: NS_SYSTEM_BOOL },
         { name: "incrUpdate", type: NS_SYSTEM_BOOL },
         { name: "frontend", type: NS_SYSTEM_BOOL },
@@ -544,6 +585,18 @@ registerSchema(
           type: RelationType.Visible,
           func: "system.schema.hasjsonfield",
           args: [{ name: "type" }],
+        },
+        {
+          field: "tableName",
+          type: RelationType.Invisible,
+          func: "system.conv.assign",
+          args: [{ name: "frontend" } ],
+        },
+        {
+          field: "attrTableName",
+          type: RelationType.Invisible,
+          func: "system.conv.assign",
+          args: [{ name: "frontend" } ],
         },
         {
           field: "func",
@@ -655,6 +708,7 @@ registerSchema(
         },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
+        { name: "scopePolicy", type: "system.schema.appscopepolicy"},
         { name: "auth", type: "system.schema.policytype" },
         { name: "auths", type: "system.schema.policyitems" },
         { name: "relations", type: "system.schema.appfieldrelations" },

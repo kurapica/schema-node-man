@@ -620,6 +620,11 @@ importLanguage("enUS", {
   "system.schema.workflowcontextsnapshot": "Workflow Context Snapshot",
   "system.schema.workflowsnapshot": "Workflow Snapshot",
 
+  "system.schema.appscopepolicy": "App Scope Policy",
+  "system.schema.appscopepolicy.type": "App Scope Policy Type",
+  "system.schema.appscopepolicy.contextmaps": "Context Map List",
+  "system.schema.appscopepolicy.businesskey": "Business Key",
+
   "system.schema.access": "Service Access",
   "system.schema.access.app": "Access App",
   "system.schema.access.target": "Access Target",

@@ -610,6 +610,11 @@ importLanguage("zhCN", {
   "system.schema.workflowcontextsnapshot": "工作流上下文快照",
   "system.schema.workflowsnapshot": "工作流快照",
 
+  "system.schema.appscopepolicy": "应用物理存储策略",
+  "system.schema.appscopepolicy.type": "应用物理存储策略类型",
+  "system.schema.appscopepolicy.contextmaps": "上下文映射列表",
+  "system.schema.appscopepolicy.businesskey": "业务键",
+
   "system.schema.access": "服务访问",
   "system.schema.access.app": "访问应用",
   "system.schema.access.target": "访问目标",
