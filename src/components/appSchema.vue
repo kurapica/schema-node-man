@@ -546,7 +546,6 @@ const showFields = async(row: any) => {
 const fieldRowClassName = (data: any) => {
     const { row } = data
     if (row.disable) return 'disable-row'
-    if (row.sourceApp) return 'ref-row'
     if (row.func) return 'push-row'
     if (row.frontend) return 'frontend-row'
     return '';

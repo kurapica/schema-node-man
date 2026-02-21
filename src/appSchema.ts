@@ -60,7 +60,7 @@ registerSchema(
 
     newSystemFunc("system.schema.getcontextwhitelist", "system.array", [], async() => {
       const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
-        return [{ type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", contextSchema?.struct?.fields || [])}]
+      return await getFieldAccessWhiteList("", contextSchema?.struct?.fields || [])
     }),
 
     newSystemStruct("system.schema.appscopecontextmap", [
@@ -78,8 +78,7 @@ registerSchema(
 
     newSystemStruct("system.schema.appscopepolicy", [
       { name: "type", type: "system.schema.appscopetype", require: true, default: AppScopeType.BusinessTarget },
-      { name: "contextMaps", type: "system.schema.appscopecontextmaps" },
-      { name: "businessKey", type: NS_SYSTEM_STRING }
+      { name: "contextMaps", type: "system.schema.appscopecontextmaps" }
     ], [
       {
         field: "contextMaps", 
@@ -272,32 +271,13 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.appgetsourceappblacklist",
-      NS_SYSTEM_STRINGS,
-      [{ name: "app", type: NS_SYSTEM_STRING }],
-      (app: string) => {
-        return app ? [app] : [];
-      },
-    ),
-
-    newSystemFunc(
-      "system.schema.appgetsourceappfldinfo",
+      "system.schema.gettypeinfoforappfield",
       "system.schema.valuetype",
       [
-        { name: "sourceApp", type: NS_SYSTEM_STRING, nullable: true },
-        { name: "sourceFld", type: NS_SYSTEM_STRING, nullable: true },
         { name: "info", type: NS_SYSTEM_STRING, nullable: true },
         { name: "type", type: NS_SYSTEM_STRING, nullable: true },
       ],
-      async (app: string, fld: string, info: string, type: string) => {
-        if (app && fld) {
-          const appSchema = await getAppSchema(app);
-          const f = appSchema?.fields?.find(
-            (f: IAppFieldSchema) => f.name === fld,
-          );
-          if (f) return (f as any)[info];
-        }
-
+      async (info: string, type: string) => {
         if (type) {
           const schema = await getSchema(type);
           if (schema) {
@@ -499,12 +479,9 @@ registerSchema(
         { name: "type", type: "system.schema.valuetype", require: true },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "sourceApp", type: "system.schema.app" },
-        { name: "sourceField", type: "system.schema.appfield" },
         { name: "topology", type: "system.schema.fieldstoragetopology" },
         { name: "tableName", type: NS_SYSTEM_STRING },
         { name: "attrTableName", type: NS_SYSTEM_STRING },
-        { name: "trackPush", type: NS_SYSTEM_BOOL },
         { name: "incrUpdate", type: NS_SYSTEM_BOOL },
         { name: "frontend", type: NS_SYSTEM_BOOL },
         { name: "disable", type: NS_SYSTEM_BOOL },
@@ -523,10 +500,8 @@ registerSchema(
         {
           field: "name",
           type: RelationType.Default,
-          func: "system.schema.appgetsourceappfldinfo",
+          func: "system.schema.gettypeinfoforappfield",
           args: [
-            { name: "sourceApp" },
-            { name: "sourceField" },
             { value: "name" },
             { name: "type" },
           ],
@@ -534,51 +509,11 @@ registerSchema(
         {
           field: "display",
           type: RelationType.Default,
-          func: "system.schema.appgetsourceappfldinfo",
+          func: "system.schema.gettypeinfoforappfield",
           args: [
-            { name: "sourceApp" },
-            { name: "sourceField" },
             { value: "display" },
             { name: "type" },
           ],
-        },
-        {
-          field: "desc",
-          type: RelationType.Default,
-          func: "system.schema.appgetsourceappfldinfo",
-          args: [
-            { name: "sourceApp" },
-            { name: "sourceField" },
-            { value: "desc" },
-          ],
-        },
-        {
-          field: "type",
-          type: RelationType.Default,
-          func: "system.schema.appgetsourceappfldinfo",
-          args: [
-            { name: "sourceApp" },
-            { name: "sourceField" },
-            { value: "type" },
-          ],
-        },
-        {
-          field: "sourceApp",
-          type: RelationType.BlackList,
-          func: "system.schema.appgetsourceappblacklist",
-          args: [{ name: "app" }],
-        },
-        {
-          field: "sourceField",
-          type: RelationType.Visible,
-          func: "system.logic.notnull",
-          args: [{ name: "sourceApp" }],
-        },
-        {
-          field: "sourceField",
-          type: RelationType.Root,
-          func: "system.conv.assign",
-          args: [{ name: "type" }],
         },
         {
           field: "topology",
@@ -617,12 +552,6 @@ registerSchema(
           args: [{ name: "app" }, { name: "name" }, { name: "func" }],
         },
         {
-          field: "frontend",
-          type: RelationType.Visible,
-          func: "system.logic.isnull",
-          args: [{ name: "sourceApp" }],
-        },
-        {
           field: "combine",
           type: RelationType.Visible,
           func: "system.schema.appiscombineenable",
@@ -639,12 +568,6 @@ registerSchema(
           type: RelationType.WhiteList,
           func: "system.schema.getstructnumbervaluefields",
           args: [{ name: "type" }],
-        },
-        {
-          field: "trackPush",
-          type: RelationType.Visible,
-          func: "system.schema.appistrackpushenable",
-          args: [{ name: "sourceField" }, { name: "func" }],
         },
         {
           field: "colAuths",
@@ -1113,8 +1036,6 @@ export function saveStorageAppSchema(schema: IAppSchema) {
       type: f.type,
       display: f.display,
       desc: f.desc,
-      sourceApp: f.sourceApp,
-      sourceField: f.sourceField,
       func: f.func,
       arg: f.arg,
       incrUpdate: f.incrUpdate,
