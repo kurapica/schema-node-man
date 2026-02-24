@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
+import locale from 'element-plus/es/locale/lang/zh-cn'
 import ElementPlus from "element-plus"
 import { createRouter, createWebHashHistory } from 'vue-router'
 import 'element-plus/dist/index.css'
@@ -43,7 +44,7 @@ app.use(router)
 app.config.globalProperties.$router = router
 
 // UI
-app.use(ElementPlus)
+app.use(ElementPlus, { locale})
 app.component("Markdown", Markdown)
 
 // Start
