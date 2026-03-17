@@ -4,8 +4,8 @@
       <el-form v-if="enableAppData && appTargetNode" ref="form" label-width="140px" label-position="left"
         :model="appTargetNode.rawData">
           <section style="float:right;margin-left: 1rem;">
-            <el-button type="info" @click="useempty">{{ _L["frontend.view.useempty"] }}</el-button>
-            <el-button type="info" @click="genguid">{{ _L["frontend.view.genguid"] }}</el-button>
+            <el-button v-if="!issystemlevel" type="info" @click="useempty">{{ _L["frontend.view.useempty"] }}</el-button>
+            <el-button  v-if="!issystemlevel" type="info" @click="genguid">{{ _L["frontend.view.genguid"] }}</el-button>
             <el-button type="primary" v-if="!saving" v-loading="loading" @click="loadData">{{
               _L["frontend.view.loaddata"] }}</el-button>
             <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveData">{{
@@ -80,7 +80,7 @@
 <script lang="ts" setup>
 import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
-import { SchemaType, type INodeSchema, getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, getSchema, _LS, type IAppInteractionWorkflow, generateGuid } from "schema-node"
+import { SchemaType, type INodeSchema, getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, getSchema, _LS, type IAppInteractionWorkflow, generateGuid, AppScopeType } from "schema-node"
 import { schemaView, _L } from "schema-node-vueview"
 import { onMounted, onUnmounted, reactive, ref } from "vue"
 
@@ -106,12 +106,13 @@ const showoutput = ref(false)
 const startWorkflowing = ref(false)
 const statusWatcher: Function[] = []
 const invisibleFields = reactive<{ [key: string]: boolean }>({})
+const issystemlevel = ref(false)
 
 const loadData = async () => {
   if (!appTargetNode.value) return
   try {
     const target = appTargetNode.value.getField("target")!.rawData as string
-    if (isNull(target)) return
+    if (!issystemlevel.value && isNull(target)) return
     loading.value = true;
     appNode.value = undefined;
     // appNode.value?.dispose()
@@ -129,7 +130,7 @@ const loadData = async () => {
     // visible check
     statusWatcher.forEach(f => f())
     statusWatcher.length = 0
-    appNode.value?.fields.forEach(f => {
+    appNode.value?.fields.forEach((f:any) => {
       statusWatcher.push(f.subscribeState(() => {
         invisibleFields[f.name] = f.invisible || false
       }, true))
@@ -158,7 +159,7 @@ const saveData = async () => {
     // if (!appNode.value.valid) return
 
     const target = appTargetNode.value.getField("target")!.rawData as string
-    if (isNull(target)) return
+    if (!issystemlevel.value && isNull(target)) return
 
     saving.value = true
     const r = await appNode.value.submit();
@@ -276,6 +277,8 @@ onMounted(async () => {
   showref.value = appNode.value?.refInputFields.length ? true : false
   showoutput.value = appNode.value?.pushFields.length ? true : false
   if (!enableAppData) return
+
+  issystemlevel.value = appNode.value?.policyScope === AppScopeType.SystemLevel
 
   // visible check
   statusWatcher.forEach(f => f())

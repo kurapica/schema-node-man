@@ -63,20 +63,20 @@ onMounted(() => {
   let parent = node.parent
   let srcAppNode: ScalarNode | undefined = undefined
 
-  if (parent?.schemaName === "system.schema.funccallarg") {
+  if (parent?.schemaName === "system.schema.def.func.callarg") {
     const argsNode = parent.parent as ArrayNode
-    if (argsNode?.schemaName === "system.schema.funccallargs") {
-      const appArgNode = argsNode.elements.find((f: AnySchemaNode) => (f as StructNode).data.type == "system.schema.app")
+    if (argsNode?.schemaName === "system.schema.def.func.callargs") {
+      const appArgNode = argsNode.elements.find((f: AnySchemaNode) => (f as StructNode).data.type == "system.schema.domain.app")
       if (appArgNode) {
         srcAppNode = (appArgNode as StructNode).getField("value") as ScalarNode
       }
     }
   }
   if (srcAppNode === undefined) {
-    while (parent && !(parent instanceof StructNode && parent.fields?.find((f: AnySchemaNode) => f.schemaName === "system.schema.app"))) {
+    while (parent && !(parent instanceof StructNode && parent.fields?.find((f: AnySchemaNode) => f.schemaName === "system.schema.domain.app"))) {
       parent = parent.parent
     }
-    srcAppNode = parent?.fields?.find((f: AnySchemaNode) => f.schemaName === "system.schema.app") as ScalarNode
+    srcAppNode = parent?.fields?.find((f: AnySchemaNode) => f.schemaName === "system.schema.domain.app") as ScalarNode
   }
 
   let appSchema: IAppSchema | undefined = undefined

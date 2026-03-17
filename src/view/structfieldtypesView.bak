@@ -4,7 +4,7 @@
       @edit="handleTabsEdit">
       <el-tab-pane v-for="(element, i) in elementDisplay"
         :closable="!(node.readonly || element.require || element.name && noClosable.includes(element.name))"
-        :label="_L(element.display || element.name || _L['system.schema.structschema.unkown'])" :name="i"></el-tab-pane>
+        :label="_L(element.display || element.name || _L['system.schema.def.struct.schema.unkown'])" :name="i"></el-tab-pane>
     </el-tabs>
     <schema-view v-if="activeCol >= 0 && activeCol < elements.length" :key="elements[activeCol].guid"
       :node="(elements[activeCol] as StructNode)" in-form="expand" plain-text="left">
@@ -42,7 +42,7 @@ const handleTabsEdit = (target: any, action: string) => {
   else if (action === "remove") {
     const delRow = arrayNode.elements[target]
     if (!delRow) return
-    ElMessageBox.confirm(sformat("system.schema.structschema.confirmflddel", delRow.data.display || delRow.data.name || "system.schema.structschema.anonymous"), _L.value["system.schema.structschema.fields"], {
+    ElMessageBox.confirm(sformat("system.schema.def.struct.schema.confirmflddel", delRow.data.display || delRow.data.name || "system.schema.def.struct.schema.anonymous"), _L.value["system.schema.def.struct.schema.fields"], {
       confirmButtonText: _L.value["YES"],
       cancelButtonText: _L.value["NO"]
     }).then(() => {
@@ -74,12 +74,12 @@ const regSortable = () => {
 
       if (oldIndex < newIndex) {
         for (let i = oldIndex; i < newIndex; i++) {
-          arrayNode.swapRow(i, i + 1)
+          arrayNode.moveRow(i, i + 1)
         }
       }
       else {
         for (let i = oldIndex; i > newIndex; i--) {
-          arrayNode.swapRow(i, i - 1)
+          arrayNode.moveRow(i, i - 1)
         }
       }
 
@@ -97,44 +97,40 @@ let dataChangeHandler: Function | null = null
 let baseChangeHandler: Function | null = null
 let elementDisplay = reactive<{ guid: string, name: string, handler: Function, display: string, require: boolean }[]>([])
 onMounted(() => {
-  let oldLength = 0
-  dataChangeHandler = arrayNode.subscribe((action: any) => {
+  dataChangeHandler = arrayNode.subscribeLayoutChanged(() => {
     const currlen = arrayNode.elements.length
-    if (currlen !== oldLength || action === "swap") {
-      oldLength = currlen
-      elements.value = [...arrayNode.elements] as StructNode[]
+    elements.value = [...arrayNode.elements] as StructNode[]
 
-      for (let i = 0; i < arrayNode.elements.length; i++) {
-        const ele: AnySchemaNode = arrayNode.elements[i]
-        if (elementDisplay.length > i) {
-          if (ele.guid === elementDisplay[i].guid) continue
-          elementDisplay[i].handler()
-        }
-        const view = reactive<{
-          guid: string,
-          display: string,
-          name: string,
-          require: boolean
-          handler: Function
-        }>({
-          guid: ele.guid,
-          display: "",
-          name: "",
-          require: false,
-          handler: (): void => { }
-        })
-        view.handler = ele.subscribe(() => {
-          const { name, display, require } = ele.rawData
-          view.name = name
-          view.display = _L.value(display)
-          view.require = require
-        }, true)
-        elementDisplay[i] = view
+    for (let i = 0; i < arrayNode.elements.length; i++) {
+      const ele: AnySchemaNode = arrayNode.elements[i]
+      if (elementDisplay.length > i) {
+        if (ele.guid === elementDisplay[i].guid) continue
+        elementDisplay[i].handler()
       }
+      const view = reactive<{
+        guid: string,
+        display: string,
+        name: string,
+        require: boolean
+        handler: Function
+      }>({
+        guid: ele.guid,
+        display: "",
+        name: "",
+        require: false,
+        handler: (): void => { }
+      })
+      view.handler = ele.subscribe(() => {
+        const { name, display, require } = ele.rawData
+        view.name = name
+        view.display = _L.value(display)
+        view.require = require
+      }, true)
+      elementDisplay[i] = view
+    }
 
-      for (let i = elementDisplay.length - 1; i >= arrayNode.elements.length; i--) {
-        elementDisplay.pop()?.handler()
-      }
+    for (let i = elementDisplay.length - 1; i >= arrayNode.elements.length; i--) {
+      elementDisplay.pop()?.handler()
     }
   }, true)
 

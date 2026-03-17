@@ -27,15 +27,15 @@ onMounted(async () => {
   let parent: AnySchemaNode | undefined = relationInfo
   let app: string | undefined = undefined
   while (parent) {
-    if (parent.config.type === "system.schema.appfieldschema") {
+    if (parent.config.type === "system.schema.def.app.field.schema") {
       app = (parent as StructNode).getField("app")?.rawData
       break
     }
-    else if (parent.config.type === "system.schema.appschema") {
+    else if (parent.config.type === "system.schema.def.app.schema") {
       app = (parent as StructNode).getField("name")?.rawData
       break
     }
-    else if (parent.config.type === "system.schema.structschema") {
+    else if (parent.config.type === "system.schema.def.struct.schema") {
       const fieldsNode = (parent as StructNode).getField("fields") as ArrayNode
       fieldHandler = fieldsNode.subscribe(async () => {
         typeMap.clear()
@@ -71,7 +71,7 @@ onMounted(async () => {
     const generic = schema?.func?.generic ? (Array.isArray(schema.func.generic) ? [...schema.func.generic] : [schema.func.generic]) : []
 
     // entrys for whitelist, maybe more common check later
-    const matchEntrys = func == "system.conv.assign" && type == RelationType.WhiteList
+    const matchEntrys = func == "system.intrinsic.assign" && type == RelationType.WhiteList
 
     if (schema?.func?.return && /^[tT]\d*$/.test(schema.func.return)) {
       const gidx = schema.func.return.length > 1 ? parseInt(schema.func.return.substring(1)) - 1 : 0
@@ -120,7 +120,7 @@ onMounted(async () => {
 
       // value field
       const valueField = row.getField("value") as ScalarNode
-      if (aschema?.name === "system.schema.apptarget") {
+      if (aschema?.name === "system.schema.domain.target") {
         if (!valueField.rule.whiteList?.length) {
           valueField.rule.whiteList = ["00000000-0000-0000-0000-000000000000"]
           valueField.validate().then(() => valueField.notifyState())

@@ -1,8 +1,8 @@
-import {
-  type IStructFieldConfig,
+﻿import {
+  type IStructFieldSchema,
   type IFunctionArgumentInfo,
   type IFunctionExpression,
-  type IStructFieldRelation,
+  type IStructRelationSchema,
   type IFunctionCallArgument,
   type IAppFieldSchema,
   _LS,
@@ -38,77 +38,78 @@ import {
   type FieldFilterModeValue,
   NS_SYSTEM_CONTEXT,
   AppScopeType,
+  NS_SYSTEM_IDENTIFIER,
 } from "schema-node";
 
 // Schema for definition
 registerSchema(
   [
-    newSystemScalar("system.schema.appaccessfld", NS_SYSTEM_STRING),
-    newSystemScalar("system.schema.appinput", NS_SYSTEM_STRING),
+    newSystemScalar("frontend.design.appaccessfld", NS_SYSTEM_STRING),
+    newSystemScalar("frontend.design.appinput", NS_SYSTEM_STRING),
 
     newSystemFunc(
-      "system.schema.getappfieldnametype",
-      "system.schema.valuetype",
+      "frontend.design.getappfieldnametype",
+      "system.schema.type.rule.value",
       [],
       async (type: string, relation: RelationType) => {
         return relation === RelationType.Type &&
-          type == "system.schema.valuetype"
+          type == "system.schema.type.rule.value"
           ? NS_SYSTEM_ARRAY
           : type;
       },
     ),
 
-    newSystemFunc("system.schema.getcontextwhitelist", "system.array", [], async() => {
+    newSystemFunc("frontend.design.getcontextwhitelist", "system.array", [], async() => {
       const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
       return await getFieldAccessWhiteList("", contextSchema?.struct?.fields || [])
     }),
 
-    newSystemStruct("system.schema.appscopecontextmap", [
+    newSystemStruct("system.schema.def.app.scopecontextmap", [
       { name: "contextItem", type: NS_SYSTEM_STRING },
       { name: "mapKey", type: NS_SYSTEM_STRING }
     ], [
       {
         field: "contextItem",
         type: RelationType.WhiteList,
-        func: "system.schema.getcontextwhitelist",
+        func: "frontend.design.getcontextwhitelist",
         args: []
       }
     ]),
-    newSystemArray("system.schema.appscopecontextmaps", "system.schema.appscopecontextmap", "contextItem"),
+    newSystemArray("system.schema.def.app.scopecontextmaps", "system.schema.def.app.scopecontextmap", "contextItem"),
 
-    newSystemStruct("system.schema.appscopepolicy", [
-      { name: "type", type: "system.schema.appscopetype", require: true, default: AppScopeType.BusinessTarget },
-      { name: "contextMaps", type: "system.schema.appscopecontextmaps" }
+    newSystemStruct("system.schema.def.app.scopepolicy", [
+      { name: "type", type: "system.schema.def.app.scope", require: true, default: AppScopeType.BusinessTarget },
+      { name: "contextMaps", type: "system.schema.def.app.scopecontextmaps" }
     ], [
       {
         field: "contextMaps", 
         type: RelationType.Visible, 
-        func: "system.logic.equal", 
+        func: "system.logic.eq", 
         args: [{ name: "type" }, { value: AppScopeType.IsolationContext }]
       },
       {
         field: "businessKey",
         type: RelationType.Visible,
-        func: "system.logic.equal",
+        func: "system.logic.eq",
         args: [{ name: "type" }, { value: AppScopeType.BusinessTarget }]
       }
     ]),
 
     newSystemStruct(
-      "system.schema.appfieldvalarg",
+      "frontend.design.appfieldvalarg",
       [
         { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
         {
           name: "type",
-          type: "system.schema.valuetype",
+          type: "system.schema.type.rule.value",
           invisible: false,
           displayOnly: true,
         },
-        { name: "name", type: "system.schema.appaccessfld" },
+        { name: "name", type: "frontend.design.appaccessfld" },
         { name: "value", type: NS_SYSTEM_OBJECT },
       ],
       [
-        //{ field: "name", type: RelationType.Root, func: "system.conv.assign", args: [ { name: "type" } ] },
+        //{ field: "name", type: RelationType.Root, func: "system.intrinsic.assign", args: [ { name: "type" } ] },
         {
           field: "name",
           type: RelationType.Disable,
@@ -118,28 +119,28 @@ registerSchema(
         {
           field: "value",
           type: RelationType.Type,
-          func: "system.schema.getexpvaluetype",
+          func: "frontend.design.getexpvaluetype",
           args: [{ name: "type" }],
         },
         {
           field: "value",
           type: RelationType.Disable,
-          func: "system.schema.hideexpvalue",
+          func: "frontend.design.hideexpvalue",
           args: [{ name: "type" }, { name: "name" }],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.appfieldvalargs",
-      "system.schema.appfieldvalarg",
+      "frontend.design.appfieldvalargs",
+      "frontend.design.appfieldvalarg",
     ),
 
     newSystemStruct(
-      "system.schema.fieldfilter",
+      "system.schema.def.app.field.filter",
       [
         {
           name: "mode",
-          type: "system.schema.fieldfiltermode",
+          type: "system.schema.def.app.field.filtermode",
           require: true,
           default: FieldFilterMode.Exactly,
         },
@@ -150,13 +151,13 @@ registerSchema(
           invisible: true,
         },
         { name: "filter", type: NS_SYSTEM_STRING, asSuggest: true },
-        { name: "resolve", type: "system.schema.fieldfilterresolve" },
+        { name: "resolve", type: "system.schema.def.app.field.filterresolve" },
       ],
       [
         {
           field: "isFilter",
           type: RelationType.Default,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "mode" }, { value: FieldFilterMode.Filter }],
         },
         {
@@ -165,21 +166,30 @@ registerSchema(
           func: "system.logic.cond",
           args: [
             { name: "isFilter" },
-            { value: "system.schema.predicatefunc" },
+            { value: "system.schema.type.rule.predicate" },
             { value: NS_SYSTEM_STRING },
           ],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.fieldfilters",
-      "system.schema.fieldfilter",
+      "system.schema.def.app.field.filters",
+      "system.schema.def.app.field.filter",
       "filter",
     ),
 
+    newSystemStruct(
+      "system.schema.def.app.field.foreign",
+      [
+        { name: "field", type: NS_SYSTEM_STRING, require: true },
+        { name: "app", type: "system.schema.domain.app", require: true },
+      ]
+    ),
+    newSystemArray("system.schema.def.app.field.foreigns", "system.schema.def.app.field.foreign"),
+
     newSystemFunc(
-      "system.schema.appgetfieldtype",
-      "system.schema.valuetype",
+      "frontend.design.appgetfieldtype",
+      "system.schema.type.rule.value",
       [
         { name: "app", type: NS_SYSTEM_STRING },
         { name: "field", type: NS_SYSTEM_STRING },
@@ -206,7 +216,7 @@ registerSchema(
 
           if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
             tarField = schema.struct.fields.find(
-              (p: IStructFieldConfig) => p.name === paths[i],
+              (p: IStructFieldSchema) => p.name === paths[i],
             );
           } else {
             tarField = undefined;
@@ -217,62 +227,62 @@ registerSchema(
     ),
 
     newSystemStruct(
-      "system.schema.appfieldrelation",
+      "frontend.design.appfieldrelation",
       [
-        { name: "field", require: true, type: "system.schema.appaccessfld" },
+        { name: "field", require: true, type: "frontend.design.appaccessfld" },
         {
           name: "fieldType",
           displayOnly: true,
           invisible: true,
-          type: "system.schema.valuetype",
+          type: "system.schema.type.rule.value",
         },
         {
           name: "return",
           displayOnly: true,
           invisible: true,
-          type: "system.schema.valuetype",
+          type: "system.schema.type.rule.value",
         },
-        { name: "type", require: true, type: "system.schema.relationtype" },
-        { name: "func", require: true, type: "system.schema.functype" },
-        { name: "args", type: "system.schema.appfieldvalargs" },
+        { name: "type", require: true, type: "system.schema.def.struct.relationtype" },
+        { name: "func", require: true, type: "system.schema.type.func" },
+        { name: "args", type: "frontend.design.appfieldvalargs" },
       ],
       [
         {
           field: "type",
           type: RelationType.WhiteList,
-          func: "system.schema.getrelationwhitelist",
+          func: "frontend.design.getrelationwhitelist",
           args: [{ name: "fieldType" }],
         },
         {
           field: "return",
           type: RelationType.Default,
-          func: "system.schema.getrelationfuncreturn",
+          func: "frontend.design.getrelationfuncreturn",
           args: [{ name: "fieldType" }, { name: "type" }],
         },
         {
           field: "func",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "return" }],
         },
         {
           field: "args.name",
           type: RelationType.Root,
-          func: "system.schema.getappfieldnametype",
+          func: "frontend.design.getappfieldnametype",
           args: [{ name: "args.type" }, { name: "type" }],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.appfieldrelations",
-      "system.schema.appfieldrelation",
+      "frontend.design.appfieldrelations",
+      "frontend.design.appfieldrelation",
       "field",
       "type",
     ),
 
     newSystemFunc(
-      "system.schema.gettypeinfoforappfield",
-      "system.schema.valuetype",
+      "frontend.design.gettypeinfoforappfield",
+      "system.schema.type.rule.value",
       [
         { name: "info", type: NS_SYSTEM_STRING, nullable: true },
         { name: "type", type: NS_SYSTEM_STRING, nullable: true },
@@ -290,7 +300,7 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.appiscombineenable",
+      "frontend.design.appiscombineenable",
       NS_SYSTEM_BOOL,
       [
         { name: "type", type: NS_SYSTEM_STRING, nullable: true },
@@ -308,7 +318,7 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.appiscombinesenable",
+      "frontend.design.appiscombinesenable",
       NS_SYSTEM_BOOL,
       [
         { name: "type", type: NS_SYSTEM_STRING, nullable: true },
@@ -326,7 +336,7 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.appistrackpushenable",
+      "frontend.design.appistrackpushenable",
       NS_SYSTEM_BOOL,
       [
         { name: "field", type: NS_SYSTEM_STRING, nullable: true },
@@ -338,50 +348,43 @@ registerSchema(
       },
     ),
 
-    newSystemStruct("system.schema.rowpolicyitem", [
-      { name: "evaluator", type: "system.schema.evaluatorfunc", require: true },
-      { name: "filter", type: "system.schema.predicatefunc" },
+    newSystemStruct("system.schema.def.policy.row", [
+      { name: "evaluator", type: "system.schema.type.rule.evaluator", require: true },
+      { name: "filter", type: "system.schema.type.rule.predicate" },
     ]),
     newSystemArray(
-      "system.schema.rowpolicyitems",
-      "system.schema.rowpolicyitem",
+      "system.schema.def.policy.rows",
+      "system.schema.def.policy.row",
       "evaluator",
     ),
 
-    newSystemStruct("system.schema.colpolicyitem", [
+    newSystemStruct("system.schema.def.policy.col", [
       { name: "name", type: NS_SYSTEM_STRING, require: true },
       {
         name: "evaluators",
-        type: "system.schema.evaluatorfuncs",
+        type: "system.schema.type.rule.evaluators",
         require: true,
       },
     ]),
     newSystemArray(
-      "system.schema.colpolicyitems",
-      "system.schema.colpolicyitem",
+      "system.schema.def.policy.cols",
+      "system.schema.def.policy.col",
       "name",
     ),
 
     newSystemFunc(
-      "system.schema.getfieldforauths",
+      "frontend.design.getfieldforauths",
       NS_SYSTEM_ARRAY,
       [
-        { name: "app", type: NS_SYSTEM_STRING, nullable: true },
-        { name: "field", type: NS_SYSTEM_STRING, nullable: true },
+        { name: "type", type: NS_SYSTEM_STRING, nullable: true },
       ],
-      async (app: string, field: string) => {
-        const appSchema = app ? await getAppSchema(app) : undefined;
-        const fieldSchema = appSchema?.fields?.find(
-          (f: IAppFieldSchema) => f.name === field,
-        );
-        let fieldType = fieldSchema
-          ? await getSchema(fieldSchema?.type || "")
-          : undefined;
+      async (type: string) => {
+        let fieldType = type ? await getSchema(type) : undefined;
         if (fieldType?.type === SchemaType.Array && fieldType.array?.element)
           fieldType = await getSchema(fieldType.array.element);
 
         if (fieldType?.type === SchemaType.Struct) {
-          return fieldType.struct?.fields?.map((f: IStructFieldConfig) => ({
+          return fieldType.struct?.fields?.map((f: IStructFieldSchema) => ({
             value: f.name,
             label: _L(f.display) || f.name,
           }));
@@ -391,12 +394,12 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.showfieldfilterresolve",
+      "frontend.design.showfieldfilterresolve",
       NS_SYSTEM_BOOL,
       [
         { name: "app", type: NS_SYSTEM_STRING, nullable: true },
         { name: "field", type: NS_SYSTEM_STRING, nullable: true },
-        { name: "mode", type: "system.schema.fieldfiltermode", nullable: true },
+        { name: "mode", type: "system.schema.def.app.field.filtermode", nullable: true },
         { name: "filter", type: NS_SYSTEM_STRING, nullable: true },
       ],
       async (app: string, field: string, mode: FieldFilterModeValue | undefined, filter: string) => {
@@ -408,7 +411,7 @@ registerSchema(
           fieldType = await getSchema(fieldType.array.element);
 
         if (fieldType?.type === SchemaType.Struct) {
-          const filterField = fieldType.struct?.fields?.find((f: IStructFieldConfig) => f.name === filter);
+          const filterField = fieldType.struct?.fields?.find((f: IStructFieldSchema) => f.name === filter);
           const filterType = filterField ? await getSchema(filterField.type) : undefined;
           return filterType?.type === SchemaType.Enum && filterType.enum?.cascade?.length ? true : false;
         }
@@ -417,7 +420,7 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getapppushsourcewhitelist",
+      "frontend.design.getapppushsourcewhitelist",
       NS_SYSTEM_ARRAY,
       [
         { name: "app", type: NS_SYSTEM_STRING },
@@ -446,7 +449,7 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.hasjsonfield",
+      "frontend.design.hasjsonfield",
       NS_SYSTEM_BOOL,
       [{ name: "type", type: NS_SYSTEM_STRING, nullable: true }],
       async (type: string) => {
@@ -455,14 +458,39 @@ registerSchema(
         if (schema?.type !== SchemaType.Array || !schema.array?.element) return false
         schema = await getSchema(schema.array.element);
         if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
-          return schema.struct.fields.some((f: IStructFieldConfig) => f.type === "system.json");
+          return schema.struct.fields.some((f: IStructFieldSchema) => f.type === "system.json");
         }
         return false;
       },
     ),
 
+    newSystemStruct("system.schema.def.app.field.view", [
+      { name: "app", type: "system.schema.domain.app" },
+      { name: "field", type: NS_SYSTEM_STRING },
+      { name: "map", type: NS_SYSTEM_STRING }
+    ]),
+
+    newSystemFunc("frontend.design.getavailablefieldviews", "system.array", [
+      { name: "app", type: NS_SYSTEM_STRING, nullable: true },
+      { name: "sourceApp", type: NS_SYSTEM_STRING, nullable: true }
+    ], async (app: string, sourceApp: string) => {
+      if (isNull(sourceApp)) return [];
+      const sourceAppSChema = await getAppSchema(sourceApp);
+      if (!sourceAppSChema?.fields?.length) return [];
+      const whiteList = [];
+      for (const field of sourceAppSChema.fields) {
+        if (field.foreigns?.length && field.foreigns.some((f) => f.app === app)) {
+        whiteList.push({
+          value: `${field.name}`,
+          label: _L(field.display) || field.name,
+        });
+        }
+      }
+      return whiteList;
+    }),
+
     newSystemStruct(
-      "system.schema.appfieldschema",
+      "system.schema.def.app.field.schema",
       [
         {
           name: "app",
@@ -472,35 +500,36 @@ registerSchema(
         },
         {
           name: "name",
-          type: "system.schema.varname",
+          type: NS_SYSTEM_IDENTIFIER,
           require: true,
           upLimit: 32,
         },
-        { name: "type", type: "system.schema.valuetype", require: true },
+        { name: "type", type: "system.schema.type.rule.value", require: true },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "topology", type: "system.schema.fieldstoragetopology" },
+        { name: "topology", type: "system.schema.def.app.field.topology" },
         { name: "tableName", type: NS_SYSTEM_STRING },
         { name: "attrTableName", type: NS_SYSTEM_STRING },
         { name: "incrUpdate", type: NS_SYSTEM_BOOL },
         { name: "frontend", type: NS_SYSTEM_BOOL },
         { name: "disable", type: NS_SYSTEM_BOOL },
         { name: "readonly", type: NS_SYSTEM_BOOL },
-        { name: "template", type: NS_SYSTEM_BOOL },
-        { name: "func", type: "system.schema.pushfunctype" },
+        { name: "func", type: "frontend.design.pushfunctype" },
         { name: "arg", type: NS_SYSTEM_STRING },
-        { name: "combine", type: "system.schema.datacombinetype" },
-        { name: "combines", type: "system.schema.datacombines" },
-        { name: "auths", type: "system.schema.policyitems" },
-        { name: "rowAuths", type: "system.schema.rowpolicyitems" },
-        { name: "colAuths", type: "system.schema.colpolicyitems" },
-        { name: "filters", type: "system.schema.fieldfilters" },
+        { name: "combine", type: "system.schema.def.array.datacombinetype" },
+        { name: "combines", type: "system.schema.def.array.datacombines" },
+        { name: "auths", type: "system.schema.def.policy.items" },
+        { name: "rowAuths", type: "system.schema.def.policy.rows" },
+        { name: "colAuths", type: "system.schema.def.policy.cols" },
+        { name: "filters", type: "system.schema.def.app.field.filters" },
+        { name: "foreigns", type: "system.schema.def.app.field.foreigns" },
+        { name: "view", type: "system.schema.def.app.field.view" },
       ],
       [
         {
           field: "name",
           type: RelationType.Default,
-          func: "system.schema.gettypeinfoforappfield",
+          func: "frontend.design.gettypeinfoforappfield",
           args: [
             { value: "name" },
             { name: "type" },
@@ -509,7 +538,7 @@ registerSchema(
         {
           field: "display",
           type: RelationType.Default,
-          func: "system.schema.gettypeinfoforappfield",
+          func: "frontend.design.gettypeinfoforappfield",
           args: [
             { value: "display" },
             { name: "type" },
@@ -518,25 +547,25 @@ registerSchema(
         {
           field: "topology",
           type: RelationType.Visible,
-          func: "system.schema.hasjsonfield",
+          func: "frontend.design.hasjsonfield",
           args: [{ name: "type" }],
         },
         {
           field: "tableName",
           type: RelationType.Invisible,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "frontend" } ],
         },
         {
           field: "attrTableName",
           type: RelationType.Invisible,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "frontend" } ],
         },
         {
           field: "func",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "type" }],
         },
         {
@@ -548,70 +577,82 @@ registerSchema(
         {
           field: "arg",
           type: RelationType.WhiteList,
-          func: "system.schema.getapppushsourcewhitelist",
+          func: "frontend.design.getapppushsourcewhitelist",
           args: [{ name: "app" }, { name: "name" }, { name: "func" }],
         },
         {
           field: "combine",
           type: RelationType.Visible,
-          func: "system.schema.appiscombineenable",
+          func: "frontend.design.appiscombineenable",
           args: [{ name: "type" }, { name: "func" }],
         },
         {
           field: "combines",
           type: RelationType.Visible,
-          func: "system.schema.appiscombinesenable",
+          func: "frontend.design.appiscombinesenable",
           args: [{ name: "type" }, { name: "func" }],
         },
         {
           field: "combines.field",
           type: RelationType.WhiteList,
-          func: "system.schema.getstructnumbervaluefields",
+          func: "frontend.design.getstructnumbervaluefields",
           args: [{ name: "type" }],
         },
         {
           field: "colAuths",
           type: RelationType.Visible,
-          func: "system.schema.isstructorstructarray",
+          func: "frontend.design.isstructorstructarray",
           args: [{ name: "type" }],
         },
         {
           field: "colAuths.name",
           type: RelationType.WhiteList,
-          func: "system.schema.getfieldforauths",
-          args: [{ name: "app" }, { name: "name" }],
+          func: "frontend.design.getfieldforauths",
+          args: [{ name: "type" }],
         },
         {
           field: "filters",
           type: RelationType.Visible,
-          func: "system.schema.isstructorstructarray",
+          func: "frontend.design.isstructorstructarray",
           args: [{ name: "type" }],
         },
         {
           field: "filters.filter",
           type: RelationType.WhiteList,
-          func: "system.schema.getfieldforauths",
-          args: [{ name: "app" }, { name: "name" }],
+          func: "frontend.design.getfieldforauths",
+          args: [{ name: "type" }],
         },
         {
           field: "filters.resolve",
           type: RelationType.Visible,
-          func: "system.schema.showfieldfilterresolve",
+          func: "frontend.design.showfieldfilterresolve",
           args: [{ name: "app" }, { name: "name" }, { name: "filters.mode" }, { name: "filters.filter" }],
         },
         {
-          field: "template",
-          type: RelationType.Visible,
-          func: "system.schema.isstructarray",
+          field: "foreigns.field",
+          type: RelationType.WhiteList,
+          func: "frontend.design.getfieldforauths",
+          args: [{ name: "type" }],
+        },
+        {
+          field: "view.field",
+          type: RelationType.WhiteList,
+          func: "frontend.design.getavailablefieldviews",
+          args: [{ name: "app" }, { name: "view.app" }],
+        },
+        {
+          field: "view.map",
+          type: RelationType.WhiteList,
+          func: "frontend.design.getfieldforauths",
           args: [{ name: "type" }],
         },
       ],
     ),
 
     newSystemFunc(
-      "system.schema.apphasfields",
+      "frontend.design.apphasfields",
       NS_SYSTEM_BOOL,
-      [{ name: "app", type: "system.schema.app", nullable: true }],
+      [{ name: "app", type: "system.schema.domain.app", nullable: true }],
       async (app: string) => {
         if (!app) return false;
         const schema = await getAppSchema(app);
@@ -620,48 +661,48 @@ registerSchema(
     ),
 
     newSystemStruct(
-      "system.schema.appschema",
+      "system.schema.def.app.schema",
       [
         {
           name: "name",
           require: true,
-          type: "system.schema.appinput",
+          type: "frontend.design.appinput",
           upLimit: 32,
           immutable: true,
         },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "scopePolicy", type: "system.schema.appscopepolicy"},
-        { name: "auth", type: "system.schema.policytype" },
-        { name: "auths", type: "system.schema.policyitems" },
-        { name: "relations", type: "system.schema.appfieldrelations" },
+        { name: "scopePolicy", type: "system.schema.def.app.scopepolicy"},
+        { name: "auth", type: "system.schema.type.policy" },
+        { name: "auths", type: "system.schema.def.policy.items" },
+        { name: "relations", type: "frontend.design.appfieldrelations" },
       ],
       [
         {
           field: "relations.fieldType",
           type: RelationType.Default,
-          func: "system.schema.appgetfieldtype",
+          func: "frontend.design.appgetfieldtype",
           args: [{ name: "name" }, { name: "relations.field" }],
         },
         {
           field: "relations",
           type: RelationType.Visible,
-          func: "system.schema.apphasfields",
+          func: "frontend.design.apphasfields",
           args: [{ name: "name" }],
         },
         {
           field: "auths.scope",
           type: RelationType.WhiteList,
-          func: "system.schema.getappschemapolicyscope",
+          func: "frontend.design.getappschemapolicyscope",
           args: [],
         },
       ],
     ),
 
     newSystemFunc(
-      "system.schema.getworkflowmode",
+      "frontend.design.getworkflowmode",
       NS_SYSTEM_STRING,
-      [{ name: "type", type: "system.schema.workflowtype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.workflow", nullable: true }],
       async (type: string) => {
         if (!type) return null;
         const schema = await getSchema(type);
@@ -670,9 +711,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getworkflowstatetype",
+      "frontend.design.getworkflowstatetype",
       NS_SYSTEM_STRING,
-      [{ name: "type", type: "system.schema.workflowtype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.workflow", nullable: true }],
       async (type: string) => {
         if (!type) return null;
         const schema = await getSchema(type);
@@ -681,9 +722,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.hasworkflowstatetype",
+      "frontend.design.hasworkflowstatetype",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.workflowtype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.workflow", nullable: true }],
       async (type: string) => {
         if (!type) return null;
         const schema = await getSchema(type);
@@ -692,12 +733,12 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.haspreviousworkflow",
+      "frontend.design.haspreviousworkflow",
       NS_SYSTEM_BOOL,
       [
         {
           name: "previous",
-          type: "system.schema.appworkflownodeschemas",
+          type: "system.schema.def.app.workflow.nodes",
           nullable: true,
         },
       ],
@@ -707,9 +748,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.hasworkflowargs",
+      "frontend.design.hasworkflowargs",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.workflowtype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.workflow", nullable: true }],
       async (type: string) => {
         if (!type) return null;
         const schema = await getSchema(type);
@@ -718,11 +759,11 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.showforkkey",
+      "frontend.design.showforkkey",
       NS_SYSTEM_BOOL,
       [
         { name: "fork", type: NS_SYSTEM_BOOL, nullable: true },
-        { name: "payload", type: "system.schema.valuetype", nullable: true },
+        { name: "payload", type: "system.schema.type.rule.value", nullable: true },
       ],
       async (fork?: boolean, payload?: string) => {
         if (!fork || isNull(payload)) return false;
@@ -732,17 +773,17 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.showfork",
+      "frontend.design.showfork",
       NS_SYSTEM_BOOL,
-      [{ name: "mode", type: "system.schema.workflowmode", nullable: true }],
+      [{ name: "mode", type: "system.workflow.mode", nullable: true }],
       (mode: string) => {
         return mode !== WorkflowMode.Function;
       },
     ),
 
     newSystemFunc(
-      "system.schema.getworkflowpolicyscopes",
-      "system.schema.policyscopes",
+      "frontend.design.getworkflowpolicyscopes",
+      "system.schema.def.policy.scopes",
       [],
       () => {
         return [PolicyScope.FuncExecute];
@@ -750,9 +791,9 @@ registerSchema(
     ),
 
     {
-      name: "system.schema.forkeys",
+      name: "frontend.design.forkeys",
       type: SchemaType.Array,
-      display: _LS("system.schema.forkeys"),
+      display: _LS("frontend.design.forkeys"),
       loadState: SchemaLoadState.System,
       array: {
         element: NS_SYSTEM_STRING,
@@ -761,64 +802,64 @@ registerSchema(
     },
 
     newSystemStruct(
-      "system.schema.appworkflownodeschema",
+      "system.schema.def.app.workflow.node",
       [
         {
           name: "app",
-          type: "system.schema.app",
+          type: "system.schema.domain.app",
           displayOnly: true,
           invisible: true,
         },
         {
           name: "name",
-          type: "system.schema.varname",
+          type: NS_SYSTEM_IDENTIFIER,
           require: true,
           upLimit: 32,
         },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "type", type: "system.schema.workflowtype", require: true },
+        { name: "type", type: "system.schema.type.workflow", require: true },
         {
           name: "mode",
-          type: "system.schema.workflowmode",
+          type: "system.workflow.mode",
           displayOnly: true,
           invisible: true,
         },
         { name: "fork", type: NS_SYSTEM_BOOL },
-        { name: "forkKey", type: "system.schema.forkeys" },
+        { name: "forkKey", type: "frontend.design.forkeys" },
         { name: "unCancelable", type: NS_SYSTEM_BOOL },
         { name: "cancelPre", type: NS_SYSTEM_BOOL },
         { name: "payloadSave", type: NS_SYSTEM_BOOL },
-        { name: "args", type: "system.schema.funccallargs" },
-        { name: "previous", type: "system.schema.appworkflows" },
-        { name: "event", type: "system.schema.eventtype" },
+        { name: "args", type: "system.schema.def.func.callargs" },
+        { name: "previous", type: NS_SYSTEM_STRINGS },
+        { name: "event", type: "system.schema.type.event" },
         { name: "state", type: NS_SYSTEM_OBJECT },
-        { name: "func", type: "system.schema.functype" },
-        { name: "payload", type: "system.schema.valuetype" },
-        { name: "funcArgs", type: "system.schema.funccallargs" },
+        { name: "func", type: "system.schema.type.func" },
+        { name: "payload", type: "system.schema.type.rule.value" },
+        { name: "funcArgs", type: "system.schema.def.func.callargs" },
       ],
       [
         {
           field: "args",
           type: RelationType.Visible,
-          func: "system.schema.hasworkflowargs",
+          func: "frontend.design.hasworkflowargs",
           args: [{ name: "type" }],
         },
         {
           field: "mode",
           type: RelationType.Default,
-          func: "system.schema.getworkflowmode",
+          func: "frontend.design.getworkflowmode",
           args: [{ name: "type" }],
         },
         {
           field: "fork",
           type: RelationType.Visible,
-          func: "system.schema.showfork",
+          func: "frontend.design.showfork",
           args: [{ name: "mode" }],
         },
         {
           field: "func",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "mode" }, { value: WorkflowMode.Function }],
         },
         {
@@ -830,25 +871,25 @@ registerSchema(
         {
           field: "event",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "mode" }, { value: WorkflowMode.Event }],
         },
         {
           field: "previous.$ele",
           type: RelationType.BlackList,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "previous" }],
         },
         {
           field: "state",
           type: RelationType.Type,
-          func: "system.schema.getworkflowstatetype",
+          func: "frontend.design.getworkflowstatetype",
           args: [{ name: "type" }],
         },
         {
           field: "state",
           type: RelationType.Visible,
-          func: "system.schema.hasworkflowstatetype",
+          func: "frontend.design.hasworkflowstatetype",
           args: [{ name: "type" }],
         },
         {
@@ -860,14 +901,14 @@ registerSchema(
         {
           field: "type",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ value: "system.workflow" }],
         },
-        //{ field: "event", type: RelationType.Root, func: "system.conv.assign", args: [ { value: "system.event" } ] },
+        //{ field: "event", type: RelationType.Root, func: "system.intrinsic.assign", args: [ { value: "system.event" } ] },
         {
           field: "forkKey",
           type: RelationType.Visible,
-          func: "system.schema.showforkkey",
+          func: "frontend.design.showforkkey",
           args: [{ name: "fork" }, { name: "payload" }],
         },
         {
@@ -879,7 +920,7 @@ registerSchema(
         {
           field: "unCancelable",
           type: RelationType.Invisible,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "fork" }],
         },
         {
@@ -891,54 +932,54 @@ registerSchema(
       ],
     ),
     newSystemArray(
-      "system.schema.appworkflownodeschemas",
-      "system.schema.appworkflownodeschema",
+      "system.schema.def.app.workflow.nodes",
+      "system.schema.def.app.workflow.node",
       "name",
     ),
 
     newSystemStruct(
-      "system.schema.appworkflowschema",
+      "system.schema.def.app.workflow.schema",
       [
         {
           name: "app",
-          type: "system.schema.app",
+          type: "system.schema.domain.app",
           readonly: true,
           invisible: true,
         },
         {
           name: "name",
-          type: "system.schema.varname",
+          type: NS_SYSTEM_IDENTIFIER,
           require: true,
           upLimit: 32,
         },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "auths", type: "system.schema.policyitems" },
-        { name: "nodes", type: "system.schema.appworkflownodeschemas" },
+        { name: "auths", type: "system.schema.def.policy.items" },
+        { name: "nodes", type: "system.schema.def.app.workflow.nodes" },
       ],
       [
         {
           field: "nodes.previous",
           type: RelationType.Visible,
-          func: "system.schema.haspreviousworkflow",
+          func: "frontend.design.haspreviousworkflow",
           args: [{ name: "nodes" }],
         },
         {
           field: "nodes.previous.$ele",
           type: RelationType.WhiteList,
-          func: "system.str.toentrys",
+          func: "system.str.map.toentrys",
           args: [{ name: "nodes" }, { value: "name" }, { value: "display" }],
         },
         {
           field: "nodes.app",
           type: RelationType.Default,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "app" }],
         },
         {
           field: "auths.scope",
           type: RelationType.WhiteList,
-          func: "system.schema.getworkflowpolicyscopes",
+          func: "frontend.design.getworkflowpolicyscopes",
           args: [],
         },
       ],
@@ -948,7 +989,7 @@ registerSchema(
     newSystemFunc(
       "frontend.appgetapptargets",
       NS_SYSTEM_STRINGS,
-      [{ name: "app", type: "system.schema.app", nullable: true }],
+      [{ name: "app", type: "system.schema.domain.app", nullable: true }],
       (app: string) => {
         if (isNull(app)) return [];
         const appTargets = JSON.parse(
@@ -960,11 +1001,16 @@ registerSchema(
       },
     ),
 
+    newSystemFunc("frontend.notsystemapp", NS_SYSTEM_BOOL, [{ name: "app", type: "system.schema.domain.app" }],  async (app: string) => {
+      const appSchema = await getAppSchema(app);
+      return appSchema?.scopePolicy?.type !== AppScopeType.SystemLevel;
+    }),
+
     newSystemStruct(
       "frontend.apptarget",
       [
         { name: "allowApps", type: NS_SYSTEM_STRINGS, invisible: true },
-        { name: "app", type: "system.schema.app", require: true },
+        { name: "app", type: "system.schema.domain.app", require: true },
         {
           name: "target",
           type: NS_SYSTEM_STRING,
@@ -977,7 +1023,7 @@ registerSchema(
         {
           field: "app",
           type: RelationType.WhiteList,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "allowApps" }],
         },
         {
@@ -986,6 +1032,12 @@ registerSchema(
           func: "frontend.appgetapptargets",
           args: [{ name: "app" }],
         },
+        {
+          field: "target",
+          type: RelationType.Visible,
+          func: "frontend.notsystemapp",
+          args: [{ name: "app" }],
+        }
       ],
     ),
     //#endregion
@@ -1042,7 +1094,7 @@ export function saveStorageAppSchema(schema: IAppSchema) {
       frontend: f.frontend,
       disable: f.disable,
     })),
-    relations: schema.relations?.map((r: IStructFieldRelation) => ({
+    relations: schema.relations?.map((r: IStructRelationSchema) => ({
       field: r.field,
       func: r.func,
       type: r.type,
@@ -1112,7 +1164,7 @@ export function appSchemaToJson(f: IAppSchema, types?: string[]): IAppSchema {
     r.fields?.forEach((f: IAppFieldSchema) => {
       if (!types.includes(f.type)) types.push(f.type);
     });
-    r.relations?.forEach((r: IStructFieldRelation) => {
+    r.relations?.forEach((r: IStructRelationSchema) => {
       if (!types.includes(r.func)) types.push(r.func);
     });
   }
@@ -1176,10 +1228,10 @@ function gatherSchemas(types: INodeSchema[], name?: string) {
     }
     case SchemaType.Struct: {
       r.struct = deepClone(schema.struct, true);
-      r.struct?.fields?.forEach((f: IStructFieldConfig) =>
+      r.struct?.fields?.forEach((f: IStructFieldSchema) =>
         gatherSchemas(types, f.type),
       );
-      r.struct?.relations?.forEach((r: IStructFieldRelation) =>
+      r.struct?.relations?.forEach((r: IStructRelationSchema) =>
         gatherSchemas(types, r.func),
       );
       break;
@@ -1187,7 +1239,7 @@ function gatherSchemas(types: INodeSchema[], name?: string) {
     case SchemaType.Array: {
       r.array = deepClone(schema.array, true);
       gatherSchemas(types, r.array?.element);
-      r.array?.relations?.forEach((r: IStructFieldRelation) =>
+      r.array?.relations?.forEach((r: IStructRelationSchema) =>
         gatherSchemas(types, r.func),
       );
       break;
@@ -1238,18 +1290,17 @@ import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue";
 import appWorkflowIdView from "./components/appWorkflowIdView.vue";
 import forkKeyView from "./view/forkKeyView.vue";
 import { regSchemaTypeView } from "schema-node-vueview";
-import { fa } from "element-plus/es/locales.mjs";
 
-regSchemaTypeView("system.schema.app", sourceappView);
-regSchemaTypeView("system.schema.appinput", appInputView);
-regSchemaTypeView("system.schema.appfield", appsrcfldView);
-regSchemaTypeView("system.schema.appaccessfld", appaccessfldView);
-regSchemaTypeView("system.schema.appfieldrelations", apprelationinfosView);
-regSchemaTypeView("system.schema.appfieldvalargs", structfldfuncargsView);
+regSchemaTypeView("system.schema.domain.app", sourceappView);
+regSchemaTypeView("frontend.design.appinput", appInputView);
+regSchemaTypeView("system.schema.domain.field", appsrcfldView);
+regSchemaTypeView("frontend.design.appaccessfld", appaccessfldView);
+regSchemaTypeView("frontend.design.appfieldrelations", apprelationinfosView);
+regSchemaTypeView("frontend.design.appfieldvalargs", structfldfuncargsView);
 regSchemaTypeView(
-  "system.schema.appworkflownodeschemas",
+  "system.schema.def.app.workflow.nodes",
   appworkflownodeschemasView,
 );
 regSchemaTypeView("system.workflow.id", appWorkflowIdView);
-regSchemaTypeView("system.schema.forkeys", forkKeyView);
+regSchemaTypeView("frontend.design.forkeys", forkKeyView);
 //#endregion

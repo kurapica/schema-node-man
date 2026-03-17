@@ -1,8 +1,15 @@
 <template>
-    <el-container>
+    <el-container style="height: 100vh;">
         <el-header style="position: relative;">
             <nav-header></nav-header>
-            <p style="position: absolute; top: 0rem; right: 1rem">
+            <p style="position: absolute; top: 0rem; right: 2rem">
+                <el-switch
+                    v-model="isDark"
+                    :active-text="_L['frontend.dark']"
+                    :inactive-text="_L['frontend.light']"
+                    @change="toggleTheme"
+                    style="margin-right: 2rem"
+                />
                 <el-input v-if="!isEmbedded" v-model="url" :placeholder="_L['frontend.server.url']" style="display:inline;margin-right: 2rem" @change="saveServer"></el-input>
                 <a href="javascript:void(0)" v-if="isEmbedded || url" style="margin-right: 2rem;" @click="openAuth">{{_L["frontend.auth"]}}</a>
                 <a href="javascript:void(0)" @click="toggle('enUS')" :class="lang =='enUS' ? 'active' : 'deactive'">EN</a>
@@ -31,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import NavHeader from "./navHeader.vue"
 import { setLanguage, getLanguage, StructNode } from "schema-node"
 import { _L } from "schema-node-vueview"
@@ -40,6 +47,25 @@ import { getFrontendAuth, saveFrontendAuth } from "../auth"
 import { schemaView } from "schema-node-vueview"
 
 const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'
+
+// 主题切换
+const isDark = ref(localStorage.getItem('themeMode') === 'dark')
+const applyTheme = (mode: 'dark' | 'light') => {
+    document.documentElement.setAttribute('data-theme', mode)
+    document.documentElement.classList.toggle('dark', mode === 'dark')
+    document.body.setAttribute('data-theme', mode)
+}
+
+const toggleTheme = () => {
+    const mode = isDark.value ? 'dark' : 'light'
+    applyTheme(mode)
+    localStorage.setItem('themeMode', mode)
+}
+onMounted(() => {
+    const mode = (localStorage.getItem('themeMode') || 'light') as 'dark' | 'light'
+    applyTheme(mode)
+    isDark.value = mode === 'dark'
+})
 
 const lang = ref(getLanguage())
 const toggle = (l: string) => {

@@ -3,6 +3,7 @@ import './style.css'
 import App from './App.vue'
 import locale from 'element-plus/es/locale/lang/zh-cn'
 import ElementPlus from "element-plus"
+import 'element-plus/theme-chalk/dark/css-vars.css'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import 'element-plus/dist/index.css'
 import { routes } from './routes'
@@ -13,7 +14,6 @@ import "./auth"
 import { setLanguage } from 'schema-node'
 import { reloadStorageSchemas } from './schema'
 import { reloadStorageAppSchemas } from './appSchema'
-import "./assets/example/schema"
 import { setSchemaSite } from './schemaServerProvider'
 
 const app = createApp(App)

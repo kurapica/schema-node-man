@@ -1,6 +1,6 @@
-<template>
-    <el-table :data="rows" :border="true" header-align="left" :header-cell-style="{ background: '#eee' }">
-        <el-table-column align="left" prop="label" :label="_L['system.schema.appfieldvalarg']" min-width="120" />
+﻿<template>
+    <el-table :data="rows" :border="true" header-align="left" :header-cell-style="tableHeaderCellStyle">
+        <el-table-column align="left" prop="label" :label="_L['frontend.design.appfieldvalarg']" min-width="120" />
         <el-table-column align="left" :label="_L['system.schema.appfield']" min-width="120">
             <template #default="scope">
                 <schema-view :node="scope.row.node" :plain-text="plainText"></schema-view>
@@ -16,6 +16,12 @@ import { _L, schemaView } from 'schema-node-vueview'
 
 const props = defineProps<{ node: ArrayNode, plainText?: any }>()
 const argsNode = toRaw(props.node)
+const tableHeaderCellStyle = {
+    backgroundColor: 'var(--app-surface-muted)',
+    color: 'var(--app-text)',
+    borderColor: 'var(--app-border)'
+}
+
 const rows = ref<{
     label: string,
     node: ScalarNode

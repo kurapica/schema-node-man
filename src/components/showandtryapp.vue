@@ -2,7 +2,7 @@
     <section>
         <el-button type="success" @click="showtryit = true">{{ _L["frontend.view.clicktotry"] }}</el-button>
         <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit']" direction="rtl" size="100%" append-to-body>
-            <el-container class="main" style="height: 80vh;color:black;">
+            <el-container class="main tryapp-panel" style="height: 80vh;">
                 <el-main>
                     <el-tabs v-model="activeTab">
                         <el-tab-pane :label="_L['frontend.view.tryit']" :name="0"></el-tab-pane>
@@ -22,7 +22,7 @@
                     <tryapp v-if="activeTab === 0" :app="app" :skin="skin"></tryapp>
                     <el-table v-if="activeTab === 2" :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
                         header-align="left" 
-                        :header-cell-style="{ background: '#eee' }">
+                        :header-cell-style="tableHeaderCellStyle">
                         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
                         <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
                             <template #default="scope">
@@ -32,7 +32,7 @@
                         <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
                             <template #default="scope">
                                 <schema-view v-model="scope.row.type" :config="{
-                                    type: 'system.schema.valuetype',
+                                    type: 'system.schema.type.rule.value',
                                     readonly: true
                                 }" plain-text="left"></schema-view>
                             </template>
@@ -60,6 +60,11 @@ const activeTab = ref(0)
 const schemaNode = ref<StructNode | null>(null)
 const fields = ref<IAppFieldSchema[]>([])
 const showtryit = ref(false)
+const tableHeaderCellStyle = {
+    backgroundColor: 'var(--app-surface-muted)',
+    color: 'var(--app-text)',
+    borderColor: 'var(--app-border)'
+}
 
 const fieldRowClassName = (data: any) => {
     const { row } = data
@@ -73,7 +78,7 @@ watch(() => props.app, () => {
     if (schema)
     {
         schemaNode.value = new StructNode({
-            type: "system.schema.appschema",
+            type: "system.schema.def.app.schema",
             readonly: true
         }, jsonClone(toRaw(schema)))
         fields.value = schema.fields ? [...schema.fields] : []
@@ -82,6 +87,11 @@ watch(() => props.app, () => {
 </script>
 
 <style lang="css">
+.tryapp-panel {
+    color: var(--app-text);
+    background-color: var(--app-surface);
+}
+
 .el-form-item .el-form-item {
     margin-bottom: 18px;
 }

@@ -101,10 +101,10 @@ onUnmounted(() => langHandler ? langHandler() : null)
 .outline {
   line-height: 50px;
   text-align: center;
-  color: #444;
-  border-bottom: 1px solid #eee;
+    color: var(--app-text);
+    border-bottom: 1px solid var(--app-border);
   font-weight: 600;
-  background-color: white;
+    background-color: var(--app-surface);
 }
 
 .main {

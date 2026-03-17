@@ -1,5 +1,5 @@
 <template>
-  <el-container class="main" style="background-color: white;padding:1rem;border-radius: 8px;overflow: hidden;">
+  <el-container class="main main-panel">
     <el-header style="height: fit-content; width: 100%;">
       <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
         <schema-view v-model="state.app" in-form :config="{
@@ -20,14 +20,18 @@
           </el-upload>
         </template>
         <template v-else>
+          <el-select v-if="downloadFromServer && schemaFormats.length" v-model="selectedFormat" style="width: 140px; margin-right: 0.5rem;"
+            :placeholder="_L['frontend.view.format']">
+            <el-option v-for="format in schemaFormats" :key="format" :label="format" :value="format" />
+          </el-select>
           <el-button type="success" @click="download">{{ _L["frontend.view.confirm"] }}</el-button>
           <el-button type="info" @click="downloading = false">{{ _L["frontend.view.cancel"] }}</el-button>
         </template>
       </el-form>
     </el-header>
     <el-main>
-      <el-table :data="appSchemas" style="width: 100%; height: 70vh;" :border="true" header-align="left"
-        :header-cell-style="{ background: '#eee' }" @selection-change="handleSelection">
+      <el-table ref="appTableRef" :data="appSchemas" style="width: 100%; height: 70vh;" :border="true" header-align="left"
+        :header-cell-style="tableHeaderCellStyle" @selection-change="handleSelection">
         <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
           <template #default="scope">
@@ -121,7 +125,7 @@
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <el-table :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
-            header-align="left" :header-cell-style="{ background: '#eee' }">
+            header-align="left" :header-cell-style="tableHeaderCellStyle">
             <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
               <template #default="scope">
                 <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{
@@ -137,7 +141,7 @@
             <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
               <template #default="scope">
                 <schema-view v-model="scope.row.type" :config="{
-                  type: 'system.schema.valuetype',
+                  type: 'system.schema.type.rule.value',
                   readonly: true
                 }" plain-text="left"></schema-view>
               </template>
@@ -214,22 +218,22 @@
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <el-table :data="workflows" style="width: 100%; height: 65vh;" :border="true" header-align="left"
-            :header-cell-style="{ background: '#eee' }">
-            <el-table-column align="left" prop="name" :label="_L['system.schema.appworkflowschema.name']"
+            :header-cell-style="tableHeaderCellStyle">
+            <el-table-column align="left" prop="name" :label="_L['system.schema.def.app.workflow.schema.name']"
               min-width="120" />
-            <el-table-column align="left" prop="display" :label="_L['system.schema.appworkflowschema.display']"
+            <el-table-column align="left" prop="display" :label="_L['system.schema.def.app.workflow.schema.display']"
               min-width="150">
               <template #default="scope">
                 {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="desc" :label="_L['system.schema.appworkflowschema.desc']"
+            <el-table-column align="left" prop="desc" :label="_L['system.schema.def.app.workflow.schema.desc']"
               min-width="150">
               <template #default="scope">
                 {{ _L(scope.row.desc) }}
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="active" :label="_L['system.schema.appworkflowschema.active']"
+            <el-table-column align="left" prop="active" :label="_L['system.schema.def.app.workflow.schema.active']"
               min-width="120">
               <template #default="scope">
                 <schema-view v-model="scope.row.active" :config="{
@@ -318,8 +322,14 @@
 <script setup lang="ts">
 import { Delete } from '@element-plus/icons-vue'
 import { reactive, watch, ref, toRaw } from 'vue'
+
+const tableHeaderCellStyle = {
+  backgroundColor: 'var(--app-surface-muted)',
+  color: 'var(--app-text)',
+  borderColor: 'var(--app-border)'
+}
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, type IAppSchema, type IAppFieldSchema, SchemaNodeStatus, getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema, type IAppWorkflowSchema, NS_SYSTEM_BOOL } from 'schema-node'
+import { _LS, type IAppSchema, type IAppFieldSchema, SchemaNodeStatus, getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema, type IAppWorkflowSchema, NS_SYSTEM_BOOL, getSchemaFormats } from 'schema-node'
 import { ElForm, ElMessage } from 'element-plus'
 import { appSchemaToJson, clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'
 import tryapp from './tryapp.vue'
@@ -393,7 +403,7 @@ const handleNew = async () => {
   localStorage["schema_new_app"] = state.app
 
   appNode.value = new StructNode({
-    type: "system.schema.appschema",
+    type: "system.schema.def.app.schema",
   }, {})
   showAppEditor.value = true
 
@@ -407,7 +417,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
   isNewApp = false
   const schema = await getAppSchema(row.name)
   appNode.value = new StructNode({
-    type: "system.schema.appschema",
+    type: "system.schema.def.app.schema",
     readonly
   }, jsonClone(schema))
   showAppEditor.value = true
@@ -528,7 +538,7 @@ let appFieldWatchHandler: Function | null = null
 // create
 const handleFieldNew = async () => {
   appFieldNode.value = new StructNode({
-    type: "system.schema.appfieldschema",
+    type: "system.schema.def.app.field.schema",
   }, { app: currApp! })
   showAppFieldEditor.value = true
 
@@ -540,7 +550,7 @@ const handleFieldNew = async () => {
 // update
 const handleFieldEdit = async (row: any, readonly?: boolean) => {
   appFieldNode.value = new StructNode({
-    type: "system.schema.appfieldschema",
+    type: "system.schema.def.app.field.schema",
     readonly
   }, jsonClone(toRaw(row)))
   showAppFieldEditor.value = true
@@ -711,7 +721,7 @@ let appWorkflowWatchHandler: Function | null = null
 // create
 const handleWorkflowNew = async () => {
   appWorkflowNode.value = new StructNode({
-    type: "system.schema.appworkflowschema",
+    type: "system.schema.def.app.workflow.schema",
   }, { app: currApp! })
   showWorkflowEditor.value = true
 
@@ -723,7 +733,7 @@ const handleWorkflowNew = async () => {
 // update
 const handleWorkflowEdit = async (row: any, readonly?: boolean) => {
   appWorkflowNode.value = new StructNode({
-    type: "system.schema.appworkflowschema",
+    type: "system.schema.def.app.workflow.schema",
     readonly
   }, jsonClone(toRaw(row)))
   showWorkflowEditor.value = true
@@ -869,20 +879,78 @@ const tryit = () => {
 //#region Download
 
 const downloading = ref(false)
+const appTableRef = ref<any>()
+const schemaFormats = ref<string[]>([])
+const selectedFormat = ref<string>('')
+const downloadFromServer = ref(false)
+const APP_SCHEMA_DOWNLOAD_FORMAT_KEY = "schema_man_app_download_format"
 let selections: string[] = []
 
 const startDownload = () => {
   selections = []
+  appTableRef.value?.clearSelection?.()
+
+  const provider = getSchemaServerProvider()
+  downloadFromServer.value = !!provider
+  if (provider) {
+    schemaFormats.value = getSchemaFormats()
+    const savedFormat = localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] || ''
+    selectedFormat.value = schemaFormats.value.includes(savedFormat) ? savedFormat : (schemaFormats.value[0] || '')
+  }
+  else {
+    schemaFormats.value = []
+    selectedFormat.value = ''
+  }
+
   downloading.value = true
 }
 
 const handleSelection = (val: any[]) => {
-  selections = val.map((v: any) => v.name)
+  const selectedRows = val || []
+  if (!selectedRows.length) {
+    selections = []
+    return
+  }
+
+  const row = selectedRows[selectedRows.length - 1]
+  if (selectedRows.length > 1 && appTableRef.value) {
+    appTableRef.value.clearSelection()
+    appTableRef.value.toggleRowSelection(row, true)
+  }
+  selections = [row.name]
 }
 
-const download = () => {
-  if (!selections.length) return
-  const name = selections.length > 1 ? "appschema.json" : `${selections[0]}.json`
+const download = async () => {
+  if (!selections.length) {
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
+
+  const appName = selections[0]
+  const provider = getSchemaServerProvider()
+
+  if (provider && downloadFromServer.value) {
+    if (!selectedFormat.value) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
+    }
+
+    try {
+      await provider.loadAppSchema(appName, true, selectedFormat.value)
+      downloading.value = false
+    }
+    catch (ex: any) {
+      if (ex && ex.status === 403) {
+        ElMessage.error(_L.value["frontend.view.nopermission"])
+        return
+      }
+      ElMessage.error(_L.value["frontend.view.error"])
+      console.error(ex)
+    }
+    return
+  }
+
+  const name = `${appName}.json`
   const content = JSON.stringify(selections.map(getAppCachedSchema).map(s => appSchemaToJson(s!)), null, 2)
 
   // download
@@ -897,6 +965,11 @@ const download = () => {
 
   downloading.value = false
 }
+
+watch(selectedFormat, (val) => {
+  if (!val) return
+  localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] = val
+})
 
 const uploadSchema = (file: File) => {
   file.text().then(text => {
@@ -916,7 +989,15 @@ const uploadSchema = (file: File) => {
 
 <style lang="css">
 body {
-  color: black;
+  color: var(--app-text);
+}
+
+.main-panel {
+  padding: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--app-surface);
+  color: var(--app-text);
 }
 
 .el-form-item .el-form-item {
@@ -927,15 +1008,31 @@ body {
   background: gray;
 }
 
+html.dark .el-table .disable-row {
+  background: #505866;
+}
+
 .el-table .ref-row {
   background: oldlace;
+}
+
+html.dark .el-table .ref-row {
+  background: #463925;
 }
 
 .el-table .push-row {
   background: oldlace;
 }
 
+html.dark .el-table .push-row {
+  background: #463925;
+}
+
 .el-table .frontend-row {
   background: lightcyan;
+}
+
+html.dark .el-table .frontend-row {
+  background: #173743;
 }
 </style>

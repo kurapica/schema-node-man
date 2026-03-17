@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <span v-if="state.readonly && plainText"
         :style="{ 'width': '100%', 'text-align': plainText === true ? 'center' : plainText }">
         {{ state.display }}
@@ -116,7 +116,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
                 option.children ||= []
                 option.children.unshift ({
                     value: `${prefix}${f.name}.${ARRAY_ELEMENT}`,
-                    label: _L["system.schema.reltarfield.ele"],
+                    label: _L["frontend.design.reltarfield.ele"],
                     leaf: true,
                     children: null
                 })
@@ -135,12 +135,12 @@ onMounted(async () => {
     let parentNode = scalarNode.parent
     while (parentNode)
     {
-        if (parentNode.config.type === "system.schema.appfieldschema")
+        if (parentNode.config.type === "system.schema.def.app.field.schema")
         {
             app = (parentNode as StructNode).getField("app")?.rawData
             break
         }
-        else if(parentNode.config.type === "system.schema.appschema")
+        else if(parentNode.config.type === "system.schema.def.app.schema")
         {
             app = (parentNode as StructNode).getField("name")?.rawData
             break
@@ -177,7 +177,7 @@ onMounted(async () => {
                 }
                 if (paths[i] === ARRAY_ELEMENT)
                 {
-                    paths[i] = _L["system.schema.reltarfield.ele"]
+                    paths[i] = _L["frontend.design.reltarfield.ele"]
                     break
                 }
                 if (schema?.type !== SchemaType.Struct) break

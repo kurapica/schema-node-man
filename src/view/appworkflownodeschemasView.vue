@@ -299,7 +299,7 @@ const refreshWorkflowNode = async () => {
 
                     if (generics?.length === 1) {
                         const index = workflowType.workflow.args
-                            ? workflowType.workflow.args.findIndex(a => a.type === "system.schema.appfield")
+                            ? workflowType.workflow.args.findIndex(a => a.type === "system.schema.domain.field")
                             : -1
 
                         if (index >= 0 && args && args[index] && args[index].value) {
@@ -388,10 +388,10 @@ const refreshWorkflowNode = async () => {
 
             display.data = `${carg.nullable ? '? ' : '* '}${carg.name}`
             type.data = carg.type
-            if (carg.type === "system.schema.appfield")
+            if (carg.type === "system.schema.domain.field")
                 nameField.rule.whiteList = undefined
             else
-                nameField.rule.whiteList = await getFieldAccessWhiteList(carg.type, payloadTypes)
+                nameField.rule.whiteList = await getFieldAccessWhiteList(carg.type, payloadTypes) as any
             nameField.validation().then(() => nameField.notifyState())
         }
     }
@@ -479,7 +479,7 @@ const refreshFuncArgs = async (inner: boolean = false): Promise<boolean> => {
             const whitelist = await getFieldAccessWhiteList(ctype?.name || "", payloads, "", false, special?.matchArray)
 
             if (!isEqual((nameField.rule as ScalarRule).whiteList, whitelist)) {
-                (nameField.rule as ScalarRule).whiteList = whitelist
+                (nameField.rule as ScalarRule).whiteList = whitelist as any
                 nameField.validate().then(() => nameField.notifyState())
             }
 
@@ -571,13 +571,7 @@ const deleteNode = () => {
     closeWorkflowNode()
 }
 
-let handler: Function | undefined = arrayNode.subscribe((action: string) => {
-    const len = arrayNode.elements.length
-    if (action !== "swap" && len == state.length) return;
-
-    // refresh if changed
-    return refreshWorkflows()
-}, true)
+let handler: Function | undefined = arrayNode.subscribeLayoutChanged(refreshWorkflows, true)
 
 let stateHandler: Function | undefined = arrayNode.subscribeState(() => {
     state.readonly = arrayNode.readonly || false

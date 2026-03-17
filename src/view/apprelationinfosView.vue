@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <el-container style="width: 100%;">
         <el-aside>
             <el-tree :data="options" :default-props="{ children: 'children', label: 'label' }" @node-click="handleNodeClick" accordion>
@@ -63,7 +63,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
             option.children ||= []
             option.children.unshift ({
                 value: `${prefix}${f.name}.${ARRAY_ELEMENT}`,
-                label: _L.value["system.schema.reltarfield.ele"],
+                label: _L.value["frontend.design.reltarfield.ele"],
                 children: null
             })
         }
@@ -92,7 +92,7 @@ const handleTabsEdit = (target: any, action: string) => {
     else if (action === "remove") {
         const delRow = elements.value[target]
         if (!delRow) return
-        ElMessageBox.confirm(_L.value["system.schema.structschema.confirmrldel"], _L.value["system.schema.structschema.relations"], {
+        ElMessageBox.confirm(_L.value["system.schema.def.struct.schema.confirmrldel"], _L.value["system.schema.def.struct.schema.relations"], {
             confirmButtonText: _L.value["YES"],
             cancelButtonText: _L.value["NO"]
         }).then(() => {
@@ -151,7 +151,7 @@ const refresh = () => {
         view.handler = ele.subscribe(() => {
             const { field, type } = ele.rawData
             view.field = field
-            view.type = type ? _L.value["system.schema.relationtype."+(type as string).toLowerCase()] : ""
+            view.type = type ? _L.value["system.schema.def.struct.relationtype."+(type as string).toLowerCase()] : ""
         }, true)
         elementDisplay[index++] = view
     }
@@ -173,19 +173,9 @@ const handleNodeClick = (data: any) => {
 // data change handler
 let dataChangeHandler: Function | null = null
 onMounted(async () => {
-    let oldLength = 0
-
     const app = (arrayNode.parent as StructNode).getField("name")?.data
     options.value = await buildOptions(app ? (await getAppSchema(app))?.fields ?? [] : [])
-
-    dataChangeHandler = arrayNode.subscribe((action: any) => {
-        const currlen = arrayNode.elements.length
-        if (currlen !== oldLength || action === "swap")
-        {
-            oldLength = currlen
-            refresh()
-        }
-    })
+    dataChangeHandler = arrayNode.subscribeLayoutChanged(refresh, true)
 })
 
 onUnmounted(() => {

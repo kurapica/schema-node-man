@@ -1,14 +1,14 @@
 <template>
-  <el-container class="main" style="background-color: white;padding:1rem;border-radius: 8px;overflow: hidden;">
+  <el-container class="main main-panel">
     <el-header style="height: fit-content; width: 100%;">
       <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
         <schema-view v-model="state.namespace" in-form expand :config="{
-          type: 'system.schema.namespace',
-          display: _LS('system.schema.namespace')
+          type: 'system.schema.type.namespace',
+          display: _LS('system.schema.type.namespace')
         }"></schema-view>
         <schema-view v-model="state.type" in-form :config="{
-          type: 'system.schema.schematype',
-          display: _LS('system.schema.schematype')
+          type: 'system.schema.def.schematype',
+          display: _LS('system.schema.def.schematype')
         }"></schema-view>
         <schema-view v-model="state.keyword" in-form :config="{
           type: 'system.string',
@@ -31,7 +31,7 @@
     </el-header>
     <el-main>
       <el-table :data="schemas" style="width: 100%; height: 70vh;" :border="true" header-align="left"
-        :header-cell-style="{ background: '#eee' }" @selection-change="handleSelection">
+        :header-cell-style="tableHeaderCellStyle" @selection-change="handleSelection">
         <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
           <template #default="scope">
@@ -42,7 +42,7 @@
         </el-table-column>
         <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
           <template #default="scope">
-            {{ _L['system.schema.schematype.' + scope.row.type] }}
+            {{ _L['system.schema.def.schematype.' + scope.row.type] }}
           </template>
         </el-table-column>
         <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
@@ -139,12 +139,12 @@
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <template v-if="currRow?.usedBy?.length">
-            <h3>{{ _L["system.schema.schematype"] }}</h3>
+            <h3>{{ _L["system.schema.def.schematype"] }}</h3>
             <hr />
             <ul>
               <li v-for="type in currRow?.usedBy" :key="type">
                 <schema-view :config="{
-                  type: 'system.schema.anytype',
+                  type: 'system.schema.type.any',
                   readonly: true
                 }" :value="type" plain-text="left"></schema-view>
               </li>
@@ -185,6 +185,12 @@ import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
 
 const schemas = ref<INodeSchema[]>([])
+const tableHeaderCellStyle = {
+  backgroundColor: 'var(--app-surface-muted)',
+  color: 'var(--app-text)',
+  borderColor: 'var(--app-border)'
+}
+
 const schemaTypeOrder = {
   [SchemaType.Namespace]: 1,
   [SchemaType.Scalar]: 2,
@@ -282,7 +288,7 @@ const handleNew = async () => {
   localStorage["schema_new_namespace"] = state.namespace
 
   namespaceNode.value = new StructNode({
-    type: "system.schema.nodeschema",
+    type: "system.schema.def.nodeschema",
   }, {})
   const typeField = namespaceNode.value.getField("type") as EnumNode
   typeField.rule.blackList = [SchemaType.Json, SchemaType.Event, SchemaType.Workflow]
@@ -301,7 +307,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
   const schema = await getSchema(row.name)
 
   namespaceNode.value = new StructNode({
-    type: "system.schema.nodeschema",
+    type: "system.schema.def.nodeschema",
     readonly
   }, jsonClone(schema))
   showNamespaceEditor.value = true
@@ -434,7 +440,7 @@ const copySchema = async () => {
   if (ret) schema.func!.return = ""
 
   namespaceNode.value = new StructNode({
-    type: "system.schema.nodeschema",
+    type: "system.schema.def.nodeschema",
   }, jsonClone(schema))
 
   namespaceNode.value.getField("name")!.data = name
@@ -504,7 +510,15 @@ const uploadSchema = (file: File) => {
 
 <style lang="css">
 body {
-  color: black;
+  color: var(--app-text);
+}
+
+.main-panel {
+  padding: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--app-surface);
+  color: var(--app-text);
 }
 
 .el-form-item .el-form-item {

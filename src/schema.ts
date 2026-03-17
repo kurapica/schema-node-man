@@ -1,4 +1,4 @@
-import {
+﻿import {
   _L,
   _LS,
   ARRAY_ELEMENT,
@@ -19,6 +19,7 @@ import {
   newSystemStruct,
   NS_SYSTEM_ARRAY,
   NS_SYSTEM_BOOL,
+  NS_SYSTEM_IDENTIFIER,
   NS_SYSTEM_INT,
   NS_SYSTEM_INTS,
   NS_SYSTEM_JSON,
@@ -37,24 +38,24 @@ import {
   type IFunctionExpression,
   type ILocaleString,
   type INodeSchema,
-  type IStructFieldConfig,
-  type IStructFieldRelation,
+  type IStructFieldSchema,
+  type IStructRelationSchema,
 } from "schema-node";
 
 // Schema for definition
 registerSchema(
   [
     //#region system scalars
-    newSystemScalar("system.schema.pushfunctype", "system.schema.functype"),
+    newSystemScalar("frontend.design.pushfunctype", "system.schema.type.func"),
     newSystemScalar(
-      "system.schema.namespaceinput",
+      "frontend.design.namespaceinput",
       NS_SYSTEM_STRING,
       undefined,
       "^[a-z]\\w*(.[a-z]\\w*)*$",
       { upLimit: 128 },
     ),
     newSystemScalar(
-      "system.schema.reltarfield",
+      "frontend.design.reltarfield",
       NS_SYSTEM_STRING,
       undefined,
       undefined,
@@ -64,36 +65,36 @@ registerSchema(
 
     //#region scalar definition
     newSystemStruct(
-      "system.schema.scalarschema",
+      "system.schema.def.scalar.schema",
       [
-        { name: "base", type: "system.schema.scalartype", require: true },
+        { name: "base", type: "system.schema.type.scalar", require: true },
         { name: "unit", type: NS_SYSTEM_LOCALE_STRING },
         { name: "lowLimit", type: NS_SYSTEM_NUMBER },
         { name: "upLimit", type: NS_SYSTEM_NUMBER },
         { name: "error", type: NS_SYSTEM_LOCALE_STRING },
         { name: "regex", type: NS_SYSTEM_STRING },
-        { name: "whiteList", type: "system.schema.whitelistfunc" },
+        { name: "whiteList", type: "system.schema.type.rule.whitelist" },
         { name: "asSuggest", type: NS_SYSTEM_BOOL },
-        { name: "preValid", type: "system.schema.validfunc" },
-        { name: "postValid", type: "system.schema.validfunc" },
+        { name: "preValid", type: "system.schema.type.rule.valid" },
+        { name: "postValid", type: "system.schema.type.rule.valid" },
       ],
       [
         {
           field: "whiteList",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "base" }],
         },
         {
           field: "preValid",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "base" }],
         },
         {
           field: "postValid",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "base" }],
         },
       ],
@@ -102,7 +103,7 @@ registerSchema(
 
     //#region enum definition
     newSystemFunc(
-      "system.schema.calcnextflag",
+      "frontend.design.calcnextflag",
       NS_SYSTEM_INT,
       [{ name: "values", type: NS_SYSTEM_INTS }],
       (values: any[]) => {
@@ -112,41 +113,41 @@ registerSchema(
       },
     ),
 
-    newSystemStruct("system.schema.enumvalueinfo", [
+    newSystemStruct("system.schema.def.enum.value", [
       { name: "value", type: NS_SYSTEM_STRING, require: true, immutable: true },
       { name: "name", type: NS_SYSTEM_LOCALE_STRING, require: true },
       { name: "disable", type: NS_SYSTEM_BOOL, default: false },
     ]),
     newSystemArray(
-      "system.schema.enumvalueinfos",
-      "system.schema.enumvalueinfo",
+      "system.schema.def.enum.values",
+      "system.schema.def.enum.value",
       "value",
     ),
 
-    newSystemStruct("system.schema.enumintvalueinfo", [
+    newSystemStruct("frontend.design.enumintvalueinfo", [
       { name: "value", type: NS_SYSTEM_INT, require: true, immutable: true },
       { name: "name", type: NS_SYSTEM_LOCALE_STRING, require: true },
       { name: "disable", type: NS_SYSTEM_BOOL, default: false },
     ]),
     newSystemArray(
-      "system.schema.enumintvalueinfos",
-      "system.schema.enumintvalueinfo",
+      "frontend.design.enumintvalueinfos",
+      "frontend.design.enumintvalueinfo",
       "value",
     ),
 
-    newSystemStruct("system.schema.enumflagvalueinfo", [
+    newSystemStruct("frontend.design.enumflagvalueinfo", [
       { name: "value", type: NS_SYSTEM_INT, require: true, immutable: true },
       { name: "name", type: NS_SYSTEM_LOCALE_STRING, require: true },
       { name: "disable", type: NS_SYSTEM_BOOL, default: false },
     ]),
     newSystemRelArray(
-      "system.schema.enumflagsvalueinfos",
-      "system.schema.enumflagvalueinfo",
+      "frontend.design.enumflagsvalueinfos",
+      "frontend.design.enumflagvalueinfo",
       [
         {
           field: "value",
           type: RelationType.Assign,
-          func: "system.schema.calcnextflag",
+          func: "frontend.design.calcnextflag",
           args: [{ name: ARRAY_ITSELF }],
         },
       ],
@@ -154,44 +155,44 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getenuminfostype",
-      "system.schema.arraytype",
-      [{ name: "type", type: "system.schema.enumvaluetype" }],
+      "frontend.design.getenuminfostype",
+      "system.schema.type.array",
+      [{ name: "type", type: "system.schema.def.enum.valuetype" }],
       (type: EnumValueType) => {
         switch (type) {
           case EnumValueType.String:
-            return "system.schema.enumvalueinfos";
+            return "system.schema.def.enum.values";
           case EnumValueType.Int:
-            return "system.schema.enumintvalueinfos";
+            return "frontend.design.enumintvalueinfos";
           case EnumValueType.Flags:
-            return "system.schema.enumflagsvalueinfos";
+            return "frontend.design.enumflagsvalueinfos";
         }
       },
     ),
 
     newSystemStruct(
-      "system.schema.enumschema",
+      "system.schema.def.enum.schema",
       [
         {
           name: "type",
-          type: "system.schema.enumvaluetype",
+          type: "system.schema.def.enum.valuetype",
           require: true,
           default: EnumValueType.Int,
         },
         { name: "cascade", type: NS_SYSTEM_LOCALE_STRINGS },
-        { name: "values", type: "system.schema.enumvalueinfos" },
+        { name: "values", type: "system.schema.def.enum.values" },
       ],
       [
         {
           field: "cascade",
           type: RelationType.Invisible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: EnumValueType.Flags }],
         },
         {
           field: "values",
           type: RelationType.Type,
-          func: "system.schema.getenuminfostype",
+          func: "frontend.design.getenuminfostype",
           args: [{ name: "type" }],
         },
       ],
@@ -200,9 +201,9 @@ registerSchema(
 
     //#region struct definition
     newSystemFunc(
-      "system.schema.getexpvaluetype",
-      "system.schema.valuetype",
-      [{ name: "type", type: "system.schema.valuetype" }],
+      "frontend.design.getexpvaluetype",
+      "system.schema.type.rule.value",
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         let schema = await getSchema(type);
         if (schema?.type === SchemaType.Array)
@@ -219,10 +220,10 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.hideexpvalue",
-      "system.schema.valuetype",
+      "frontend.design.hideexpvalue",
+      "system.schema.type.rule.value",
       [
-        { name: "type", type: "system.schema.valuetype" },
+        { name: "type", type: "system.schema.type.rule.value" },
         { name: "name", type: NS_SYSTEM_STRING },
       ],
       async (type: string, name: string) => {
@@ -241,18 +242,18 @@ registerSchema(
     ),
 
     newSystemStruct(
-      "system.schema.structfldfuncarg",
+      "frontend.design.structfldfuncarg",
       [
         { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
-        { name: "type", type: "system.schema.valuetype", readonly: true },
-        { name: "name", type: "system.schema.reltarfield" },
+        { name: "type", type: "system.schema.type.rule.value", readonly: true },
+        { name: "name", type: "frontend.design.reltarfield" },
         { name: "value", type: NS_SYSTEM_OBJECT },
       ],
       [
         {
           field: "name",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "type" }],
         },
         {
@@ -264,26 +265,26 @@ registerSchema(
         {
           field: "value",
           type: RelationType.Type,
-          func: "system.schema.getexpvaluetype",
+          func: "frontend.design.getexpvaluetype",
           args: [{ name: "type" }],
         },
         {
           field: "value",
           type: RelationType.Disable,
-          func: "system.schema.hideexpvalue",
+          func: "frontend.design.hideexpvalue",
           args: [{ name: "type" }, { name: "name" }],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.structfldfuncargs",
-      "system.schema.structfldfuncarg",
+      "frontend.design.structfldfuncargs",
+      "frontend.design.structfldfuncarg",
     ),
 
     newSystemFunc(
-      "system.schema.isscalartype",
+      "frontend.design.isscalartype",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         const schema = await getSchema(type);
         return schema?.type === SchemaType.Scalar;
@@ -291,9 +292,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.isscalarenumtype",
+      "frontend.design.isscalarenumtype",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.rule.value", nullable: true }],
       async (type: string) => {
         let schema = type ? await getSchema(type) : null;
         if (schema?.type === SchemaType.Array && schema.array?.element)
@@ -305,9 +306,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.iscascadeenumtype",
+      "frontend.design.iscascadeenumtype",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         let schema = await getSchema(type);
         if (schema?.type === SchemaType.Array && schema.array?.element)
@@ -321,9 +322,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getroottype",
-      "system.schema.valuetype",
-      [{ name: "type", type: "system.schema.valuetype" }],
+      "frontend.design.getroottype",
+      "system.schema.type.rule.value",
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         let schema = await getSchema(type);
         if (schema?.type === SchemaType.Array && schema.array?.element)
@@ -336,9 +337,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.isflagsenumtype",
+      "frontend.design.isflagsenumtype",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         const schema = await getSchema(type);
         return (
@@ -349,9 +350,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getenumcascadewhitelist",
+      "frontend.design.getenumcascadewhitelist",
       NS_SYSTEM_ARRAY,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         let schema = await getSchema(type);
         if (schema?.type === SchemaType.Array && schema.array?.element)
@@ -371,10 +372,10 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.isenumroot",
+      "frontend.design.isenumroot",
       NS_SYSTEM_BOOL,
       [
-        { name: "type", type: "system.schema.valuetype" },
+        { name: "type", type: "system.schema.type.rule.value" },
         { name: "cascade", type: NS_SYSTEM_INT, nullable: true },
       ],
       async (type: string, cascade?: number) => {
@@ -393,10 +394,10 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getenumrootcascade",
+      "frontend.design.getenumrootcascade",
       NS_SYSTEM_INT,
       [
-        { name: "type", type: "system.schema.valuetype" },
+        { name: "type", type: "system.schema.type.rule.value" },
         { name: "cascade", type: NS_SYSTEM_INT, nullable: true },
       ],
       async (type: string, cascade?: number) => {
@@ -415,9 +416,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getwhiteblacklisttype",
-      "system.schema.valuetype",
-      [{ name: "type", type: "system.schema.valuetype" }],
+      "frontend.design.getwhiteblacklisttype",
+      "system.schema.type.rule.value",
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         const schema = await getSchema(type);
         if (
@@ -431,9 +432,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getscalarorenumtype",
-      "system.schema.valuetype",
-      [{ name: "type", type: "system.schema.valuetype" }],
+      "frontend.design.getscalarorenumtype",
+      "system.schema.type.rule.value",
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         const schema = await getSchema(type);
         return schema?.type === SchemaType.Scalar ||
@@ -444,29 +445,29 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getdefaultfieldinfo",
+      "frontend.design.getdefaultfieldinfo",
       NS_SYSTEM_STRING,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string, prop: string) => {
         const schema = await getSchema(type);
         if (!schema || schema?.type === SchemaType.Scalar) return null;
         if (prop === "display")
-          return schema.display?.key ? _LS(_L(schema.display)) : null;
+          return schema.display?.key ? schema.display : null;
         if (prop === "name") return type.split(".").pop() || type;
         return schema[prop as keyof INodeSchema] as string;
       },
     ),
 
     newSystemStruct(
-      "system.schema.structfieldconfig",
+      "system.schema.def.struct.field",
       [
         {
           name: "name",
-          type: "system.schema.varname",
+          type: NS_SYSTEM_IDENTIFIER,
           require: true,
           upLimit: 32,
         },
-        { name: "type", type: "system.schema.valuetype", require: true },
+        { name: "type", type: "system.schema.type.rule.value", require: true },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
         { name: "desc", type: NS_SYSTEM_LOCALE_STRING },
         { name: "error", type: NS_SYSTEM_LOCALE_STRING },
@@ -498,7 +499,7 @@ registerSchema(
         {
           field: "name",
           type: RelationType.Default,
-          func: "system.schema.getdefaultfieldinfo",
+          func: "frontend.design.getdefaultfieldinfo",
           args: [{ name: "type" }, { value: "name" }],
         },
 
@@ -506,7 +507,7 @@ registerSchema(
         {
           field: "display",
           type: RelationType.Default,
-          func: "system.schema.getdefaultfieldinfo",
+          func: "frontend.design.getdefaultfieldinfo",
           args: [{ name: "type" }, { value: "display" }],
         },
 
@@ -514,49 +515,49 @@ registerSchema(
         {
           field: "default",
           type: RelationType.Visible,
-          func: "system.schema.isscalarenumtype",
+          func: "frontend.design.isscalarenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "default",
           type: RelationType.Type,
-          func: "system.schema.getscalarorenumtype",
+          func: "frontend.design.getscalarorenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "default",
           type: RelationType.WhiteList,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "whiteList" }],
         },
         {
           field: "default",
           type: RelationType.BlackList,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "blackList" }],
         },
         {
           field: "default",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "root" }],
         },
         {
           field: "default",
           type: RelationType.AnyLevel,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "anyLevel" }],
         },
         {
           field: "default",
           type: RelationType.Cascade,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "cascade" }],
         },
         {
           field: "default",
           type: RelationType.SingleFlag,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "singleFlag" }],
         },
 
@@ -564,141 +565,141 @@ registerSchema(
         {
           field: "whiteList",
           type: RelationType.Visible,
-          func: "system.schema.isscalarenumtype",
+          func: "frontend.design.isscalarenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "whiteList",
           type: RelationType.Type,
-          func: "system.schema.getwhiteblacklisttype",
+          func: "frontend.design.getwhiteblacklisttype",
           args: [{ name: "type" }],
         },
         {
           field: "whiteList",
           type: RelationType.BlackList,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "blackList" }],
         },
         {
           field: "whiteList",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "root" }],
         },
         {
           field: "whiteList",
           type: RelationType.Cascade,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "cascade" }],
         },
         {
           field: "blackList",
           type: RelationType.Visible,
-          func: "system.schema.isscalarenumtype",
+          func: "frontend.design.isscalarenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "blackList",
           type: RelationType.Type,
-          func: "system.schema.getwhiteblacklisttype",
+          func: "frontend.design.getwhiteblacklisttype",
           args: [{ name: "type" }],
         },
         {
           field: "blackList",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "root" }],
         },
         {
           field: "blackList",
           type: RelationType.Cascade,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "cascade" }],
         },
         {
           field: "lowLimit",
           type: RelationType.Visible,
-          func: "system.schema.isscalartype",
+          func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "upLimit",
           type: RelationType.Visible,
-          func: "system.schema.isscalartype",
+          func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "asSuggest",
           type: RelationType.Visible,
-          func: "system.schema.isscalartype",
+          func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "useOriginForUpLimit",
           type: RelationType.Visible,
-          func: "system.schema.isscalartype",
+          func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "cascade",
           type: RelationType.Visible,
-          func: "system.schema.iscascadeenumtype",
+          func: "frontend.design.iscascadeenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "cascade",
           type: RelationType.WhiteList,
-          func: "system.schema.getenumcascadewhitelist",
+          func: "frontend.design.getenumcascadewhitelist",
           args: [{ name: "type" }],
         },
         {
           field: "root",
           type: RelationType.Visible,
-          func: "system.schema.isenumroot",
+          func: "frontend.design.isenumroot",
           args: [{ name: "type" }, { name: "cascade" }],
         },
         {
           field: "root",
           type: RelationType.Type,
-          func: "system.schema.getroottype",
+          func: "frontend.design.getroottype",
           args: [{ name: "type" }],
         },
         {
           field: "root",
           type: RelationType.Cascade,
-          func: "system.schema.getenumrootcascade",
+          func: "frontend.design.getenumrootcascade",
           args: [{ name: "type" }, { name: "cascade" }],
         },
         {
           field: "anyLevel",
           type: RelationType.Visible,
-          func: "system.schema.iscascadeenumtype",
+          func: "frontend.design.iscascadeenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "singleFlag",
           type: RelationType.Visible,
-          func: "system.schema.isflagsenumtype",
+          func: "frontend.design.isflagsenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "unpack",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: NS_SYSTEM_JSON }],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.structfieldconfigs",
-      "system.schema.structfieldconfig",
+      "system.schema.def.struct.fields",
+      "system.schema.def.struct.field",
       "name",
     ),
 
     newSystemFunc(
-      "system.schema.getstructindexfields",
+      "frontend.design.getstructindexfields",
       NS_SYSTEM_STRINGS,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         const schema = type ? await getSchema(type) : null;
         const indexes: string[] = [];
@@ -707,7 +708,7 @@ registerSchema(
           for (let i = 0; i < schema.struct.fields.length; i++) {
             if (
               await isStructFieldIndexable(
-                schema.struct.fields[i] as IStructFieldConfig,
+                schema.struct.fields[i] as IStructFieldSchema,
               )
             ) {
               indexes.push(schema.struct.fields[i].name);
@@ -719,9 +720,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getstructnumbervaluefields",
+      "frontend.design.getstructnumbervaluefields",
       NS_SYSTEM_STRINGS,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         let schema = type ? await getSchema(type) : null;
         if (schema?.type === SchemaType.Array && schema.array?.element)
@@ -740,11 +741,11 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getrelationfuncreturn",
-      "system.schema.valuetype",
+      "frontend.design.getrelationfuncreturn",
+      "system.schema.type.rule.value",
       [
-        { name: "fieldType", type: "system.schema.valuetype" },
-        { name: "relationType", type: "system.schema.relationtype" },
+        { name: "fieldType", type: "system.schema.type.rule.value" },
+        { name: "relationType", type: "system.schema.def.struct.relationtype" },
       ],
       async (fieldType: string, type: any) => {
         switch (type) {
@@ -766,7 +767,7 @@ registerSchema(
             return fieldType;
 
           case RelationType.Type:
-            return "system.schema.valuetype";
+            return "system.schema.type.rule.value";
 
           case RelationType.Cascade:
             return NS_SYSTEM_INT;
@@ -778,8 +779,6 @@ registerSchema(
           case RelationType.SingleFlag:
           case RelationType.Validation:
             return NS_SYSTEM_BOOL;
-          case RelationType.Reference:
-            return fieldType;
           case RelationType.Display:
             return NS_SYSTEM_STRING;
         }
@@ -787,7 +786,7 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getrelationwhitelist",
+      "frontend.design.getrelationwhitelist",
       NS_SYSTEM_STRINGS,
       [{ name: "fieldType", type: NS_SYSTEM_STRING }],
       async (fieldType: string) => {
@@ -837,7 +836,6 @@ registerSchema(
             RelationType.Assign,
             RelationType.Type,
             RelationType.Display,
-            RelationType.Reference,
           ];
         }
         return [
@@ -855,17 +853,16 @@ registerSchema(
           RelationType.Cascade,
           RelationType.Display,
           RelationType.Validation,
-          RelationType.Reference,
         ];
       },
     ),
 
     newSystemFunc(
-      "system.schema.getstructfieldtype",
-      "system.schema.valuetype",
+      "frontend.design.getstructfieldtype",
+      "system.schema.type.rule.value",
       [
         { name: "field", type: NS_SYSTEM_STRING },
-        { name: "fields", type: "system.schema.structfieldconfigs" },
+        { name: "fields", type: "system.schema.def.struct.fields" },
       ],
       async (field: string, fields: any[]) => {
         const paths = (field || "").split(".");
@@ -883,7 +880,7 @@ registerSchema(
 
           if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
             tarField = schema.struct.fields.find(
-              (p: IStructFieldConfig) => p.name === paths[i],
+              (p: IStructFieldSchema) => p.name === paths[i],
             );
           } else {
             tarField = null;
@@ -894,10 +891,10 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getstructfieldtypebytype",
-      "system.schema.valuetype",
+      "frontend.design.getstructfieldtypebytype",
+      "system.schema.type.rule.value",
       [
-        { name: "type", type: "system.schema.valuetype" },
+        { name: "type", type: "system.schema.type.rule.value" },
         { name: "field", type: NS_SYSTEM_STRING },
       ],
       async (type: string, field: string) => {
@@ -907,7 +904,7 @@ registerSchema(
         let schema = await getSchema(type);
         if (!schema) return null;
         let tarField = schema.struct?.fields.find(
-          (p: IStructFieldConfig) => p.name === paths[0],
+          (p: IStructFieldSchema) => p.name === paths[0],
         );
         for (let i = 1; i < paths.length; i++) {
           if (!tarField) return null;
@@ -923,7 +920,7 @@ registerSchema(
 
           if (schema?.type === SchemaType.Struct && schema.struct?.fields) {
             tarField = schema.struct.fields.find(
-              (p: IStructFieldConfig) => p.name === paths[i],
+              (p: IStructFieldSchema) => p.name === paths[i],
             );
           } else {
             tarField = undefined;
@@ -934,19 +931,19 @@ registerSchema(
     ),
 
     newSystemStruct(
-      "system.schema.structfieldrelation",
+      "system.schema.def.struct.relation",
       [
-        { name: "field", type: "system.schema.reltarfield", require: true },
+        { name: "field", type: "frontend.design.reltarfield", require: true },
         {
           name: "fieldType",
-          type: "system.schema.valuetype",
+          type: "system.schema.type.rule.value",
           displayOnly: true,
           invisible: true,
         },
-        { name: "type", type: "system.schema.relationtype", require: true },
-        { name: "return", type: "system.schema.valuetype", displayOnly: true },
-        { name: "func", type: "system.schema.functype", require: true },
-        { name: "args", type: "system.schema.structfldfuncargs" },
+        { name: "type", type: "system.schema.def.struct.relationtype", require: true },
+        { name: "return", type: "system.schema.type.rule.value", displayOnly: true },
+        { name: "func", type: "system.schema.type.func", require: true },
+        { name: "args", type: "frontend.design.structfldfuncargs" },
       ],
       [
         {
@@ -958,46 +955,46 @@ registerSchema(
         {
           field: "type",
           type: RelationType.WhiteList,
-          func: "system.schema.getrelationwhitelist",
+          func: "frontend.design.getrelationwhitelist",
           args: [{ name: "fieldType" }],
         },
         {
           field: "return",
           type: RelationType.Default,
-          func: "system.schema.getrelationfuncreturn",
+          func: "frontend.design.getrelationfuncreturn",
           args: [{ name: "fieldType" }, { name: "type" }],
         },
         {
           field: "func",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "return" }],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.structfieldrelations",
-      "system.schema.structfieldrelation",
+      "system.schema.def.struct.relations",
+      "system.schema.def.struct.relation",
       "field",
       "type",
     ),
 
     newSystemStruct(
-      "system.schema.structschema",
+      "system.schema.def.struct.schema",
       [
-        { name: "base", type: "system.schema.structtype" },
+        { name: "base", type: "system.schema.type.struct" },
         {
           name: "fields",
-          type: "system.schema.structfieldconfigs",
+          type: "system.schema.def.struct.fields",
           require: true,
         },
-        { name: "relations", type: "system.schema.structfieldrelations" },
+        { name: "relations", type: "system.schema.def.struct.relations" },
       ],
       [
         {
           field: "relations.fieldType",
           type: RelationType.Default,
-          func: "system.schema.getstructfieldtype",
+          func: "frontend.design.getstructfieldtype",
           args: [{ name: "relations.field" }, { name: "fields" }],
         },
       ],
@@ -1006,9 +1003,9 @@ registerSchema(
 
     //#region array definition
     newSystemFunc(
-      "system.schema.isstructtype",
+      "frontend.design.isstructtype",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.rule.value", nullable: true }],
       async (type: string) => {
         if (!type) return true;
         const schema = await getSchema(type);
@@ -1017,9 +1014,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.isstructorstructarray",
+      "frontend.design.isstructorstructarray",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.rule.value", nullable: true }],
       async (type: string) => {
         if (!type) return false;
         let schema = await getSchema(type);
@@ -1032,9 +1029,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.isstructarray",
+      "frontend.design.isstructarray",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.rule.value", nullable: true }],
       async (type: string) => {
         if (!type) return false;
         let schema = await getSchema(type);
@@ -1048,9 +1045,9 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.notstructarraytype",
+      "frontend.design.notstructarraytype",
       NS_SYSTEM_BOOL,
-      [{ name: "type", type: "system.schema.valuetype", nullable: true }],
+      [{ name: "type", type: "system.schema.type.rule.value", nullable: true }],
       async (type: string) => {
         if (!type) return true;
         let schema = await getSchema(type);
@@ -1062,18 +1059,18 @@ registerSchema(
       },
     ),
 
-    newSystemStruct("system.schema.datacombine", [
+    newSystemStruct("system.schema.def.array.datacombine", [
       { name: "field", type: NS_SYSTEM_STRING },
-      { name: "type", type: "system.schema.datacombinetype" },
+      { name: "type", type: "system.schema.def.array.datacombinetype" },
     ]),
     newSystemArray(
-      "system.schema.datacombines",
-      "system.schema.datacombine",
+      "system.schema.def.array.datacombines",
+      "system.schema.def.array.datacombine",
       "field",
     ),
 
     newSystemStruct(
-      "system.schema.dataindex",
+      "system.schema.def.array.dataindex",
       [
         { name: "name", type: NS_SYSTEM_STRING, upLimit: 16 },
         { name: "fields", type: NS_SYSTEM_STRINGS },
@@ -1082,74 +1079,74 @@ registerSchema(
         {
           field: "fields.$ele",
           type: RelationType.BlackList,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "fields" }],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.dataindexes",
-      "system.schema.dataindex",
+      "frontend.design.dataindexes",
+      "system.schema.def.array.dataindex",
       "name",
     ),
 
     newSystemStruct(
-      "system.schema.arrayschema",
+      "system.schema.def.array.schema",
       [
-        { name: "element", type: "system.schema.arrayeletype" },
+        { name: "element", type: "system.schema.type.rule.arrayelement" },
         { name: "single", type: NS_SYSTEM_BOOL },
         { name: "primary", type: NS_SYSTEM_STRINGS },
-        { name: "indexes", type: "system.schema.dataindexes" },
-        { name: "combines", type: "system.schema.datacombines" },
-        { name: "relations", type: "system.schema.structfieldrelations" },
+        { name: "indexes", type: "frontend.design.dataindexes" },
+        { name: "combines", type: "system.schema.def.array.datacombines" },
+        { name: "relations", type: "system.schema.def.struct.relations" },
       ],
       [
         {
           field: "primary",
           type: RelationType.Visible,
-          func: "system.schema.isstructtype",
+          func: "frontend.design.isstructtype",
           args: [{ name: "element" }],
         },
         {
           field: "primary.$ele",
           type: RelationType.WhiteList,
-          func: "system.schema.getstructindexfields",
+          func: "frontend.design.getstructindexfields",
           args: [{ name: "element" }],
         },
         {
           field: "primary.$ele",
           type: RelationType.BlackList,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "primary" }],
         },
         {
           field: "indexes",
           type: RelationType.Visible,
-          func: "system.schema.isstructtype",
+          func: "frontend.design.isstructtype",
           args: [{ name: "element" }],
         },
         {
           field: "indexes.fields.$ele",
           type: RelationType.WhiteList,
-          func: "system.schema.getstructindexfields",
+          func: "frontend.design.getstructindexfields",
           args: [{ name: "element" }],
         },
         {
           field: "combines",
           type: RelationType.Visible,
-          func: "system.schema.isstructtype",
+          func: "frontend.design.isstructtype",
           args: [{ name: "element" }],
         },
         {
           field: "combines.field",
           type: RelationType.WhiteList,
-          func: "system.schema.getstructnumbervaluefields",
+          func: "frontend.design.getstructnumbervaluefields",
           args: [{ name: "element" }],
         },
         {
           field: "relations.fieldType",
           type: RelationType.Default,
-          func: "system.schema.getstructfieldtypebytype",
+          func: "frontend.design.getstructfieldtypebytype",
           args: [{ name: "element" }, { name: "relations.field" }],
         },
       ],
@@ -1158,9 +1155,9 @@ registerSchema(
 
     //#region function definition
     newSystemFunc(
-      "system.schema.gettypedisplayorname",
+      "frontend.design.gettypedisplayorname",
       NS_SYSTEM_STRING,
-      [{ name: "type", type: "system.schema.valuetype" }],
+      [{ name: "type", type: "system.schema.type.rule.value" }],
       async (type: string) => {
         const schema = type ? await getSchema(type) : null;
         if (!schema) return null;
@@ -1171,10 +1168,10 @@ registerSchema(
     ),
 
     newSystemStruct(
-      "system.schema.funcarg",
+      "system.schema.def.func.arg",
       [
         { name: "name", require: true, type: NS_SYSTEM_STRING, upLimit: 32 },
-        { name: "type", require: true, type: "system.schema.valuetype" },
+        { name: "type", require: true, type: "system.schema.type.rule.value" },
         { name: "nullable", type: NS_SYSTEM_BOOL },
         { name: "display", type: NS_SYSTEM_LOCALE_STRING },
       ],
@@ -1182,26 +1179,26 @@ registerSchema(
         {
           field: "name",
           type: RelationType.Default,
-          func: "system.schema.gettypedisplayorname",
+          func: "frontend.design.gettypedisplayorname",
           args: [{ name: "type" }],
         },
       ],
     ),
-    newSystemArray("system.schema.funcargs", "system.schema.funcarg", "name"),
+    newSystemArray("system.schema.def.func.args", "system.schema.def.func.arg", "name"),
 
     newSystemStruct(
-      "system.schema.funccallarg",
+      "system.schema.def.func.callarg",
       [
         { name: "display", type: NS_SYSTEM_STRING, displayOnly: true },
-        { name: "type", type: "system.schema.valuetype", readonly: true },
+        { name: "type", type: "system.schema.type.rule.value", readonly: true },
         { name: "name", type: NS_SYSTEM_STRING, upLimit: 32 },
-        { name: "value", type: NS_SYSTEM_OBJECT },
+        { name: "value", type: NS_SYSTEM_OBJECT, anyLevel: true },
       ],
       [
         {
           field: "name",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ name: "type" }],
         },
         {
@@ -1213,23 +1210,23 @@ registerSchema(
         {
           field: "value",
           type: RelationType.Type,
-          func: "system.schema.getexpvaluetype",
+          func: "frontend.design.getexpvaluetype",
           args: [{ name: "type" }],
         },
         {
           field: "value",
           type: RelationType.Disable,
-          func: "system.schema.hideexpvalue",
+          func: "frontend.design.hideexpvalue",
           args: [{ name: "type" }, { name: "name" }],
         },
       ],
     ),
-    newSystemArray("system.schema.funccallargs", "system.schema.funccallarg"),
+    newSystemArray("system.schema.def.func.callargs", "system.schema.def.func.callarg"),
 
     newSystemFunc(
-      "system.schema.getcalltypewhitelist",
+      "frontend.design.getcalltypewhitelist",
       NS_SYSTEM_ARRAY,
-      [{ name: "return", type: "system.schema.valuetype" }],
+      [{ name: "return", type: "system.schema.type.rule.value" }],
       async (ret: string) => {
         const schema = ret ? await getSchema(ret) : null;
         if (schema?.type === SchemaType.Array) {
@@ -1257,11 +1254,11 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getfuncroot",
-      "system.schema.valuetype",
+      "frontend.design.getfuncroot",
+      "system.schema.type.rule.value",
       [
-        { name: "return", type: "system.schema.valuetype" },
-        { name: "type", type: "system.schema.expressiontype" },
+        { name: "return", type: "system.schema.type.rule.value" },
+        { name: "type", type: "system.schema.def.func.exptype" },
       ],
       async (ret: string, type: ExpressionType) => {
         switch (type) {
@@ -1285,45 +1282,45 @@ registerSchema(
     ),
 
     newSystemStruct(
-      "system.schema.funcexp",
+      "system.schema.def.func.exp",
       [
         { name: "name", type: NS_SYSTEM_STRING, require: true, upLimit: 32 },
-        { name: "return", type: "system.schema.valuetype", require: true },
+        { name: "return", type: "system.schema.type.rule.value", require: true },
         {
           name: "type",
-          type: "system.schema.expressiontype",
+          type: "system.schema.def.func.exptype",
           require: true,
           default: ExpressionType.Call,
         },
-        { name: "func", type: "system.schema.functype", require: true },
-        { name: "args", type: "system.schema.funccallargs", require: true },
+        { name: "func", type: "system.schema.type.func", require: true },
+        { name: "args", type: "system.schema.def.func.callargs", require: true },
       ],
       [
         {
           field: "type",
           type: RelationType.WhiteList,
-          func: "system.schema.getcalltypewhitelist",
+          func: "frontend.design.getcalltypewhitelist",
           args: [{ name: "return" }],
         },
         {
           field: "func",
           type: RelationType.Root,
-          func: "system.schema.getfuncroot",
+          func: "frontend.design.getfuncroot",
           args: [{ name: "return" }, { name: "type" }],
         },
       ],
     ),
-    newSystemArray("system.schema.funcexps", "system.schema.funcexp", "name"),
+    newSystemArray("system.schema.def.func.exps", "system.schema.def.func.exp", "name"),
 
-    newSystemStruct("system.schema.functionschema", [
+    newSystemStruct("system.schema.def.func.schema", [
       {
         name: "return",
-        type: "system.schema.valuetype",
+        type: "system.schema.type.rule.value",
         require: true,
         immutable: true,
       },
-      { name: "args", type: "system.schema.funcargs", require: true },
-      { name: "exps", type: "system.schema.funcexps", require: true },
+      { name: "args", type: "system.schema.def.func.args", require: true },
+      { name: "exps", type: "system.schema.def.func.exps", require: true },
       { name: "generic", type: NS_SYSTEM_STRINGS, invisible: true },
       { name: "server", type: NS_SYSTEM_BOOL },
       { name: "nocache", type: NS_SYSTEM_BOOL },
@@ -1331,40 +1328,40 @@ registerSchema(
     //#endregion
 
     //#region event definition
-    newSystemStruct("system.schema.eventschema", [
-      { name: "payload", type: "system.schema.valuetype", readonly: true },
+    newSystemStruct("system.schema.def.event.schema", [
+      { name: "payload", type: "system.schema.type.rule.value", readonly: true },
     ]),
     //#endregion
 
     //#region workflow definition
-    newSystemStruct("system.schema.workflowschema", [
+    newSystemStruct("system.schema.def.app.workflow.schema", [
       {
         name: "mode",
-        type: "system.schema.workflowmode",
+        type: "system.workflow.mode",
         require: true,
         readonly: true,
       },
-      { name: "payload", type: "system.schema.valuetype", readonly: true },
-      { name: "state", type: "system.schema.valuetype", readonly: true },
-      { name: "session", type: "system.schema.valuetype", readonly: true },
-      { name: "args", type: "system.schema.funcargs", readonly: true },
+      { name: "payload", type: "system.schema.type.rule.value", readonly: true },
+      { name: "state", type: "system.schema.type.rule.value", readonly: true },
+      { name: "session", type: "system.schema.type.rule.value", readonly: true },
+      { name: "args", type: "system.schema.def.func.args", readonly: true },
     ]),
     //#endregion
 
     //#region policy definition
     newSystemStruct(
-      "system.schema.policyitem",
+      "system.schema.def.policy.item",
       [
-        { name: "scope", type: "system.schema.policyscope", require: true },
+        { name: "scope", type: "system.schema.def.policy.scope", require: true },
         {
           name: "combine",
-          type: "system.schema.policycombine",
+          type: "system.schema.def.policy.combine",
           require: true,
           default: PolicyCombine.OrElse,
         },
         {
           name: "evaluator",
-          type: "system.schema.evaluatorfunc",
+          type: "system.schema.type.rule.evaluator",
           require: true,
         },
       ],
@@ -1372,25 +1369,25 @@ registerSchema(
         {
           field: "evaluator",
           type: RelationType.Root,
-          func: "system.conv.assign",
+          func: "system.intrinsic.assign",
           args: [{ value: NS_SYSTEM_BOOL }],
         },
       ],
     ),
     newSystemArray(
-      "system.schema.policyitems",
-      "system.schema.policyitem",
+      "system.schema.def.policy.items",
+      "system.schema.def.policy.item",
       "scope",
     ),
 
     newSystemStruct(
-      "system.schema.policyschema",
-      [{ name: "items", type: "system.schema.policyitems", require: true }],
+      "system.schema.def.policy.schema",
+      [{ name: "items", type: "system.schema.def.policy.items", require: true }],
       [
         {
           field: "items.scope",
           type: RelationType.WhiteList,
-          func: "system.schema.getappschemapolicyscope",
+          func: "frontend.design.getappschemapolicyscope",
           args: [],
         },
         {
@@ -1403,8 +1400,8 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getschemapolicyscope",
-      "system.schema.policyscopes",
+      "frontend.design.getschemapolicyscope",
+      "system.schema.def.policy.scopes",
       [],
       () => {
         return [
@@ -1418,8 +1415,8 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getappschemapolicyscope",
-      "system.schema.policyscopes",
+      "frontend.design.getappschemapolicyscope",
+      "system.schema.def.policy.scopes",
       [],
       () => {
         return [
@@ -1437,8 +1434,8 @@ registerSchema(
     ),
 
     newSystemFunc(
-      "system.schema.getrowpolicyscope",
-      "system.schema.policyscopes",
+      "frontend.design.getrowpolicyscope",
+      "system.schema.def.policy.scopes",
       [],
       () => {
         return [
@@ -1453,32 +1450,32 @@ registerSchema(
 
     //#region namespace definition
     newSystemFunc(
-      "system.schema.genarraydisplay",
+      "frontend.design.genarraydisplay",
       NS_SYSTEM_STRING,
-      [{ name: "elementType", type: "system.schema.valuetype" }],
+      [{ name: "elementType", type: "system.schema.type.rule.value" }],
       (elementType: string) =>
         `{[LIST.PREFIX]}{@${elementType}}{[LIST.SUFFIX]}`,
     ),
 
     newSystemFunc(
-      "system.schema.genarrayname",
+      "frontend.design.genarrayname",
       NS_SYSTEM_STRING,
-      [{ name: "elementType", type: "system.schema.valuetype" }],
+      [{ name: "elementType", type: "system.schema.type.rule.value" }],
       (elementType: string) => `${elementType.split(".").pop()}s`,
     ),
 
     newSystemStruct(
-      "system.schema.nodeschema",
+      "system.schema.def.nodeschema",
       [
         {
           name: "name",
-          type: "system.schema.namespaceinput",
+          type: "frontend.design.namespaceinput",
           require: true,
           immutable: true,
         },
         {
           name: "type",
-          type: "system.schema.schematype",
+          type: "system.schema.def.schematype",
           require: true,
           immutable: true,
           default: SchemaType.Namespace,
@@ -1490,75 +1487,75 @@ registerSchema(
           require: true,
           upLimit: 128,
         },
-        { name: "auth", type: "system.schema.policytype" },
-        { name: "scalar", type: "system.schema.scalarschema" },
-        { name: "enum", type: "system.schema.enumschema" },
-        { name: "struct", type: "system.schema.structschema" },
-        { name: "array", type: "system.schema.arrayschema" },
-        { name: "func", type: "system.schema.functionschema" },
-        { name: "event", type: "system.schema.eventschema" },
-        { name: "workflow", type: "system.schema.workflowschema" },
-        { name: "policy", type: "system.schema.policyschema" },
+        { name: "auth", type: "system.schema.type.policy" },
+        { name: "scalar", type: "system.schema.def.scalar.schema" },
+        { name: "enum", type: "system.schema.def.enum.schema" },
+        { name: "struct", type: "system.schema.def.struct.schema" },
+        { name: "array", type: "system.schema.def.array.schema" },
+        { name: "func", type: "system.schema.def.func.schema" },
+        { name: "event", type: "system.schema.def.event.schema" },
+        { name: "workflow", type: "system.schema.def.app.workflow.schema" },
+        { name: "policy", type: "system.schema.def.policy.schema" },
       ],
       [
         {
           field: "name",
           type: RelationType.Default,
-          func: "system.schema.genarrayname",
+          func: "frontend.design.genarrayname",
           args: [{ name: "array.element" }],
         },
         {
           field: "scalar",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Scalar }],
         },
         {
           field: "enum",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Enum }],
         },
         {
           field: "struct",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Struct }],
         },
         {
           field: "array",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Array }],
         },
         {
           field: "func",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Func }],
         },
         {
           field: "event",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Event }],
         },
         {
           field: "workflow",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Workflow }],
         },
         {
           field: "policy",
           type: RelationType.Visible,
-          func: "system.logic.equal",
+          func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Policy }],
         },
         {
           field: "display.key",
           type: RelationType.Default,
-          func: "system.schema.genarraydisplay",
+          func: "frontend.design.genarraydisplay",
           args: [{ name: "array.element" }],
         },
       ],
@@ -1692,7 +1689,7 @@ export function schemaToJson(f: INodeSchema): INodeSchema {
     case SchemaType.Struct:
       r.struct = deepClone(f.struct, true);
       if (r.struct?.relations) {
-        r.struct.relations.forEach((r: IStructFieldRelation) => {
+        r.struct.relations.forEach((r: IStructRelationSchema) => {
           const funcInfo = getCachedSchema(r.func);
           const args = funcInfo?.func?.args || [];
           if (!args.length || !args[args.length - 1].params) return;
@@ -1755,34 +1752,31 @@ import structfldfuncargsView from "./view/structfldfuncargsView.vue";
 import funcdefineView from "./view/funcdefineView.vue";
 import { regSchemaTypeView } from "schema-node-vueview";
 
-regSchemaTypeView("system.schema.anytype", namespaceView);
-regSchemaTypeView("system.schema.namespace", namespaceView);
-regSchemaTypeView("system.schema.scalartype", namespaceView);
-regSchemaTypeView("system.schema.enumtype", namespaceView);
-regSchemaTypeView("system.schema.structtype", namespaceView);
-regSchemaTypeView("system.schema.arraytype", namespaceView);
-regSchemaTypeView("system.schema.functype", namespaceView);
-regSchemaTypeView("system.schema.pushfunctype", namespaceView);
-regSchemaTypeView("system.schema.validfunc", namespaceView);
-regSchemaTypeView("system.schema.whitelistfunc", namespaceView);
-regSchemaTypeView("system.schema.predicatefunc", namespaceView);
-regSchemaTypeView("system.schema.evaluatorfunc", namespaceView);
-regSchemaTypeView("system.schema.arrayeletype", namespaceView);
-regSchemaTypeView("system.schema.valuetype", namespaceView);
-regSchemaTypeView("system.schema.namespaceinput", namespaceInputView);
+regSchemaTypeView("system.schema.type.any", namespaceView);
+regSchemaTypeView("system.schema.type.namespace", namespaceView);
+regSchemaTypeView("system.schema.type.scalar", namespaceView);
+regSchemaTypeView("system.schema.type.enum", namespaceView);
+regSchemaTypeView("system.schema.type.struct", namespaceView);
+regSchemaTypeView("system.schema.type.array", namespaceView);
+regSchemaTypeView("system.schema.type.func", namespaceView);
+regSchemaTypeView("frontend.design.pushfunctype", namespaceView);
+regSchemaTypeView("system.schema.type.rule.valid", namespaceView);
+regSchemaTypeView("system.schema.type.rule.whitelist", namespaceView);
+regSchemaTypeView("system.schema.type.rule.predicate", namespaceView);
+regSchemaTypeView("system.schema.type.rule.evaluator", namespaceView);
+regSchemaTypeView("system.schema.type.rule.arrayelement", namespaceView);
+regSchemaTypeView("system.schema.type.rule.value", namespaceView);
+regSchemaTypeView("frontend.design.namespaceinput", namespaceInputView);
 
-regSchemaTypeView("system.schema.enumvalueinfos", enumvalueinfosView);
-regSchemaTypeView("system.schema.enumintvalueinfos", enumvalueinfosView);
-regSchemaTypeView("system.schema.enumflagsvalueinfos", enumvalueinfosView);
+regSchemaTypeView("system.schema.def.enum.values", enumvalueinfosView);
+regSchemaTypeView("frontend.design.enumintvalueinfos", enumvalueinfosView);
+regSchemaTypeView("frontend.design.enumflagsvalueinfos", enumvalueinfosView);
 
-regSchemaTypeView("system.schema.structfieldconfigs", structfieldtypesView);
-regSchemaTypeView(
-  "system.schema.structfieldrelations",
-  structfldrelationinfosView,
-);
-regSchemaTypeView("system.schema.reltarfield", reltarfieldView);
-regSchemaTypeView("system.schema.structfldfuncargs", structfldfuncargsView);
+regSchemaTypeView("system.schema.def.struct.fields", structfieldtypesView);
+regSchemaTypeView( "system.schema.def.struct.relations", structfldrelationinfosView);
+regSchemaTypeView("frontend.design.reltarfield", reltarfieldView);
+regSchemaTypeView("frontend.design.structfldfuncargs", structfldfuncargsView);
 
-regSchemaTypeView("system.schema.functionschema", funcdefineView);
+regSchemaTypeView("system.schema.def.func.schema", funcdefineView);
 
 //#endregion

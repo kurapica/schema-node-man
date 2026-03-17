@@ -32,209 +32,156 @@ const toEntryFunc = async(func: ScalarNode, args: StructNode[], typeMap: Map<str
     return []
 }
 
-const refreshAppDataFetchFunc = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const app = args[0].getField("value")!.rawData
-    const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
-    const result: ArgInfo[] = [{}]
+export const specialFuncRefresh: { [key: string]: (func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => Promise<ArgInfo[]> } = {
+    // field access
+    "system.collection.getfield": refreshFieldFunc,
+    "system.collection.getfields":refreshFieldFunc,
 
-    if (!appSchema) return result
-    result.push({ whiteList: await getFieldAccessWhiteList("", appSchema.fields || [], undefined, true) })
+    // to entry
+    "system.str.map.toentry": toEntryFunc,
+    "system.str.map.toentrys": toEntryFunc,
 
-    const fname = args[1].getField("value")!.rawData
-    const field = !isNull(fname) ? appSchema.fields?.find(f => f.name === fname) : undefined
+    // fetch context item
+    "system.data.getcontext": async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+        const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
+        return [{ type: ret, whiteList: await getFieldAccessWhiteList(ret || "", contextSchema?.struct?.fields || [])}]
+    },
 
-    // field not selected
-    if (!field) return result
+    // app data fetch
+    "system.data.get": async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+        const app = args[0].getField("value")!.rawData
+        const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
+        const result: ArgInfo[] = [{}]
 
-    let fieldSchema = await getSchema(field.type)
-    if (fieldSchema?.type === SchemaType.Array && fieldSchema.array?.element && fieldSchema.array?.primary?.length)
-    {
-        const primarys = fieldSchema.array.primary
-        if (primarys.length !== args.length - 3)
+        if (!appSchema) return result
+        result.push({ whiteList: await getFieldAccessWhiteList("", appSchema.fields || [], undefined, true) })
+
+        const fname = args[1].getField("value")!.rawData
+        const field = !isNull(fname) ? appSchema.fields?.find(f => f.name === fname) : undefined
+
+        // field not selected
+        if (!field) return result
+
+        let fieldSchema = await getSchema(field.type)
+        if (fieldSchema?.type === SchemaType.Array && fieldSchema.array?.element && fieldSchema.array?.primary?.length)
         {
-            func.data = primarys.length === 1
-                ? "system.data.getappdatabyonekey"
-                : primarys.length === 2
-                    ? "system.data.getappdatabytwokey"
-                    : primarys.length === 3
-                        ? "system.data.getappdatabythreekey"
-                        : "system.data.getappdatabyfourkey"
+            const primarys = fieldSchema.array.primary
+            fieldSchema = await getSchema(fieldSchema.array.element)
+            if (fieldSchema?.type === SchemaType.Struct && fieldSchema.struct?.fields.length)
+            {
+                for (let i = 0; i < primarys.length; i++)
+                {
+                    const f = fieldSchema.struct!.fields.find(f => f.name === primarys[i])
+                    if (f) {
+                        result.push({ type: f.type, display: _L(f.display || f.name) })
+                    }
+                    else {
+                        result.push({})
+                    }
+                }
+            }
+        }
+        return result
+    },
+
+    // app field data fetch
+    "system.data.getdatasource": async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+        const app = `${args[0].getField("value")!.rawData}`
+        const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
+        const result: ArgInfo[] = [{}]
+
+        if (!appSchema) return result
+        result.push({ whiteList: await getFieldAccessWhiteList(ret || "", appSchema.fields || [], undefined, true) })
+
+        return result
+    },
+
+    "system.data.getfield": async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+        const app = args[0].getField("value")!.rawData
+        const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
+        const result: ArgInfo[] = [{}]
+
+        if (!appSchema) return result
+        result.push({ whiteList: await getFieldAccessWhiteList("", appSchema.fields || [], undefined, true) })
+
+        const fname = args[1].getField("value")!.rawData
+        const field = !isNull(fname) ? appSchema.fields?.find(f => f.name === fname) : undefined
+
+        // field not selected
+        if (!field) return result
+        let fieldSchema = await getSchema(field.type)
+
+        const primarys = fieldSchema?.type === SchemaType.Array && fieldSchema.array?.element && fieldSchema.array?.primary || []
+        if (fieldSchema?.type === SchemaType.Array)
+            fieldSchema = fieldSchema.array?.element ? await getSchema(fieldSchema.array.element) : undefined
+
+        // no data field can be fetched
+        if (fieldSchema?.type !== SchemaType.Struct)
+        {
+            func.data = "system.data.get"
             return result
         }
 
-        fieldSchema = await getSchema(fieldSchema.array.element)
-        if (fieldSchema?.type === SchemaType.Struct && fieldSchema.struct?.fields.length)
+        // data field
+        result.push({ whiteList: await getFieldAccessWhiteList("", fieldSchema.struct?.fields.filter(f => !primarys.includes(f.name)) || [], undefined, true) })
+
+        // primary key check
+        if (primarys.length)
         {
             for (let i = 0; i < primarys.length; i++)
             {
                 const f = fieldSchema.struct!.fields.find(f => f.name === primarys[i])
                 if (f) {
-                    result.push({ type: f.type, display: _L(f.display || f.name) })
+                    result.push({ type: f.type, display: _L(f.display || f.name)  })
                 }
                 else {
                     result.push({})
                 }
             }
         }
-    }
-    else if(args.length > 3)
-    {
-        // change the func to match the field
-        func.data = "system.data.getappdata"
-    }
-    return result
-}
-
-const refreshAppFieldDataFetchFunc = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const app = args[0].getField("value")!.rawData
-    const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
-    const result: ArgInfo[] = [{}]
-
-    if (!appSchema) return result
-    result.push({ whiteList: await getFieldAccessWhiteList("", appSchema.fields || [], undefined, true) })
-
-    const fname = args[1].getField("value")!.rawData
-    const field = !isNull(fname) ? appSchema.fields?.find(f => f.name === fname) : undefined
-
-    // field not selected
-    if (!field) return result
-    let fieldSchema = await getSchema(field.type)
-
-    const primarys = fieldSchema?.type === SchemaType.Array && fieldSchema.array?.element && fieldSchema.array?.primary || []
-    if (fieldSchema?.type === SchemaType.Array)
-        fieldSchema = fieldSchema.array?.element ? await getSchema(fieldSchema.array.element) : undefined
-
-    // no data field can be fetched
-    if (fieldSchema?.type !== SchemaType.Struct)
-    {
-        func.data = "system.data.getappdata"
         return result
-    }
-
-    // data field
-    result.push({ whiteList: await getFieldAccessWhiteList("", fieldSchema.struct?.fields.filter(f => !primarys.includes(f.name)) || [], undefined, true) })
-
-    // primary key check
-    if (primarys.length)
-    {
-        if (primarys.length !== args.length - 4)
-        {
-            func.data = primarys.length === 1
-                ? "system.data.getappfdatabyonekey"
-                : primarys.length === 2
-                    ? "system.data.getappfdatabytwokey"
-                    : primarys.length === 3
-                        ? "system.data.getappfdatabythreekey"
-                        : "system.data.getappfdatabyfourkey"
-            return result
-        }
-
-        for (let i = 0; i < primarys.length; i++)
-        {
-            const f = fieldSchema.struct!.fields.find(f => f.name === primarys[i])
-            if (f) {
-                result.push({ type: f.type, display: _L(f.display || f.name)  })
-            }
-            else {
-                result.push({})
-            }
-        }
-    }
-    else if(args.length > 3)
-    {
-        // change the func to match the field
-        func.data = "system.data.getappfdata"
-    }
-    return result
-}
-
-const refreshAppDataSource = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const app = `${args[0].getField("value")!.rawData}`
-    const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
-    const result: ArgInfo[] = [{}]
-
-    if (!appSchema) return result
-    result.push({ whiteList: await getFieldAccessWhiteList(ret || "", appSchema.fields || [], undefined, true) })
-
-    return result
-}
-
-const refreshSaveAppData = async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const app = `${args[0].getField("value")!.rawData}`
-    const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
-    const result: ArgInfo[] = [{}]
-
-    if (!appSchema) return result
-    result.push({ whiteList: await getFieldAccessWhiteList(ret || "", appSchema.fields || [], undefined, true) })
-
-    const field = `${args[1].getField("value")!.rawData}`
-    const fieldSchema = appSchema.fields?.find(f => f.name === field)
-    const fieldType = fieldSchema?.type ? await getSchema(fieldSchema.type) : undefined
-    if (!fieldType || fieldType.type !== SchemaType.Array || !fieldType.array?.primary?.length) return result
-
-    // value type
-    const chooseValue = args[2].getField("name")!.rawData
-    if (!isNull(chooseValue) && typeMap.has(chooseValue)) {
-        result.push({ type: typeMap.get(chooseValue)!.name }) // value type
-    }
-    else
-    {
-        result.push({ type: fieldType.array.element, matchArray: true }) // value type
-    }
-
-    // pass onlyAdd and target and raiseEvent
-    result.push({})
-    result.push({})
-    result.push({})
-
-    // overrides
-    const elementType = fieldType.array.element ? await getSchema(fieldType.array.element) : undefined
-    if (!elementType || elementType.type !== SchemaType.Struct || !elementType.struct?.fields.length) return result
-    let whiteList = await getFieldAccessWhiteList("", elementType.struct.fields.filter(f => !fieldType.array!.primary!.includes(f.name)), undefined, true)
-    for (let i = 5; i < args.length; i++) {
-        result.push({ whiteList: whiteList })
-
-        // remove used field
-        const fname = args[i].getField("value")!.rawData
-        whiteList = whiteList.filter(w => w.value !== fname)
-    }
-
-    return result
-}
-
-export const specialFuncRefresh: { [key: string]: (func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => Promise<ArgInfo[]> } = {
-    // field access
-    "system.collection.delfield": refreshFieldFunc,
-    "system.collection.getfield": refreshFieldFunc,
-    "system.collection.getfields":refreshFieldFunc,
-    "system.collection.setfield": refreshFieldFunc,
-    "system.collection.getfielddefault": refreshFieldFunc,
-
-    // to entry
-    "system.str.toentry": toEntryFunc,
-    "system.str.toentrys": toEntryFunc,
-
-    // fetch context item
-    "system.data.getcontextitem": async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-        const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
-        return [{ type: ret, whiteList: await getFieldAccessWhiteList(ret || "", contextSchema?.struct?.fields || [])}]
     },
 
-    // app data fetch
-    "system.data.getappdata": refreshAppDataFetchFunc,
-    "system.data.getappdatabyonekey": refreshAppDataFetchFunc,
-    "system.data.getappdatabytwokey": refreshAppDataFetchFunc,
-    "system.data.getappdatabythreekey": refreshAppDataFetchFunc,
-    "system.data.getappdatabyfourkey": refreshAppDataFetchFunc,
+    "system.data.save": async(func: ScalarNode, args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
+        const app = `${args[0].getField("value")!.rawData}`
+        const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
+        const result: ArgInfo[] = [{}]
 
-    // app field data fetch
-    "system.data.getdatasource": refreshAppDataSource,
+        if (!appSchema) return result
+        result.push({ whiteList: await getFieldAccessWhiteList(ret || "", appSchema.fields || [], undefined, true) })
 
-    "system.data.getappfdata": refreshAppFieldDataFetchFunc,
-    "system.data.getappfdatabyonekey": refreshAppFieldDataFetchFunc,
-    "system.data.getappfdatabytwokey": refreshAppFieldDataFetchFunc,
-    "system.data.getappfdatabythreekey": refreshAppFieldDataFetchFunc,
-    "system.data.getappfdatabyfourkey": refreshAppFieldDataFetchFunc,
+        const field = `${args[1].getField("value")!.rawData}`
+        const fieldSchema = appSchema.fields?.find(f => f.name === field)
+        const fieldType = fieldSchema?.type ? await getSchema(fieldSchema.type) : undefined
+        if (!fieldType || fieldType.type !== SchemaType.Array || !fieldType.array?.primary?.length) return result
 
-    "system.data.saveappdata": refreshSaveAppData,
+        // value type
+        const chooseValue = args[2].getField("name")!.rawData
+        if (!isNull(chooseValue) && typeMap.has(chooseValue)) {
+            result.push({ type: typeMap.get(chooseValue)!.name }) // value type
+        }
+        else
+        {
+            result.push({ type: fieldType.array.element, matchArray: true }) // value type
+        }
+
+        // pass onlyAdd and target and raiseEvent
+        result.push({})
+        result.push({})
+        result.push({})
+
+        // overrides
+        const elementType = fieldType.array.element ? await getSchema(fieldType.array.element) : undefined
+        if (!elementType || elementType.type !== SchemaType.Struct || !elementType.struct?.fields.length) return result
+        let whiteList = await getFieldAccessWhiteList("", elementType.struct.fields.filter(f => !fieldType.array!.primary!.includes(f.name)), undefined, true)
+        for (let i = 5; i < args.length; i++) {
+            result.push({ whiteList: whiteList })
+
+            // remove used field
+            const fname = args[i].getField("value")!.rawData
+            whiteList = whiteList.filter(w => w.value !== fname)
+        }
+
+        return result
+    },
 }

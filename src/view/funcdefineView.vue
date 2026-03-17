@@ -14,7 +14,7 @@
                 </template>
                 <div v-for="i in state.arglen" class="func-arg"
                     style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
-                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: argColor[i-1] || 'white' }">
+                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: argColor[i-1] }">
                         <schema-view v-if="argsNode.elements[i - 1]" 
                             :key="argsNode.elements[i - 1].guid" 
                             :node="argsNode.elements[i - 1]"
@@ -62,7 +62,7 @@
                     <el-button type="primary" @click="expsNode.addRow()">{{ _L["frontend.view.new"] }}</el-button>
                 </template>
                 <div v-for="i in state.explen" class="func-arg" style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
-                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: color[i-1] || 'white' }">
+                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: color[i-1] }">
                         <schema-view v-if="expsNode.elements[i - 1]" 
                             :key="expsNode.elements[i - 1].guid" 
                             :node="expsNode.elements[i - 1]"
@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, mockSchemaData, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT, getFieldAccessWhiteList, type IStructFieldConfig } from 'schema-node'
+import { _LS, mockSchemaData, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT, getFieldAccessWhiteList, type IStructFieldSchema } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
 import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
@@ -388,7 +388,7 @@ const refresh = async () => {
     let lastMatch = false
     let isStructRet = retSchema?.type === SchemaType.Struct && retSchema.struct?.fields.length
     const expcount = expsNode.elements.length
-    const structFields = retSchema?.struct?.fields.map((f: IStructFieldConfig) => f) || []
+    const structFields = retSchema?.struct?.fields.map((f: IStructFieldSchema) => f) || []
     if (retSchema && expcount)
     {
         const data = expsNode.elements[expcount - 1].rawData
@@ -416,7 +416,7 @@ const refresh = async () => {
                         ret = fld.type
                         e.getField("return")!.data = ret
                     }
-                    if (nameNode.rule.whiteList?.length !== 1 || nameNode.rule.whiteList[0].value !== fld.name)
+                    if (nameNode.rule.whiteList?.length !== 1 || typeof(nameNode.rule.whiteList[0]) !== "object" || nameNode.rule.whiteList[0].value !== fld.name)
                     {
                         nameNode.rule.asSuggest = true
                         nameNode.rule.whiteList = [ { value: fld.name, label: _L.value(fld.display || fld.name) } ]
@@ -524,7 +524,7 @@ const refresh = async () => {
             if (choose.length > 1 && exp) {
                 for (let m = 1; m < choose.length; m++) {
                     if (exp && exp.schema.type === SchemaType.Struct) {
-                        const fld: IStructFieldConfig | undefined = exp.schema.struct?.fields.find((f: IStructFieldConfig) => f.name === choose[m])
+                        const fld: IStructFieldSchema | undefined = exp.schema.struct?.fields.find((f: IStructFieldSchema) => f.name === choose[m])
                         if (fld) {
                             exp = { name: fld.name, type: fld.type, schema: (await getSchema(fld.type))! }
                         }
@@ -572,12 +572,12 @@ const refresh = async () => {
             const whitelist = await getFieldAccessWhiteList(ctype?.name || "", argMap, "", false, isarray && (arrIdx === k || arrIdx < 0))
 
             if (!isEqual((name.rule as ScalarRule).whiteList, whitelist)) {
-                (name.rule as ScalarRule).whiteList = whitelist
+                (name.rule as ScalarRule).whiteList = whitelist as any
                 name.validate().then(() => name.notifyState())
             }
 
             // value field
-            if (ctype?.name === "system.schema.apptarget")
+            if (ctype?.name === "system.schema.domain.target")
             {
                 if (!valueField.rule.whiteList?.length)
                 {
@@ -698,10 +698,7 @@ onMounted(() => {
     }, true)
 
     retHandler = returnNode.subscribe(refreshArgs)
-    argsHandler = argsNode.subscribe((action: string) => {
-        const arglen = argsNode.elements.length
-        if (action !== "swap" && argsHandlers.length === arglen) return
-
+    argsHandler = argsNode.subscribeLayoutChanged(() => {
         let changed = false
 
         // clear
@@ -731,10 +728,8 @@ onMounted(() => {
         if (changed) return soonRefreshArgs()
     }, true)
 
-    expsHandler = expsNode.subscribe((action: string) => {
+    expsHandler = expsNode.subscribeLayoutChanged(() => {
         const expslen = expsNode.elements.length
-        if (action !== "swap" && expsHandlers.length === expslen) return
-
         let changed = false
 
         // clear

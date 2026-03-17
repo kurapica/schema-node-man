@@ -1,9 +1,9 @@
 export const routes = [
-    {
+    /*{
         path: '/introduce',
         name: "frontend.nav.introduce",
         component: () => import('./components/introduce.vue')
-    },
+    },*/
     {
         path: '/type',
         name: "frontend.nav.type",

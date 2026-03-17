@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <span v-if="state.readonly && plainText"
         :style="{ 'width': '100%', 'text-align': plainText === true ? 'center' : plainText }">
         {{ state.display }}
@@ -110,7 +110,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
                 option.children ||= []
                 option.children.unshift ({
                     value: `${prefix}${f.name}.${ARRAY_ELEMENT}`,
-                    label: _L["system.schema.reltarfield.ele"],
+                    label: _L["frontend.design.reltarfield.ele"],
                     leaf: true,
                     children: null
                 })
@@ -128,11 +128,11 @@ let fieldsHandler: Function | undefined = undefined
 const fieldsHandlers: { guid: string, name: Function, type: Function }[] = []
 onMounted(() => {
     let parentNode = scalarNode.parent
-    while (parentNode && parentNode.config.type !== "system.schema.structschema" && parentNode.config.type !== "system.schema.arrayschema")
+    while (parentNode && parentNode.config.type !== "system.schema.def.struct.schema" && parentNode.config.type !== "system.schema.def.array.schema")
         parentNode = parentNode.parent
     if (!parentNode) return
 
-    if (parentNode.config.type === "system.schema.structschema")
+    if (parentNode.config.type === "system.schema.def.struct.schema")
     {
         const fieldsNode = (parentNode as StructNode).getField("fields") as ArrayNode
 
@@ -163,7 +163,7 @@ onMounted(() => {
                     }
                     if (paths[i] === ARRAY_ELEMENT)
                     {
-                        paths[i] = _L["system.schema.reltarfield.ele"]
+                        paths[i] = _L["frontend.design.reltarfield.ele"]
                         break
                     }
                     if (schema?.type !== SchemaType.Struct) break
@@ -190,37 +190,32 @@ onMounted(() => {
 
         if (props.plainText && scalarNode.readonly) return
 
-        let length = 0
-        fieldsHandler = fieldsNode.subscribe((action: string) => {
+        fieldsHandler = fieldsNode.subscribeLayoutChanged(() => {
             const elements = fieldsNode.elements
             const currlen = elements.length
-            if (currlen !== length || action === "swap")
+            for(let i = 0; i < elements.length; i++)
             {
-                length = currlen
-                for(let i = 0; i < elements.length; i++)
+                const ele = elements[i] as StructNode
+                if (fieldsHandlers.length > i) 
                 {
-                    const ele = elements[i] as StructNode
-                    if (fieldsHandlers.length > i) 
-                    {
-                        if (ele.guid === fieldsHandlers[i].guid) continue
-                        fieldsHandlers[i].name()
-                        fieldsHandlers[i].type()
-                    }
-                    fieldsHandlers[i] = {
-                        guid: ele.guid,
-                        name: ele.getField("name")!.subscribe(rebuildOptions),
-                        type: ele.getField("type")!.subscribe(rebuildOptions)
-                    }
+                    if (ele.guid === fieldsHandlers[i].guid) continue
+                    fieldsHandlers[i].name()
+                    fieldsHandlers[i].type()
                 }
-                for(let i = fieldsHandlers.length - 1; i >= currlen; i--)
-                {
-                    const handler = fieldsHandlers.pop()
-                    handler?.name()
-                    handler?.type()
+                fieldsHandlers[i] = {
+                    guid: ele.guid,
+                    name: ele.getField("name")!.subscribe(rebuildOptions),
+                    type: ele.getField("type")!.subscribe(rebuildOptions)
                 }
-
-                rebuildOptions()
             }
+            for(let i = fieldsHandlers.length - 1; i >= currlen; i--)
+            {
+                const handler = fieldsHandlers.pop()
+                handler?.name()
+                handler?.type()
+            }
+
+            rebuildOptions()
         }, true)
     }
     else
@@ -236,7 +231,7 @@ onMounted(() => {
                 options.value = [
                     {
                         value: `${ARRAY_ELEMENT}`,
-                        label: _L["system.schema.reltarfield.ele"],
+                        label: _L["frontend.design.reltarfield.ele"],
                         leaf: true,
                         children: null
                     }
@@ -267,7 +262,7 @@ onMounted(() => {
                     }
                     if (paths[i] === ARRAY_ELEMENT)
                     {
-                        paths[i] = _L["system.schema.reltarfield.ele"]
+                        paths[i] = _L["frontend.design.reltarfield.ele"]
                         break
                     }
                     if (schema?.type !== SchemaType.Struct) break

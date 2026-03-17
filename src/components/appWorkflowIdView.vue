@@ -67,10 +67,10 @@ let stateWatcher: Function | null = null
 onMounted(() => {
     const node = scalarNode
     let parent = node.parent
-    while (parent && !(parent instanceof StructNode && parent.fields?.find((f:AnySchemaNode) => f.schemaName === "system.schema.app"))) {
+    while (parent && !(parent instanceof StructNode && parent.fields?.find((f:AnySchemaNode) => f.schemaName === "system.schema.domain.app"))) {
         parent = parent.parent
     }
-    let srcAppNode = parent?.fields?.find((f:AnySchemaNode) => f.schemaName === "system.schema.app") as ScalarNode
+    let srcAppNode = parent?.fields?.find((f:AnySchemaNode) => f.schemaName === "system.schema.domain.app") as ScalarNode
     
     let appSchema: IAppSchema | undefined = undefined
     let type: string  = node.rule.root

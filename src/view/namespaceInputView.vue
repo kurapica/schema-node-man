@@ -7,7 +7,7 @@
             v-model="prefix" 
             expand
             :config="{
-                type:'system.schema.namespace',
+                type:'system.schema.type.namespace',
                 display: _LS('frontend.view.upnamespace')
             }"
         ></schema-view>
