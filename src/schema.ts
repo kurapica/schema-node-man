@@ -1,4 +1,4 @@
-﻿import {
+import {
   _L,
   _LS,
   ARRAY_ELEMENT,
@@ -6,6 +6,7 @@
   deepClone,
   EnumValueType,
   ExpressionType,
+  RecognizerPartType,
   getArraySchema,
   getCachedSchema,
   getSchema,
@@ -13,12 +14,14 @@
   isSchemaCanBeUseAs,
   isStructFieldIndexable,
   newSystemArray,
+  newSystemEnum,
   newSystemFunc,
   newSystemRelArray,
   newSystemScalar,
   newSystemStruct,
   NS_SYSTEM_ARRAY,
   NS_SYSTEM_BOOL,
+  NS_SYSTEM_ENTRIES,
   NS_SYSTEM_IDENTIFIER,
   NS_SYSTEM_INT,
   NS_SYSTEM_INTS,
@@ -81,19 +84,19 @@ registerSchema(
       [
         {
           field: "whiteList",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "base" }],
         },
         {
           field: "preValid",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "base" }],
         },
         {
           field: "postValid",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "base" }],
         },
@@ -146,7 +149,7 @@ registerSchema(
       [
         {
           field: "value",
-          type: RelationType.Assign,
+          property: RelationType.Assign,
           func: "frontend.design.calcnextflag",
           args: [{ name: ARRAY_ITSELF }],
         },
@@ -185,13 +188,13 @@ registerSchema(
       [
         {
           field: "cascade",
-          type: RelationType.Invisible,
+          property: RelationType.Invisible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: EnumValueType.Flags }],
         },
         {
           field: "values",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getenuminfostype",
           args: [{ name: "type" }],
         },
@@ -252,25 +255,25 @@ registerSchema(
       [
         {
           field: "name",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "type" }],
         },
         {
           field: "name",
-          type: RelationType.Disable,
+          property: RelationType.Disable,
           func: "system.logic.notempty",
           args: [{ name: "value" }],
         },
         {
           field: "value",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getexpvaluetype",
           args: [{ name: "type" }],
         },
         {
           field: "value",
-          type: RelationType.Disable,
+          property: RelationType.Disable,
           func: "frontend.design.hideexpvalue",
           args: [{ name: "type" }, { name: "name" }],
         },
@@ -498,7 +501,7 @@ registerSchema(
         // name
         {
           field: "name",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.getdefaultfieldinfo",
           args: [{ name: "type" }, { value: "name" }],
         },
@@ -506,7 +509,7 @@ registerSchema(
         // display
         {
           field: "display",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.getdefaultfieldinfo",
           args: [{ name: "type" }, { value: "display" }],
         },
@@ -514,49 +517,49 @@ registerSchema(
         // default
         {
           field: "default",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isscalarenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "default",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getscalarorenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "default",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "system.intrinsic.assign",
           args: [{ name: "whiteList" }],
         },
         {
           field: "default",
-          type: RelationType.BlackList,
+          property: RelationType.BlackList,
           func: "system.intrinsic.assign",
           args: [{ name: "blackList" }],
         },
         {
           field: "default",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "root" }],
         },
         {
           field: "default",
-          type: RelationType.AnyLevel,
+          property: RelationType.AnyLevel,
           func: "system.intrinsic.assign",
           args: [{ name: "anyLevel" }],
         },
         {
           field: "default",
-          type: RelationType.Cascade,
+          property: RelationType.Cascade,
           func: "system.intrinsic.assign",
           args: [{ name: "cascade" }],
         },
         {
           field: "default",
-          type: RelationType.SingleFlag,
+          property: RelationType.SingleFlag,
           func: "system.intrinsic.assign",
           args: [{ name: "singleFlag" }],
         },
@@ -564,127 +567,127 @@ registerSchema(
         // white list
         {
           field: "whiteList",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isscalarenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "whiteList",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getwhiteblacklisttype",
           args: [{ name: "type" }],
         },
         {
           field: "whiteList",
-          type: RelationType.BlackList,
+          property: RelationType.BlackList,
           func: "system.intrinsic.assign",
           args: [{ name: "blackList" }],
         },
         {
           field: "whiteList",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "root" }],
         },
         {
           field: "whiteList",
-          type: RelationType.Cascade,
+          property: RelationType.Cascade,
           func: "system.intrinsic.assign",
           args: [{ name: "cascade" }],
         },
         {
           field: "blackList",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isscalarenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "blackList",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getwhiteblacklisttype",
           args: [{ name: "type" }],
         },
         {
           field: "blackList",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "root" }],
         },
         {
           field: "blackList",
-          type: RelationType.Cascade,
+          property: RelationType.Cascade,
           func: "system.intrinsic.assign",
           args: [{ name: "cascade" }],
         },
         {
           field: "lowLimit",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "upLimit",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "asSuggest",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "useOriginForUpLimit",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isscalartype",
           args: [{ name: "type" }],
         },
         {
           field: "cascade",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.iscascadeenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "cascade",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getenumcascadewhitelist",
           args: [{ name: "type" }],
         },
         {
           field: "root",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isenumroot",
           args: [{ name: "type" }, { name: "cascade" }],
         },
         {
           field: "root",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getroottype",
           args: [{ name: "type" }],
         },
         {
           field: "root",
-          type: RelationType.Cascade,
+          property: RelationType.Cascade,
           func: "frontend.design.getenumrootcascade",
           args: [{ name: "type" }, { name: "cascade" }],
         },
         {
           field: "anyLevel",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.iscascadeenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "singleFlag",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isflagsenumtype",
           args: [{ name: "type" }],
         },
         {
           field: "unpack",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: NS_SYSTEM_JSON }],
         },
@@ -940,7 +943,7 @@ registerSchema(
           displayOnly: true,
           invisible: true,
         },
-        { name: "type", type: "system.schema.def.struct.relationtype", require: true },
+        { name: "prop", type: "system.schema.property", require: true },
         { name: "return", type: "system.schema.type.rule.value", displayOnly: true },
         { name: "func", type: "system.schema.type.func", require: true },
         { name: "args", type: "frontend.design.structfldfuncargs" },
@@ -948,25 +951,25 @@ registerSchema(
       [
         {
           field: "return",
-          type: RelationType.Visible,
+          prop: RelationType.Visible,
           func: "system.logic.notempty",
-          args: [{ name: "type" }],
+          args: [{ name: "prop" }],
         },
         {
-          field: "type",
-          type: RelationType.WhiteList,
+          field: "prop",
+          prop: RelationType.WhiteList,
           func: "frontend.design.getrelationwhitelist",
           args: [{ name: "fieldType" }],
         },
         {
           field: "return",
-          type: RelationType.Default,
+          prop: RelationType.Default,
           func: "frontend.design.getrelationfuncreturn",
-          args: [{ name: "fieldType" }, { name: "type" }],
+          args: [{ name: "fieldType" }, { name: "prop" }],
         },
         {
           field: "func",
-          type: RelationType.Root,
+          prop: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "return" }],
         },
@@ -976,7 +979,7 @@ registerSchema(
       "system.schema.def.struct.relations",
       "system.schema.def.struct.relation",
       "field",
-      "type",
+      "prop",
     ),
 
     newSystemStruct(
@@ -993,7 +996,7 @@ registerSchema(
       [
         {
           field: "relations.fieldType",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.getstructfieldtype",
           args: [{ name: "relations.field" }, { name: "fields" }],
         },
@@ -1078,7 +1081,7 @@ registerSchema(
       [
         {
           field: "fields.$ele",
-          type: RelationType.BlackList,
+          property: RelationType.BlackList,
           func: "system.intrinsic.assign",
           args: [{ name: "fields" }],
         },
@@ -1103,49 +1106,49 @@ registerSchema(
       [
         {
           field: "primary",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isstructtype",
           args: [{ name: "element" }],
         },
         {
           field: "primary.$ele",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getstructindexfields",
           args: [{ name: "element" }],
         },
         {
           field: "primary.$ele",
-          type: RelationType.BlackList,
+          property: RelationType.BlackList,
           func: "system.intrinsic.assign",
           args: [{ name: "primary" }],
         },
         {
           field: "indexes",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isstructtype",
           args: [{ name: "element" }],
         },
         {
           field: "indexes.fields.$ele",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getstructindexfields",
           args: [{ name: "element" }],
         },
         {
           field: "combines",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isstructtype",
           args: [{ name: "element" }],
         },
         {
           field: "combines.field",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getstructnumbervaluefields",
           args: [{ name: "element" }],
         },
         {
           field: "relations.fieldType",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.getstructfieldtypebytype",
           args: [{ name: "element" }, { name: "relations.field" }],
         },
@@ -1178,7 +1181,7 @@ registerSchema(
       [
         {
           field: "name",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.gettypedisplayorname",
           args: [{ name: "type" }],
         },
@@ -1197,25 +1200,25 @@ registerSchema(
       [
         {
           field: "name",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "type" }],
         },
         {
           field: "name",
-          type: RelationType.Disable,
+          property: RelationType.Disable,
           func: "system.logic.notempty",
           args: [{ name: "value" }],
         },
         {
           field: "value",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getexpvaluetype",
           args: [{ name: "type" }],
         },
         {
           field: "value",
-          type: RelationType.Disable,
+          property: RelationType.Disable,
           func: "frontend.design.hideexpvalue",
           args: [{ name: "type" }, { name: "name" }],
         },
@@ -1298,13 +1301,13 @@ registerSchema(
       [
         {
           field: "type",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getcalltypewhitelist",
           args: [{ name: "return" }],
         },
         {
           field: "func",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "frontend.design.getfuncroot",
           args: [{ name: "return" }, { name: "type" }],
         },
@@ -1348,6 +1351,79 @@ registerSchema(
     ]),
     //#endregion
 
+    //#region recognizer definition
+    newSystemEnum("system.schema.def.recognizer.parttype", RecognizerPartType),
+
+    newSystemStruct(
+      "system.schema.def.recognizer.format",
+      [
+        { name: "minDigits", type: NS_SYSTEM_INT },
+        { name: "maxDigits", type: NS_SYSTEM_INT },
+        { name: "precision", type: NS_SYSTEM_INT },
+        { name: "padChar", type: NS_SYSTEM_STRING, upLimit: 1 },
+        { name: "padLeft", type: NS_SYSTEM_BOOL },
+        { name: "trim", type: NS_SYSTEM_BOOL },
+        { name: "toUpper", type: NS_SYSTEM_BOOL },
+        { name: "toLower", type: NS_SYSTEM_BOOL },
+        { name: "layout", type: NS_SYSTEM_STRING, upLimit: 64 },
+        { name: "mapping", type: NS_SYSTEM_ENTRIES },
+        { name: "formatFunc", type: "system.schema.type.func" },
+        { name: "parseFunc", type: "system.schema.type.func" },
+      ],
+    ),
+
+    newSystemStruct(
+      "system.schema.def.recognizer.part",
+      [
+        {
+          name: "type",
+          type: "system.schema.def.recognizer.parttype",
+          require: true,
+          default: RecognizerPartType.Field,
+        },
+        { name: "text", type: NS_SYSTEM_STRING, upLimit: 128 },
+        { name: "field", type: NS_SYSTEM_STRING, upLimit: 64 },
+        { name: "delimiter", type: NS_SYSTEM_STRING, upLimit: 32 },
+        { name: "recognizer", type: "system.schema.type.recognizer" },
+        { name: "format", type: "system.schema.def.recognizer.format" },
+      ],
+      [
+        {
+          field: "text",
+          property: RelationType.Visible,
+          func: "system.logic.eq",
+          args: [{ name: "type" }, { value: RecognizerPartType.Literal }],
+        },
+        {
+          field: "field",
+          property: RelationType.Visible,
+          func: "system.logic.eq",
+          args: [{ name: "type" }, { value: RecognizerPartType.Field }],
+        },
+        {
+          field: "delimiter",
+          property: RelationType.Visible,
+          func: "system.logic.eq",
+          args: [{ name: "type" }, { value: RecognizerPartType.Elements }],
+        },
+      ],
+    ),
+    newSystemArray(
+      "system.schema.def.recognizer.parts",
+      "system.schema.def.recognizer.part",
+    ),
+
+    newSystemStruct("system.schema.def.recognizer.schema", [
+      {
+        name: "sourceType",
+        type: "system.schema.type.rule.value",
+        require: true,
+        immutable: true,
+      },
+      { name: "parts", type: "system.schema.def.recognizer.parts", require: true },
+    ]),
+    //#endregion
+
     //#region policy definition
     newSystemStruct(
       "system.schema.def.policy.item",
@@ -1368,7 +1444,7 @@ registerSchema(
       [
         {
           field: "evaluator",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ value: NS_SYSTEM_BOOL }],
         },
@@ -1386,13 +1462,13 @@ registerSchema(
       [
         {
           field: "items.scope",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getappschemapolicyscope",
           args: [],
         },
         {
           field: "items.scope",
-          type: RelationType.BlackList,
+          property: RelationType.BlackList,
           func: "system.collection.getfields",
           args: [{ name: "items" }, { value: "scope" }],
         },
@@ -1479,7 +1555,7 @@ registerSchema(
           require: true,
           immutable: true,
           default: SchemaType.Namespace,
-          blackList: [SchemaType.Json],
+          blackList: [SchemaType.Json, SchemaType.Property],
         },
         {
           name: "display",
@@ -1496,65 +1572,72 @@ registerSchema(
         { name: "event", type: "system.schema.def.event.schema" },
         { name: "workflow", type: "system.schema.def.app.workflow.schema" },
         { name: "policy", type: "system.schema.def.policy.schema" },
+        { name: "recognizer", type: "system.schema.def.recognizer.schema" },
       ],
       [
         {
           field: "name",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.genarrayname",
           args: [{ name: "array.element" }],
         },
         {
           field: "scalar",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Scalar }],
         },
         {
           field: "enum",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Enum }],
         },
         {
           field: "struct",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Struct }],
         },
         {
           field: "array",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Array }],
         },
         {
           field: "func",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Func }],
         },
         {
           field: "event",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Event }],
         },
         {
           field: "workflow",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Workflow }],
         },
         {
           field: "policy",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "type" }, { value: SchemaType.Policy }],
         },
         {
+          field: "recognizer",
+          property: RelationType.Visible,
+          func: "system.logic.eq",
+          args: [{ name: "type" }, { value: SchemaType.Recognizer }],
+        },
+        {
           field: "display.key",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.genarraydisplay",
           args: [{ name: "array.element" }],
         },

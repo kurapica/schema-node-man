@@ -1,4 +1,4 @@
-﻿import {
+import {
   type IStructFieldSchema,
   type IFunctionArgumentInfo,
   type IFunctionExpression,
@@ -70,7 +70,7 @@ registerSchema(
     ], [
       {
         field: "contextItem",
-        type: RelationType.WhiteList,
+        property: RelationType.WhiteList,
         func: "frontend.design.getcontextwhitelist",
         args: []
       }
@@ -83,13 +83,13 @@ registerSchema(
     ], [
       {
         field: "contextMaps", 
-        type: RelationType.Visible, 
+        property: RelationType.Visible, 
         func: "system.logic.eq", 
         args: [{ name: "type" }, { value: AppScopeType.IsolationContext }]
       },
       {
         field: "businessKey",
-        type: RelationType.Visible,
+        property: RelationType.Visible,
         func: "system.logic.eq",
         args: [{ name: "type" }, { value: AppScopeType.BusinessTarget }]
       }
@@ -109,22 +109,22 @@ registerSchema(
         { name: "value", type: NS_SYSTEM_OBJECT },
       ],
       [
-        //{ field: "name", type: RelationType.Root, func: "system.intrinsic.assign", args: [ { name: "type" } ] },
+        //{ field: "name", property: RelationType.Root, func: "system.intrinsic.assign", args: [ { name: "type" } ] },
         {
           field: "name",
-          type: RelationType.Disable,
+          property: RelationType.Disable,
           func: "system.logic.notempty",
           args: [{ name: "value" }],
         },
         {
           field: "value",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getexpvaluetype",
           args: [{ name: "type" }],
         },
         {
           field: "value",
-          type: RelationType.Disable,
+          property: RelationType.Disable,
           func: "frontend.design.hideexpvalue",
           args: [{ name: "type" }, { name: "name" }],
         },
@@ -156,13 +156,13 @@ registerSchema(
       [
         {
           field: "isFilter",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "system.logic.eq",
           args: [{ name: "mode" }, { value: FieldFilterMode.Filter }],
         },
         {
           field: "filter",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "system.logic.cond",
           args: [
             { name: "isFilter" },
@@ -242,34 +242,34 @@ registerSchema(
           invisible: true,
           type: "system.schema.type.rule.value",
         },
-        { name: "type", require: true, type: "system.schema.def.struct.relationtype" },
+        { name: "prop", require: true, type: "system.schema.property" },
         { name: "func", require: true, type: "system.schema.type.func" },
         { name: "args", type: "frontend.design.appfieldvalargs" },
       ],
       [
         {
-          field: "type",
-          type: RelationType.WhiteList,
+          field: "prop",
+          prop: RelationType.WhiteList,
           func: "frontend.design.getrelationwhitelist",
           args: [{ name: "fieldType" }],
         },
         {
           field: "return",
-          type: RelationType.Default,
+          prop: RelationType.Default,
           func: "frontend.design.getrelationfuncreturn",
-          args: [{ name: "fieldType" }, { name: "type" }],
+          args: [{ name: "fieldType" }, { name: "prop" }],
         },
         {
           field: "func",
-          type: RelationType.Root,
+          prop: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "return" }],
         },
         {
           field: "args.name",
-          type: RelationType.Root,
+          prop: RelationType.Root,
           func: "frontend.design.getappfieldnametype",
-          args: [{ name: "args.type" }, { name: "type" }],
+          args: [{ name: "args.type" }, { name: "prop" }],
         },
       ],
     ),
@@ -277,7 +277,7 @@ registerSchema(
       "frontend.design.appfieldrelations",
       "frontend.design.appfieldrelation",
       "field",
-      "type",
+      "prop",
     ),
 
     newSystemFunc(
@@ -528,7 +528,7 @@ registerSchema(
       [
         {
           field: "name",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.gettypeinfoforappfield",
           args: [
             { value: "name" },
@@ -537,7 +537,7 @@ registerSchema(
         },
         {
           field: "display",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.gettypeinfoforappfield",
           args: [
             { value: "display" },
@@ -546,103 +546,103 @@ registerSchema(
         },
         {
           field: "topology",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.hasjsonfield",
           args: [{ name: "type" }],
         },
         {
           field: "tableName",
-          type: RelationType.Invisible,
+          property: RelationType.Invisible,
           func: "system.intrinsic.assign",
           args: [{ name: "frontend" } ],
         },
         {
           field: "attrTableName",
-          type: RelationType.Invisible,
+          property: RelationType.Invisible,
           func: "system.intrinsic.assign",
           args: [{ name: "frontend" } ],
         },
         {
           field: "func",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ name: "type" }],
         },
         {
           field: "arg",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.notnull",
           args: [{ name: "func" }],
         },
         {
           field: "arg",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getapppushsourcewhitelist",
           args: [{ name: "app" }, { name: "name" }, { name: "func" }],
         },
         {
           field: "combine",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.appiscombineenable",
           args: [{ name: "type" }, { name: "func" }],
         },
         {
           field: "combines",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.appiscombinesenable",
           args: [{ name: "type" }, { name: "func" }],
         },
         {
           field: "combines.field",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getstructnumbervaluefields",
           args: [{ name: "type" }],
         },
         {
           field: "colAuths",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isstructorstructarray",
           args: [{ name: "type" }],
         },
         {
           field: "colAuths.name",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getfieldforauths",
           args: [{ name: "type" }],
         },
         {
           field: "filters",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.isstructorstructarray",
           args: [{ name: "type" }],
         },
         {
           field: "filters.filter",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getfieldforauths",
           args: [{ name: "type" }],
         },
         {
           field: "filters.resolve",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.showfieldfilterresolve",
           args: [{ name: "app" }, { name: "name" }, { name: "filters.mode" }, { name: "filters.filter" }],
         },
         {
           field: "foreigns.field",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getfieldforauths",
           args: [{ name: "type" }],
         },
         {
           field: "view.field",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getavailablefieldviews",
           args: [{ name: "app" }, { name: "view.app" }],
         },
         {
           field: "view.map",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getfieldforauths",
           args: [{ name: "type" }],
         },
@@ -680,19 +680,19 @@ registerSchema(
       [
         {
           field: "relations.fieldType",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.appgetfieldtype",
           args: [{ name: "name" }, { name: "relations.field" }],
         },
         {
           field: "relations",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.apphasfields",
           args: [{ name: "name" }],
         },
         {
           field: "auths.scope",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getappschemapolicyscope",
           args: [],
         },
@@ -840,92 +840,92 @@ registerSchema(
       [
         {
           field: "args",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.hasworkflowargs",
           args: [{ name: "type" }],
         },
         {
           field: "mode",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "frontend.design.getworkflowmode",
           args: [{ name: "type" }],
         },
         {
           field: "fork",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.showfork",
           args: [{ name: "mode" }],
         },
         {
           field: "func",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "mode" }, { value: WorkflowMode.Function }],
         },
         {
           field: "funcArgs",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.notnull",
           args: [{ name: "func" }],
         },
         {
           field: "event",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.eq",
           args: [{ name: "mode" }, { value: WorkflowMode.Event }],
         },
         {
           field: "previous.$ele",
-          type: RelationType.BlackList,
+          property: RelationType.BlackList,
           func: "system.intrinsic.assign",
           args: [{ name: "previous" }],
         },
         {
           field: "state",
-          type: RelationType.Type,
+          property: RelationType.Type,
           func: "frontend.design.getworkflowstatetype",
           args: [{ name: "type" }],
         },
         {
           field: "state",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.hasworkflowstatetype",
           args: [{ name: "type" }],
         },
         {
           field: "payload",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.notnull",
           args: [{ name: "type" }],
         },
         {
           field: "type",
-          type: RelationType.Root,
+          property: RelationType.Root,
           func: "system.intrinsic.assign",
           args: [{ value: "system.workflow" }],
         },
-        //{ field: "event", type: RelationType.Root, func: "system.intrinsic.assign", args: [ { value: "system.event" } ] },
+        //{ field: "event", property: RelationType.Root, func: "system.intrinsic.assign", args: [ { value: "system.event" } ] },
         {
           field: "forkKey",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.showforkkey",
           args: [{ name: "fork" }, { name: "payload" }],
         },
         {
           field: "cancelPre",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.notempty",
           args: [{ name: "forkKey" }],
         },
         {
           field: "unCancelable",
-          type: RelationType.Invisible,
+          property: RelationType.Invisible,
           func: "system.intrinsic.assign",
           args: [{ name: "fork" }],
         },
         {
           field: "payloadSave",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "system.logic.notnull",
           args: [{ name: "payload" }],
         },
@@ -960,25 +960,25 @@ registerSchema(
       [
         {
           field: "nodes.previous",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.design.haspreviousworkflow",
           args: [{ name: "nodes" }],
         },
         {
           field: "nodes.previous.$ele",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "system.str.map.toentrys",
           args: [{ name: "nodes" }, { value: "name" }, { value: "display" }],
         },
         {
           field: "nodes.app",
-          type: RelationType.Default,
+          property: RelationType.Default,
           func: "system.intrinsic.assign",
           args: [{ name: "app" }],
         },
         {
           field: "auths.scope",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.design.getworkflowpolicyscopes",
           args: [],
         },
@@ -1022,19 +1022,19 @@ registerSchema(
       [
         {
           field: "app",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "system.intrinsic.assign",
           args: [{ name: "allowApps" }],
         },
         {
           field: "target",
-          type: RelationType.WhiteList,
+          property: RelationType.WhiteList,
           func: "frontend.appgetapptargets",
           args: [{ name: "app" }],
         },
         {
           field: "target",
-          type: RelationType.Visible,
+          property: RelationType.Visible,
           func: "frontend.notsystemapp",
           args: [{ name: "app" }],
         }
