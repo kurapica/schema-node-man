@@ -3,9 +3,9 @@
         <!-- Common -->
         <div style="display: flex; margin-bottom: 12px; margin-top: 8px;">
             <!-- Type -->
-            <el-tag v-if="state.schema.type">{{ _L[`system.schema.schematype.${state.schema.type}`]}}</el-tag>
+            <el-tag v-if="state.schema.type">{{ _L[`system.schema.def.schematype.${state.schema.type}`]}}</el-tag>
             <!-- Array Element -->
-            <el-tag v-if="state.eleschema?.type" type="success" style="margin-left: 12px;">{{ _L[`system.schema.schematype.${state.eleschema.type}`] }}</el-tag>
+            <el-tag v-if="state.eleschema?.type" type="success" style="margin-left: 12px;">{{ _L[`system.schema.def.schematype.${state.eleschema.type}`] }}</el-tag>
             <!-- Base Type -->
             <el-tag v-if="state.baseType" type="info" style="margin-left: 12px;">{{ _L[baseTyepMap[state.baseType]] }}</el-tag>
             <!-- Return -->
@@ -13,9 +13,9 @@
                 <el-tag v-if="typeof(state.retType) === 'string'" type="success" style="margin-left: 12px;">{{ state.retType }}</el-tag>
                 <template v-else>
                     <!-- Type -->
-                    <el-tag v-if="state.retType.schema?.type" style="margin-left: 12px;">{{ _L[`system.schema.schematype.${state.retType.schema.type}`] }}</el-tag>
+                    <el-tag v-if="state.retType.schema?.type" style="margin-left: 12px;">{{ _L[`system.schema.def.schematype.${state.retType.schema.type}`] }}</el-tag>
                     <!-- Array Element -->
-                    <el-tag v-if="state.retType.eleschema?.type" type="success" style="margin-left: 12px;">{{ _L[`system.schema.schematype.${state.retType.eleschema.type}`] }}</el-tag>
+                    <el-tag v-if="state.retType.eleschema?.type" type="success" style="margin-left: 12px;">{{ _L[`system.schema.def.schematype.${state.retType.eleschema.type}`] }}</el-tag>
                     <!-- Base Type -->
                     <el-tag v-if="state.retType.baseType" type="info" style="margin-left: 12px;">{{ _L[baseTyepMap[state.retType.baseType]] }}</el-tag>
                 </template>
@@ -46,16 +46,16 @@
             <template v-if="state.structure">
                 <el-table :data="state.structure" row-key="label" 
                     :tree-props="{ children: 'children' }">
-                    <el-table-column prop="label" :label="_L['system.schema.structfieldconfig.name']" min-width="120"></el-table-column>
-                    <el-table-column prop="schemaType" :label="_L['system.schema.structfieldconfig.type']" min-width="180">
+                    <el-table-column prop="label" :label="_L['system.schema.def.struct.field.name']" min-width="120"></el-table-column>
+                    <el-table-column prop="schemaType" :label="_L['system.schema.def.struct.field.type']" min-width="180">
                         <template #default="scope">
                            <schema-view :config="{
-                                type: 'system.schema.anytype',
+                                type: 'system.schema.type.any',
                                 readonly: true
                             }" :value="scope.row.schemaType" plain-text="left"></schema-view>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="desc" :label="_L['system.schema.structfieldconfig.desc']" min-width="180">
+                    <el-table-column prop="desc" :label="_L['system.schema.def.struct.field.desc']" min-width="180">
                         <template #default="scope">
                             {{ _L(scope.row.desc) }}
                         </template>
@@ -63,9 +63,9 @@
                     <el-table-column prop="" :label="_L['frontend.view.tag']" min-width="240">
                         <template #default="scope">
                             <!-- Type -->
-                            <el-tag v-if="scope.row.type">{{ _L[`system.schema.schematype.${scope.row.type}`] }}</el-tag>
+                            <el-tag v-if="scope.row.type">{{ _L[`system.schema.def.schematype.${scope.row.type}`] }}</el-tag>
                             <!-- Array Element -->
-                            <el-tag v-if="scope.row.eleType" type="success" style="margin-left: 12px;">{{ _L[`system.schema.schematype.${scope.row.eleType}`] }}</el-tag>
+                            <el-tag v-if="scope.row.eleType" type="success" style="margin-left: 12px;">{{ _L[`system.schema.def.schematype.${scope.row.eleType}`] }}</el-tag>
                             <!-- Base Type -->
                             <el-tag v-if="scope.row.baseType" type="info" style="margin-left: 12px;">{{ _L[baseTyepMap[scope.row.baseType]] }}</el-tag>
                         </template>
@@ -76,7 +76,7 @@
             <template v-if="typeof(state.retType) === 'object' && state.retType.structure">
                 <el-table :data="state.retType.structure" row-key="label"  :tree-props="{ children: 'children' }" style="margin-bottom: 24px;">
                     <el-table-column prop="label" :label="_L['frontend.view.returnstruct']" min-width="240"></el-table-column>
-                    <el-table-column prop="desc" :label="_L['system.schema.structfieldconfig.name']" min-width="240">
+                    <el-table-column prop="desc" :label="_L['system.schema.def.struct.field.name']" min-width="240">
                         <template #default="scope">
                             {{ _L(scope.row.desc) }}
                         </template>
@@ -84,9 +84,9 @@
                     <el-table-column prop=""  :label="_L['frontend.view.tag']" min-width="240">
                         <template #default="scope">
                             <!-- Type -->
-                            <el-tag v-if="scope.row.type">{{ _L[`system.schema.schematype.${scope.row.type}`] }}</el-tag>
+                            <el-tag v-if="scope.row.type">{{ _L[`system.schema.def.schematype.${scope.row.type}`] }}</el-tag>
                             <!-- Array Element -->
-                            <el-tag v-if="scope.row.eleType" type="success" style="margin-left: 12px;">{{ _L[`system.schema.schematype.${scope.row.eleType}`] }}</el-tag>
+                            <el-tag v-if="scope.row.eleType" type="success" style="margin-left: 12px;">{{ _L[`system.schema.def.schematype.${scope.row.eleType}`] }}</el-tag>
                             <!-- Base Type -->
                             <el-tag v-if="scope.row.baseType" type="info" style="margin-left: 12px;">{{ _L[baseTyepMap[scope.row.baseType]] }}</el-tag>
                         </template>
@@ -97,13 +97,13 @@
             <template v-if="state.arguments">
                 <el-table :data="state.arguments" row-key="label" 
                     :tree-props="{ children: 'children' }">
-                    <el-table-column prop="label" :label="_L['system.schema.funccallarg.display']" min-width="240"></el-table-column>
+                    <el-table-column prop="label" :label="_L['system.schema.def.func.callarg.display']" min-width="240"></el-table-column>
                     <el-table-column prop="" label="标签" min-width="240">
                         <template #default="scope">
                                 <!-- Type -->
-                            <el-tag v-if="scope.row.type">{{ _L[`system.schema.schematype.${scope.row.type}`] }}</el-tag>
+                            <el-tag v-if="scope.row.type">{{ _L[`system.schema.def.schematype.${scope.row.type}`] }}</el-tag>
                             <!-- Array Element -->
-                            <el-tag v-if="scope.row.eleType" type="success" style="margin-left: 12px;">{{ _L[`system.schema.schematype.${scope.row.eleType}`] }}</el-tag>
+                            <el-tag v-if="scope.row.eleType" type="success" style="margin-left: 12px;">{{ _L[`system.schema.def.schematype.${scope.row.eleType}`] }}</el-tag>
                             <!-- Base Type -->
                             <el-tag v-if="scope.row.baseType" type="info" style="margin-left: 12px;">{{ _L[baseTyepMap[scope.row.baseType]] }}</el-tag>
                         </template>
@@ -253,7 +253,7 @@ watch(() => props.type, async () => {
 
             for (let i = 0; i < state.schema.func.args.length; i++) {
                 const arg = state.schema.func.args[i]
-                const info: ITypeStructInfo = { label: arg.name }
+                const info: ITypeStructInfo = { label: arg.display?.key ? _L.value(arg.display) : arg.name }
 
                 if (/^[tT]\d*$/.test(arg.type))
                 {

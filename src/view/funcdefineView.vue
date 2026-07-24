@@ -1,5 +1,6 @@
 <template>
     <section style="width: 100%;">
+        <schema-view :node="nocacheNode" in-form="nest" plain-text="left"></schema-view>
         <schema-view :node="returnNode" in-form="nest" plain-text="left"></schema-view>
         
         <!-- Arguments -->
@@ -13,7 +14,7 @@
                 </template>
                 <div v-for="i in state.arglen" class="func-arg"
                     style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
-                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: argColor[i-1] || 'white' }">
+                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: argColor[i-1] }">
                         <schema-view v-if="argsNode.elements[i - 1]" 
                             :key="argsNode.elements[i - 1].guid" 
                             :node="argsNode.elements[i - 1]"
@@ -61,7 +62,7 @@
                     <el-button type="primary" @click="expsNode.addRow()">{{ _L["frontend.view.new"] }}</el-button>
                 </template>
                 <div v-for="i in state.explen" class="func-arg" style="display: grid; grid-template-columns: repeat(2, 48%); grid-gap: 12px">
-                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: color[i-1] || 'white' }">
+                    <el-card class="box-card" shadow="hover" :style="{ ['background-color']: color[i-1] }">
                         <schema-view v-if="expsNode.elements[i - 1]" 
                             :key="expsNode.elements[i - 1].guid" 
                             :node="expsNode.elements[i - 1]"
@@ -83,15 +84,17 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, getFieldAccessWhiteList, NS_SYSTEM_CONTEXT, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, getAppSchema, RuleSchema } from 'schema-node'
+import { _LS, mockSchemaData, clearDebounce, ArrayNode, callSchemaFunction, debounce, ExpressionType, getArraySchema, getSchema, isEqual, isNull, isSchemaCanBeUseAs, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, ScalarNode, ScalarRule, SchemaType, StructNode, type IFunctionExpression, type INodeSchema, type IStructEnumFieldConfig, type AnySchemaNode, NS_SYSTEM_OBJECT, getFieldAccessWhiteList, type IStructFieldSchema } from 'schema-node'
 import { ref, toRaw, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
+import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
 
 const props = defineProps<{ node: StructNode }>()
 const funcNode = toRaw(props.node)
 const returnNode = funcNode.getField("return") as ScalarNode
 const argsNode = funcNode.getField("args") as ArrayNode
 const expsNode = funcNode.getField("exps") as ArrayNode
+const nocacheNode = funcNode.getField("nocache") as ScalarNode
 
 const state = reactive({
     readonly: false,
@@ -104,98 +107,6 @@ const argdatas: { key: string, name: string, type: string, data: any, showdata: 
 const result = ref<any[]>([])
 const argColor = ref<string[]>([])
 const color = ref<string[]>([])
-
-interface ArgInfo {
-    type?: string,
-    display?: string,
-    whiteList?: any[],
-}
-
-const refreshFieldFunc = async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const expName = args[0].getField("name").rawData
-    let exp = typeMap.get(expName)
-    if (exp?.type === SchemaType.Array && exp.array?.element)
-        exp = await getSchema(exp.array.element)
-    if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
-        return [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList(ret || "", exp.struct.fields, undefined, true) }]
-    }
-    return []
-}
-
-const refreshAppDataFetchFunc = async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-    const app = args[0].getField("value").rawData
-    const appSchema = !isNull(app) ? await getAppSchema(app) : undefined
-    const result: ArgInfo[] = [{}]
-
-    if (!appSchema) return result
-    result.push({ whiteList: await getFieldAccessWhiteList("", appSchema.fields || [], undefined, true) })
-
-    const fname = args[1].getField("value").rawData
-    const field = !isNull(fname) ? appSchema.fields?.find(f => f.name === fname) : undefined
-
-    // field not selected
-    if (!field) return result
-
-    let fieldSchema = await getSchema(field.type)
-    if (fieldSchema?.type === SchemaType.Array && fieldSchema.array?.element && fieldSchema.array?.primary?.length)
-    {
-        const primarys = fieldSchema.array.primary
-        fieldSchema = await getSchema(fieldSchema.array.element)
-        if (fieldSchema?.type === SchemaType.Struct && fieldSchema.struct?.fields.length)
-        {
-            for (let i = 0; i < primarys.length; i++)
-            {
-                const f = fieldSchema.struct!.fields.find(f => f.name === primarys[i])
-                if (f) {
-                    result.push({ type: f.type })
-                }
-                else {
-                    result.push({})
-                }
-            }
-        }
-    }
-    return result
-}
-
-const specialFuncRefresh: { [key: string]: (args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => Promise<ArgInfo[]> } = {
-    // field access
-    "system.collection.delfield": refreshFieldFunc,
-    "system.collection.getfield": refreshFieldFunc,
-    "system.collection.getfields":refreshFieldFunc,
-    "system.collection.setfield": refreshFieldFunc,
-
-    // field equal
-    "system.collection.fieldequal":async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-        const expName = args[0].getField("name").rawData
-        let exp = typeMap.get(expName)
-        if (exp?.type === SchemaType.Array && exp.array?.element)
-            exp = await getSchema(exp.array.element)
-        if (exp && exp.type === SchemaType.Struct && exp.struct?.fields.length) {
-            const result:any = [{}, { type: NS_SYSTEM_STRING, whiteList: await getFieldAccessWhiteList("", exp.struct.fields, undefined, true) }]
-            const fldName = args[1].getField("value").rawData
-            const field = !isNull(fldName) ? exp.struct.fields.find(f => f.name === fldName) : undefined
-            if (field) {
-                result.push({ type: field.type })
-            }
-            return result
-        }
-        return []
-    },
-
-    // fetch context item
-    "system.data.getcontextitem": async(args: StructNode[], typeMap: Map<string, INodeSchema>, ret?: string) => {
-        const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
-        return [{ type: ret, whiteList: await getFieldAccessWhiteList(ret || "", contextSchema?.struct?.fields || [])}]
-    },
-
-    // app data fetch
-    "system.data.getappdata": refreshAppDataFetchFunc,
-    "system.data.getappdatabyonekey": refreshAppDataFetchFunc,
-    "system.data.getappdatabytwokey": refreshAppDataFetchFunc,
-    "system.data.getappdatabythreekey": refreshAppDataFetchFunc,
-    "system.data.getappdatabyfourkey": refreshAppDataFetchFunc,
-}
 
 let stateHandler: Function | undefined = undefined
 let retHandler: Function | undefined = undefined
@@ -210,7 +121,7 @@ const doCaclc = async () => {
 
     for (let i = 0; i < argsNode.elements.length; i++) {
         const { name, nullable, type } = argsNode.elements[i].rawData
-        const data = toRaw(argdatas[i].data)
+        const data = toRaw(argdatas[i]?.data)
         if (isNull(type) || isNull(name) || (isNull(data) && !nullable)) {
             fullfill = false
             break
@@ -243,21 +154,28 @@ const doCaclc = async () => {
             if (exp.args?.length) {
                 let value = null
                 for (let j = 0; j < exp.args.length; j++) {
+                    const arg = fargs.length > j ? fargs[j] : fargs[fargs.length - 1]
                     if (exp.args[j].name) {
-                        value = values[exp.args[j].name!]
+                        const paths = exp.args[j].name!.split(".").filter((v: string) => !isNull(v))
+                        value = values[paths[0]]
+                        for (let k = 1; k < paths.length; k++) {
+                            if (isNull(value)) {
+                                value = null
+                                break
+                            }
+                            value = value[paths[k]]
+                        }
 
                         // check array
-                        let atype = fargs[j].type
+                        let atype = arg.type
                         if (/^[tT]\d*$/.test(atype))
                         {
                             const gidx = atype.length > 1 ? parseInt(atype.substring(1)) - 1 : 0
                             atype = (Array.isArray(funcinfo?.func?.generic) ? funcinfo.func.generic[gidx] : gidx === 0 ? funcinfo?.func?.generic : "") || ""
                         }
 
-                        if (isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!atype || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], atype)))
-                        {
+                        if (!arg.params && isarray && arrIdx < 0 && arraymap[exp.args[j].name!] && (!atype || await isSchemaCanBeUseAs(arraymap[exp.args[j].name!], atype)))
                             arrIdx = j
-                        }
                     }
                     else {
                         value = exp.args[j].value
@@ -362,6 +280,69 @@ const doCaclc = async () => {
                         }
                     }
                     break
+
+                case ExpressionType.Count:
+                    {
+                        res = 0
+                        if (arrIdx >= 0)
+                        {
+                            const array = callargs[arrIdx]
+                            if (Array.isArray(array))
+                            {
+                                for(let l = 0; l < array.length; l++)
+                                {
+                                    callargs[arrIdx] = array[l]
+                                    if (await callSchemaFunction(exp.func, callargs))
+                                        res++
+                                }
+                            }
+                        }
+                    }
+                    break
+
+                case ExpressionType.All:
+                    {
+                        res = true
+                        if (arrIdx >= 0)
+                        {
+                            const array = callargs[arrIdx]
+                            if (Array.isArray(array))
+                            {
+                                for(let l = 0; l < array.length; l++)
+                                {
+                                    callargs[arrIdx] = array[l]
+                                    if (!await callSchemaFunction(exp.func, callargs))
+                                    {
+                                        res = false
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break
+
+                case ExpressionType.Any:
+                    {
+                        res = false
+                        if (arrIdx >= 0)
+                        {
+                            const array = callargs[arrIdx]
+                            if (Array.isArray(array))
+                            {
+                                for(let l = 0; l < array.length; l++)
+                                {
+                                    callargs[arrIdx] = array[l]
+                                    if (await callSchemaFunction(exp.func, callargs))
+                                    {
+                                        res = true
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break
             }
 
             if (isNull(res)) res = null
@@ -390,14 +371,14 @@ const refresh = async () => {
     const typeMap: Map<string, INodeSchema> = new Map()
 
     // args refresh
-    const args: { name: string, schema: INodeSchema }[] = []
+    const argMap: { name: string, type: string, schema: INodeSchema }[] = []
     for (let i = 0; i < argsNode.elements.length; i++) {
         const a = argsNode.elements[i]
         const { name, type } = a.rawData
         if (name && type) {
             const schema = await getSchema(type)
             if (schema) {
-                args.push({ name, schema })
+                argMap.push({ name, type: schema.name, schema })
                 typeMap.set(name, schema)
             }
         }
@@ -407,6 +388,7 @@ const refresh = async () => {
     let lastMatch = false
     let isStructRet = retSchema?.type === SchemaType.Struct && retSchema.struct?.fields.length
     const expcount = expsNode.elements.length
+    const structFields = retSchema?.struct?.fields.map((f: IStructFieldSchema) => f) || []
     if (retSchema && expcount)
     {
         const data = expsNode.elements[expcount - 1].rawData
@@ -414,19 +396,53 @@ const refresh = async () => {
     }
 
     // exps refresh
-    const exps: { name: string, schema: INodeSchema }[] = []
     const retColor: string[] = []
     for (let i = 0; i < expcount; i++) {
         const e = expsNode.elements[i] as StructNode
         const { name, type, func } = e.rawData
-        const ret = e.rawData.return
+        let ret = e.rawData.return
 
+        // struct field support
+        if (isStructRet)
+        {
+            const nameNode = e.getField("name") as ScalarNode
+            if (name){
+                const index = structFields.findIndex((f:any) => f.name === name)
+                if (index >= 0)
+                {
+                    const fld = structFields[index]
+                    structFields.splice(index, 1)
+                    if (!ret){
+                        ret = fld.type
+                        e.getField("return")!.data = ret
+                    }
+                    if (nameNode.rule.whiteList?.length !== 1 || typeof(nameNode.rule.whiteList[0]) !== "object" || nameNode.rule.whiteList[0].value !== fld.name)
+                    {
+                        nameNode.rule.asSuggest = true
+                        nameNode.rule.whiteList = [ { value: fld.name, label: _L.value(fld.display || fld.name) } ]
+                        nameNode.notifyState()
+                    }
+                }
+                else
+                {
+                    nameNode.rule.whiteList = undefined
+                    nameNode.notifyState()
+                }
+            }
+            else
+            {
+                nameNode.rule.asSuggest = true
+                nameNode.rule.whiteList = structFields.map((f:any) => ({ value: f.name, label: _L.value(f.display || f.name) }))
+                nameNode.notifyState()
+            }
+        }
+        
         let funcret = ret
         let arrayType = ""
         let arrayEle = ""
         let isarray = type !== ExpressionType.Call
         let arrIdx = -1
-        
+
         switch (type) {
             case ExpressionType.Filter:
                 funcret = NS_SYSTEM_BOOL
@@ -443,6 +459,13 @@ const refresh = async () => {
 
             case ExpressionType.Map:
                 funcret = (await getSchema(ret))!.array!.element
+                arrayEle = funcret
+                break
+
+            case ExpressionType.Count:
+            case ExpressionType.All:
+            case ExpressionType.Any:
+                funcret = NS_SYSTEM_BOOL
                 break
         }
 
@@ -452,7 +475,22 @@ const refresh = async () => {
         // args
         const fargs = e.getField("args") as ArrayNode
         const finfo = func ? await getSchema(func) : null
-        const farglen = finfo?.func?.args.length || 0
+        const rarglen = finfo?.func?.args.length || 0
+        let farglen = rarglen
+
+        // params support
+        if (farglen && finfo?.func?.args[farglen - 1].params){
+            for (let i = fargs.elements.length; i >= farglen; i--) {
+                const ele = fargs.elements[i - 1] as StructNode
+                const { name, value } = ele.rawData
+                if (!isNull(name) || !isNull(value))
+                {
+                    farglen = i + 1
+                    break
+                }
+            }
+        }
+        
         while (fargs.elements.length < farglen) fargs.addRow()
         if (fargs.elements.length > farglen) fargs.delRows(farglen, fargs.elements.length - farglen)
 
@@ -464,7 +502,7 @@ const refresh = async () => {
 
         // special func refresh trick
         const specials: ArgInfo[] = specialFuncRefresh[func]
-            ? await specialFuncRefresh[func](fargs.elements as StructNode[], typeMap, ret)
+            ? await specialFuncRefresh[func](e.getField("func") as ScalarNode, fargs.elements as StructNode[], typeMap, arrayEle || ret)
             : []
 
         // adjust type, white list and etc
@@ -476,13 +514,31 @@ const refresh = async () => {
             const valueField = farg.getField("value") as ScalarNode
             const special = specials.length > k ? specials[k] : undefined
 
-            const carg = finfo!.func!.args[k]
-            display.data = `${carg.nullable ? '? ' : '* '}${special?.display || carg.name}`
+            const carg =  finfo!.func!.args[k >= rarglen ? rarglen - 1 : k]
+            display.data = `${(carg.params || carg.nullable) ? '? ' : '* '}${special?.display || carg.name}`
 
             // call argument type
             let ctype = await getSchema(special?.type || carg.type, generic)
-            const choose = name.rawData
-            const exp = choose ? args.find(a => a.name === choose) || exps.find(a => a.name === choose) : null
+            const choose = (name.rawData || "").split('.').filter((f: string) => !isNull(f))
+            let exp = choose.length && choose[0] ? argMap.find(a => a.name === choose[0]) : null
+            if (choose.length > 1 && exp) {
+                for (let m = 1; m < choose.length; m++) {
+                    if (exp && exp.schema.type === SchemaType.Struct) {
+                        const fld: IStructFieldSchema | undefined = exp.schema.struct?.fields.find((f: IStructFieldSchema) => f.name === choose[m])
+                        if (fld) {
+                            exp = { name: fld.name, type: fld.type, schema: (await getSchema(fld.type))! }
+                        }
+                        else {
+                            exp = null
+                            break
+                        }
+                    }
+                    else {
+                        exp = null
+                        break
+                    }
+                }
+            }
 
             // match type and array index
             if (!ctype && /^[tT]\d*$/.test(carg.type)) {
@@ -491,10 +547,8 @@ const refresh = async () => {
                 if (exp) {
                     ctype = exp.schema
                     generic[gidx] = exp.schema.name
-                    if (isarray && arrIdx < 0)
-                    {
-                        if (exp.schema.type === SchemaType.Array && exp.schema.array?.element)
-                        {
+                    if (isarray && arrIdx < 0) {
+                        if (exp.schema.type === SchemaType.Array && exp.schema.array?.element) {
                             ctype = await getSchema(exp.schema.array.element)
                             arrIdx = k
                             generic[gidx] = ctype!.name
@@ -505,50 +559,33 @@ const refresh = async () => {
                     ctype = await getSchema(generic[gidx])
                 }
             }
-            else if (isarray && arrIdx < 0 && exp && ctype)
-            {
-                if (exp.schema.type === SchemaType.Array && exp.schema.array?.element && await isSchemaCanBeUseAs(exp.schema.array.element, ctype!.name))
-                {
+            else if (isarray && arrIdx < 0 && exp && ctype) {
+                if (exp.schema.type === SchemaType.Array && exp.schema.array?.element && await isSchemaCanBeUseAs(exp.schema.array.element, ctype!.name)) {
                     arrIdx = k
                 }
             }
 
             // type value
-            type.data = ctype?.name || NS_SYSTEM_STRING
+            type.data = ctype?.name || NS_SYSTEM_OBJECT
 
             // name white list
-            const whitelist: string[] = []
-            if (ctype) {
-                for (let j = 0; j < args.length; j++) {
-                    if (await isSchemaCanBeUseAs(args[j].schema.name, ctype.name)) {
-                        whitelist.push(args[j].name)
-                    }
-                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && args[j].schema.array?.element && await isSchemaCanBeUseAs(args[j].schema.array!.element, ctype.name))
-                    {
-                        whitelist.push(args[j].name)
-                    }
-                }
-                for (let j = 0; j < exps.length; j++) {
-                    if (await isSchemaCanBeUseAs(exps[j].schema.name, ctype.name)) {
-                        whitelist.push(exps[j].name)
-                    }
-                    else if (isarray && (arrIdx === k || arrIdx < 0) && ctype.type !== SchemaType.Array && exps[j].schema.array?.element && await isSchemaCanBeUseAs(exps[j].schema.array!.element, ctype.name))
-                    {
-                        whitelist.push(exps[j].name)
-                    }
-                }
-            }
-            else {
-                args.forEach(a => whitelist.push(a.name))
-                exps.forEach(a => whitelist.push(a.name))
-            }
+            const whitelist = await getFieldAccessWhiteList(ctype?.name || "", argMap, "", false, isarray && (arrIdx === k || arrIdx < 0))
+
             if (!isEqual((name.rule as ScalarRule).whiteList, whitelist)) {
-                (name.rule as ScalarRule).whiteList = whitelist
+                (name.rule as ScalarRule).whiteList = whitelist as any
                 name.validate().then(() => name.notifyState())
             }
 
             // value field
-            if (!isEqual(special?.whiteList, valueField.rule.whiteList))
+            if (ctype?.name === "system.schema.domain.target")
+            {
+                if (!valueField.rule.whiteList?.length)
+                {
+                    valueField.rule.whiteList = ["00000000-0000-0000-0000-000000000000"]
+                    valueField.validate().then(() => valueField.notifyState())
+                }
+            }
+            else if (!isEqual(special?.whiteList, valueField.rule.whiteList))
             {
                 valueField.rule.whiteList = special?.whiteList
                 valueField.validate().then(() => valueField.notifyState())
@@ -559,7 +596,7 @@ const refresh = async () => {
         if (name && ret) {
             const schema = await getSchema(ret)
             if (schema) {
-                exps.push({ name, schema })
+                argMap.push({ name, schema, type: schema.name })
                 typeMap.set(name, schema)
             }
         }
@@ -610,11 +647,11 @@ const refreshArgs = async () => {
             argdatas[i].key = `${name}-${type}`
             if (type !== argdatas[i].type) {
                 argdatas[i].type = type
-                argdatas[i].data = null
+                argdatas[i].data = mockSchemaData(type)
             }
         }
         else {
-            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: null, showdata: false })
+            argdatas[i] = reactive({ key: `${name}-${type}`, name, type, data: mockSchemaData(type), showdata: false })
         }
 
         acolor[i] = ""
@@ -661,10 +698,7 @@ onMounted(() => {
     }, true)
 
     retHandler = returnNode.subscribe(refreshArgs)
-    argsHandler = argsNode.subscribe((action: string) => {
-        const arglen = argsNode.elements.length
-        if (action !== "swap" && argsHandlers.length === arglen) return
-
+    argsHandler = argsNode.subscribeLayoutChanged(() => {
         let changed = false
 
         // clear
@@ -686,18 +720,16 @@ onMounted(() => {
             const n = e as StructNode
             argsHandlers[i] = {
                 guid: e.guid,
-                name: n.getField("name").subscribe(delayRefreshArgs),
-                type: n.getField("type").subscribe(refreshArgs)
+                name: n.getField("name")!.subscribe(delayRefreshArgs),
+                type: n.getField("type")!.subscribe(refreshArgs)
             }
         })
 
         if (changed) return soonRefreshArgs()
     }, true)
 
-    expsHandler = expsNode.subscribe((action: string) => {
+    expsHandler = expsNode.subscribeLayoutChanged(() => {
         const expslen = expsNode.elements.length
-        if (action !== "swap" && expsHandlers.length === expslen) return
-
         let changed = false
 
         // clear
@@ -719,11 +751,11 @@ onMounted(() => {
             const n = e as StructNode
             expsHandlers[i] = {
                 guid: e.guid,
-                name: n.getField("name").subscribe(delayRefresh),
-                return: n.getField("return").subscribe(soonRefresh),
-                type: n.getField("type").subscribe(soonRefresh),
-                func: n.getField("func").subscribe(soonRefresh),
-                args: n.getField("args").subscribe(delayRefresh)
+                name: n.getField("name")!.subscribe(delayRefresh),
+                return: n.getField("return")!.subscribe(soonRefresh),
+                type: n.getField("type")!.subscribe(soonRefresh),
+                func: n.getField("func")!.subscribe(soonRefresh),
+                args: n.getField("args")!.subscribe(delayRefresh)
             }
         })
 

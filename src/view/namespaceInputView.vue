@@ -4,10 +4,11 @@
     </span>
     <section v-else style="display: flex; width:100%;">
         <schema-view
-            v-model="prefix"
+            v-model="prefix" 
+            expand
             :config="{
-                type:'system.schema.namespace',
-                display: _L['frontend.view.upnamespace']
+                type:'system.schema.type.namespace',
+                display: _LS('frontend.view.upnamespace')
             }"
         ></schema-view>
         <el-input
@@ -19,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { type ScalarNode } from 'schema-node'
+import { isNull } from 'schema-node';
+import { type ScalarNode, _LS } from 'schema-node'
 import { schemaView, _L } from 'schema-node-vueview';
 import { ref, onMounted, onUnmounted, reactive, toRaw, watch } from 'vue'
 
@@ -40,7 +42,16 @@ const name = ref("")
 
 const refreshData = () => {
     if (props.node.readonly) return
-    props.node.data = name.value ? (typeof(prefix.value) === "string" && prefix.value && prefix.value !== "null" && prefix.value !== "undefined" ? `${prefix.value}.${name.value}` : name.value) : ""
+    const p = `${prefix.value}`
+    let result = `${name.value}`
+    if (isNull(result)) {
+        props.node.data = ""
+        return
+    }
+    if (!isNull(p) && p !== "" && p !== "null" && p !== "undefined") {
+        result = `${p}.${result}`
+    }
+    props.node.data = result
 }
 
 watch(prefix, refreshData)
@@ -62,6 +73,10 @@ onMounted(() => {
         state.disable = scalarNode.rule.disable
         state.require = scalarNode.require
         state.readonly = scalarNode.readonly
+        const dft = scalarNode.rule.default
+        if (isNull(name.value) && !isNull(dft)) {
+            name.value = dft
+        }
     }, true)
 })
 

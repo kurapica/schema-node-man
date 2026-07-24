@@ -1,21 +1,19 @@
-<template>
+﻿<template>
     <section style="width: 100%;">
-        <template v-if="state.readonly && plainText">
-            <el-popover
-                placement="bottom-start"
-                :title="state.data"
-                width="width:fit-content"
-                trigger="hover">
-                <namespace-info-view :type="state.data"/>
-                <template #reference>
-                    <a :style="{'width': '100%', 'color': 'green', 'text-align': plainText === true ? 'center' : plainText }"
-                        href="javascript:void(0)"
-                        @click="handleEdit(state.data, true)">
-                        {{ state.display }}
-                    </a>
-                </template>
-            </el-popover>
-        </template>
+        <el-popover v-if="!expanded"
+            placement="bottom-start"
+            :title="state.data"
+            width="width:fit-content"
+            trigger="hover">
+            <namespace-info-view :type="state.data"/>
+            <template #reference>
+                <a :style="{'width': '100%', 'color': 'green', 'text-align': plainText === true ? 'center' : plainText }"
+                    href="javascript:void(0)"
+                    @click="handleEdit(state.data, true)">
+                    {{ state.display || _L["frontend.view.selectnamespace"] }}
+                </a>
+            </template>
+        </el-popover>
         <section v-else style="display: flex;">
             <el-cascader
                 v-model="data" 
@@ -40,6 +38,7 @@
                             :title="data.value"
                             width="width:fit-content"
                             :open-delay="500"
+                            :offset="42"
                             trigger="hover">
                             <el-button v-if="!(data.loadState & SchemaLoadState.System)" type="warning" @click="handleEdit(data.value, true)" style="float: right">{{ _L["frontend.view.view"] }}</el-button>
                             <namespace-info-view style="min-width: 300px;" :type="data.value"/>
@@ -54,7 +53,7 @@
                 <span>&lt;</span>
                 <template v-for="(genNode, index) in state.generic" :key="genNode.guid">
                     <schema-view
-                        :node="genNode"
+                        :node="genNode as any"
                         :style="{width: `${Math.floor(98 / (state.generic.length))}%`}"
                         no-generic
                         v-bind="$attrs"
@@ -67,7 +66,7 @@
 
         <!-- namespace editor -->
         <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body @closed="closeNamespaceEditor">
-            <el-container class="main" style="height: 80vh;color:black">
+            <el-container class="main theme-panel" style="height: 80vh;">
                 <el-header>
                     <el-button v-if="editable" type="warning" @click="handleEdit(handletype, false)" style="float: right">{{ _L["frontend.view.edit"] }}</el-button>
                 </el-header>
@@ -100,10 +99,10 @@
 </template>
 
 <script lang="ts" setup>
-import { saveStorageSchema } from "@/schema"
-import { getSchemaServerProvider } from "@/schemaServerProvider"
+import { saveStorageSchema } from "../schema"
+import { getSchemaServerProvider } from "../schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
-import { ExpressionType, PolicyScope, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, getAppSchema } from "schema-node"
+import { ExpressionType, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, _LS, debounce } from "schema-node"
 import { _L, schemaView } from "schema-node-vueview"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
@@ -120,7 +119,7 @@ interface ICascaderOptionInfo {
 }
 //#endregion
 
-const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean, noGeneric?: boolean }>()
+const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean, noGeneric?: boolean, expand?: boolean }>()
 const scalarNode = toRaw(props.node)
 const type = scalarNode.config.type
 
@@ -131,8 +130,13 @@ const state = reactive<{
     disable?: boolean,
     require?: boolean,
     readonly?: boolean,
-    generic?: ScalarNode[],
-}>({})
+    generic?: ScalarNode[]
+}>({ 
+    disable: scalarNode.rule.disable,
+    require: scalarNode.require,
+    readonly: scalarNode.readonly 
+})
+const expanded = ref(props.expand || false)
 
 const setData = (value: any) => {
     if (state.generic?.length)
@@ -182,29 +186,30 @@ let rowAccessType = ""
 
 // namespace map
 const namespaceMap: any = {
-    "system.schema.anytype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Func],
-    "system.schema.namespace": [SchemaType.Namespace],
-    "system.schema.scalartype": [SchemaType.Namespace, SchemaType.Scalar],
-    "system.schema.enumtype": [SchemaType.Namespace, SchemaType.Enum],
-    "system.schema.structtype": [SchemaType.Namespace, SchemaType.Struct],
-    "system.schema.arraytype": [SchemaType.Namespace, SchemaType.Array],
-    "system.schema.functype": [SchemaType.Namespace, SchemaType.Func],
-    "system.schema.eventtype": [SchemaType.Namespace, SchemaType.Event],
-    "system.schema.workflowtype": [SchemaType.Namespace, SchemaType.Workflow],
-    "system.schema.policytype": [SchemaType.Namespace, SchemaType.Policy],
-    "system.schema.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
-    "system.schema.policyfunctype": [SchemaType.Namespace, SchemaType.Func],
-    "system.schema.validfunc": [SchemaType.Namespace, SchemaType.Func],
-    "system.schema.whitelistfunc": [SchemaType.Namespace, SchemaType.Func],
-    "system.schema.arrayeletype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
-    "system.schema.valuetype": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array],
+    "system.schema.type.any": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Func],
+    "system.schema.type.namespace": [SchemaType.Namespace],
+    "system.schema.type.scalar": [SchemaType.Namespace, SchemaType.Scalar],
+    "system.schema.type.enum": [SchemaType.Namespace, SchemaType.Enum],
+    "system.schema.type.struct": [SchemaType.Namespace, SchemaType.Struct],
+    "system.schema.type.array": [SchemaType.Namespace, SchemaType.Array],
+    "system.schema.type.func": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.type.event": [SchemaType.Namespace, SchemaType.Event],
+    "system.schema.type.workflow": [SchemaType.Namespace, SchemaType.Workflow],
+    "system.schema.type.policy": [SchemaType.Namespace, SchemaType.Policy],
+    "frontend.design.pushfunctype": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.constraint.evaluator": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.constraint.predicate": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.constraint.valid": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.constraint.whitelist": [SchemaType.Namespace, SchemaType.Func],
+    "system.schema.type.rule.arrayelement": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct],
+    "system.schema.type.rule.value": [SchemaType.Namespace, SchemaType.Scalar, SchemaType.Enum, SchemaType.Struct, SchemaType.Array, SchemaType.Json],
 }[type as string]
 
 // Push function allow both value type and array type of the value type
-const ispushfunctype = type === "system.schema.pushfunctype"
-const isscalarvalidfunc = type === "system.schema.validfunc"
-const isscalarwhitelist = type === "system.schema.whitelistfunc"
-const enableEntries = ref(true)
+const ispushfunctype = type === "frontend.design.pushfunctype"
+const isscalarvalidfunc = type === "system.schema.constraint.valid"
+const isscalarwhitelist = type === "system.schema.constraint.whitelist"
+const enableEntries = ref(false)
 
 // view
 
@@ -220,11 +225,17 @@ let namesapceWatchHandler: Function | null = null
 
 // update
 const handleEdit = async (name: string, readonly?: boolean) => {
+    if (!state.readonly && !expanded.value) {
+        expanded.value = true
+        reBuildOptions()
+        return
+    }
+
     const schema = await getSchema(name)
     handletype.value = name
     editable.value = (readonly || false) && ((schema?.loadState || 0) & SchemaLoadState.System) === 0
     namespaceNode.value = new StructNode({
-        type: "system.schema.nodeschema",
+        type: "system.schema.def.nodeschema",
         readonly
     }, jsonClone(schema))
     showNamespaceEditor.value = true
@@ -293,7 +304,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
     // check compatible type
     if (namespaceMap.includes(SchemaType.Func)) {
         const funcList = options.filter(r => r.type === SchemaType.Func)
-        const blackList: string[] = ["system.schema"]
+        const blackList: string[] = ["frontend"]
         for(let i = 0; i < funcList.length; i++)
         {
             const f = await getSchema(funcList[i].value)
@@ -335,7 +346,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
                 blackList.push(f.name)
             }
             
-            if(rowAccessType && !blackList.includes(f.name) && f.func.args.length !== 1 && !await isSchemaCanBeUseAs(f.func.args[0].type, rowAccessType))
+            if(rowAccessType && !blackList.includes(f.name) && !await isSchemaCanBeUseAs(f.func.args[0]?.type, rowAccessType))
             {
                 blackList.push(f.name)
             }
@@ -344,7 +355,7 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
     }
     else if(props.noGeneric)
     {
-        const blackList: string[] = ["system.schema"]
+        const blackList: string[] = ["frontend"]
         for(let i = 0; i < options.length; i++)
         {
             const genTypes = getGenericParameter(options[i].value)
@@ -353,14 +364,16 @@ const genBlackList = async (options: ICascaderOptionInfo[]): Promise<string[]> =
         return blackList
     }
     else {
-        return ["system.schema"]
+        return ["frontend"]
     }
 }
 
 const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[]) => {
+    if (!expanded.value) return options
     const nsOnly = namespaceMap.length === 1
 
     values = values?.filter(v => namespaceMap.includes(v.type)) || []
+    values = values.filter(v => !v.name.includes("<")) // filter generic implement types
 
     // sort
     values.sort((a, b) => {
@@ -396,6 +409,8 @@ const buildOptions = async (options: ICascaderOptionInfo[], values: INodeSchema[
 }
 
 const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
+    if (!expanded.value) return resolve([])
+
     try {
         const { value } = node
         if (!value) return resolve([])
@@ -423,6 +438,7 @@ const lazyLoad = (node: ICascaderOptionInfo, resolve: any, reject: any) => {
 }
 
 const reBuildOptions = async () => {
+    if (!expanded.value) return
     const enumRoot = scalarNode.rule?.root
     if (enumRoot) {
         const rootType = await getSchema(enumRoot)
@@ -444,7 +460,7 @@ const reBuildOptions = async () => {
         compatibleType = ""
         root.value = ""
     }
-
+    
     if (compatibleType && ispushfunctype)
     {
         const ctype = await getSchema(compatibleType)
@@ -459,9 +475,16 @@ const reBuildOptions = async () => {
     {
         otherCompatibleType = (await getArraySchema(compatibleType))?.name || ""
     }
+    if (compatibleType === "system.schema.type.rule.value" && !otherCompatibleType)
+    {
+        otherCompatibleType = "system.schema.def.struct.fields"
+        console.log("Set other compatible type to structfieldschemas", otherCompatibleType)
+    }
 
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])
 }
+
+const delayRebuildOptions = debounce(reBuildOptions, 300)
 
 const refreshOptions = (options: ICascaderOptionInfo[]) => {
     options.forEach(o => {
@@ -480,7 +503,7 @@ let policyscopeHandler: Function | null = null
 
 onMounted(() => {
     const parent = scalarNode.parent
-    if (scalarNode.config.type === "system.schema.functype" && parent?.config.type === "system.schema.funcexp")
+    if (scalarNode.config.type === "system.schema.type.func" && parent?.config.type === "system.schema.def.func.exp")
     {
         const expNode = (parent as StructNode).getField("type") as ScalarNode
         exptypeHandler = expNode.subscribe(() => {
@@ -494,15 +517,15 @@ onMounted(() => {
                 upLimit = 99
                 lowLimit = 0
             }
-            reBuildOptions()
+            delayRebuildOptions()
         }, true)
     }
-    else if (parent instanceof StructNode && parent.getField("type")?.config?.type === "system.schema.relationtype")
+    else if (parent instanceof StructNode && parent.getField("type")?.config?.type === "system.schema.def.struct.relationtype")
     {
         const typeNode = parent.getField("type")
-        relationtypeHandler = typeNode.subscribe(() => {
-            enableEntries.value = typeNode.data == RelationType.WhiteList
-        })
+        relationtypeHandler = typeNode!.subscribe(() => {
+            enableEntries.value = typeNode?.data == RelationType.WhiteList
+        }, true)
     }
 
     // scalar white list, zero or 1-arg for the base type
@@ -511,47 +534,41 @@ onMounted(() => {
         lowLimit = 0
     }
 
-    // policy scope
-    if (type === "system.schema.policyfunctype") {
-        const scopeNode = parent instanceof StructNode ? parent.getField("scope") : undefined
-        if (scopeNode){
-            policyscopeHandler = scopeNode.subscribe(async () => {
-                const scope = scopeNode.data
-                let access = ""
-                let limit = 0
-                if (scope == PolicyScope.RowAccess)
-                {
-                    limit = 1
-                    let fieldNode = parent
-                    while (fieldNode && fieldNode.config.type !== "system.schema.appfieldschema")
-                        fieldNode = fieldNode.parent
+    // push func only allow 1-arg
+    if (ispushfunctype) {
+        upLimit = 1
+        lowLimit = 1
+    }
 
-                    if (fieldNode)
-                    {
-                        const app = (fieldNode as StructNode).getField("app").data
-                        const fld = (fieldNode as StructNode).getField("name").data
-                        if (app && fld)
-                        {
-                            const appSchema = await getAppSchema(app)
-                            const col = appSchema?.fields?.find((f: any) => f.name === fld)
-                            if (col) {
-                                access = col.type
-                                const schema = await getSchema(col.type)
-                                if (schema?.type == SchemaType.Array)
-                                {
-                                    access = schema.array?.element || ""
-                                }
-                            }
-                        }
-                    }
-                }
+    // evaluator func no arg, account should be fetched from context
+    if (type === "system.schema.constraint.evaluator")
+    {
+        upLimit = 0
+        lowLimit = 0
+    }
+    // row access type for predicate func
+    else if (type === "system.schema.constraint.predicate") {
+        let fieldNode = parent
+        const isPolicyItem = fieldNode?.config.type === "system.schema.def.policy.row"
+        while (fieldNode && fieldNode.config.type !== "system.schema.def.app.field.schema")
+            fieldNode = fieldNode.parent
+
+        if (fieldNode)
+        {
+            const typeField = (fieldNode as StructNode).getField("type") as ScalarNode
+            const limit = isPolicyItem ? 1 : 128
+            policyscopeHandler = typeField.subscribe(async() => {
+                let access = typeField.rawData
+                const schema = await getSchema(access)
+                if (schema?.type == SchemaType.Array)
+                    access = schema.array?.element || ""
 
                 if (access !== rowAccessType || limit != upLimit)
                 {
                     upLimit = limit
-                    lowLimit = limit
+                    lowLimit = Math.min(2, limit)
                     rowAccessType = access
-                    reBuildOptions()
+                    delayRebuildOptions()
                 }
             }, true)
         }
@@ -562,7 +579,7 @@ onMounted(() => {
         let data = scalarNode.rawData
 
         // generic type check
-        if (!props.noGeneric && !(props.plainText && scalarNode.readonly))
+        if (!props.noGeneric && !scalarNode.readonly)
         {
             let name = isNull(data) ? "" : data
             const match = name.match(REGEX_GENERIC_IMPLEMENT)
@@ -584,7 +601,7 @@ onMounted(() => {
 
                 while(genericNodes.length < genTypes.length)
                 {
-                    const node = new ScalarNode({ type: schema?.type === SchemaType.Array ? "system.schema.arrayeletype" : "system.schema.valuetype", display: _L.value("[GENERIC]") }, geneiricTypes[genericNodes.length] || "")
+                    const node = new ScalarNode({ type: schema?.type === SchemaType.Array ? "system.schema.type.rule.arrayelement" : "system.schema.type.rule.value", display: _LS("[GENERIC]") }, geneiricTypes[genericNodes.length] || "")
                     node.subscribe(() => setData(state.data))
                     node.rule.disable = state.readonly || state.disable || props.disabled
                     genericNodes.push(node)
@@ -604,6 +621,9 @@ onMounted(() => {
         {
             state.data = data
         }
+
+        if (isNull(data))
+            expanded.value = true
         
         // build display
         const paths = (isNull(data) ? "" : data).split(".")
@@ -636,7 +656,7 @@ onMounted(() => {
         }
         state.display = display.join("/")
         if (rebuild)
-            await reBuildOptions()
+            delayRebuildOptions()
     }, true)
 
     // state watch
@@ -649,7 +669,7 @@ onMounted(() => {
         if (r !== compatibleType)
         {
             compatibleType = r
-            reBuildOptions()
+            delayRebuildOptions()
         }
 
         state.generic?.forEach(g => {
@@ -676,3 +696,10 @@ onUnmounted(() => {
     if (policyscopeHandler) policyscopeHandler()
 })
 </script>
+
+<style lang="css">
+.theme-panel {
+    color: var(--app-text);
+    background-color: var(--app-surface);
+}
+</style>

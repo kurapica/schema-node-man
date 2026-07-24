@@ -2,7 +2,7 @@
     <section>
         <el-button type="success" @click="showtryit = true">{{ _L["frontend.view.clicktotry"] }}</el-button>
         <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit']" direction="rtl" size="100%" append-to-body>
-            <el-container class="main" style="height: 80vh;color:black;">
+            <el-container class="main theme-panel" style="height: 80vh;">
                 <el-main>
                     <template v-if="isnamespace">
                         <el-form v-if="schemaNode" ref="editorRef" :model="schemaNode.rawData" label-width="160"
@@ -61,7 +61,7 @@ watch(() => props.type, async () => {
     {
         isnamespace.value = schema.type === SchemaType.Namespace || schema.type === SchemaType.Func
         schemaNode.value = new StructNode({
-            type: "system.schema.nodeschema",
+            type: "system.schema.def.nodeschema",
             readonly: true
         }, jsonClone(toRaw(schema)))
     }
@@ -69,6 +69,11 @@ watch(() => props.type, async () => {
 </script>
 
 <style lang="css">
+.theme-panel {
+    color: var(--app-text);
+    background-color: var(--app-surface);
+}
+
 .el-form-item .el-form-item {
     margin-bottom: 18px;
 }

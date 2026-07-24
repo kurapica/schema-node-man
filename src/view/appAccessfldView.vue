@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <span v-if="state.readonly && plainText"
         :style="{ 'width': '100%', 'text-align': plainText === true ? 'center' : plainText }">
         {{ state.display }}
@@ -33,7 +33,6 @@ interface ICascaderOptionInfo {
 
 const props = defineProps<{ node: ScalarNode, plainText?: any, disabled?: boolean }>()
 const scalarNode = toRaw(props.node)
-const ispush = scalarNode.config.type === "system.schema.apppushfld"
 
 // display state
 const state = reactive<{
@@ -71,17 +70,6 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
         {
             if (!await isSchemaCanBeUseAs(f.type, root))
             {
-                if (ispush && schema?.type === SchemaType.Array && schema.array?.element && await isSchemaCanBeUseAs(schema.array.element, root))
-                {
-                    result.push({
-                        value: `${prefix}${f.name}`,
-                        label: `${_L(f.display) || f.name}`,
-                        leaf: true,
-                        children: null
-                    })
-                    continue
-                }
-
                 const isArray = schema?.type === SchemaType.Array
                 if (isArray)
                 {
@@ -128,7 +116,7 @@ const buildOptions = async (fields: { name: string, type: string, display?: any 
                 option.children ||= []
                 option.children.unshift ({
                     value: `${prefix}${f.name}.${ARRAY_ELEMENT}`,
-                    label: _L["system.schema.reltarfield.ele"],
+                    label: _L["frontend.design.reltarfield.ele"],
                     leaf: true,
                     children: null
                 })
@@ -147,14 +135,14 @@ onMounted(async () => {
     let parentNode = scalarNode.parent
     while (parentNode)
     {
-        if (parentNode.config.type === "system.schema.appfieldschema")
+        if (parentNode.config.type === "system.schema.def.app.field.schema")
         {
-            app = (parentNode as StructNode).getField("app").rawData
+            app = (parentNode as StructNode).getField("app")?.rawData
             break
         }
-        else if(parentNode.config.type === "system.schema.appschema")
+        else if(parentNode.config.type === "system.schema.def.app.schema")
         {
-            app = (parentNode as StructNode).getField("name").rawData
+            app = (parentNode as StructNode).getField("name")?.rawData
             break
         }
         parentNode = parentNode.parent
@@ -189,7 +177,7 @@ onMounted(async () => {
                 }
                 if (paths[i] === ARRAY_ELEMENT)
                 {
-                    paths[i] = _L["system.schema.reltarfield.ele"]
+                    paths[i] = _L["frontend.design.reltarfield.ele"]
                     break
                 }
                 if (schema?.type !== SchemaType.Struct) break

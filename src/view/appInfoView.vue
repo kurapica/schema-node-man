@@ -3,16 +3,16 @@
         <h3>{{ appSchema.name }}</h3>
         <p>{{ _L(appSchema.display) }}</p>
         <el-table v-if="appSchema.fields?.length" :data="appSchema.fields" style="width: 100%">
-            <el-table-column prop="name" :label="_L['system.schema.appfieldschema.name']"/>
-            <el-table-column prop="type" :label="_L['system.schema.appfieldschema.type']" width="240">
+            <el-table-column prop="name" :label="_L['system.schema.def.app.field.schema.name']"/>
+            <el-table-column prop="type" :label="_L['system.schema.def.app.field.schema.type']" width="240">
                 <template #default="scope">
                     <schema-view :config="{
-                        type: 'system.schema.anytype',
+                        type: 'system.schema.type.any',
                         readonly: true
                     }" :value="scope.row.type" plain-text="left"></schema-view>
                 </template>
             </el-table-column>
-            <el-table-column prop="display" :label="_L['system.schema.appfieldschema.display']">
+            <el-table-column prop="display" :label="_L['system.schema.def.app.field.schema.display']">
                 <template #default="scope">
                     {{ _L(scope.row.display) }}
                 </template>
