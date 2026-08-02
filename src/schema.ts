@@ -49,7 +49,6 @@ import {
 registerSchema(
   [
     //#region system scalars
-    newSystemScalar("frontend.design.pushfunctype", "system.schema.type.func"),
     newSystemScalar(
       "frontend.design.namespaceinput",
       NS_SYSTEM_STRING,
@@ -1523,127 +1522,6 @@ registerSchema(
       },
     ),
     //#endregion
-
-    //#region namespace definition
-    newSystemFunc(
-      "frontend.design.genarraydisplay",
-      NS_SYSTEM_STRING,
-      [{ name: "elementType", type: "system.schema.type.rule.value" }],
-      (elementType: string) =>
-        `{[LIST.PREFIX]}{@${elementType}}{[LIST.SUFFIX]}`,
-    ),
-
-    newSystemFunc(
-      "frontend.design.genarrayname",
-      NS_SYSTEM_STRING,
-      [{ name: "elementType", type: "system.schema.type.rule.value" }],
-      (elementType: string) => `${elementType.split(".").pop()}s`,
-    ),
-
-    newSystemStruct(
-      "system.schema.def.nodeschema",
-      [
-        {
-          name: "name",
-          type: "frontend.design.namespaceinput",
-          require: true,
-          immutable: true,
-        },
-        {
-          name: "type",
-          type: "system.schema.def.schematype",
-          require: true,
-          immutable: true,
-          default: SchemaType.Namespace,
-          blackList: [SchemaType.Json, SchemaType.Property],
-        },
-        {
-          name: "display",
-          type: "system.localestring",
-          require: true,
-          upLimit: 128,
-        },
-        { name: "auth", type: "system.schema.type.policy" },
-        { name: "scalar", type: "system.schema.def.scalar.schema" },
-        { name: "enum", type: "system.schema.def.enum.schema" },
-        { name: "struct", type: "system.schema.def.struct.schema" },
-        { name: "array", type: "system.schema.def.array.schema" },
-        { name: "func", type: "system.schema.def.func.schema" },
-        { name: "event", type: "system.schema.def.event.schema" },
-        { name: "workflow", type: "system.schema.def.app.workflow.schema" },
-        { name: "policy", type: "system.schema.def.policy.schema" },
-        { name: "recognizer", type: "system.schema.def.recognizer.schema" },
-      ],
-      [
-        {
-          field: "name",
-          property: RelationType.Default,
-          func: "frontend.design.genarrayname",
-          args: [{ name: "array.element" }],
-        },
-        {
-          field: "scalar",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Scalar }],
-        },
-        {
-          field: "enum",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Enum }],
-        },
-        {
-          field: "struct",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Struct }],
-        },
-        {
-          field: "array",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Array }],
-        },
-        {
-          field: "func",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Func }],
-        },
-        {
-          field: "event",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Event }],
-        },
-        {
-          field: "workflow",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Workflow }],
-        },
-        {
-          field: "policy",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Policy }],
-        },
-        {
-          field: "recognizer",
-          property: RelationType.Visible,
-          func: "system.logic.eq",
-          args: [{ name: "type" }, { value: SchemaType.Recognizer }],
-        },
-        {
-          field: "display.key",
-          property: RelationType.Default,
-          func: "frontend.design.genarraydisplay",
-          args: [{ name: "array.element" }],
-        },
-      ],
-    ),
-    //#endregion
   ],
   SchemaLoadState.System,
 );
@@ -1842,7 +1720,6 @@ regSchemaTypeView("system.schema.type.enum", namespaceView);
 regSchemaTypeView("system.schema.type.struct", namespaceView);
 regSchemaTypeView("system.schema.type.array", namespaceView);
 regSchemaTypeView("system.schema.type.func", namespaceView);
-regSchemaTypeView("frontend.design.pushfunctype", namespaceView);
 regSchemaTypeView("system.schema.type.rule.valid", namespaceView);
 regSchemaTypeView("system.schema.type.rule.whitelist", namespaceView);
 regSchemaTypeView("system.schema.type.rule.predicate", namespaceView);
