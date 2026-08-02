@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import './style.css'
+import './assets/css/style.css'
 import App from './App.vue'
 import locale from 'element-plus/es/locale/lang/zh-cn'
 import ElementPlus from "element-plus"
@@ -8,10 +8,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import 'element-plus/dist/index.css'
 import { routes } from './routes'
 import Markdown from './components/markdown.vue'
-import "./assets/locale/zhCN"
-import "./assets/locale/enUS"
 import "./auth"
-import { setLanguage } from 'schema-node'
+import { initSchemaRuntime, setLanguage } from 'schema-node-core'
 import { reloadStorageSchemas } from './schema'
 import { reloadStorageAppSchemas } from './appSchema'
 import { setSchemaSite } from './schemaServerProvider'
@@ -46,6 +44,9 @@ app.config.globalProperties.$router = router
 // UI
 app.use(ElementPlus, { locale})
 app.component("Markdown", Markdown)
+
+// init shema runtime
+initSchemaRuntime()
 
 // Start
 app.mount('#app')

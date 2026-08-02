@@ -1,9 +1,4 @@
-﻿import { importLanguage } from "schema-node";
-import zhCNJson from "./zhCN.json";
-
-importLanguage("zhCN", {
-  ...zhCNJson,
-
+﻿{
   "frontend.design.enumintvalueinfo.value": "枚举值",
   "frontend.design.enumintvalueinfo.name": "枚举名",
   "frontend.design.enumintvalueinfo.disable": "停用",
@@ -79,10 +74,6 @@ importLanguage("zhCN", {
   "frontend.design.appfieldrelation.func": "关联函数",
   "frontend.design.appfieldrelation.args": "关联参数",
   "frontend.design.appfieldrelations": "应用字段数据关联列表",
-
-  //#endregion
-
-  //#region  Frontend
 
   "frontend.nav.introduce": "介绍",
   "frontend.nav.tryit": "尝试",
@@ -188,7 +179,5 @@ importLanguage("zhCN", {
   "frontend.view.manualworkflows": "手动工作流",
   "frontend.view.schemanameexists": "类型名称已存在",
   "frontend.view.appnameexists": "应用名称已存在",
-  "frontend.view.selectnamespace": "请选择类型",
-
-  //#endregion
-});
+  "frontend.view.selectnamespace": "请选择类型"
+}

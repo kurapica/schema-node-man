@@ -1,5 +1,5 @@
-import { setSchemaApiHeaders } from "schema-node"
-import { _LS, deepClone, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, registerSchema, SchemaLoadState, SchemaType } from "schema-node"
+import { setSchemaApiHeaders } from "schema-node-app"
+import { _LS, deepClone, NS_SYSTEM_BOOL, NS_SYSTEM_STRING, SchemaLoadState, SchemaType } from "schema-node-core"
 
 registerSchema([
     {
