@@ -65,44 +65,6 @@ registerSchema(
     ),
     //#endregion
 
-    //#region scalar definition
-    newSystemStruct(
-      "system.schema.def.scalar.schema",
-      [
-        { name: "base", type: "system.schema.type.scalar", require: true },
-        { name: "unit", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "lowLimit", type: NS_SYSTEM_NUMBER },
-        { name: "upLimit", type: NS_SYSTEM_NUMBER },
-        { name: "error", type: NS_SYSTEM_LOCALE_STRING },
-        { name: "regex", type: NS_SYSTEM_STRING },
-        { name: "whiteList", type: "system.schema.type.rule.whitelist" },
-        { name: "asSuggest", type: NS_SYSTEM_BOOL },
-        { name: "preValid", type: "system.schema.type.rule.valid" },
-        { name: "postValid", type: "system.schema.type.rule.valid" },
-      ],
-      [
-        {
-          field: "whiteList",
-          property: RelationType.Root,
-          func: "system.intrinsic.assign",
-          args: [{ name: "base" }],
-        },
-        {
-          field: "preValid",
-          property: RelationType.Root,
-          func: "system.intrinsic.assign",
-          args: [{ name: "base" }],
-        },
-        {
-          field: "postValid",
-          property: RelationType.Root,
-          func: "system.intrinsic.assign",
-          args: [{ name: "base" }],
-        },
-      ],
-    ),
-    //#endregion
-
     //#region enum definition
     newSystemFunc(
       "frontend.design.calcnextflag",
