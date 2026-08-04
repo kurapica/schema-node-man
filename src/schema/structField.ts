@@ -1,4 +1,4 @@
-import { Alias, buildFuncCall, Call, ForSchema, Meta, NS_SYSTEM_OBJECT, NS_SYSTEM_SCHEMA_DESIGN, NS_SYSTEM_SCHEMA_REFLECT_ARRAY, NS_SYSTEM_SCHEMA_REFLECT_IS_SCHEMA_KIND, NS_SYSTEM_SCHEMA_STRUCT_FIELD, OverrideType, Property, PropertyValueType, Relation, SCHEMA_KIND_ARRAY, SchemaType, Unpack, Visible } from "schema-node-core";
+import { Alias, buildFuncCall, Call, ForSchema, Meta, NS_SYSTEM_OBJECT, NS_SYSTEM_SCHEMA_DESIGN, NS_SYSTEM_SCHEMA_REFLECT_ARRAY, NS_SYSTEM_SCHEMA_REFLECT_IS_SCHEMA_KIND, NS_SYSTEM_SCHEMA_REFLECT_TYPE, NS_SYSTEM_SCHEMA_STRUCT_FIELD, OverrideType, Property, PropertyValueType, Relation, SCHEMA_KIND_ARRAY, SchemaType, Unpack, Visible } from "schema-node-core";
 
 /** The holder of the array kind properties for struct field */
 @Meta(Alias, "arrayDesign")
