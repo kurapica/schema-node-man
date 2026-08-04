@@ -15,5 +15,5 @@ export class StructFieldArrayDesign extends Property<unknown> {}
 @Meta(SchemaType, `${NS_SYSTEM_SCHEMA_STRUCT_FIELD}.ValueDesign`)
 @Meta(Unpack, true)
 @Meta(PropertyValueType, NS_SYSTEM_OBJECT)
-@Relation(OverrideType, Call, buildFuncCall(`${NS_SYSTEM_SCHEMA_REFLECT_ARRAY}.getarrayelement`, "@type"))
+@Relation(OverrideType, Call, buildFuncCall(`${NS_SYSTEM_SCHEMA_REFLECT_TYPE}.getdesignschema`, "@type", true))
 export class StructFieldValueDesign extends Property<unknown> {}
