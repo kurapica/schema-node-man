@@ -58,135 +58,7 @@ registerSchema(
           : type;
       },
     ),
-
-    newSystemFunc("frontend.design.getcontextwhitelist", "system.array", [], async() => {
-      const contextSchema = await getSchema(NS_SYSTEM_CONTEXT)
-      return await getFieldAccessWhiteList("", contextSchema?.struct?.fields || [])
-    }),
-
-    newSystemStruct("system.schema.def.app.scopecontextmap", [
-      { name: "contextItem", type: NS_SYSTEM_STRING },
-      { name: "mapKey", type: NS_SYSTEM_STRING }
-    ], [
-      {
-        field: "contextItem",
-        property: RelationType.WhiteList,
-        func: "frontend.design.getcontextwhitelist",
-        args: []
-      }
-    ]),
-    newSystemArray("system.schema.def.app.scopecontextmaps", "system.schema.def.app.scopecontextmap", "contextItem"),
-
-    newSystemStruct("system.schema.def.app.scopepolicy", [
-      { name: "type", type: "system.schema.def.app.scope", require: true, default: AppScopeType.BusinessTarget },
-      { name: "contextMaps", type: "system.schema.def.app.scopecontextmaps" }
-    ], [
-      {
-        field: "contextMaps", 
-        property: RelationType.Visible, 
-        func: "system.logic.eq", 
-        args: [{ name: "type" }, { value: AppScopeType.IsolationContext }]
-      },
-      {
-        field: "businessKey",
-        property: RelationType.Visible,
-        func: "system.logic.eq",
-        args: [{ name: "type" }, { value: AppScopeType.BusinessTarget }]
-      }
-    ]),
-
-    newSystemStruct(
-      "frontend.design.appfieldvalarg",
-      [
-        { name: "label", type: NS_SYSTEM_STRING, displayOnly: true },
-        {
-          name: "type",
-          type: "system.schema.type.rule.value",
-          invisible: false,
-          displayOnly: true,
-        },
-        { name: "name", type: "frontend.design.appaccessfld" },
-        { name: "value", type: NS_SYSTEM_OBJECT },
-      ],
-      [
-        //{ field: "name", property: RelationType.Root, func: "system.intrinsic.assign", args: [ { name: "type" } ] },
-        {
-          field: "name",
-          property: RelationType.Disable,
-          func: "system.logic.notempty",
-          args: [{ name: "value" }],
-        },
-        {
-          field: "value",
-          property: RelationType.Type,
-          func: "frontend.design.getexpvaluetype",
-          args: [{ name: "type" }],
-        },
-        {
-          field: "value",
-          property: RelationType.Disable,
-          func: "frontend.design.hideexpvalue",
-          args: [{ name: "type" }, { name: "name" }],
-        },
-      ],
-    ),
-    newSystemArray(
-      "frontend.design.appfieldvalargs",
-      "frontend.design.appfieldvalarg",
-    ),
-
-    newSystemStruct(
-      "system.schema.def.app.field.filter",
-      [
-        {
-          name: "mode",
-          type: "system.schema.def.app.field.filtermode",
-          require: true,
-          default: FieldFilterMode.Exactly,
-        },
-        {
-          name: "isFilter",
-          type: NS_SYSTEM_BOOL,
-          displayOnly: true,
-          invisible: true,
-        },
-        { name: "filter", type: NS_SYSTEM_STRING, asSuggest: true },
-        { name: "resolve", type: "system.schema.def.app.field.filterresolve" },
-      ],
-      [
-        {
-          field: "isFilter",
-          property: RelationType.Default,
-          func: "system.logic.eq",
-          args: [{ name: "mode" }, { value: FieldFilterMode.Filter }],
-        },
-        {
-          field: "filter",
-          property: RelationType.Type,
-          func: "system.logic.cond",
-          args: [
-            { name: "isFilter" },
-            { value: "system.schema.type.rule.predicate" },
-            { value: NS_SYSTEM_STRING },
-          ],
-        },
-      ],
-    ),
-    newSystemArray(
-      "system.schema.def.app.field.filters",
-      "system.schema.def.app.field.filter",
-      "filter",
-    ),
-
-    newSystemStruct(
-      "system.schema.def.app.field.foreign",
-      [
-        { name: "field", type: NS_SYSTEM_STRING, require: true },
-        { name: "app", type: "system.schema.domain.app", require: true },
-      ]
-    ),
-    newSystemArray("system.schema.def.app.field.foreigns", "system.schema.def.app.field.foreign"),
-
+    
     newSystemFunc(
       "frontend.design.appgetfieldtype",
       "system.schema.type.rule.value",
@@ -224,60 +96,6 @@ registerSchema(
         }
         return tarField?.type;
       },
-    ),
-
-    newSystemStruct(
-      "frontend.design.appfieldrelation",
-      [
-        { name: "field", require: true, type: "frontend.design.appaccessfld" },
-        {
-          name: "fieldType",
-          displayOnly: true,
-          invisible: true,
-          type: "system.schema.type.rule.value",
-        },
-        {
-          name: "return",
-          displayOnly: true,
-          invisible: true,
-          type: "system.schema.type.rule.value",
-        },
-        { name: "prop", require: true, type: "system.schema.property" },
-        { name: "func", require: true, type: "system.schema.type.func" },
-        { name: "args", type: "frontend.design.appfieldvalargs" },
-      ],
-      [
-        {
-          field: "prop",
-          prop: RelationType.WhiteList,
-          func: "frontend.design.getrelationwhitelist",
-          args: [{ name: "fieldType" }],
-        },
-        {
-          field: "return",
-          prop: RelationType.Default,
-          func: "frontend.design.getrelationfuncreturn",
-          args: [{ name: "fieldType" }, { name: "prop" }],
-        },
-        {
-          field: "func",
-          prop: RelationType.Root,
-          func: "system.intrinsic.assign",
-          args: [{ name: "return" }],
-        },
-        {
-          field: "args.name",
-          prop: RelationType.Root,
-          func: "frontend.design.getappfieldnametype",
-          args: [{ name: "args.type" }, { name: "prop" }],
-        },
-      ],
-    ),
-    newSystemArray(
-      "frontend.design.appfieldrelations",
-      "frontend.design.appfieldrelation",
-      "field",
-      "prop",
     ),
 
     newSystemFunc(
@@ -348,30 +166,6 @@ registerSchema(
       },
     ),
 
-    newSystemStruct("system.schema.def.policy.row", [
-      { name: "evaluator", type: "system.schema.type.rule.evaluator", require: true },
-      { name: "filter", type: "system.schema.type.rule.predicate" },
-    ]),
-    newSystemArray(
-      "system.schema.def.policy.rows",
-      "system.schema.def.policy.row",
-      "evaluator",
-    ),
-
-    newSystemStruct("system.schema.def.policy.col", [
-      { name: "name", type: NS_SYSTEM_STRING, require: true },
-      {
-        name: "evaluators",
-        type: "system.schema.type.rule.evaluators",
-        require: true,
-      },
-    ]),
-    newSystemArray(
-      "system.schema.def.policy.cols",
-      "system.schema.def.policy.col",
-      "name",
-    ),
-
     newSystemFunc(
       "frontend.design.getfieldforauths",
       NS_SYSTEM_ARRAY,
@@ -391,32 +185,6 @@ registerSchema(
         }
         return [];
       },
-    ),
-
-    newSystemFunc(
-      "frontend.design.showfieldfilterresolve",
-      NS_SYSTEM_BOOL,
-      [
-        { name: "app", type: NS_SYSTEM_STRING, nullable: true },
-        { name: "field", type: NS_SYSTEM_STRING, nullable: true },
-        { name: "mode", type: "system.schema.def.app.field.filtermode", nullable: true },
-        { name: "filter", type: NS_SYSTEM_STRING, nullable: true },
-      ],
-      async (app: string, field: string, mode: FieldFilterModeValue | undefined, filter: string) => {
-        if (mode !== FieldFilterMode.Exactly) return false;
-        const appSchema = app ? await getAppSchema(app) : undefined;
-        const fieldSchema = appSchema?.fields?.find((f: IAppFieldSchema) => f.name === field);
-        let fieldType = fieldSchema ? await getSchema(fieldSchema?.type || ""): undefined;
-        if (fieldType?.type === SchemaType.Array && fieldType.array?.element)
-          fieldType = await getSchema(fieldType.array.element);
-
-        if (fieldType?.type === SchemaType.Struct) {
-          const filterField = fieldType.struct?.fields?.find((f: IStructFieldSchema) => f.name === filter);
-          const filterType = filterField ? await getSchema(filterField.type) : undefined;
-          return filterType?.type === SchemaType.Enum && filterType.enum?.cascade?.length ? true : false;
-        }
-        return false
-      }
     ),
 
     newSystemFunc(
@@ -463,12 +231,6 @@ registerSchema(
         return false;
       },
     ),
-
-    newSystemStruct("system.schema.def.app.field.view", [
-      { name: "app", type: "system.schema.domain.app" },
-      { name: "field", type: NS_SYSTEM_STRING },
-      { name: "map", type: NS_SYSTEM_STRING }
-    ]),
 
     newSystemFunc("frontend.design.getavailablefieldviews", "system.array", [
       { name: "app", type: NS_SYSTEM_STRING, nullable: true },
