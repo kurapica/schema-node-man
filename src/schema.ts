@@ -23,7 +23,7 @@ export function saveStorageSchema(schema: NodeSchema) {
   // update name list
   const namelist = localStorage["schema_custom_namelist"];
   let list: string[] = namelist ? JSON.parse(namelist) : [];
-  const name = schema.name.toLowerCase();
+  const name = getNodeSchemaName(schema).toLowerCase();
   if (!Array.isArray(list)) list = [];
   if (!list.includes(name)) {
     list.push(name);
@@ -38,7 +38,7 @@ export function saveStorageSchema(schema: NodeSchema) {
 
 // delete schema from storage
 export function removeStorageSchema(name: string | NodeSchema) {
-  name = (typeof name === "object" ? name.name : name).toLowerCase();
+  name = (typeof name === "object" ? getNodeSchemaName(name) : name).toLowerCase();
   delete localStorage[`schema_data_${name}`];
   const namelist = localStorage["schema_custom_namelist"];
   let list: string[] = namelist ? JSON.parse(namelist) : [];
@@ -71,7 +71,7 @@ export function saveAllCustomSchemaToStroage(root: string = "") {
     if ((s.loadState || 0) & SchemaLoadState.FrontEnd) {
       saveStorageSchema(s);
       if (s.kind === SCHEMA_KIND_NAMESPACE)
-        saveAllCustomSchemaToStroage(s.name);
+        saveAllCustomSchemaToStroage(getNodeSchemaName(s));
     }
   });
 }
@@ -87,7 +87,7 @@ import reltarfieldView from "./view/reltarfieldView.vue";
 import structfldfuncargsView from "./view/structfldfuncargsView.vue";
 import funcdefineView from "./view/funcdefineView.vue";
 import { regSchemaTypeView } from "schema-node-vueview";
-import { getCachedNodeType, NamespaceType, NodeSchema, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
+import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
 
 regSchemaTypeView("system.schema.type.any", namespaceView);
 regSchemaTypeView("system.schema.type.namespace", namespaceView);
