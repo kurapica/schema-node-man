@@ -11,7 +11,7 @@
                                 <schema-view
                                     :node="(schemaNode as StructNode)"
                                     in-form="expandall"
-                                    plain-text="left"
+                                    text="left"
                                 ></schema-view>
                             </div>
                         </el-form>
@@ -27,7 +27,7 @@
                                 <schema-view
                                     :node="(schemaNode as StructNode)"
                                     in-form="expandall"
-                                    plain-text="left"
+                                    text="left"
                                 ></schema-view>
                             </div>
                         </el-form>

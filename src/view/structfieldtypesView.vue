@@ -11,7 +11,7 @@
       <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="150">
         <template #default="scope">
           <schema-view v-model="scope.row.type" :config="{ type: 'system.schema.type.rule.value', readonly: true }"
-            plain-text="left"></schema-view>
+            text="left"></schema-view>
         </template>
       </el-table-column>
       <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="180">
@@ -52,7 +52,7 @@
       <el-container style="height: 100%;">
         <el-main>
           <schema-view v-if="editingNode" :key="editingNode.guid" :node="(editingNode as StructNode)"
-            in-form="expandall" plain-text="left">
+            in-form="expandall" text="left">
           </schema-view>
         </el-main>
         <el-footer>

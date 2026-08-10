@@ -1,3 +1,5 @@
+import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
+
 // reload schemas from storage
 export function reloadStorageSchemas() {
   const namelist = localStorage["schema_custom_namelist"];
@@ -78,6 +80,7 @@ export function saveAllCustomSchemaToStroage(root: string = "") {
 
 //#region  View
 
+/*
 import namespaceView from "./view/namespaceView.vue";
 import namespaceInputView from "./view/namespaceInputView.vue";
 import enumvalueinfosView from "./view/enumvalueinfosView.vue";
@@ -87,7 +90,6 @@ import reltarfieldView from "./view/reltarfieldView.vue";
 import structfldfuncargsView from "./view/structfldfuncargsView.vue";
 import funcdefineView from "./view/funcdefineView.vue";
 import { regSchemaTypeView } from "schema-node-vueview";
-import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
 
 regSchemaTypeView("system.schema.type.any", namespaceView);
 regSchemaTypeView("system.schema.type.namespace", namespaceView);
@@ -116,3 +118,4 @@ regSchemaTypeView("frontend.design.structfldfuncargs", structfldfuncargsView);
 regSchemaTypeView("system.schema.def.func.schema", funcdefineView);
 
 //#endregion
+*/

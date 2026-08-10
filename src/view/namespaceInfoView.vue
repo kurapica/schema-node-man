@@ -52,7 +52,7 @@
                            <schema-view :config="{
                                 type: 'system.schema.type.any',
                                 readonly: true
-                            }" :value="scope.row.schemaType" plain-text="left"></schema-view>
+                            }" :value="scope.row.schemaType" text="left"></schema-view>
                         </template>
                     </el-table-column>
                     <el-table-column prop="desc" :label="_L['system.schema.def.struct.field.desc']" min-width="180">

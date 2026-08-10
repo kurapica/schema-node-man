@@ -2,7 +2,7 @@
   <el-container>
     <el-header>
       <el-form v-if="enableAppData && appTargetNode" ref="form" label-width="140px" label-position="left"
-        :model="appTargetNode.rawData">
+        :model="appTargetNode.rawValue!">
           <section style="float:right;margin-left: 1rem;">
             <el-button v-if="!issystemlevel" type="info" @click="useempty">{{ _L["frontend.view.useempty"] }}</el-button>
             <el-button  v-if="!issystemlevel" type="info" @click="genguid">{{ _L["frontend.view.genguid"] }}</el-button>
@@ -11,7 +11,7 @@
             <el-button type="warning" v-if="!loading" v-loading="loading" @click="saveData">{{
               _L["frontend.view.savedata"] }}</el-button>
           </section>
-          <schema-view :node="(appTargetNode as StructNode)" :in-form="true" plain-text="left">
+          <schema-view :node="(appTargetNode as StructNode)" :in-form="true" text="left">
           </schema-view>
       </el-form>
     </el-header>
@@ -21,13 +21,13 @@
         <!-- Turn off workflow -->
         <el-button v-if="wf.togglable && wf.workflowId" v-loading="startWorkflowing"
           style="margin-bottom: 1rem; margin-right: 1rem;" type="danger" @click="turnOffWorkflow(wf.name)">
-          {{ _L["frontend.view.turnoffworkflow"] }} - {{ _L(wf.display) || wf.name }}
+          {{ _L["frontend.view.turnoffworkflow"] }} - {{ _L(getPropertyValue(wf, Display)) || wf.name }}
         </el-button>
 
         <!-- Turn on workflow -->
         <el-button v-else v-loading="startWorkflowing" style="margin-bottom: 1rem; margin-right: 1rem;" type="primary"
           @click="startWorkflow(wf.name)">
-          {{ _L(wf.display) || wf.name }}
+          {{ _L(getPropertyValue(wf, Display)) || wf.name }}
         </el-button>
       </template>
       <el-tabs v-model="activeTab" v-if="showref || showoutput">
@@ -36,39 +36,39 @@
         <el-tab-pane v-if="showoutput" :label="_L['frontend.view.outputfield']" :name="2"></el-tab-pane>
       </el-tabs>
 
-      <el-form v-show="activeTab === 0" ref="form" label-width="140px" :model="appNode.rawData">
-        <template v-for="f in appNode.inputFields" :key="f.guid">
-          <h2 v-if="!invisibleFields[f.name]">{{ _L(f.display) || f.name }}</h2>
-          <schema-view plain-text="left" :node="(f as AnySchemaNode)" :in-form="true" :skin="skin"></schema-view>
+      <el-form v-show="activeTab === 0" ref="form" label-width="140px" :model="appNode.rawValue">
+        <template v-for="f in appNode.inputFields" :key="f.id">
+          <h2 v-if="!invisibleFields[f.name!]">{{ _L(f.getPropertyValue(Display)) || f.name }}</h2>
+          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin"></schema-view>
         </template>
       </el-form>
 
-      <el-form v-show="activeTab === 1 && showref" label-width="140px" :model="appNode.rawData">
-        <template v-for="f in appNode.refInputFields" :key="f.guid">
-          <h2 v-if="!invisibleFields[f.name]">{{ _L(f.display) || f.name }}</h2>
-          <schema-view plain-text="left" :node="(f as AnySchemaNode)" :in-form="true" :skin="skin"></schema-view>
+      <el-form v-show="activeTab === 1 && showref" label-width="140px" :model="appNode.rawValue">
+        <template v-for="f in appNode.viewFields" :key="f.id">
+          <h2 v-if="!invisibleFields[f.name!]">{{ _L(f.getPropertyValue(Display)) || f.name }}</h2>
+          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin"></schema-view>
           <br />
         </template>
       </el-form>
 
-      <el-form v-show="activeTab === 2 && showoutput" label-width="140px" :model="appNode.rawData">
-        <template v-for="f in appNode.pushFields" :key="f.guid">
-          <h2 v-if="!invisibleFields[f.name]">{{ _L(f.display) || f.name }}</h2>
-          <schema-view plain-text="left" :node="(f as AnySchemaNode)" :in-form="true" :skin="skin"></schema-view>
+      <el-form v-show="activeTab === 2 && showoutput" label-width="140px" :model="appNode.rawValue">
+        <template v-for="f in appNode.deriveFields" :key="f.id">
+          <h2 v-if="!invisibleFields[f.name!]">{{ _L(f.getPropertyValue(Display)) || f.name }}</h2>
+          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin"></schema-view>
           <br />
         </template>
       </el-form>
     </el-main>
 
-    <el-drawer v-model="showInteraction" :title="_L(interactionWorkflow?.display || '')" direction="rtl" size="80%"
+    <el-drawer v-model="showInteraction" :title="_L(getPropertyValue(interactionWorkflow!, Display) || '')" direction="rtl" size="80%"
       append-to-body>
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <schema-view v-if="interactionData" :key="interactionData.guid" :node="interactionData as any" in-form="expandall"
-            plain-text="left" v-bind="$attrs"></schema-view>
+          <schema-view v-if="interactionData" :key="interactionData.id" :node="interactionData as any" in-form="expandall"
+            text="left" v-bind="$attrs"></schema-view>
         </el-main>
         <el-footer>
-          <el-button type="success" @click="startWorkflow(interactionWorkflow!.name, interactionData?.data)">
+          <el-button type="success" @click="startWorkflow(interactionWorkflow!.name, interactionData?.rawValue)">
             {{ _L["CONFIRM"] }}
           </el-button>
         </el-footer>
@@ -80,7 +80,8 @@
 <script lang="ts" setup>
 import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
-import { SchemaType, type INodeSchema, getSchemaNode, getAppDataProvider, getAppNode, StructNode, type AppNode, type AnySchemaNode, isNull, getSchema, _LS, type IAppInteractionWorkflow, generateGuid, AppScopeType } from "schema-node"
+import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, IAppInteractionWorkflow } from "schema-node-app";
+import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, isNull, StructNode, StructType, ValueType } from "schema-node-core";
 import { schemaView, _L } from "schema-node-vueview"
 import { onMounted, onUnmounted, reactive, ref } from "vue"
 
@@ -89,15 +90,15 @@ const form = ref<InstanceType<typeof ElForm>>()
 const activeTab = ref(0)
 
 const appNode = ref<AppNode | undefined>(undefined)
-const dataProvider = getAppDataProvider()
+const dataProvider = getAppSchemaProvider()
 const enableAppData = dataProvider ? true : false
 const manualWorkflows = ref<IAppInteractionWorkflow[]>([])
 
 // app target node
 const empty_guid = "00000000-0000-0000-0000-000000000000"
 const appTargetNode = ref<StructNode | undefined>(undefined)
-const useempty = () => appTargetNode.value!.getField("target")!.data = empty_guid
-const genguid = () => appTargetNode.value!.getField("target")!.data = generateGuid()
+const useempty = () => appTargetNode.value!.getAccessValue("target")!.setValue(empty_guid)
+const genguid = () => appTargetNode.value!.getAccessValue("target")!.setValue(generateGuid())
 
 const loading = ref(false)
 const saving = ref(false)
@@ -111,7 +112,7 @@ const issystemlevel = ref(false)
 const loadData = async () => {
   if (!appTargetNode.value) return
   try {
-    const target = appTargetNode.value.getField("target")!.rawData as string
+    const target = (appTargetNode.value.getAccessValue("target")! as DataNode).rawValue as string
     if (!issystemlevel.value && isNull(target)) return
     loading.value = true;
     appNode.value = undefined;
@@ -158,7 +159,7 @@ const saveData = async () => {
     await form.value?.validate()
     // if (!appNode.value.valid) return
 
-    const target = appTargetNode.value.getField("target")!.rawData as string
+    const target = appTargetNode.value.getAccessValue("target")!.rawValue as string
     if (!issystemlevel.value && isNull(target)) return
 
     saving.value = true
@@ -172,16 +173,15 @@ const saveData = async () => {
     }
 
     addAppTarget(props.app, target)
-    appTargetNode.value.getField("app")!.data = ""
+    appTargetNode.value.getAccessValue("app")!.setValue("")
     await new Promise(resolve => setTimeout(resolve, 100))
-    appTargetNode.value.getField("app")!.data = props.app
+    appTargetNode.value.getAccessValue("app")!.setValue(props.app)
   } catch (ex: any) {
     if (ex && ex.status === 403) {
       ElMessage.error(_L.value["frontend.view.nopermission"])
       return
     }
     ElMessage.error(_L.value["frontend.view.error"])
-    console.log(JSON.stringify(appNode.value.fullerror))
     return
   }
   finally {
@@ -197,7 +197,7 @@ const startWorkflow = async (name: string, data: any = undefined) => {
   if (!appTargetNode.value || !appNode.value) return
   showInteraction.value = false
   try {
-    const target = appTargetNode.value.getField("target")!.rawData as string
+    const target = appTargetNode.value.getAccessValue("target")!.rawValue as string
     if (isNull(target)) return
 
     const workflow = manualWorkflows.value.find(wf => wf.name === name)
@@ -205,12 +205,12 @@ const startWorkflow = async (name: string, data: any = undefined) => {
 
     const payloadType = workflow.nodes[0].payload
     if (isNull(data) && !isNull(payloadType)) {
-      const payloadSchema = await getSchema(payloadType) as INodeSchema
-      if (payloadSchema.type === SchemaType.Struct && payloadSchema.struct!.fields.length > 2) {
-        const dataField = payloadSchema.struct!.fields.find(f => f.name === "data")
+      const payload = await getNodeType(payloadType) as ValueType;
+      if (payload instanceof StructType && Array.from(payload.getFields()).length > 2) {
+        const dataField = payload.getField("data")
         if (dataField) {
           interactionWorkflow.value = workflow
-          interactionData.value = await getSchemaNode({ type: dataField.type }, {}) as StructNode
+          interactionData.value = dataField.type!.create({}) as StructNode
           showInteraction.value = true
           return
         }
@@ -244,7 +244,7 @@ const startWorkflow = async (name: string, data: any = undefined) => {
 const turnOffWorkflow = async (workflow: string) => {
   if (!appTargetNode.value || !appNode.value) return
   try {
-    const target = appTargetNode.value.getField("target")!.rawData as string
+    const target = appTargetNode.value.getAccessValue("target")!.rawValue as string
     if (isNull(target)) return
 
     startWorkflowing.value = true
@@ -274,24 +274,23 @@ onMounted(async () => {
     fields: [],
     schemaOnly: true
   })
-  showref.value = appNode.value?.refInputFields.length ? true : false
-  showoutput.value = appNode.value?.pushFields.length ? true : false
+  showref.value = Array.from(appNode.value!.viewFields).length ? true : false
+  showoutput.value = Array.from(appNode.value!.deriveFields).length ? true : false
   if (!enableAppData) return
 
-  issystemlevel.value = appNode.value?.policyScope === AppScopeType.SystemLevel
+  issystemlevel.value = appNode.value?.appType.scopeType === AppScopeType.SystemLevel
 
   // visible check
   statusWatcher.forEach(f => f())
   statusWatcher.length = 0
   appNode.value?.fields.forEach(f => {
     statusWatcher.push(f.subscribeState(() => {
-      invisibleFields[f.name] = f.invisible || false
+      invisibleFields[f.name!] = !f.visible
     }, true))
   })
 
-  appTargetNode.value = (await getSchemaNode({
-    type: "frontend.apptarget"
-  }, { allowApps: [props.app], app: props.app, target: "" })) as StructNode
+  appTargetNode.value = ((await getNodeType("frontend.apptarget")) as StructType)
+    .create({ allowApps: [props.app], app: props.app, target: "" }) as StructNode;
 })
 
 onUnmounted(() => {

@@ -95,7 +95,7 @@
           <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(namespaceNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
+              <schema-view :node="(namespaceNode as StructNode)" in-form="expandall" text="left"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -144,7 +144,7 @@
                 <schema-view :config="{
                   type: 'system.schema.type.any',
                   readonly: true
-                }" :value="type" plain-text="left"></schema-view>
+                }" :value="type" text="left"></schema-view>
               </li>
             </ul>
             <br />

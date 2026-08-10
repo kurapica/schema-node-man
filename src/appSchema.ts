@@ -1,4 +1,5 @@
-import { AppType as RunTimeAppType } from "schema-node-app";
+import { AppSchema, saveAppSchema, getCachedAppType, getAppSchemaName } from "schema-node-app";
+import { SchemaLoadState, isNull } from "schema-node-core";
 
 // reload schemas from storage
 export function reloadStorageAppSchemas() {
@@ -96,7 +97,7 @@ export function addAppTarget(app: string, target: string) {
 //#endregion
 
 //#region View
-
+/*
 import sourceappView from "./view/appSourceView.vue";
 import appInputView from "./view/appInputView.vue";
 import appsrcfldView from "./view/appSrcfldView.vue";
@@ -109,7 +110,6 @@ import forkKeyView from "./view/forkKeyView.vue";
 import { regSchemaTypeView } from "schema-node-vueview";
 import { AppSchema, getAppSchemaName, getCachedAppType, saveAppSchema } from "schema-node-app";
 import { isNull, SchemaLoadState } from "schema-node-core";
-import { AppType } from "vite";
 
 regSchemaTypeView("system.schema.domain.app", sourceappView);
 regSchemaTypeView("frontend.design.appinput", appInputView);
@@ -124,3 +124,4 @@ regSchemaTypeView(
 regSchemaTypeView("system.workflow.id", appWorkflowIdView);
 regSchemaTypeView("frontend.design.forkeys", forkKeyView);
 //#endregion
+*/

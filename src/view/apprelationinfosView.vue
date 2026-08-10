@@ -20,7 +20,7 @@
                     :key="elements[activeCol].guid"
                     :node="(elements[activeCol] as StructNode)"
                     in-form="expand" 
-                    plain-text="left">
+                    text="left">
                 </schema-view>
             </template>
         </el-main>

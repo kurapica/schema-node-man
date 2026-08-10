@@ -1,7 +1,7 @@
 <template>
     <section style="width: 100%;">
-        <schema-view :node="nocacheNode" in-form="nest" plain-text="left"></schema-view>
-        <schema-view :node="returnNode" in-form="nest" plain-text="left"></schema-view>
+        <schema-view :node="nocacheNode" in-form="nest" text="left"></schema-view>
+        <schema-view :node="returnNode" in-form="nest" text="left"></schema-view>
         
         <!-- Arguments -->
         <el-form-item :key="argsNode?.guid" :prop="argsNode?.access">
@@ -18,7 +18,7 @@
                         <schema-view v-if="argsNode.elements[i - 1]" 
                             :key="argsNode.elements[i - 1].guid" 
                             :node="argsNode.elements[i - 1]"
-                            in-form="expand" plain-text="left"
+                            in-form="expand" text="left"
                         ></schema-view>
                         <div v-if="!state.readonly" class="bottom clearfix">
                             <el-button type="primary" @click="argsNode.addRow(i)">{{ _L["frontend.view.new"] }}</el-button>
@@ -66,7 +66,7 @@
                         <schema-view v-if="expsNode.elements[i - 1]" 
                             :key="expsNode.elements[i - 1].guid" 
                             :node="expsNode.elements[i - 1]"
-                            in-form="expandall" plain-text="left" 
+                            in-form="expandall" text="left" 
                             no-add no-del style="width: 100%;"
                         ></schema-view>
                         <div v-if="!state.readonly" class="bottom clearfix">

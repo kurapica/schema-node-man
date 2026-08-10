@@ -35,7 +35,7 @@
         <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
           <template #default="scope">
-            <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{
+            <span v-if="scope.row.error" style="color:red">{{
               scope.row.name }}</span>
             <span v-else>{{ scope.row.name }}</span>
           </template>
@@ -100,10 +100,10 @@
       @closed="closeAppEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="appNode" ref="editorRef" :model="appNode.rawData" label-width="160" label-position="left"
+          <el-form v-if="appNode" ref="editorRef" :model="appNode.rawValue!" label-width="160" label-position="left"
             style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
+              <schema-view :node="(appNode as StructNode)" in-form="expandall" text="left"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -128,8 +128,7 @@
             header-align="left" :header-cell-style="tableHeaderCellStyle">
             <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
               <template #default="scope">
-                <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{
-                  scope.row.name }}</span>
+                <span v-if="scope.row.error" style="color:red">{{ scope.row.name }}</span>
                 <span v-else>{{ scope.row.name }}</span>
               </template>
             </el-table-column>
@@ -143,7 +142,7 @@
                 <schema-view v-model="scope.row.type" :config="{
                   type: 'system.schema.type.rule.value',
                   readonly: true
-                }" plain-text="left"></schema-view>
+                }" text="left"></schema-view>
               </template>
             </el-table-column>
             <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
@@ -193,10 +192,10 @@
       @closed="closeFieldEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawData" label-width="160"
+          <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appFieldNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
+              <schema-view :node="(appFieldNode as StructNode)" in-form="expandall" text="left"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -239,7 +238,7 @@
                 <schema-view v-model="scope.row.active" :config="{
                   type: NS_SYSTEM_BOOL,
                   readonly: true
-                }" plain-text="left"></schema-view>
+                }" text="left"></schema-view>
               </template>
             </el-table-column>
             <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="400">
@@ -283,10 +282,10 @@
       @closed="closeWorkflowEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawData" label-width="160"
+          <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appWorkflowNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
+              <schema-view :node="(appWorkflowNode as StructNode)" in-form="expandall" text="left"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -329,12 +328,12 @@ const tableHeaderCellStyle = {
   borderColor: 'var(--app-border)'
 }
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, isNull, StructNode, SchemaLoadState, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone } from 'schema-node-core'
+import { _LS, isNull, StructNode, SchemaLoadState, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppFieldSchema, AppSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, saveAppSchema } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getCachedAppType, getExportAppSchema, getSchemaFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema } from 'schema-node-app'
 
 //#region View
 
@@ -565,7 +564,7 @@ const handleFieldNew = async () => {
 const handleFieldEdit = async (row: any, readonly?: boolean) => {
   const appFieldSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_FIELD}.schema`) as StructType;
   appFieldNode.value = appFieldSchemaType.create(deepClone(row)) as StructNode;
-  if (readonly) appFieldNode.value.setPropertyValue(Readonly, true);
+  if (readonly) appFieldNode.value.setPropertyValue(ReadOnly, true);
 
   showAppFieldEditor.value = true
 
@@ -624,14 +623,15 @@ const moveFieldUp = async (row: any) => {
   const appType = await getAppType(currApp!)
   if (!appType) return;
 
-  const idx = appSchema.fields.findIndex(f => f.name === row.name)
-  if (idx <= 0) return
-  const temp = appSchema.fields[idx - 1]
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
+  const index = fields.value.findIndex(f => f.name === row.name);
+  if (index < 1) return;
+  const other = fields.value[index - 1].name;
+
+  if ((appType.loadState || 0) & SchemaLoadState.Service) {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
-        const res = provider.swapAppFieldSchema(appSchema.name, row.name, temp.name)
+        const res = provider.swapAppFieldSchema(appType.name, row.name, other)
         if (!res) {
           ElMessage.error(_L.value["frontend.view.error"])
           return
@@ -649,55 +649,45 @@ const moveFieldUp = async (row: any) => {
     }
   }
 
-  appSchema.fields[idx - 1] = appSchema.fields[idx]
-  appSchema.fields[idx] = temp
-  saveStorageAppSchema(appSchema)
-  fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  appType.swapField(row.name, other)
+  saveStorageAppSchema(appType.getSchema())
+  fields.value = Array.from(appType.getFields().map(f => f.getFieldSchema() as AppFieldSchema))
 }
 
 // save
 const confirmField = async () => {
-  const res = await fieldEditorRef.value?.validate()
-  if (!res || !appFieldNode.value?.valid) return
+  const res = await fieldEditorRef.value?.validate();
+  if (!res || !appFieldNode.value?.isValid) return;
 
-  if (!appFieldNode.value?.valid) return
-  const data = jsonClone(toRaw(appFieldNode.value.data))
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema) return
+  const data = appFieldNode.value.submitValue as AppFieldSchema;
+  const appType = await getAppType(currApp!);
+  if (!appType) return;
 
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
+  if ((appType.loadState || 0) & SchemaLoadState.Service) {
+    const provider = getSchemaServerProvider();
     if (provider) {
       try {
-        const res = await provider.saveAppFieldSchema(appSchema.name, data)
+        const res = await provider.saveAppFieldSchema(appType.name, data);
         if (!res) {
-          ElMessage.error(_L.value["frontend.view.error"])
-          return
+          ElMessage.error(_L.value["frontend.view.error"]);
+          return;
         }
       }
       catch (ex: any) {
         if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
+          ElMessage.error(_L.value["frontend.view.nopermission"]);
+          return;
         }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
+        ElMessage.error(_L.value["frontend.view.error"]);
+        console.error(ex);
+        return;
       }
     }
   }
 
-  if (!appSchema.fields) appSchema.fields = []
-  const idx = appSchema.fields.findIndex(f => f.name === data.name)
-  if (idx! >= 0) {
-    appSchema.fields[idx] = data
-  }
-  else {
-    appSchema.fields.push(data)
-  }
-
-  saveStorageAppSchema(appSchema)
-  fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  appType.saveField(data);
+  saveStorageAppSchema(appType.getSchema())
+  fields.value = Array.from(appType.getFields().map(f => f.getFieldSchema() as AppFieldSchema))
   closeFieldEditor()
   showAppFieldEditor.value = false
 }
@@ -708,7 +698,6 @@ const closeFieldEditor = () => {
   appFieldWatchHandler = []
   appFieldNode.value?.dispose()
   appFieldNode.value = undefined
-  appFieldWatchHandler = null
 
   // forece refresh
   refresh()
@@ -720,54 +709,72 @@ const closeFieldEditor = () => {
 
 //#region Workflows
 
-const showWorkflowList = ref(false)
-const workflows = ref<IAppWorkflowSchema[]>([])
+const showWorkflowList = ref(false);
+const workflows = ref<AppWorkflowSchema[]>([]);
 const showWorkflows = async (row: any) => {
-  currApp = row.name
-  const appSchema = await getAppSchema(row.name)
-  appTitle.value = _L.value(appSchema?.display) || appSchema?.name || ""
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+  currApp = getAppSchemaName(row);
+  const appType = (await getAppType(currApp!))!
+  appTitle.value = _L.value(appType.getProperty(Display)?.getValue<LocaleString>()) || appType?.name || ""
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
   showWorkflowList.value = true
 }
 
 //#region Workflow Edit
 
-const workflowEditorRef = ref<InstanceType<typeof ElForm>>()
-const showWorkflowEditor = ref(false)
-const appWorkflowNode = ref<StructNode | undefined>(undefined)
-const appWorkflowOper = ref("")
-let appWorkflowWatchHandler: Function | null = null
+const workflowEditorRef = ref<InstanceType<typeof ElForm>>();
+const showWorkflowEditor = ref(false);
+const appWorkflowNode = ref<StructNode | undefined>(undefined);
+const appWorkflowOper = ref("");
+let appWorkflowWatchHandler: Function[] = []
 
 // create
 const handleWorkflowNew = async () => {
-  appWorkflowNode.value = new StructNode({
-    type: "system.schema.def.app.workflow.schema",
-  }, { app: currApp! })
-  showWorkflowEditor.value = true
+  const appWorkflowSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_WORKFLOW}.schema`) as StructType;
+  appWorkflowNode.value = appWorkflowSchemaType.create({ app: currApp! }) as StructNode;
 
-  appWorkflowWatchHandler = appWorkflowNode.value.subscribe(() => {
-    appWorkflowOper.value = _L.value["frontend.view.new"] + " " + (_L.value(appWorkflowNode.value?.data.display) || appWorkflowNode.value?.data.name || "")
-  }, true)
+  const displayField = appWorkflowNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appWorkflowNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appWorkflowOper.value = _L.value["frontend.view.new"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
+  appWorkflowWatchHandler.push(displayField.subscribe(refreshOper));
+  appWorkflowWatchHandler.push(nameField.subscribe(refreshOper, true));
+  showWorkflowEditor.value = true
 }
 
 // update
 const handleWorkflowEdit = async (row: any, readonly?: boolean) => {
-  appWorkflowNode.value = new StructNode({
-    type: "system.schema.def.app.workflow.schema",
-    readonly
-  }, jsonClone(toRaw(row)))
+  const appWorkflowSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_WORKFLOW}.schema`) as StructType;
+  appWorkflowNode.value = appWorkflowSchemaType.create(deepClone(row)) as StructNode;
+  if (readonly) appWorkflowNode.value.setPropertyValue(ReadOnly, true);
+
   showWorkflowEditor.value = true
+
+  const displayField = appWorkflowNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appWorkflowNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appWorkflowOper.value = _L.value[readonly ? "frontend.view.view" : "frontend.view.edit"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
+  if (readonly) {
+    refreshOper();
+  }
+  else {
+    appWorkflowWatchHandler.push(displayField.subscribe(refreshOper));
+    appWorkflowWatchHandler.push(nameField.subscribe(refreshOper, true));
+  }
 }
 
 // delete
 const handleWorkflowDelete = async (row: any) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.workflows) return
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
+  const appType = await getAppType(currApp!)
+  if (!appType) return
+  if ((appType.loadState || 0) & SchemaLoadState.Service) {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
-        const res = provider.deleteAppWorkflowSchema(appSchema.name, row.name)
+        const res = provider.deleteAppWorkflowSchema(appType.name, row.name)
         if (!res) {
           ElMessage.error(_L.value["frontend.view.error"])
           return
@@ -784,84 +791,72 @@ const handleWorkflowDelete = async (row: any) => {
       }
     }
   }
-  appSchema.workflows = appSchema.workflows.filter(w => w.name !== row.name)
-  saveStorageAppSchema(appSchema)
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+  appType.removeWorkflow(row.name)
+  saveStorageAppSchema(appType.getSchema())
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
 }
 
 // save
 const confirmWorkflow = async () => {
-  const res = await workflowEditorRef.value?.validate()
-  if (!res || !appWorkflowNode.value?.valid) {
-    ElMessage.error(appWorkflowNode.value?.error)
-    return
+  const res = await workflowEditorRef.value?.validate();
+  if (!res || !appWorkflowNode.value?.isValid) {
+    ElMessage.error(appWorkflowNode.value?.error);
+    return;
   }
-  if (!appWorkflowNode.value?.valid) return
-  const data = jsonClone(toRaw(appWorkflowNode.value.data))
-  console.log("workflow data:", data)
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema) return
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
+  const data = appWorkflowNode.value.submitValue as AppWorkflowSchema;
+  const appType = await getAppType(currApp!)
+  if (!appType) return
+  if ((appType.loadState || 0) & SchemaLoadState.Service) {
+    const provider = getSchemaServerProvider();
     if (provider) {
       try {
         // save workflow schema
-        if (data.name && data.name !== appSchema.name) {
-          const res = await provider.saveAppWorkflowSchema(appSchema.name, data)
-          if (!res) {
-            ElMessage.error(_L.value["frontend.view.error"])
-            return
-          }
+        const res = await provider.saveAppWorkflowSchema(appType.name, data);
+        if (!res) {
+          ElMessage.error(_L.value["frontend.view.error"]);
+          return;
         }
       }
       catch (ex: any) {
         if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
+          ElMessage.error(_L.value["frontend.view.nopermission"]);
+          return;
         }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
+        ElMessage.error(_L.value["frontend.view.error"]);
+        console.error(ex);
+        return;
       }
     }
   }
-  if (!appSchema.workflows) appSchema.workflows = []
-  const idx = appSchema.workflows.findIndex(w => w.name === data.name)
-  if (idx! >= 0) {
-    appSchema.workflows[idx] = data
-  }
-  else {
-    appSchema.workflows.push(data)
-  }
-  saveStorageAppSchema(appSchema)
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+
+  appType.saveWorkflow(data);
+  saveStorageAppSchema(appType.getSchema());
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema));
   closeWorkflowEditor()
   showWorkflowEditor.value = false
 }
 
 // close
 const closeWorkflowEditor = () => {
-  if (appWorkflowWatchHandler) appWorkflowWatchHandler()
-  appWorkflowNode.value?.dispose()
-  appWorkflowNode.value = undefined
-  appWorkflowWatchHandler = null
+  appWorkflowWatchHandler.forEach(h => h());
+  appWorkflowWatchHandler = [];
+  appWorkflowNode.value?.dispose();
+  appWorkflowNode.value = undefined;
 }
 
 // toggle
 const toggleWorkflow = async (row: any, active: boolean) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.workflows) return
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
+  const appType = await getAppType(currApp!)
+  if (!appType) return
+  if ((appType.loadState || 0) & SchemaLoadState.Service) {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
         // toggle workflow schema
-        if (row.name && row.name !== appSchema.name) {
-          const res = provider.toggleAppWorkflowSchema(appSchema.name, row.name, active)
-          if (!res) {
-            ElMessage.error(_L.value["frontend.view.error"])
-            return
-          }
+        const res = provider.toggleAppWorkflowSchema(appType.name, row.name, active)
+        if (!res) {
+          ElMessage.error(_L.value["frontend.view.error"])
+          return
         }
       }
       catch (ex: any) {
@@ -875,11 +870,12 @@ const toggleWorkflow = async (row: any, active: boolean) => {
       }
     }
   }
-  const idx = appSchema.workflows.findIndex(w => w.name === row.name)
-  if (idx! >= 0)
-    appSchema.workflows[idx].active = active
-  saveStorageAppSchema(appSchema)
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+  const data = appType.getWorkflow(row.name)?.getWorkflowSchema();
+  if (!data) return
+  data.active = active;
+  appType.saveWorkflow(data);
+  saveStorageAppSchema(appType.getSchema())
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
 }
 
 //#endregion
@@ -898,106 +894,107 @@ const tryit = () => {
 
 //#region Download
 
-const downloading = ref(false)
-const appTableRef = ref<any>()
-const schemaFormats = ref<string[]>([])
-const selectedFormat = ref<string>('')
-const downloadFromServer = ref(false)
-const APP_SCHEMA_DOWNLOAD_FORMAT_KEY = "schema_man_app_download_format"
-let selections: string[] = []
+const downloading = ref(false);
+const appTableRef = ref<any>();
+const schemaFormats = ref<string[]>([]);
+const selectedFormat = ref<string>('');
+const downloadFromServer = ref(false);
+const APP_SCHEMA_DOWNLOAD_FORMAT_KEY = "schema_man_app_download_format";
+let selections: string[] = [];
 
 const startDownload = () => {
-  selections = []
-  appTableRef.value?.clearSelection?.()
+  selections = [];
+  appTableRef.value?.clearSelection?.();
 
-  const provider = getSchemaServerProvider()
-  downloadFromServer.value = !!provider
+  const provider = getSchemaServerProvider();
+  downloadFromServer.value = !!provider;
   if (provider) {
-    schemaFormats.value = getSchemaFormats()
-    const savedFormat = localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] || ''
-    selectedFormat.value = schemaFormats.value.includes(savedFormat) ? savedFormat : (schemaFormats.value[0] || '')
+    schemaFormats.value = getSchemaFormats();
+    const savedFormat = localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] || '';
+    selectedFormat.value = schemaFormats.value.includes(savedFormat) ? savedFormat : (schemaFormats.value[0] || '');
   }
   else {
-    schemaFormats.value = []
-    selectedFormat.value = ''
+    schemaFormats.value = [];
+    selectedFormat.value = '';
   }
 
-  downloading.value = true
+  downloading.value = true;
 }
 
 const handleSelection = (val: any[]) => {
-  const selectedRows = val || []
+  const selectedRows = val || [];
   if (!selectedRows.length) {
-    selections = []
+    selections = [];
     return
   }
 
-  const row = selectedRows[selectedRows.length - 1]
+  const row = selectedRows[selectedRows.length - 1];
   if (selectedRows.length > 1 && appTableRef.value) {
-    appTableRef.value.clearSelection()
-    appTableRef.value.toggleRowSelection(row, true)
+    appTableRef.value.clearSelection();
+    appTableRef.value.toggleRowSelection(row, true);
   }
-  selections = [row.name]
+  selections = [row.name];
 }
 
 const download = async () => {
   if (!selections.length) {
-    ElMessage.error(_L.value["frontend.view.error"])
-    return
+    ElMessage.error(_L.value["frontend.view.error"]);
+    return;
   }
 
-  const appName = selections[0]
-  const provider = getSchemaServerProvider()
+  const appName = selections[0];
+  const provider = getSchemaServerProvider();
 
   if (provider && downloadFromServer.value) {
     if (!selectedFormat.value) {
-      ElMessage.error(_L.value["frontend.view.error"])
-      return
+      ElMessage.error(_L.value["frontend.view.error"]);
+      return;
     }
 
     try {
-      await provider.loadAppSchema(appName, true, selectedFormat.value)
-      downloading.value = false
+      await provider.getAppSchema(appName, true, selectedFormat.value);
+      downloading.value = false;
     }
     catch (ex: any) {
       if (ex && ex.status === 403) {
-        ElMessage.error(_L.value["frontend.view.nopermission"])
-        return
+        ElMessage.error(_L.value["frontend.view.nopermission"]);
+        return;
       }
-      ElMessage.error(_L.value["frontend.view.error"])
-      console.error(ex)
+      ElMessage.error(_L.value["frontend.view.error"]);
+      console.error(ex);
+      return;
     }
-    return
+    return;
   }
 
-  const name = `${appName}.json`
-  const content = JSON.stringify(selections.map(getAppCachedSchema).map(s => appSchemaToJson(s!)), null, 2)
+  const name = `${appName}.json`;
+  const content = JSON.stringify(selections.map(s => getExportAppSchema(s!)), null, 2);
 
   // download
-  const blob = new Blob([content], { type: 'application/octet-stream' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+  const blob = new Blob([content], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 
-  downloading.value = false
+  downloading.value = false;
 }
 
 watch(selectedFormat, (val) => {
-  if (!val) return
-  localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] = val
+  if (!val) return;
+  localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] = val;
 })
 
 const uploadSchema = (file: File) => {
   file.text().then(text => {
-    const data = JSON.parse(text)
+    const data = JSON.parse(text);
     if (Array.isArray(data)) {
-      registerAppSchema(data, SchemaLoadState.Custom)
-      saveAllCustomAppSchemaToStroage()
-      return refresh()
+      saveAppSchema(data);
+      saveAllCustomAppSchemaToStroage();
+      return refresh();
     }
   })
   return false

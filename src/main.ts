@@ -8,11 +8,12 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import 'element-plus/dist/index.css'
 import { routes } from './routes'
 import Markdown from './components/markdown.vue'
-import "./auth"
+import "./utility/locale"
+import "./utility/auth"
 import { initSchemaRuntime, setLanguage } from 'schema-node-core'
 import { reloadStorageSchemas } from './schema'
 import { reloadStorageAppSchemas } from './appSchema'
-import { setSchemaSite } from './schemaServerProvider'
+import { setSchemaSite } from './schema/provider/schemaServerProvider'
 
 const app = createApp(App)
 

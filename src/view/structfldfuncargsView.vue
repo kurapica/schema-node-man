@@ -1,5 +1,5 @@
 <template>
-  <table-view :node="argsNode" no-add no-del :in-form="SchemaNodeFormType.ExpandAll" plain-text="left"></table-view>
+  <table-view :node="argsNode" no-add no-del :in-form="SchemaNodeFormType.ExpandAll" text="left"></table-view>
 </template>
 
 <script setup lang="ts">

@@ -2,7 +2,7 @@
     <table-view
         :node="node"
         :in-form="inForm"
-        :plain-text="plainText"
+        :text="plainText"
         operWidth="200"
         v-bind="$attrs">
         <template #operator="{ row, index }">
@@ -25,7 +25,7 @@
                     :key="subListNode.guid"
                     :node="(subListNode as ArrayNode)"
                     :in-form="inForm"
-                    :plain-text="plainText"
+                    :text="plainText"
                     operWidth="200">
                     <template #operator="{ row, index }">
                         <template v-if="!readonly">

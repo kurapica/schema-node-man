@@ -9,7 +9,7 @@
                     <schema-view :config="{
                         type: 'system.schema.type.any',
                         readonly: true
-                    }" :value="scope.row.type" plain-text="left"></schema-view>
+                    }" :value="scope.row.type" text="left"></schema-view>
                 </template>
             </el-table-column>
             <el-table-column prop="display" :label="_L['system.schema.def.app.field.schema.display']">

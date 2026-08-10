@@ -78,7 +78,7 @@
                                 :key="namespaceNode.guid"
                                 :node="(namespaceNode as StructNode)"
                                 in-form="expandall"
-                                plain-text="left"
+                                text="left"
                             ></schema-view>
                         </div>
                     </el-form>

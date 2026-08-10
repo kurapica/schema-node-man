@@ -31,7 +31,7 @@
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <schema-view v-if="workflowNode" :key="workflowNode.guid" :node="workflowNode.node as any"
-                        in-form="expandall" :plain-text="plainText" no-add no-del v-bind="$attrs"></schema-view>
+                        in-form="expandall" :text="plainText" no-add no-del v-bind="$attrs"></schema-view>
                 </el-main>
                 <el-footer>
                     <el-popconfirm v-if="!workflowNode?.children?.length && !state.readonly"

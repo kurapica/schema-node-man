@@ -17,7 +17,7 @@
             :name="i"></el-tab-pane>
         </el-tabs>
         <schema-view v-if="activeCol >= 0 && activeCol < elements.length" :key="elements[activeCol].guid"
-          :node="(elements[activeCol] as StructNode)" in-form="expand" plain-text="left">
+          :node="(elements[activeCol] as StructNode)" in-form="expand" text="left">
         </schema-view>
       </template>
     </el-main>

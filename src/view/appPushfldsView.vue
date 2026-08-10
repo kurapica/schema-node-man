@@ -3,7 +3,7 @@
         <el-table-column align="left" prop="label" :label="_L['frontend.design.appfieldvalarg']" min-width="120" />
         <el-table-column align="left" :label="_L['system.schema.appfield']" min-width="120">
             <template #default="scope">
-                <schema-view :node="scope.row.node" :plain-text="plainText"></schema-view>
+                <schema-view :node="scope.row.node" :text="plainText"></schema-view>
             </template>
         </el-table-column>
     </el-table>

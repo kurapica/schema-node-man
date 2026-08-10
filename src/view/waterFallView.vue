@@ -6,7 +6,7 @@
                 :key="node.elements[i-1].guid"
                 :node="node.elements[i-1]"
                 in-form="expandall"
-                :plain-text="plainText"
+                :text="plainText"
                 v-bind="$attrs"
             ></schema-view>
         </section>
