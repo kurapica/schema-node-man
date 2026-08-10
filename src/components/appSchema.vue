@@ -329,12 +329,12 @@ const tableHeaderCellStyle = {
   borderColor: 'var(--app-border)'
 }
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, isNull, StructNode, SchemaLoadState, NS_SYSTEM_BOOL, ArrayProperty, getNodeType, StructType, StringNode, LocaleString } from 'schema-node-core'
+import { _LS, isNull, StructNode, SchemaLoadState, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppSchema, getAppSchemaName, getAppType, NS_SYSTEM_SCHEMA_APP } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, saveAppSchema } from 'schema-node-app'
 
 //#region View
 
@@ -446,35 +446,34 @@ const handleDelete = async (row: any) => {
   if (!appType) return;
 
   if ((appType.loadState || 0) & SchemaLoadState.Service) {
-    const provider = getSchemaServerProvider()
+    const provider = getSchemaServerProvider();
     if (provider) {
-      const res = provider.deleteAppSchema(row.name)
+      const res = provider.deleteAppSchema(row.name);
       if (!res) {
-        ElMessage.error(_L.value["frontend.view.cantdelapp"])
-        return
+        ElMessage.error(_L.value["frontend.view.cantdelapp"]);
+        return;
       }
     }
   }
-  removeStorageAppSchema(getAppSchemaName(row))
-  appType.container?.removeSubAppSchema(row.name)
-  return refresh()
+  removeStorageAppSchema(getAppSchemaName(row));
+  appType.container?.removeSubAppSchema(row.name);
+  return refresh();
 }
 
 // save
 const confirmApp = async () => {
-  const res = await editorRef.value?.validate()
-  if (!res || !appNode.value?.isValid) return
+  const res = await editorRef.value?.validate();
+  if (!res || !appNode.value?.isValid) return;///
 
-  if (!appNode.value?.valid) return
-  const data = jsonClone(toRaw(appNode.value.data))
-  const schema = getAppCachedSchema(data.name)
+  const data = appNode.value.submitValue as AppSchema;
+  const appType = await getAppType(getAppSchemaName(data));
 
-  if (isNewApp && (schema || await getAppSchema(data.name))) {
+  if (isNewApp && appType) {
     ElMessage.error(_L.value["frontend.view.appnameexists"])
     return
   }
 
-  if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server)) {
+  if (!appType || ((appType.loadState || 0) & SchemaLoadState.Service)) {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
@@ -483,7 +482,7 @@ const confirmApp = async () => {
           ElMessage.error(_L.value["frontend.view.error"])
           return
         }
-        data.loadState = (data.loadState || 0) | SchemaLoadState.Server
+        data.loadState = (data.loadState || 0) | SchemaLoadState.Service
       }
       catch (ex: any) {
         if (ex && ex.status === 403) {
@@ -497,7 +496,7 @@ const confirmApp = async () => {
     }
   }
 
-  registerAppSchema([data], data.loadState)
+  saveAppSchema(data)
   saveStorageAppSchema(data)
   closeAppEditor()
   showAppEditor.value = false
@@ -517,23 +516,23 @@ const closeAppEditor = () => {
 //#region Field 
 
 const showFieldList = ref(false)
-const fields = ref<IAppFieldSchema[]>([])
+const fields = ref<AppFieldSchema[]>([])
 const appTitle = ref("")
 let currApp: string | null = null
 
 const showFields = async (row: any) => {
-  currApp = row.name
-  const appSchema = await getAppSchema(row.name)
-  appTitle.value = _L.value(appSchema?.display) || appSchema?.name || ""
-  fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  currApp = getAppSchemaName(row);
+  const appType = await getAppType(getAppSchemaName(row));
+  appTitle.value = _L.value(appType?.getProperty(Display)?.getValue<LocaleString>() ?? appType?.name ?? "");
+  fields.value = Array.from(appType?.getFields().map(f => f.getFieldSchema() as AppFieldSchema) ?? []);
   showFieldList.value = true
 }
 
-const fieldRowClassName = (data: any) => {
+const fieldRowClassName = (data: { row: AppFieldSchema }) => {
   const { row } = data
-  if (row.disable) return 'disable-row'
-  if (row.func) return 'push-row'
-  if (row.frontend) return 'frontend-row'
+  if (getPropertyValue(row, Disable)) return 'disable-row'
+  if (getPropertyValue(row, DataDerive)) return 'push-row'
+  if (!getPropertyValue(row, EnableStorage)) return 'frontend-row'
   return '';
 }
 
@@ -544,48 +543,58 @@ const showAppFieldEditor = ref(false)
 const appFieldNode = ref<StructNode | undefined>(undefined)
 const appFieldOper = ref("")
 
-let appFieldWatchHandler: Function | null = null
+let appFieldWatchHandler: Function[] = []
 
 // create
 const handleFieldNew = async () => {
-  appFieldNode.value = new StructNode({
-    type: "system.schema.def.app.field.schema",
-  }, { app: currApp! })
-  showAppFieldEditor.value = true
+  const appFieldSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_FIELD}.schema`) as StructType;
+  appFieldNode.value = appFieldSchemaType.create({ app: currApp! } as AppFieldSchema) as StructNode;
 
-  appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-    appFieldOper.value = _L.value["frontend.view.new"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
-  }, true)
+  const displayField = appFieldNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appFieldNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appFieldOper.value = _L.value["frontend.view.new"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
+  appFieldWatchHandler.push(displayField.subscribe(refreshOper));
+  appFieldWatchHandler.push(nameField.subscribe(refreshOper, true));
+  showAppFieldEditor.value = true
 }
 
 // update
 const handleFieldEdit = async (row: any, readonly?: boolean) => {
-  appFieldNode.value = new StructNode({
-    type: "system.schema.def.app.field.schema",
-    readonly
-  }, jsonClone(toRaw(row)))
+  const appFieldSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_FIELD}.schema`) as StructType;
+  appFieldNode.value = appFieldSchemaType.create(deepClone(row)) as StructNode;
+  if (readonly) appFieldNode.value.setPropertyValue(Readonly, true);
+
   showAppFieldEditor.value = true
 
+  const displayField = appFieldNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appFieldNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appFieldOper.value = _L.value[readonly ? "frontend.view.view" : "frontend.view.edit"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
   if (readonly) {
-    appFieldOper.value = _L.value["frontend.view.view"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
+    refreshOper();
   }
   else {
-    appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-      appFieldOper.value = _L.value["frontend.view.edit"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
-    }, true)
+    appFieldWatchHandler.push(displayField.subscribe(refreshOper));
+    appFieldWatchHandler.push(nameField.subscribe(refreshOper, true));
   }
 }
 
 // delete
 const handleFieldDelete = async (row: any) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.fields) return
+  const appType = await getAppType(currApp!)
+  const field = appType?.getField(row.name)
+  if (!field) return
 
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
+  if ((appType!.loadState || 0) & SchemaLoadState.Service) {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
-        const res = provider.deleteAppFieldSchema(appSchema.name, row.name)
+        const res = provider.deleteAppFieldSchema(appType!.name, row.name)
         if (!res) {
           ElMessage.error(_L.value["frontend.view.error"])
           return
@@ -603,18 +612,17 @@ const handleFieldDelete = async (row: any) => {
     }
   }
 
-  const idx = appSchema.fields.findIndex(f => f.name === row.name)
-  if (idx! >= 0) {
-    appSchema.fields.splice(idx, 1)
-    saveStorageAppSchema(appSchema)
-    fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  if (appType) {
+    appType.removeField(field.name);
+    saveStorageAppSchema(appType.getSchema());
+    fields.value = Array.from(appType.getFields().map(f => f.getFieldSchema() as AppFieldSchema));
   }
 }
 
 // move up
 const moveFieldUp = async (row: any) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.fields) return
+  const appType = await getAppType(currApp!)
+  if (!appType) return;
 
   const idx = appSchema.fields.findIndex(f => f.name === row.name)
   if (idx <= 0) return
@@ -696,7 +704,8 @@ const confirmField = async () => {
 
 // close
 const closeFieldEditor = () => {
-  if (appFieldWatchHandler) appFieldWatchHandler()
+  appFieldWatchHandler.forEach(handler => handler())
+  appFieldWatchHandler = []
   appFieldNode.value?.dispose()
   appFieldNode.value = undefined
   appFieldWatchHandler = null
