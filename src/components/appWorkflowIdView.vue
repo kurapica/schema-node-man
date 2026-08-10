@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type AnySchemaNode, _L, getAppSchema, isNull, isSchemaCanBeUseAs, ScalarNode, StructNode, type IAppSchema, getSchema, WorkflowMode } from 'schema-node'
+import { type AnySchemaNode, _L, getAppSchema, isNull, isSchemaCanBeUseAs, ScalarNode, StructNode, type IAppSchema, getSchema, WorkflowMode } from 'schema-node-app'
 import { computed, onMounted, onUnmounted, reactive, toRaw } from 'vue'
 
 // Define props

@@ -35,8 +35,7 @@
         <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
           <template #default="scope">
-            <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{
-              scope.row.name }}</span>
+            <span v-if="scope.row.error" style="color:red">{{ scope.row.name }}</span>
             <span v-else>{{ scope.row.name }}</span>
           </template>
         </el-table-column>
@@ -59,19 +58,18 @@
             <span v-else>{{ _L["frontend.view.oper"] }}</span>
           </template>
           <template #default="scope">
-            <el-button v-if="scope.row.type === SchemaType.Namespace"
-              :type="(scope.row.hasSchemas || scope.row.schemas?.length) ? 'success' : 'info'"
+            <el-button v-if="scope.row.kind === SCHEMA_KIND_NAMESPACE" type="info"
               @click="choose(scope.row)">{{ _L["frontend.view.down"] }}
             </el-button>
             <el-button v-else type="success" @click="handleEdit(scope.row, true)">
               {{ _L["frontend.view.view"] }}
             </el-button>
             <el-button type="warning"
-              v-if="!((scope.row.loadState || 0) & SchemaLoadState.System) || scope.row.type === SchemaType.Namespace"
+              v-if="!((scope.row.loadState || 0) & SchemaLoadState.System) || scope.row.kind === SCHEMA_KIND_NAMESPACE"
               @click="handleEdit(scope.row, false)">
               {{ _L["frontend.view.edit"] }}
             </el-button>
-            <el-popconfirm v-if="isSchemaDeletable(scope.row.name)" :title="_L['frontend.view.confirmdelete']"
+            <el-popconfirm v-if="isSchemaDeletable(scope.row)" :title="_L['frontend.view.confirmdelete']"
               :confirm-button-text="_L['YES']" :cancel-button-text="_L['NO']" :icon="Delete"
               @confirm="handleDelete(scope.row)">
               <template #reference>
@@ -94,7 +92,7 @@
       @closed="closeNamespaceEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawData" label-width="160"
+          <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
               <schema-view :node="(namespaceNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
@@ -104,10 +102,10 @@
         <el-footer>
           <br />
           <template v-if="namespaceNode?.readonly">
-            <el-button v-if="tryitTypes.includes(namespaceNode.rawData.type)" type="primary" @click="tryit">{{
+            <el-button v-if="tryitTypes.includes((namespaceNode.rawValue! as any).kind)" type="primary" @click="tryit">{{
               _L["frontend.view.tryit"] }}</el-button>
             <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button>
-            <el-button v-if="currRow?.usedBy?.length || currRow?.usedByApp?.length" @click="showViewRef = true"
+            <el-button v-if="currRow?.usedBy?.length" @click="showViewRef = true"
               style="float:right" type="info">{{ _L["frontend.view.viewref"] }}</el-button>
             <el-button type="warning" @click="copySchema">{{ _L["frontend.view.copyschema"] }}</el-button>
           </template>
@@ -121,7 +119,7 @@
 
     <!-- try it -->
     <el-drawer v-model="showtryit"
-      :title="_L['frontend.nav.tryit'] + ' - ' + (_L(namespaceNode?.data.display) || namespaceNode?.data.name)"
+      :title="_L['frontend.nav.tryit'] + ' - ' + (_L((namespaceNode?.rawValue as any)?.display) || getNodeSchemaName(namespaceNode?.rawValue as NodeSchema))"
       direction="rtl" size="100%" append-to-body destroy-on-close>
       <el-container class="main" style="height: 80vh;">
         <el-main>
@@ -151,19 +149,6 @@
             </ul>
             <br />
           </template>
-
-          <template v-if="currRow?.usedByApp?.length">
-            <h3>{{ _L["frontend.apptarget.app"] }}</h3>
-            <hr />
-            <ul>
-              <li v-for="app in currRow?.usedByApp" :key="app">
-                <schema-view :config="{
-                  type: 'system.schema.app',
-                  readonly: true
-                }" :value="app" plain-text="left"></schema-view>
-              </li>
-            </ul>
-          </template>
         </el-main>
         <el-footer>
           <br />
@@ -177,34 +162,38 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, getSchema, type INodeSchema, SchemaNodeStatus, isSchemaDeletable, registerSchema, SchemaType, StructNode, removeSchema, isNull, SchemaLoadState, getCachedSchema, jsonClone, EnumNode } from 'schema-node'
+import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
-import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema, schemaToJson } from '../schema'
-import { getSchemaServerProvider } from '../schemaServerProvider'
+import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'
+import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
 import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
+import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW } from 'schema-node-app'
 
-const schemas = ref<INodeSchema[]>([])
+const schemas = ref<NodeSchema[]>([]);
 const tableHeaderCellStyle = {
   backgroundColor: 'var(--app-surface-muted)',
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
-}
+};
 
-const schemaTypeOrder = {
-  [SchemaType.Namespace]: 1,
-  [SchemaType.Scalar]: 2,
-  [SchemaType.Enum]: 3,
-  [SchemaType.Struct]: 4,
-  [SchemaType.Array]: 5,
-  [SchemaType.Func]: 6,
-  [SchemaType.Json]: 7,
-  [SchemaType.Event]: 8,
-  [SchemaType.Workflow]: 9,
-  [SchemaType.Policy]: 10
-}
+const schemaTypeOrder: Record<string, number> = {
+  [SCHEMA_KIND_OBJECT]: 1,
+  [SCHEMA_KIND_NAMESPACE]:2,
+  [SCHEMA_KIND_BOOL]: 3,
+  [SCHEMA_KIND_INT]: 4,
+  [SCHEMA_KIND_DECIMAL]: 5,
+  [SCHEMA_KIND_STRING]: 6,
+  [SCHEMA_KIND_DATE]: 7,
+  [SCHEMA_KIND_ENUM]: 8,
+  [SCHEMA_KIND_STRUCT]: 9,
+  [SCHEMA_KIND_ARRAY]: 10,
+  [SCHEMA_KIND_FUNCTION]: 11,
+  [SCHEMA_KIND_EVENT]: 12,
+  [SCHEMA_KIND_WORKFLOW]: 13,
+};
 
-const tryitTypes = [SchemaType.Struct, SchemaType.Array]
+const tryitTypes = [SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY];
 
 const state = reactive({
   namespace: "",
@@ -227,15 +216,12 @@ if (localStorage["schema_man_search"]) {
 }
 
 const reset = () => {
-  if (!isNull(state.keyword)) {
+  if (!isNull(state.keyword)) 
     state.keyword = ""
-  }
-  else if (!isNull(state.type)) {
+  else if (!isNull(state.type))
     state.type = null
-  }
-  else {
+  else
     state.namespace = ""
-  }
 }
 
 const goback = () => {
@@ -243,26 +229,20 @@ const goback = () => {
   state.namespace = paths.slice(0, paths.length - 1).join(".")
 }
 
-const choose = (schema: INodeSchema) => {
-  state.namespace = schema.name
+const choose = (schema: NodeSchema) => {
+  state.namespace = getNodeSchemaName(schema)
 }
 
 const refresh = async () => {
   localStorage["schema_man_search"] = JSON.stringify(state)
-  const schema = await getSchema(state.namespace || "")
-  if (schema?.type === SchemaType.Namespace) {
-    let temp = [...schema.schemas || []]
-    temp = temp.filter(p => ((p.loadState || 0) & SchemaLoadState.Frontend) === 0) // hide frontend only schemas
-    temp = temp.filter(p => !p.name.includes("<"))
-    if (state.type) {
-      temp = temp.filter(p => p.type === state.type)
-    }
-    if (state.keyword) {
-      temp = temp.filter(p => p.name.match(state.keyword) || p.display && `${p.display}`.match(state.keyword))
-    }
+  const nodeType = await getNodeType(state.namespace || "")
+  if (nodeType instanceof NamespaceType) {
+    let temp: NodeSchema[] = Array.from(nodeType.getSubNodeSchemas().filter(p => !p.name.includes("<")));
+    if (state.type) temp = temp.filter(p => p.kind === state.type)
+    if (state.keyword) temp = temp.filter(p => p.name.match(state.keyword) || matchKeyworkInLocaleString(state.keyword, getPropertyValue(p, Display)))
     temp.sort((a, b) => {
-      if (schemaTypeOrder[a.type] < schemaTypeOrder[b.type]) return -1
-      if (schemaTypeOrder[a.type] < schemaTypeOrder[b.type]) return 1
+      if (schemaTypeOrder[a.kind] < schemaTypeOrder[b.kind]) return -1
+      if (schemaTypeOrder[a.kind] < schemaTypeOrder[b.kind]) return 1
       return a.name < b.name ? -1 : 1
     })
     schemas.value = temp
@@ -270,6 +250,8 @@ const refresh = async () => {
 }
 
 watch(state, refresh, { immediate: true })
+
+const isSchemaDeletable = (schema: NodeSchema) => !((schema.loadState || 0) & SchemaLoadState.System) && !getCachedNodeType(getNodeSchemaName(schema))?.isUsed
 
 //#region Schema Edit
 
@@ -280,55 +262,72 @@ const operation = ref("")
 const showViewRef = ref(false)
 let isNewType = false
 
-let namesapceWatchHandler: Function | null = null
+const namesapceWatchHandler: Function[] = []
 
 // create
-const handleNew = async () => {
+const handleNew = async (copySchema?: NodeSchema) => {
   isNewType = true
   localStorage["schema_new_namespace"] = state.namespace
 
-  namespaceNode.value = new StructNode({
-    type: "system.schema.def.nodeschema",
-  }, {})
-  const typeField = namespaceNode.value.getField("type") as EnumNode
-  typeField.rule.blackList = [SchemaType.Json, SchemaType.Event, SchemaType.Workflow]
+  const nodeSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.schema`) as StructType;
+  namespaceNode.value = nodeSchemaType.create(copySchema ?? {}) as StructNode
+
+  const typeField = namespaceNode.value.getAccessValue("kind") as EnumNode
+  typeField.setPropertyValue(BlackList, [SCHEMA_KIND_OBJECT, SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW]) // TODO: temporary
   showNamespaceEditor.value = true
 
-  namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-    operation.value = _L.value["frontend.view.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
-  }, true)
+  const displayField = namespaceNode.value.getAccessValue("display") as StructNode
+  const namespaceField = namespaceNode.value.getAccessValue("namespace") as ScalarNode
+  const nameField = namespaceNode.value.getAccessValue("name") as ScalarNode
+
+  const refreshOperation = () => {
+    operation.value = _L.value["frontend.view.new"] + " " + _L.value(displayField.value as LocaleString ?? getNodeSchemaName(namespaceNode.value?.rawValue as NodeSchema) ?? "")
+  }
+
+  namesapceWatchHandler.push(displayField.subscribe(refreshOperation));
+  namesapceWatchHandler.push(namespaceField.subscribe(refreshOperation));
+  namesapceWatchHandler.push(nameField.subscribe(refreshOperation, true));
 }
 
 // update
-const currRow = ref<INodeSchema | null>(null)
+const currRow = ref<NodeSchema | null>(null)
 const handleEdit = async (row: any, readonly?: boolean) => {
   isNewType = false
   currRow.value = row
-  const schema = await getSchema(row.name)
+  const schema = (await getNodeType(getNodeSchemaName(row)))?.getNodeSchema();
 
-  namespaceNode.value = new StructNode({
-    type: "system.schema.def.nodeschema",
-    readonly
-  }, jsonClone(schema))
+  const nodeSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.schema`) as StructType;
+  namespaceNode.value = nodeSchemaType.create(schema) as StructNode;
+  if (readonly) namespaceNode.value.setPropertyValue(ReadOnly, true);
   showNamespaceEditor.value = true
 
+  const displayField = namespaceNode.value.getAccessValue("display") as StructNode
+  const namespaceField = namespaceNode.value.getAccessValue("namespace") as ScalarNode
+  const nameField = namespaceNode.value.getAccessValue("name") as ScalarNode
+
+  const refreshOperation = () => {
+    operation.value = _L.value[readonly ? "frontend.view.view" : "frontend.view.edit"] + " " + _L.value(displayField.value as LocaleString ?? getNodeSchemaName(namespaceNode.value?.rawValue as NodeSchema) ?? "")
+  }
+  
   if (readonly) {
-    operation.value = _L.value["frontend.view.view"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
+    refreshOperation()
   }
   else {
-    namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-      operation.value = _L.value["frontend.view.edit"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
-    }, true)
+    namesapceWatchHandler.push(displayField.subscribe(refreshOperation));
+    namesapceWatchHandler.push(namespaceField.subscribe(refreshOperation, true));
+    namesapceWatchHandler.push(nameField.subscribe(refreshOperation, true));
   }
 }
 
 // delete
 const handleDelete = async (row: any) => {
-  if (!isSchemaDeletable(row.name)) {
+  const nodeType = await getNodeType(getNodeSchemaName(row));
+
+  if (nodeType?.isUsed || (nodeType?.loadState ?? 0) & SchemaLoadState.System) {
     ElMessage.error(_L.value["frontend.view.cantdelschema"])
     return
   }
-  if ((row.loadState || 0) & SchemaLoadState.Server) {
+  if ((row.loadState || 0) & SchemaLoadState.Service) {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
@@ -349,27 +348,25 @@ const handleDelete = async (row: any) => {
       }
     }
   }
-  removeStorageSchema(row.name)
-  removeSchema(row.name)
+  removeStorageSchema(getNodeSchemaName(row))
+  nodeType?.namespace?.removeSubNodeSchema(row.name)
   return refresh()
 }
 
 // save
 const confirmNameSpace = async () => {
   const res = await editorRef.value?.validate()
-  if (!res || !namespaceNode.value?.valid) return
+  if (!res || !namespaceNode.value?.isValid) return
 
-  if (!namespaceNode.value?.valid) return
+  const data = namespaceNode.value.submitValue as NodeSchema;
+  const schema = getCachedNodeType(getNodeSchemaName(data))
 
-  const data = schemaToJson(jsonClone(toRaw(namespaceNode.value.data)))
-  const schema = getCachedSchema(data.name)
-
-  if (isNewType && (schema || await getSchema(data.name))) {
+  if (isNewType && (schema || await getNodeType(getNodeSchemaName(data)))) {
     ElMessage.error(_L.value["frontend.view.schemanameexists"])
     return
   }
 
-  if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server)) {
+  if (!schema || ((schema.loadState ?? 0) & SchemaLoadState.Service)) {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
@@ -378,7 +375,7 @@ const confirmNameSpace = async () => {
           ElMessage.error(_L.value["frontend.view.error"])
           return
         }
-        data.loadState = (data.loadState || 0) | SchemaLoadState.Server
+        data.loadState = (data.loadState ?? 0) | SchemaLoadState.Service
       }
       catch (ex: any) {
         if (ex && ex.status === 403) {
@@ -392,7 +389,7 @@ const confirmNameSpace = async () => {
     }
   }
 
-  registerSchema([data], data.loadState)
+  saveNodeSchema(data, data.loadState)
   saveStorageSchema(data)
   closeNamespaceEditor()
   showNamespaceEditor.value = false
@@ -401,10 +398,10 @@ const confirmNameSpace = async () => {
 
 // close
 const closeNamespaceEditor = () => {
-  if (namesapceWatchHandler) namesapceWatchHandler()
+  namesapceWatchHandler.forEach(watcher => watcher())
+  namesapceWatchHandler.splice(0, namesapceWatchHandler.length)
   namespaceNode.value?.dispose()
   namespaceNode.value = undefined
-  namesapceWatchHandler = null
   currRow.value = null
 }
 
@@ -416,7 +413,7 @@ const showtryit = ref(false)
 const tryittype = ref("")
 
 const tryit = () => {
-  tryittype.value = namespaceNode.value?.rawData.name
+  tryittype.value = getNodeSchemaName(namespaceNode.value?.rawValue as NodeSchema ?? {}) || ""
   showtryit.value = true
 }
 
@@ -425,37 +422,18 @@ const tryit = () => {
 //#region Copy Schema
 
 const copySchema = async () => {
-  const schema = jsonClone(namespaceNode.value?.rawData)
-  if (!schema) return
+  const schema = namespaceNode.value?.submitValue as NodeSchema;
+  if (!schema) return;
 
-  closeNamespaceEditor()
-  showNamespaceEditor.value = false
-  await new Promise(resolve => setTimeout(resolve, 200)) // wait drawer close animation
+  closeNamespaceEditor();
+  showNamespaceEditor.value = false;
+  await new Promise(resolve => setTimeout(resolve, 200)); // wait drawer close animation
 
-  const name = `${schema.name}_copy`
-  schema.name = ""
-  localStorage["schema_new_namespace"] = state.namespace
+  const name = `${schema.name}_copy`;
+  schema.name = "";
+  localStorage["schema_new_namespace"] = state.namespace;
 
-  const ret = schema.func?.return
-  if (ret) schema.func!.return = ""
-
-  namespaceNode.value = new StructNode({
-    type: "system.schema.def.nodeschema",
-  }, jsonClone(schema))
-
-  namespaceNode.value.getField("name")!.data = name
-  if (namesapceWatchHandler) namesapceWatchHandler()
-  namesapceWatchHandler = namespaceNode.value.subscribe(() => {
-    operation.value = _L.value["frontend.view.new"] + " " + (_L.value(namespaceNode.value?.data.display) || namespaceNode.value?.data.name || "")
-  }, true)
-  showNamespaceEditor.value = true
-
-  if (schema.type === SchemaType.Func && ret) {
-    const relationInfo = (namespaceNode.value.getField("func")! as StructNode)
-    const returnField = relationInfo.getField("return")!
-    returnField.data = ret
-  }
-
+  await handleNew(schema);
 }
 
 //#endregion
@@ -477,7 +455,7 @@ const handleSelection = (val: any[]) => {
 const download = () => {
   if (!selections.length) return
   const name = selections.length > 1 ? "system.schema.json" : `${selections[0]}.json`
-  const content = JSON.stringify(selections.map(getCachedSchema).map(s => schemaToJson(s!)).filter(f => f.type !== SchemaType.Namespace || f.schemas?.length), null, 2)
+  const content = JSON.stringify(selections.map(getCachedNodeType).map(s => s?.getNodeSchema()), null, 2)
 
   // download
   const blob = new Blob([content], { type: 'application/octet-stream' })
@@ -496,7 +474,7 @@ const uploadSchema = (file: File) => {
   file.text().then(text => {
     const data = JSON.parse(text)
     if (Array.isArray(data)) {
-      registerSchema(data, SchemaLoadState.Custom)
+      saveNodeSchema(data, SchemaLoadState.FrontEnd)
       saveAllCustomSchemaToStroage()
       return refresh()
     }

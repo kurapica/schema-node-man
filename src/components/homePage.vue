@@ -25,7 +25,7 @@
         <el-drawer v-model="showAuth" :title="_L['frontend.auth']" direction="rtl" size="80%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <schema-view v-if="authNode" :key="authNode.guid" :node="(authNode as StructNode)" :plainText="false" />
+                    <schema-view v-if="authNode" :key="authNode.id" :node="(authNode as StructNode)" :plainText="false" />
                 </el-main>
                 <el-footer>
                     <br/>
@@ -40,11 +40,12 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue"
 import NavHeader from "./navHeader.vue"
-import { setLanguage, getLanguage, StructNode } from "schema-node"
+import { setLanguage, getLanguage, StructNode, getNodeType, StructType } from "schema-node-core"
 import { _L } from "schema-node-vueview"
-import { getSchemaSite, setSchemaSite } from "../schemaServerProvider"
-import { getFrontendAuth, saveFrontendAuth } from "../auth"
+import { getSchemaSite, setSchemaSite } from "../schema/provider/schemaServerProvider"
+import { getFrontendAuth, saveFrontendAuth } from "../utility/auth"
 import { schemaView } from "schema-node-vueview"
+import { FrontendAuth } from "../schema/auth.js"
 
 const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'
 
@@ -80,13 +81,14 @@ const saveServer = () => setSchemaSite(url.value)
 const showAuth = ref(false)
 const authNode = ref<StructNode | null>(null)
 const openAuth = async () => {
-    authNode.value?.dispose()
-    authNode.value = null
-    showAuth.value = true
-    authNode.value = new StructNode({ type: "frontend.auth" }, getFrontendAuth())
+    authNode.value?.dispose();
+    authNode.value = null;
+    showAuth.value = true;
+    const type = await getNodeType('frontend.auth') as StructType;
+    authNode.value = type.create(getFrontendAuth());
 }
 const saveAuth = () => {
-    saveFrontendAuth(authNode.value?.data)
+    saveFrontendAuth(authNode.value?.submitValue as FrontendAuth)
     showAuth.value = false
     authNode.value?.dispose()
     authNode.value = null
