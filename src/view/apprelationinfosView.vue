@@ -31,7 +31,7 @@
 import { ElTabs } from "element-plus"
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import { schemaView, _L } from 'schema-node-vueview'
+import { schemaView, _L } from 'schema-node-vue-view'
 import { _LS, ARRAY_ELEMENT, ArrayNode, getAppSchema, getCachedSchema, getSchema, isNull, RelationType, SchemaType, StructNode, type AnySchemaNode } from 'schema-node'
 
 //#region Inner type

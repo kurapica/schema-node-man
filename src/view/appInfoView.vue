@@ -26,9 +26,9 @@
 
 <script lang="ts" setup>
 import { getAppSchema, type IAppSchema } from 'schema-node'
-import { _L } from 'schema-node-vueview'
+import { _L } from 'schema-node-vue-view'
 import { ref, watch } from 'vue'
-import { schemaView } from 'schema-node-vueview'
+import { schemaView } from 'schema-node-vue-view'
 
 const props = defineProps<{ app?: string }>()
 const appSchema = ref<IAppSchema | undefined>(undefined)

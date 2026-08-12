@@ -107,7 +107,7 @@ import structfldfuncargsView from "./view/structfldfuncargsView.vue";
 import appworkflownodeschemasView from "./view/appworkflownodeschemasView.vue";
 import appWorkflowIdView from "./components/appWorkflowIdView.vue";
 import forkKeyView from "./view/forkKeyView.vue";
-import { regSchemaTypeView } from "schema-node-vueview";
+import { regSchemaTypeView } from "schema-node-vue-view";
 import { AppSchema, getAppSchemaName, getCachedAppType, saveAppSchema } from "schema-node-app";
 import { isNull, SchemaLoadState } from "schema-node-core";
 

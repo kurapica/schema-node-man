@@ -89,7 +89,7 @@ import structfldrelationinfosView from "./view/structfldrelationinfosView.vue";
 import reltarfieldView from "./view/reltarfieldView.vue";
 import structfldfuncargsView from "./view/structfldfuncargsView.vue";
 import funcdefineView from "./view/funcdefineView.vue";
-import { regSchemaTypeView } from "schema-node-vueview";
+import { regSchemaTypeView } from "schema-node-vue-view";
 
 regSchemaTypeView("system.schema.type.any", namespaceView);
 regSchemaTypeView("system.schema.type.namespace", namespaceView);

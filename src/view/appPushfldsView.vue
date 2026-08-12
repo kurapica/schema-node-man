@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ArrayNode, getSchema, ScalarNode, SchemaType, StructNode } from 'schema-node'
 import { onMounted, onUnmounted, ref, toRaw } from 'vue'
-import { _L, schemaView } from 'schema-node-vueview'
+import { _L, schemaView } from 'schema-node-vue-view'
 
 const props = defineProps<{ node: ArrayNode, plainText?: any }>()
 const argsNode = toRaw(props.node)

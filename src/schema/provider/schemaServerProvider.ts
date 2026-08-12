@@ -1,4 +1,4 @@
-import { AppFieldSchema, AppSchema, AppWorkflowSchema, defaultAppSchemaProvider, getSchemaApiBaseUrl, IAppSchemaProvider, postSchemaApi, setSchemaApiBaseUrl, useAppSchemaProvider } from "schema-node-app"
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, getAppSchemaProvider, getSchemaApiBaseUrl, IAppSchemaProvider, postSchemaApi, setSchemaApiBaseUrl, useAppSchemaProvider } from "schema-node-app"
 import { Entry, NodeSchema } from "schema-node-core"
 
 /**
@@ -97,7 +97,7 @@ let schemaServerProvider: ISchemaServerProvder | null = null
 
 // Default schema server provider
 const defaultSchemaServerProvider: ISchemaServerProvder = {
-  ...defaultAppSchemaProvider,
+  ...getAppSchemaProvider()!,
 
   saveSchema: async (schema: NodeSchema): Promise<boolean> => {
     return (await postSchemaApi("/save-schema", {schema}))?.result

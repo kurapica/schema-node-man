@@ -103,7 +103,7 @@ import { saveStorageSchema } from "../schema"
 import { getSchemaServerProvider } from "../schemaServerProvider"
 import { ElForm, ElMessage } from "element-plus"
 import { ExpressionType, getArraySchema, getCachedSchema, getGenericParameter, getSchema, isNull, isSchemaCanBeUseAs, jsonClone, NS_SYSTEM_ENTRIES, REGEX_GENERIC_IMPLEMENT, registerSchema, RelationType, ScalarNode, SchemaLoadState, SchemaType, StructNode, subscribeLanguage, type ILocaleString, type INodeSchema, type SchemaTypeValue, _LS, debounce } from "schema-node"
-import { _L, schemaView } from "schema-node-vueview"
+import { _L, schemaView } from "schema-node-vue-view"
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
 import namespaceInfoView from "./namespaceInfoView.vue"
 

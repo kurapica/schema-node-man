@@ -37,7 +37,7 @@
 
 <script lang="ts" setup>
 import { getAppCachedSchema, getAppSchema, isNull, subscribeAppSchemaChange, subscribeLanguage, type IAppSchema, type ScalarNode } from "schema-node"
-import { _L } from "schema-node-vueview"
+import { _L } from "schema-node-vue-view"
 import { computed, onMounted, onUnmounted, reactive, toRaw } from "vue"
 import appInfoView from "./appInfoView.vue"
 

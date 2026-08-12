@@ -327,7 +327,7 @@ const tableHeaderCellStyle = {
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
 }
-import { _L, schemaView } from 'schema-node-vueview'
+import { _L, schemaView } from 'schema-node-vue-view'
 import { _LS, isNull, StructNode, SchemaLoadState, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'

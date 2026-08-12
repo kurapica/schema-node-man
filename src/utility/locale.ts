@@ -1,7 +1,7 @@
 import zhCNJson from "../locale/zhCN.json"
 import enUSJson from "../locale/enUS.json"
 
-import { setLanguageEntries } from "schema-node-vueview"
+import { setLanguageEntries } from "schema-node-vue-view"
 import { _LS, importLanguage } from "schema-node-core"
 
 const LANGUAGES =  [

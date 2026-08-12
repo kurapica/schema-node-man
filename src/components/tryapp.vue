@@ -82,7 +82,7 @@ import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
 import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, IAppInteractionWorkflow } from "schema-node-app";
 import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, isNull, StructNode, StructType, ValueType } from "schema-node-core";
-import { schemaView, _L } from "schema-node-vueview"
+import { schemaView, _L } from "schema-node-vue-view"
 import { onMounted, onUnmounted, reactive, ref } from "vue"
 
 const props = defineProps<{ app: string, skin?: string }>()

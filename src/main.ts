@@ -17,6 +17,9 @@ import { setSchemaSite } from './schema/provider/schemaServerProvider'
 
 const app = createApp(App)
 
+// init shema runtime
+initSchemaRuntime()
+
 // language
 if (localStorage["lang"])
     setLanguage(localStorage["lang"])
@@ -45,9 +48,6 @@ app.config.globalProperties.$router = router
 // UI
 app.use(ElementPlus, { locale})
 app.component("Markdown", Markdown)
-
-// init shema runtime
-initSchemaRuntime()
 
 // Start
 app.mount('#app')

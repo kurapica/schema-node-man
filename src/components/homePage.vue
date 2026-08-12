@@ -41,10 +41,10 @@
 import { ref, onMounted } from "vue"
 import NavHeader from "./navHeader.vue"
 import { setLanguage, getLanguage, StructNode, getNodeType, StructType } from "schema-node-core"
-import { _L } from "schema-node-vueview"
+import { _L } from "schema-node-vue-view"
 import { getSchemaSite, setSchemaSite } from "../schema/provider/schemaServerProvider"
 import { getFrontendAuth, saveFrontendAuth } from "../utility/auth"
-import { schemaView } from "schema-node-vueview"
+import { schemaView } from "schema-node-vue-view"
 import { FrontendAuth } from "../schema/auth.js"
 
 const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'

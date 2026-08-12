@@ -1,7 +1,6 @@
 {
   "name": "schema-node-man",
-  "private": true,
-  "version": "1.0.9",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,7 +22,7 @@
     "rollup-plugin-copy": "^3.5.0",
     "schema-node-core": "workspace:*",
     "schema-node-app": "workspace:*",
-    "schema-node-vueview": "workspace:*",
+    "schema-node-vue-view": "workspace:*",
     "showdown": "^2.1.0",
     "sortablejs": "^1.15.6",
     "vue-router": "^4.5.1"

@@ -73,7 +73,7 @@
 <script lang="ts" setup>
 import Sortable from 'sortablejs'
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
-import { schemaView, _L } from 'schema-node-vueview'
+import { schemaView, _L } from 'schema-node-vue-view'
 import { _LS, ArrayNode, getSchema, getSchemaNode, jsonClone, SchemaType, sformat, StructNode } from 'schema-node'
 import type { AnySchemaNode } from 'schema-node'
 

@@ -54,7 +54,7 @@ import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
 import { Delete } from '@element-plus/icons-vue'
 import type { AnySchemaNode, INodeSchema, ScalarRule } from 'schema-node'
 import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, isEqual, isNull, NS_SYSTEM_OBJECT, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
-import { _L, schemaView } from 'schema-node-vueview'
+import { _L, schemaView } from 'schema-node-vue-view'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 
 const MIN_SVG_WIDTH = 800

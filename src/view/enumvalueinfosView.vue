@@ -53,7 +53,7 @@ import { saveStorageSchema } from '../schema';
 import { getSchemaServerProvider } from '../schemaServerProvider';
 import { ElMessage } from 'element-plus';
 import { ArrayNode, EnumValueType, getCachedSchema, getEnumSubList, jsonClone, saveEnumSubList, SchemaLoadState, type StructNode } from 'schema-node'
-import { _L, tableView } from 'schema-node-vueview'
+import { _L, tableView } from 'schema-node-vue-view'
 import { onUnmounted, reactive, ref, toRaw } from 'vue'
 
 const props = defineProps<{ node: ArrayNode, inForm?: any, plainText?: any }>()

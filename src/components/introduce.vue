@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import { generateGuidPart, getLanguage, subscribeLanguage } from 'schema-node-core'
 import { defineAsyncComponent, onUnmounted, ref, type Ref, type Component, shallowRef } from 'vue'
-import { _L } from 'schema-node-vueview'
+import { _L } from 'schema-node-vue-view'
 
 //#region type
 class SectionNode {

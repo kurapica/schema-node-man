@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ArrayNode, getSchema, NS_SYSTEM_STRING, StructNode, RelationType, NS_SYSTEM_ARRAY, ScalarNode, type INodeSchema, isEqual, debounce, type AnySchemaNode, isNull, getAppSchema } from 'schema-node'
 import { onMounted, onUnmounted, toRaw } from 'vue'
-import { SchemaNodeFormType, tableView } from 'schema-node-vueview'
+import { SchemaNodeFormType, tableView } from 'schema-node-vue-view'
 import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
 
 const props = defineProps<{ node: ArrayNode }>()

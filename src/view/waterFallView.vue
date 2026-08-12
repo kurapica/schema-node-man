@@ -16,7 +16,7 @@
 
 <script lang="ts" setup>
 import { ArrayNode } from 'schema-node'
-import { _L, schemaView } from 'schema-node-vueview'
+import { _L, schemaView } from 'schema-node-vue-view'
 import { onUnmounted, reactive, toRaw } from 'vue'
 
 const props = defineProps<{ node: ArrayNode, plainText?: any, inForm?: any }>()

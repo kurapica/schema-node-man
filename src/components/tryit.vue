@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { _LS } from "schema-node-core"
 import type { ElForm } from "element-plus"
-import { schemaView, _L } from "schema-node-vueview"
+import { schemaView, _L } from "schema-node-vue-view"
 import { ref } from "vue"
 
 defineProps<{ type: string, skin?: string }>()
