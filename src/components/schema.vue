@@ -162,7 +162,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, schemaView } from 'schema-node-vue-view'
-import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema } from 'schema-node-core'
+import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
@@ -348,9 +348,9 @@ const handleDelete = async (row: any) => {
       }
     }
   }
-  removeStorageSchema(getNodeSchemaName(row))
-  nodeType?.namespace?.removeSubNodeSchema(row.name)
-  return refresh()
+  removeStorageSchema(getNodeSchemaName(row));
+  (nodeType?.namespace as INamespaceNodeType)?.removeSubNodeSchema(row.name);
+  return refresh();
 }
 
 // save
