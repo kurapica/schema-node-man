@@ -10,7 +10,7 @@ import { routes } from './routes'
 import Markdown from './components/markdown.vue'
 import "./utility/locale"
 import "./utility/auth"
-import { initSchemaRuntime, setLanguage } from 'schema-node-core'
+import { initSchemaRuntime, logger, LogLevel, setLanguage } from 'schema-node-core'
 import { reloadStorageSchemas } from './schema'
 import { reloadStorageAppSchemas } from './appSchema'
 import { setSchemaSite } from './schema/provider/schemaServerProvider'
@@ -18,6 +18,7 @@ import { setSchemaSite } from './schema/provider/schemaServerProvider'
 const app = createApp(App)
 
 // init shema runtime
+logger.setLevel(LogLevel.DEBUG)
 initSchemaRuntime()
 
 // language

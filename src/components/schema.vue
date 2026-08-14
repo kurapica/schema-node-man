@@ -41,7 +41,7 @@
         </el-table-column>
         <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
           <template #default="scope">
-            {{ _L['system.schema.def.schematype.' + scope.row.type] }}
+            {{ _L['system.schema.kind.' + scope.row.kind] }}
           </template>
         </el-table-column>
         <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref, toRaw } from 'vue'
+import { reactive, watch, ref } from 'vue'
 import { _L, schemaView } from 'schema-node-vue-view'
 import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
@@ -178,8 +178,8 @@ const tableHeaderCellStyle = {
 };
 
 const schemaTypeOrder: Record<string, number> = {
-  [SCHEMA_KIND_OBJECT]: 1,
-  [SCHEMA_KIND_NAMESPACE]:2,
+  [SCHEMA_KIND_NAMESPACE]:1,
+  [SCHEMA_KIND_OBJECT]: 2,
   [SCHEMA_KIND_BOOL]: 3,
   [SCHEMA_KIND_INT]: 4,
   [SCHEMA_KIND_DECIMAL]: 5,
@@ -234,18 +234,18 @@ const choose = (schema: NodeSchema) => {
 }
 
 const refresh = async () => {
-  localStorage["schema_man_search"] = JSON.stringify(state)
-  const nodeType = await getNodeType(state.namespace || "")
+  localStorage["schema_man_search"] = JSON.stringify(state);
+  const nodeType = await getNodeType(state.namespace || "");
   if (nodeType instanceof NamespaceType) {
     let temp: NodeSchema[] = Array.from(nodeType.getSubNodeSchemas().filter(p => !p.name.includes("<")));
-    if (state.type) temp = temp.filter(p => p.kind === state.type)
-    if (state.keyword) temp = temp.filter(p => p.name.match(state.keyword) || matchKeyworkInLocaleString(state.keyword, getPropertyValue(p, Display)))
+    if (state.type) temp = temp.filter(p => p.kind === state.type);
+    if (state.keyword) temp = temp.filter(p => p.name.match(state.keyword) || matchKeyworkInLocaleString(state.keyword, getPropertyValue(p, Display)));
     temp.sort((a, b) => {
-      if (schemaTypeOrder[a.kind] < schemaTypeOrder[b.kind]) return -1
-      if (schemaTypeOrder[a.kind] < schemaTypeOrder[b.kind]) return 1
-      return a.name < b.name ? -1 : 1
+      if (schemaTypeOrder[a.kind] < schemaTypeOrder[b.kind]) return -1;
+      if (schemaTypeOrder[a.kind] > schemaTypeOrder[b.kind]) return 1;
+      return a.name < b.name ? -1 : 1;
     })
-    schemas.value = temp
+    schemas.value = temp;
   }
 }
 
