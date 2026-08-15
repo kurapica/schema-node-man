@@ -92,10 +92,10 @@
       @closed="closeNamespaceEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!" label-width="160"
+          <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(namespaceNode as StructNode)" in-form="expandall" text="left"></schema-view>
+              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" label-width="160px" debug></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -161,7 +161,7 @@
 
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue'
-import { _L, schemaView } from 'schema-node-vue-view'
+import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'

@@ -18,7 +18,7 @@ import { setSchemaSite } from './schema/provider/schemaServerProvider'
 const app = createApp(App)
 
 // init shema runtime
-logger.setLevel(LogLevel.DEBUG)
+logger.setLevel(LogLevel.VERBOSE)
 initSchemaRuntime()
 
 // language

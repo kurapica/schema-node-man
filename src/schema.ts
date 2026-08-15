@@ -1,4 +1,4 @@
-import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
+import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, NS_SYSTEM_SCHEMA_FUNC, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
 
 // reload schemas from storage
 export function reloadStorageSchemas() {
@@ -79,6 +79,11 @@ export function saveAllCustomSchemaToStroage(root: string = "") {
 }
 
 //#region  View
+
+import funcCallView from "./view/funcCall.vue";
+import { regSchemaTypeView } from "schema-node-vue-view";
+
+regSchemaTypeView(`${NS_SYSTEM_SCHEMA_FUNC}.funccall`, funcCallView, undefined, true);
 
 /*
 import namespaceView from "./view/namespaceView.vue";
