@@ -10,15 +10,20 @@ import { routes } from './routes'
 import Markdown from './components/markdown.vue'
 import "./utility/locale"
 import "./utility/auth"
-import { initSchemaRuntime, logger, LogLevel, setLanguage } from 'schema-node-core'
+import { initSchemaRuntime, logger as schemaLogger, LogLevel, setLanguage } from 'schema-node-core'
+import { logger as viewLogger } from 'schema-node-vue-view'
 import { reloadStorageSchemas } from './schema'
 import { reloadStorageAppSchemas } from './appSchema'
 import { setSchemaSite } from './schema/provider/schemaServerProvider'
 
 const app = createApp(App)
 
+// logger
+const logLevel = LogLevel.VERBOSE;
+schemaLogger.setLevel(logLevel)
+viewLogger.setLevel(logLevel)
+
 // init shema runtime
-logger.setLevel(LogLevel.VERBOSE)
 initSchemaRuntime()
 
 // language

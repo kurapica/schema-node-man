@@ -2,7 +2,7 @@
   <el-container class="main main-panel">
     <el-header style="height: fit-content; width: 100%;">
       <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
-        <schema-view v-model="state.namespace" in-form expand :config="{
+        <schema-view v-model="state.namespace" in-form :config="{
           type: 'system.schema.type.namespace',
           display: _LS('system.schema.type.namespace')
         }"></schema-view>
@@ -95,7 +95,7 @@
           <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" label-width="160px" debug></schema-view>
+              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" label-width="240px" debug></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -162,7 +162,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue'
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
-import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType } from 'schema-node-core'
+import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
@@ -273,7 +273,25 @@ const handleNew = async (copySchema?: NodeSchema) => {
   namespaceNode.value = nodeSchemaType.create(copySchema ?? {}) as StructNode
 
   const typeField = namespaceNode.value.getAccessValue("kind") as EnumNode
-  typeField.setPropertyValue(BlackList, [SCHEMA_KIND_OBJECT, SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW]) // TODO: temporary
+  const nodeKinds = (await (await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.kind`) as EnumType).getEnumEntryAccess())[0].children?.map(c => c.value) ?? [];
+  const whiteList: string[] = [];
+  for (const propCtor of getSchemaKindPropertyTypes(SCHEMA_KIND_NODE)) {
+    // pass readonly node schema kind
+    const readonly = getMetaProperty(propCtor, ReadOnly);
+    if (readonly?.hasValue && readonly.getValue<boolean>()!) continue;
+
+    const valueType = getMetaProperty(propCtor, PropertyValueType);
+    if (!valueType?.hasValue) continue;
+    const nodeType = await getNodeType(valueType.getValue<string>()!);
+    if (! (nodeType instanceof StructType)) continue;
+
+    // attach kind on the struct type is the node schema kind
+    const attachKind = nodeType.getProperty(Attach);
+    if (attachKind?.hasValue && nodeKinds.includes(attachKind.getValue<string>()!)) 
+      whiteList.push(attachKind.getValue<string>()!);
+  }
+
+  typeField.setPropertyValue(WhiteList, whiteList); // TODO: temporary
   showNamespaceEditor.value = true
 
   const displayField = namespaceNode.value.getAccessValue("display") as StructNode
