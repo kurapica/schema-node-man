@@ -2,18 +2,9 @@
   <el-container class="main main-panel">
     <el-header style="height: fit-content; width: 100%;">
       <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
-        <schema-view v-model="state.namespace" in-form :config="{
-          type: 'system.schema.type.namespace',
-          display: _LS('system.schema.type.namespace')
-        }"></schema-view>
-        <schema-view v-model="state.type" in-form :config="{
-          type: 'system.schema.def.schematype',
-          display: _LS('system.schema.def.schematype')
-        }"></schema-view>
-        <schema-view v-model="state.keyword" in-form :config="{
-          type: 'system.string',
-          display: _LS('frontend.view.keyword')
-        }"></schema-view>
+        <schema-view style="width: 200px;" v-model="state.namespace" in-form type="system.schema.namespace.type" no-label></schema-view>
+        <schema-view style="width: 200px;" v-model="state.type" in-form type="system.schema.node.kind" no-label></schema-view>
+        <schema-view style="width: 200px;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
         <el-button type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
         <!-- download -->
@@ -274,7 +265,7 @@ const handleNew = async (copySchema?: NodeSchema) => {
 
   const typeField = namespaceNode.value.getAccessValue("kind") as EnumNode
   const nodeKinds = (await (await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.kind`) as EnumType).getEnumEntryAccess())[0].children?.map(c => c.value) ?? [];
-  const whiteList: string[] = [];
+  const whiteList: string[] = [SCHEMA_KIND_NAMESPACE];
   for (const propCtor of getSchemaKindPropertyTypes(SCHEMA_KIND_NODE)) {
     // pass readonly node schema kind
     const readonly = getMetaProperty(propCtor, ReadOnly);
@@ -373,17 +364,23 @@ const handleDelete = async (row: any) => {
 
 // save
 const confirmNameSpace = async () => {
-  const res = await editorRef.value?.validate()
-  if (!res || !namespaceNode.value?.isValid) return
+  const res = await editorRef.value!.validate();
+  if (!res || !namespaceNode.value!.isValid) {
+    ElMessage.error(namespaceNode.value!.error)
+    return
+  }
 
-  const data = namespaceNode.value.submitValue as NodeSchema;
+  console.log("confirm step 2")
+  const data = namespaceNode.value!.submitValue as NodeSchema;
   const schema = getCachedNodeType(getNodeSchemaName(data))
 
+  console.log("confirm step 3")
   if (isNewType && (schema || await getNodeType(getNodeSchemaName(data)))) {
     ElMessage.error(_L.value["frontend.view.schemanameexists"])
     return
   }
 
+  console.log("confirm step 4")
   if (!schema || ((schema.loadState ?? 0) & SchemaLoadState.Service)) {
     const provider = getSchemaServerProvider()
     if (provider) {
@@ -407,6 +404,7 @@ const confirmNameSpace = async () => {
     }
   }
 
+  console.log("confirm step 5")
   saveNodeSchema(data, data.loadState)
   saveStorageSchema(data)
   closeNamespaceEditor()
@@ -520,4 +518,5 @@ body {
 .el-form-item .el-form-item {
   margin-bottom: 18px;
 }
+
 </style>
