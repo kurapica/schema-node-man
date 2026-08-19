@@ -282,7 +282,8 @@ const handleNew = async (copySchema?: NodeSchema) => {
       whiteList.push(attachKind.getValue<string>()!);
   }
 
-  typeField.setPropertyValue(WhiteList, whiteList); // TODO: temporary
+  // Only addable schema kind
+  typeField.setPropertyValue(WhiteList, whiteList);
   showNamespaceEditor.value = true
 
   const displayField = namespaceNode.value.getAccessValue("display") as StructNode
