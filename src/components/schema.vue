@@ -6,7 +6,7 @@
         <schema-view style="width: 200px;" v-model="state.type" in-form type="system.schema.node.kind" no-label></schema-view>
         <schema-view style="width: 200px;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
-        <el-button type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
+        <el-button type="primary" @click="handleNew()">{{ _L["frontend.view.new"] }}</el-button>
         <!-- download -->
         <template v-if="!downloading">
           <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
@@ -151,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref } from 'vue'
+import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
@@ -261,7 +261,7 @@ const handleNew = async (copySchema?: NodeSchema) => {
   localStorage["schema_new_namespace"] = state.namespace
 
   const nodeSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.schema`) as StructType;
-  namespaceNode.value = nodeSchemaType.create(copySchema ?? {}) as StructNode
+  namespaceNode.value = nodeSchemaType.create(copySchema ?? { namespace: state.namespace })  as StructNode
 
   const typeField = namespaceNode.value.getAccessValue("kind") as EnumNode
   const nodeKinds = (await (await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.kind`) as EnumType).getEnumEntryAccess())[0].children?.map(c => c.value) ?? [];
@@ -366,22 +366,20 @@ const handleDelete = async (row: any) => {
 // save
 const confirmNameSpace = async () => {
   const res = await editorRef.value!.validate();
-  if (!res || !namespaceNode.value!.isValid) {
-    ElMessage.error(namespaceNode.value!.error)
+  const node = toRaw(namespaceNode.value!)
+  if (!res || !node.isValid) {
+    ElMessage.error(node.error)
     return
   }
 
-  console.log("confirm step 2")
-  const data = namespaceNode.value!.submitValue as NodeSchema;
+  const data = node.submitValue as NodeSchema;
   const schema = getCachedNodeType(getNodeSchemaName(data))
 
-  console.log("confirm step 3")
   if (isNewType && (schema || await getNodeType(getNodeSchemaName(data)))) {
     ElMessage.error(_L.value["frontend.view.schemanameexists"])
     return
   }
 
-  console.log("confirm step 4")
   if (!schema || ((schema.loadState ?? 0) & SchemaLoadState.Service)) {
     const provider = getSchemaServerProvider()
     if (provider) {
@@ -405,8 +403,11 @@ const confirmNameSpace = async () => {
     }
   }
 
-  console.log("confirm step 5")
-  saveNodeSchema(data, data.loadState)
+  data.loadState = (data.loadState ?? 0) | SchemaLoadState.FrontEnd;
+
+  const namespace = (await getNodeType(data.namespace ?? '')) as INamespaceNodeType
+  namespace?.saveSubNodeSchema(data)
+
   saveStorageSchema(data)
   closeNamespaceEditor()
   showNamespaceEditor.value = false
