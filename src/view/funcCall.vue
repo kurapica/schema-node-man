@@ -16,10 +16,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayNode, getRecordedValues, StringNode, StructNode } from 'schema-node-core';
+import { ArrayNode, StringNode, StructNode } from 'schema-node-core';
 import schemaView from '../../../schema-node-vue-view/src/schemaView.vue';
 import { toRaw } from 'vue';
-import { getSubNodeFormType } from '../../../schema-node-vue-view/src/schemaView';
 import { SchemaNodeFormType } from '../../../schema-node-vue-view/src/enum/formType';
 
 const props = defineProps<{ node: StructNode, inForm?: SchemaNodeFormType, skin?: string }>();

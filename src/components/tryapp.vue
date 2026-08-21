@@ -81,7 +81,7 @@
 import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
 import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, IAppInteractionWorkflow } from "schema-node-app";
-import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, isNull, StructNode, StructType, ValueType } from "schema-node-core";
+import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, InVisible, isNull, StructNode, StructType, ValueType, Visible } from "schema-node-core";
 import { schemaView, _L } from "schema-node-vue-view"
 import { onMounted, onUnmounted, reactive, ref } from "vue"
 
@@ -132,8 +132,12 @@ const loadData = async () => {
     statusWatcher.forEach(f => f())
     statusWatcher.length = 0
     appNode.value?.fields.forEach((f:any) => {
-      statusWatcher.push(f.subscribeState(() => {
-        invisibleFields[f.name] = f.invisible || false
+
+      statusWatcher.push(f.subscribeProperty(InVisible, () => {
+        invisibleFields[f.name] = !f.visible
+      }))
+      statusWatcher.push(f.subscribeProperty(Visible, () => {
+        invisibleFields[f.name] = !f.visible
       }, true))
     })
 
@@ -284,7 +288,10 @@ onMounted(async () => {
   statusWatcher.forEach(f => f())
   statusWatcher.length = 0
   appNode.value?.fields.forEach(f => {
-    statusWatcher.push(f.subscribeState(() => {
+    statusWatcher.push(f.subscribeProperty(Visible, () => {
+      invisibleFields[f.name!] = !f.visible
+    }))
+    statusWatcher.push(f.subscribeProperty(InVisible, () => {
       invisibleFields[f.name!] = !f.visible
     }, true))
   })

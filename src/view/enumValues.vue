@@ -1,5 +1,5 @@
 <template>
-  <table-view :node="node" :in-form="inForm" :text="plainText" operWidth="200" v-bind="$attrs">
+  <table-view :node="node" :in-form="inForm" :text="text" operWidth="200" v-bind="$attrs">
     <template #operator="{ row, index }">
       <template v-if="!readonly">
         <a href="javascript:void(0)" v-if="!isflags && index" @click="arrayNode.moveRow(index, index - 1)">{{
@@ -20,7 +20,7 @@
     <el-container class="main" style="height: 80vh;">
       <el-main>
         <table-view v-if="subListNode" :key="subListNode.id" :node="(subListNode as ArrayNode)" :in-form="inForm"
-          :text="plainText" operWidth="200">
+          :text="text" operWidth="200">
           <template #operator="{ row, index }">
             <template v-if="!readonly">
               <a href="javascript:void(0)" v-if="index" @click="swapSubListRow(index, index - 1)">{{
@@ -54,10 +54,9 @@ import { ArrayNode, combinePaths, DataNode, deepClone, Disable, EnumNode, EnumTy
 import { _L, tableView } from 'schema-node-vue-view'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import { subscribeAncestorProperty } from '../../../schema-node-vue-view/src/utility/toolset';
-import { getAppSchemaProvider } from 'schema-node-app';
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider';
 
-const props = defineProps<{ node: ArrayNode, inForm?: any, plainText?: any }>()
+const props = defineProps<{ node: ArrayNode, inForm?: any, text?: any }>()
 const arrayNode = toRaw(props.node)
 
 const cascade = ref<LocaleString[]>([])
@@ -159,8 +158,8 @@ onMounted(async () => {
       isflags.value = valueTypefield.getValue() === EnumValueType.Flags
     }, true))
 
-  subs.push(subscribeAncestorProperty(arrayNode, ReadOnly, (values: boolean[]) => readonly.value = values.some(v => v)))
-  subs.push(subscribeAncestorProperty(arrayNode, Disable, (values: boolean[]) => disabled.value = values.some(v => v)))
+  subs.push(subscribeAncestorProperty(arrayNode, ReadOnly, (values: boolean[]) => readonly.value = values.some(v => v), true))
+  subs.push(subscribeAncestorProperty(arrayNode, Disable, (values: boolean[]) => disabled.value = values.some(v => v), true))
 })
 
 // clear
