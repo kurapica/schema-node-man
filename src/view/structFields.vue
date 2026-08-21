@@ -71,7 +71,7 @@
 
 <script lang="ts" setup>
 import Sortable from 'sortablejs'
-import { onMounted, onUnmounted, ref, toRaw } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, toRaw } from 'vue'
 import { schemaView, _L } from 'schema-node-vue-view'
 import { ArrayNode, ArrayType, deepClone, formatLocaleString, LocaleString, StringNode, StructNode } from 'schema-node-core';
 
@@ -218,7 +218,7 @@ const regSortable = () => {
 let dataChangeHandler: Function | null = null
 let elementDisplay = ref<{ guid: string, name: string, display: string, require: boolean, displayOnly: boolean, type: string, desc: string }[]>([])
 onMounted(() => {
-  dataChangeHandler = arrayNode.subscribeItem(() => {
+  dataChangeHandler = arrayNode.subscribeItem(async () => {
     const news = []
     for (let i = 0; i < arrayNode.length; i++) {
       const node = arrayNode.at(i)!
@@ -232,7 +232,8 @@ onMounted(() => {
         desc: _L.value(node.getAccessValue("description")?.getValue() as LocaleString),
       }
     }
-    console.log("struct data change", news)
+    elementDisplay.value = []
+    await nextTick();
     elementDisplay.value = news
     setTimeout(regSortable, 10)
   }, true)

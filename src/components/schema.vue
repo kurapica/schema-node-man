@@ -160,6 +160,7 @@ import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider
 import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
 import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW } from 'schema-node-app'
+import { logger } from '../utility/logger'
 
 const schemas = ref<NodeSchema[]>([]);
 const tableHeaderCellStyle = {
@@ -379,6 +380,8 @@ const confirmNameSpace = async () => {
     ElMessage.error(_L.value["frontend.view.schemanameexists"])
     return
   }
+
+  logger.verbose("[Save][Schema]", getNodeSchemaName(data), data)
 
   if (!schema || ((schema.loadState ?? 0) & SchemaLoadState.Service)) {
     const provider = getSchemaServerProvider()
