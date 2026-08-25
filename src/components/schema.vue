@@ -84,9 +84,9 @@
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!"
-            label-position="left" style="width: 100%; height: 90%;">
+            label-position="left" style="width: 100%; height: 90%;" label-width="240px" >
             <div class="draw-view">
-              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" label-width="240px" debug></schema-view>
+              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" debug></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -161,6 +161,7 @@ import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
 import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW } from 'schema-node-app'
 import { logger } from '../utility/logger'
+import { ca } from 'element-plus/es/locale/index.mjs'
 
 const schemas = ref<NodeSchema[]>([]);
 const tableHeaderCellStyle = {
@@ -366,10 +367,22 @@ const handleDelete = async (row: any) => {
 
 // save
 const confirmNameSpace = async () => {
-  const res = await editorRef.value!.validate();
+  try
+  {
+    const res = await editorRef.value!.validate();
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
+    }
+  }
+  catch (ex: any) {
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
+  
   const node = toRaw(namespaceNode.value!)
-  if (!res || !node.isValid) {
-    ElMessage.error(node.error)
+  if (!node.isValid) {
+    ElMessage.error(_L.value["frontend.view.error"])
     return
   }
 

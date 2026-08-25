@@ -478,7 +478,6 @@ const reBuildOptions = async () => {
     if (compatibleType === "system.schema.type.rule.value" && !otherCompatibleType)
     {
         otherCompatibleType = "system.schema.def.struct.fields"
-        console.log("Set other compatible type to structfieldschemas", otherCompatibleType)
     }
 
     root.children = await buildOptions([], (await getSchema(root.value))?.schemas || [])

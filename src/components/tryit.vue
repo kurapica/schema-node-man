@@ -1,14 +1,13 @@
 <template>
-  <el-form ref="form" label-width="140px" :model="data">
+  <el-form ref="form" label-width="240px" :model="data" label-position="left" >
     <schema-view
       text="left"
-      :props="{
-        display: _LS('frontend.view.tryit')
-      }"
+      :props="{ display: _LS('frontend.view.tryit') }"
       :type="type"
       in-form="expandall"
       v-model="data"
       :skin="skin"
+      debug
     ></schema-view>
     <el-form-item>
       <el-button type="primary" @click="form?.validate()">{{ _L["frontend.view.validate"] }}</el-button>

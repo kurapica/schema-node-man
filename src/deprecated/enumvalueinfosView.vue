@@ -76,7 +76,6 @@ if (namefield.readonly)
 
     const cascadeField = enumdefine.getField("cascade")!
     cascadeWatcher = cascadeField.subscribe(() => {
-        console.log("cascasde", cascadeField)
         cascade.value = cascadeField.data.slice(0)
     }, true)
 }
