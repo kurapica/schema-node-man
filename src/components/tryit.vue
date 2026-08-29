@@ -8,6 +8,7 @@
       v-model="data"
       :skin="skin"
       debug
+      :header-cell-style="tableHeaderCellStyle"
     ></schema-view>
     <el-form-item>
       <el-button type="primary" @click="form?.validate()">{{ _L["frontend.view.validate"] }}</el-button>
@@ -28,4 +29,9 @@ defineProps<{ type: string, skin?: string }>()
 const data = ref(null)
 const form = ref<InstanceType<typeof ElForm>>()
 
+const tableHeaderCellStyle = {
+  backgroundColor: 'var(--app-surface-muted)',
+  color: 'var(--app-text)',
+  borderColor: 'var(--app-border)'
+};
 </script>

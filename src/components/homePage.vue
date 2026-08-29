@@ -85,7 +85,7 @@ const openAuth = async () => {
     authNode.value = null;
     showAuth.value = true;
     const type = await getNodeType('frontend.auth') as StructType;
-    authNode.value = type.create(getFrontendAuth());
+    authNode.value = type.create(getFrontendAuth()) as StructNode;
 }
 const saveAuth = () => {
     saveFrontendAuth(authNode.value?.submitValue as FrontendAuth)

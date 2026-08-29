@@ -44,9 +44,9 @@
 </template>
 
 <script setup lang="ts">
-import { getNodeType, jsonClone, NS_SYSTEM_SCHEMA_NODE, ReadOnly, SCHEMA_KIND_FUNCTION, SCHEMA_KIND_NAMESPACE, SchemaType, StructNode, StructType, SystemReflectType } from 'schema-node-core'
+import { getNodeType, NS_SYSTEM_SCHEMA_NODE, ReadOnly, StructNode, StructType, SystemReflectType } from 'schema-node-core'
 import tryit from './tryit.vue'
-import { ref, toRaw, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vue-view'
 
 const props = defineProps<{ type: string, skin?: string }>()

@@ -83,10 +83,9 @@
       @closed="closeNamespaceEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!"
-            label-position="left" style="width: 100%; height: 90%;" label-width="240px" >
+          <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!" label-position="left" style="width: 100%; height: 90%;" label-width="300px" >
             <div class="draw-view">
-              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" debug></schema-view>
+              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" debug :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -161,7 +160,6 @@ import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
 import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW } from 'schema-node-app'
 import { logger } from '../utility/logger'
-import { ca } from 'element-plus/es/locale/index.mjs'
 
 const schemas = ref<NodeSchema[]>([]);
 const tableHeaderCellStyle = {
@@ -382,6 +380,8 @@ const confirmNameSpace = async () => {
   
   const node = toRaw(namespaceNode.value!)
   if (!node.isValid) {
+    for(const n of node.getErrorNodes())
+      logger.error(n)
     ElMessage.error(_L.value["frontend.view.error"])
     return
   }

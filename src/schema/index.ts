@@ -1,7 +1,7 @@
 export * from './structField'
 export * from './auth'
 export * from './apptarget'
-import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, NS_SYSTEM_SCHEMA_ENUM, NS_SYSTEM_SCHEMA_FUNC, NS_SYSTEM_SCHEMA_RELATION, NS_SYSTEM_SCHEMA_STRUCT, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
+import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, NS_SYSTEM_LIST, NS_SYSTEM_SCHEMA_ENUM, NS_SYSTEM_SCHEMA_FUNC, NS_SYSTEM_SCHEMA_FUNC_CALL_ARG, NS_SYSTEM_SCHEMA_NODE_TYPE, NS_SYSTEM_SCHEMA_RELATION, NS_SYSTEM_SCHEMA_STRUCT, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
 
 // reload schemas from storage
 export function reloadStorageSchemas() {
@@ -84,15 +84,19 @@ export function saveAllCustomSchemaToStroage(root: string = "") {
 //#region  View
 
 import { regSchemaTypeView } from "schema-node-vue-view";
-import funcCallView from "../view/funcCall.vue";
 import enumValuesView from "../view/enumValues.vue";
 import structFields from "../view/structFields.vue";
 import relationsView from "../view/relations.vue";
+import namespaceView from '../view/namespace.vue';
+import funcView from '../view/func.vue';
+import callArgsView from '../view/callArgs.vue';
 
-regSchemaTypeView(`${NS_SYSTEM_SCHEMA_FUNC}.funccall`, funcCallView, undefined, true);
 regSchemaTypeView(`${NS_SYSTEM_SCHEMA_ENUM}.values`, enumValuesView);
 regSchemaTypeView(`${NS_SYSTEM_SCHEMA_STRUCT}.fields`, structFields);
 regSchemaTypeView(`${NS_SYSTEM_SCHEMA_RELATION}.schemas`, relationsView);
+regSchemaTypeView(NS_SYSTEM_SCHEMA_NODE_TYPE, namespaceView);
+regSchemaTypeView(`${NS_SYSTEM_SCHEMA_FUNC}.schema`, funcView);
+regSchemaTypeView(`${NS_SYSTEM_LIST}<${NS_SYSTEM_SCHEMA_FUNC_CALL_ARG}>`, callArgsView); 
 
 /*
 import namespaceView from "./view/namespaceView.vue";

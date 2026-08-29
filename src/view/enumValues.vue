@@ -1,7 +1,7 @@
 <template>
-  <table-view :node="node" :in-form="inForm" :text="text" operWidth="200" v-bind="$attrs">
+  <table-view :node="node" :in-form="inForm" :text="text" operWidth="200" :readonly="readOnly" v-bind="$attrs">
     <template #operator="{ row, index }">
-      <template v-if="!readonly">
+      <template v-if="!readOnly">
         <a href="javascript:void(0)" v-if="!isflags && index" @click="arrayNode.moveRow(index, index - 1)">{{
           _L["frontend.view.moveup"] }}</a>
         <a href="javascript:void(0)" v-if="customEnum || !((row as StructNode).getAccessValue('value')! as DataNode)!.readonly"
@@ -20,9 +20,9 @@
     <el-container class="main" style="height: 80vh;">
       <el-main>
         <table-view v-if="subListNode" :key="subListNode.id" :node="(subListNode as ArrayNode)" :in-form="inForm"
-          :text="text" operWidth="200">
+          :text="text" :readonly="readOnly" operWidth="200">
           <template #operator="{ row, index }">
-            <template v-if="!readonly">
+            <template v-if="!readOnly">
               <a href="javascript:void(0)" v-if="index" @click="swapSubListRow(index, index - 1)">{{
                 _L["frontend.view.moveup"] }}</a>
               <a href="javascript:void(0)" v-if="customEnum || ((row as StructNode).getAccessValue('value')! as DataNode)!.readonly"
@@ -37,7 +37,7 @@
       </el-main>
       <el-footer>
         <br />
-        <template v-if="!readonly">
+        <template v-if="!readOnly">
           <el-button type="primary" @click="saveSubList">{{ _L["frontend.view.save"] }}</el-button>
           <el-button type="info" @click="closeSubList">{{ _L["frontend.view.cancel"] }}</el-button>
         </template>
@@ -56,11 +56,11 @@ import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import { subscribeAncestorProperty } from '../../../schema-node-vue-view/src/utility/toolset';
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider';
 
-const props = defineProps<{ node: ArrayNode, inForm?: any, text?: any }>()
+const props = defineProps<{ node: ArrayNode, inForm?: any, text?: any, readonly?: boolean }>()
 const arrayNode = toRaw(props.node)
 
 const cascade = ref<LocaleString[]>([])
-const readonly = ref(false)
+const readOnly = ref(false)
 const disabled = ref(false)
 const isflags = ref(false)
 const customEnum = ref(false)
@@ -158,7 +158,7 @@ onMounted(async () => {
       isflags.value = valueTypefield.getValue() === EnumValueType.Flags
     }, true))
 
-  subs.push(subscribeAncestorProperty(arrayNode, ReadOnly, (values: boolean[]) => readonly.value = values.some(v => v), true))
+  subs.push(subscribeAncestorProperty(arrayNode, ReadOnly, (values: boolean[]) => readOnly.value = props.readonly || values.some(v => v), true))
   subs.push(subscribeAncestorProperty(arrayNode, Disable, (values: boolean[]) => disabled.value = values.some(v => v), true))
 })
 

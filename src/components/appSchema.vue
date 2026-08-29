@@ -103,7 +103,7 @@
           <el-form v-if="appNode" ref="editorRef" :model="appNode.rawValue!" label-width="160" label-position="left"
             style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appNode as StructNode)" in-form="expandall" text="left"></schema-view>
+              <schema-view :node="(appNode as StructNode)" in-form="expandall" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -195,7 +195,7 @@
           <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appFieldNode as StructNode)" in-form="expandall" text="left"></schema-view>
+              <schema-view :node="(appFieldNode as StructNode)" in-form="expandall" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -285,7 +285,7 @@
           <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appWorkflowNode as StructNode)" in-form="expandall" text="left"></schema-view>
+              <schema-view :node="(appWorkflowNode as StructNode)" in-form="expandall" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -333,7 +333,7 @@ import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getCachedAppType, getExportAppSchema, getSchemaFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema } from 'schema-node-app'
 
 //#region View
 
@@ -423,7 +423,7 @@ const handleEdit = async (row: any, readonly?: boolean) => {
   if (!appType) return;
 
   const appSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP}.schema`) as StructType;
-  appNode.value = appSchemaType!.create(appType.getSchema()) as StructNode;
+  appNode.value = appSchemaType!.create(appType.getAppSchema()) as StructNode;
   showAppEditor.value = true
 
   const displayField = appNode.value!.getAccessValue("display") as StructNode;

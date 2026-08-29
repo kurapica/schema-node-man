@@ -39,14 +39,14 @@
       <el-form v-show="activeTab === 0" ref="form" label-width="140px" :model="appNode.rawValue">
         <template v-for="f in appNode.inputFields" :key="f.id">
           <h2 v-if="!invisibleFields[f.name!]">{{ _L(f.getPropertyValue(Display)) || f.name }}</h2>
-          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin"></schema-view>
+          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin" :header-cell-style="tableHeaderCellStyle"></schema-view>
         </template>
       </el-form>
 
       <el-form v-show="activeTab === 1 && showref" label-width="140px" :model="appNode.rawValue">
         <template v-for="f in appNode.viewFields" :key="f.id">
           <h2 v-if="!invisibleFields[f.name!]">{{ _L(f.getPropertyValue(Display)) || f.name }}</h2>
-          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin"></schema-view>
+          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin" :header-cell-style="tableHeaderCellStyle"></schema-view>
           <br />
         </template>
       </el-form>
@@ -54,7 +54,7 @@
       <el-form v-show="activeTab === 2 && showoutput" label-width="140px" :model="appNode.rawValue">
         <template v-for="f in appNode.deriveFields" :key="f.id">
           <h2 v-if="!invisibleFields[f.name!]">{{ _L(f.getPropertyValue(Display)) || f.name }}</h2>
-          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin"></schema-view>
+          <schema-view text="left" :node="(f as DataNode)" :in-form="true" :skin="skin" :header-cell-style="tableHeaderCellStyle"></schema-view>
           <br />
         </template>
       </el-form>
@@ -65,7 +65,7 @@
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <schema-view v-if="interactionData" :key="interactionData.id" :node="interactionData as any" in-form="expandall"
-            text="left" v-bind="$attrs"></schema-view>
+            text="left" v-bind="$attrs" :header-cell-style="tableHeaderCellStyle"></schema-view>
         </el-main>
         <el-footer>
           <el-button type="success" @click="startWorkflow(interactionWorkflow!.name, interactionData?.rawValue)">
@@ -108,6 +108,12 @@ const startWorkflowing = ref(false)
 const statusWatcher: Function[] = []
 const invisibleFields = reactive<{ [key: string]: boolean }>({})
 const issystemlevel = ref(false)
+
+const tableHeaderCellStyle = {
+  backgroundColor: 'var(--app-surface-muted)',
+  color: 'var(--app-text)',
+  borderColor: 'var(--app-border)'
+};
 
 const loadData = async () => {
   if (!appTargetNode.value) return

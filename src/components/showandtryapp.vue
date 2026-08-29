@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import tryapp from './tryapp.vue'
-import { ref, toRaw, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { _L, schemaView } from 'schema-node-vue-view'
 import { getNodeType, ReadOnly, StructNode, StructType } from 'schema-node-core';
 import { AppFieldSchema, getCachedAppType, NS_SYSTEM_SCHEMA_APP } from 'schema-node-app';
