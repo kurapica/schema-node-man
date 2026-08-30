@@ -64,7 +64,7 @@
       append-to-body>
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <schema-view v-if="interactionData" :key="interactionData.id" :node="interactionData as any" in-form="expandall"
+          <schema-view v-if="interactionData" :key="interactionData.id" :node="interactionData as any" :in-form="SchemaNodeFormType.ExpandAll"
             text="left" v-bind="$attrs" :header-cell-style="tableHeaderCellStyle"></schema-view>
         </el-main>
         <el-footer>
@@ -82,7 +82,7 @@ import { addAppTarget } from "../appSchema";
 import { ElMessage, type ElForm } from "element-plus"
 import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, IAppInteractionWorkflow } from "schema-node-app";
 import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, InVisible, isNull, StructNode, StructType, ValueType, Visible } from "schema-node-core";
-import { schemaView, _L } from "schema-node-vue-view"
+import { schemaView, _L, SchemaNodeFormType } from "schema-node-vue-view"
 import { onMounted, onUnmounted, reactive, ref } from "vue"
 
 const props = defineProps<{ app: string, skin?: string }>()

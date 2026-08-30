@@ -1,10 +1,10 @@
 <template>
-  <el-form ref="form" label-width="240px" :model="data" label-position="left" >
+  <el-form ref="form" label-width="240px" :model="data!" label-position="left" >
     <schema-view
       text="left"
       :props="{ display: _LS('frontend.view.tryit') }"
       :type="type"
-      in-form="expandall"
+      :in-form="SchemaNodeFormType.ExpandAll"
       v-model="data"
       :skin="skin"
       debug
@@ -21,8 +21,8 @@
 
 <script lang="ts" setup>
 import { _LS } from "schema-node-core"
-import type { ElForm } from "element-plus"
-import { schemaView, _L } from "schema-node-vue-view"
+import { ElForm } from "element-plus"
+import { schemaView, _L, SchemaNodeFormType } from "schema-node-vue-view"
 import { ref } from "vue"
 
 defineProps<{ type: string, skin?: string }>()

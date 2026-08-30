@@ -14,7 +14,7 @@
                       <div class="draw-view">
                           <schema-view
                               :node="(schemaNode as StructNode)"
-                              in-form="expandall"
+                              :in-form="SchemaNodeFormType.ExpandAll"
                               text="left"
                           ></schema-view>
                       </div>
@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import tryapp from './tryapp.vue'
 import { ref, watch } from 'vue'
-import { _L, schemaView } from 'schema-node-vue-view'
+import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 import { getNodeType, ReadOnly, StructNode, StructType } from 'schema-node-core';
 import { AppFieldSchema, getCachedAppType, NS_SYSTEM_SCHEMA_APP } from 'schema-node-app';
 
@@ -75,7 +75,7 @@ const fieldRowClassName = (data: any) => {
   return '';
 }
 watch(() => props.app, async () => {
-  const schema = getCachedAppType(props.app)?.getSchema();
+  const schema = getCachedAppType(props.app)?.getAppSchema();
   if (schema)
   {
     schemaNode.value = (await getNodeType(`${NS_SYSTEM_SCHEMA_APP}.schema`) as StructType).create(schema) as StructNode;

@@ -42,6 +42,7 @@ const props = defineProps<{ type?: string, text?: any }>()
 const showNode = shallowRef<DataNode | undefined>(undefined)
 const displayNode = shallowRef<DataNode[]>([])
 const editable = ref(false)
+const emit = defineEmits(["update"])
 
 const tableHeaderCellStyle = {
   backgroundColor: 'var(--app-surface-muted)',
@@ -78,6 +79,8 @@ const show = async() => {
       nodes.push(f);
   }
   displayNode.value = nodes
+
+  emit("update")
 }
 
 onMounted(() => show())

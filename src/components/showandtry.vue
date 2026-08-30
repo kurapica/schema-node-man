@@ -10,7 +10,7 @@
                             <div class="draw-view">
                                 <schema-view
                                     :node="(schemaNode as StructNode)"
-                                    in-form="expandall"
+                                    :in-form="SchemaNodeFormType.ExpandAll"
                                     text="left"
                                 ></schema-view>
                             </div>
@@ -24,11 +24,7 @@
                         <el-form v-if="activeTab === 1 && schemaNode" ref="editorRef" :model="schemaNode.rawValue" label-width="160"
                             label-position="left" style="width: 100%; height: 90%;">
                             <div class="draw-view">
-                                <schema-view
-                                    :node="(schemaNode as StructNode)"
-                                    in-form="expandall"
-                                    text="left"
-                                ></schema-view>
+                                <schema-view :node="(schemaNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" ></schema-view>
                             </div>
                         </el-form>
                         <tryit v-if="activeTab === 0" :type="type" :skin="skin"></tryit>
@@ -47,7 +43,7 @@
 import { getNodeType, NS_SYSTEM_SCHEMA_NODE, ReadOnly, StructNode, StructType, SystemReflectType } from 'schema-node-core'
 import tryit from './tryit.vue'
 import { ref, watch } from 'vue'
-import { _L, schemaView } from 'schema-node-vue-view'
+import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 
 const props = defineProps<{ type: string, skin?: string }>()
 const activeTab = ref(0)

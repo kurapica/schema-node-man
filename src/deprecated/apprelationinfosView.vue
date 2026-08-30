@@ -19,7 +19,7 @@
                 <schema-view v-if="activeCol >= 0 && activeCol < elements.length"
                     :key="elements[activeCol].guid"
                     :node="(elements[activeCol] as StructNode)"
-                    in-form="expand" 
+                    :in-form="SchemaNodeFormType.ExpandAll" 
                     text="left">
                 </schema-view>
             </template>
@@ -31,7 +31,7 @@
 import { ElTabs } from "element-plus"
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import { schemaView, _L } from 'schema-node-vue-view'
+import { schemaView, _L, SchemaNodeFormType } from 'schema-node-vue-view'
 import { _LS, ARRAY_ELEMENT, ArrayNode, getAppSchema, getCachedSchema, getSchema, isNull, RelationType, SchemaType, StructNode, type AnySchemaNode } from 'schema-node'
 
 //#region Inner type

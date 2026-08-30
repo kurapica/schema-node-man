@@ -2,15 +2,14 @@
   <section style="width: 100%;min-width: 120px;display: flex;">
     <span v-if="state.readonly && text">
       <el-popover
+        :ref="(el) => (node as any).popperRef = el"
         placement="left"
-        :title="node.value"
-        width="width:fit-content"
-        :open-delay="5000"
-        :offset="42"
-        trigger="hover"
-        @show="state.hoverValue = node.value as string"
+        :title="`${node.value}`"
+        width="fit-content"
+        trigger="hover" :boundaries-padding="10"
+        @show="setHoverValue(node as any)"
       >
-        <namespace-info v-if="state.hoverValue === node.value" :key="node.value as string" style="min-width: 300px;" :type="node.value as string"/>
+        <namespace-info v-if="state.hoverValue === node.value" :key="node.value as string" style="min-width: 300px;" :type="node.value as string" @update="updatePopover(node as any)"/>
         <template #reference>
             <span style="width: 100%; display: inline-block;">{{ state.display }}</span>
         </template>
@@ -27,15 +26,14 @@
       >
         <template #default="{ node }">
           <el-popover
+            :ref="(el) => node.popperRef = el"
             placement="left"
             :title="node.value"
-            width="width:fit-content"
-            :open-delay="5000"
-            :offset="42"
-            trigger="hover"
-            @show="setHoverValue(node.value as string)"
+            width="fit-content"
+            trigger="hover" :boundaries-padding="10"
+            @show="delaySetHoverValue(node)"
           >
-            <namespace-info v-if="state.hoverValue === node.value" :key="node.value as string" style="min-width: 300px;" :type="node.value as string"/>
+            <namespace-info v-if="state.hoverValue === node.value" :key="node.value as string" style="min-width: 300px;" :type="node.value as string" @update="updatePopover(node as any)"/>
             <template #reference>
                 <span style="width: 100%; display: inline-block;">{{ node.label }}</span>
             </template>
@@ -65,9 +63,10 @@
 
 <script lang="ts" setup>
 import { buildFuncCall, debounce, Display, getNodeType, isNull, LocaleString, NODE_SELF, NS_SYSTEM_SCHEMA_NODE_VALUE_TYPE, NS_SYSTEM_SCHEMA_REFLECT_TYPE, ReadOnly, splitGenericParams, StringNode, StringType, Valid } from 'schema-node-core'
-import { onMounted, onUnmounted, reactive, shallowRef, toRaw, useSlots } from 'vue'
+import { isRef, nextTick, onMounted, onUnmounted, reactive, shallowRef, toRaw, useSlots } from 'vue'
 import { schemaView, inputView, subscribeAncestorProperty, _L } from 'schema-node-vue-view';
 import namespaceInfo from './namespaceInfo.vue';
+import { ElPopover } from 'element-plus';
 
 // ── Template ──────────────────────────────────────────────────────
 const props = defineProps<{
@@ -154,9 +153,13 @@ const getDisplay = async (name: string) => {
   return display;
 }
 
-const setHoverValue = debounce((value: string) => {
-  state.hoverValue = value;
-}, 500);
+const setHoverValue = async (value: { popperRef: any, value: string }) => {
+  state.hoverValue = value.value;
+};
+const updatePopover = (value: { popperRef: any }) => {
+  value.popperRef?.popperRef?.popperInstanceRef?.update();
+}
+const delaySetHoverValue = debounce(setHoverValue, 500);
 
 onMounted(() => {
   if (props.readonly)

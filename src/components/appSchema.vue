@@ -103,7 +103,7 @@
           <el-form v-if="appNode" ref="editorRef" :model="appNode.rawValue!" label-width="160" label-position="left"
             style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appNode as StructNode)" in-form="expandall" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :node="(appNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -195,7 +195,7 @@
           <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appFieldNode as StructNode)" in-form="expandall" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :node="(appFieldNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -285,7 +285,7 @@
           <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appWorkflowNode as StructNode)" in-form="expandall" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :node="(appWorkflowNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -327,7 +327,7 @@ const tableHeaderCellStyle = {
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
 }
-import { _L, schemaView } from 'schema-node-vue-view'
+import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 import { _LS, isNull, StructNode, SchemaLoadState, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'

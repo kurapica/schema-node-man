@@ -31,7 +31,7 @@
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <schema-view v-if="workflowNode" :key="workflowNode.guid" :node="workflowNode.node as any"
-                        in-form="expandall" :text="plainText" no-add no-del v-bind="$attrs"></schema-view>
+                        :in-form="SchemaNodeFormType.ExpandAll" :text="plainText" no-add no-del v-bind="$attrs"></schema-view>
                 </el-main>
                 <el-footer>
                     <el-popconfirm v-if="!workflowNode?.children?.length && !state.readonly"
@@ -54,7 +54,7 @@ import { specialFuncRefresh, type ArgInfo } from '../specialFuncHandler'
 import { Delete } from '@element-plus/icons-vue'
 import type { AnySchemaNode, INodeSchema, ScalarRule } from 'schema-node'
 import { ArrayNode, debounce, getAppSchema, getCachedSchema, getFieldAccessWhiteList, getGenericParameter, getSchema, isEqual, isNull, NS_SYSTEM_OBJECT, ScalarNode, SchemaType, StructNode, WorkflowMode, type ILocaleString, type WorkflowModeValue } from 'schema-node'
-import { _L, schemaView } from 'schema-node-vue-view'
+import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 
 const MIN_SVG_WIDTH = 800
