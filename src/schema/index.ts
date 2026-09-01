@@ -1,4 +1,3 @@
-export * from './structField'
 export * from './auth'
 export * from './apptarget'
 import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, NS_SYSTEM_LIST, NS_SYSTEM_SCHEMA_ENUM, NS_SYSTEM_SCHEMA_FUNC, NS_SYSTEM_SCHEMA_FUNC_CALL_ARG, NS_SYSTEM_SCHEMA_NODE_TYPE, NS_SYSTEM_SCHEMA_RELATION, NS_SYSTEM_SCHEMA_STRUCT, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
