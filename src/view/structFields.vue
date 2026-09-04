@@ -1,5 +1,5 @@
 <template>
-  <table-view :node="node" :view-columns="['name', 'type', 'display']" sortable v-bind="$attrs" />
+  <table-view :node="node" :view-columns="['name', 'type', 'fieldDefine.display']" sortable v-bind="$attrs" />
 </template>
 
 <script lang="ts" setup>

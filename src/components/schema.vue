@@ -278,8 +278,10 @@ const handleNew = async (copySchema?: NodeSchema) => {
 
     // attach kind on the struct type is the node schema kind
     const attachKind = nodeType.getProperty(Attach);
-    if (attachKind?.hasValue && nodeKinds.includes(attachKind.getValue<string>()!)) 
-      whiteList.push(attachKind.getValue<string>()!);
+    if (!attachKind?.hasValue) continue;
+    const kind = attachKind.getValue<string>()?.split(".")[0];
+    if (kind && nodeKinds.includes(kind)) 
+      whiteList.push(kind);
   }
 
   // Only addable schema kind
