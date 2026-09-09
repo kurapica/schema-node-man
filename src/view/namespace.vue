@@ -18,7 +18,7 @@
     <template v-else>
       <input-view
         :key="mainNode.id"
-        :style="state.readonly && text ? {} : { width: (98 / (genericNodes.length + 1)) + '%' }"
+        :style="state.readonly && text ? {} : { width: (100 / (genericNodes.length + 1)) + '%' }"
         :node="mainNode"
         :readonly="readonly"
         :text="text"

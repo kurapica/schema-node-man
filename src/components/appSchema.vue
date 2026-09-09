@@ -2,14 +2,8 @@
   <el-container class="main main-panel">
     <el-header style="height: fit-content; width: 100%;">
       <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
-        <schema-view v-model="state.app" in-form :config="{
-          type: 'system.schema.app',
-          display: _LS('system.schema.app')
-        }"></schema-view>
-        <schema-view v-model="state.keyword" in-form :config="{
-          type: 'system.string',
-          display: _LS('frontend.view.keyword')
-        }"></schema-view>
+        <schema-view style="width: 200px;margin-right: 0.5rem;" v-model="state.app" in-form type="system.schema.app.type" no-label/>
+        <schema-view style="width: 200px;margin-right: 0.5rem;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
         <el-button type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
         <!-- download -->
@@ -103,7 +97,7 @@
           <el-form v-if="appNode" ref="editorRef" :model="appNode.rawValue!" label-width="160" label-position="left"
             style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :debug="isDebug" :node="(appNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -320,22 +314,25 @@
 
 <script setup lang="ts">
 import { Delete } from '@element-plus/icons-vue'
-import { reactive, watch, ref, toRaw } from 'vue'
-
-const tableHeaderCellStyle = {
-  backgroundColor: 'var(--app-surface-muted)',
-  color: 'var(--app-text)',
-  borderColor: 'var(--app-border)'
-}
+import { reactive, watch, ref } from 'vue'
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 import { _LS, isNull, StructNode, SchemaLoadState, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema } from 'schema-node-app'
+import { subscribeDebugMode } from '../utility/debug'
 
 //#region View
+const isDebug = ref(false)
+subscribeDebugMode((debug) => isDebug.value = debug, true)
+
+const tableHeaderCellStyle = {
+  backgroundColor: 'var(--app-surface-muted)',
+  color: 'var(--app-text)',
+  borderColor: 'var(--app-border)'
+}
 
 const enableWorkflow = getSchemaServerProvider() ? true : false
 const appSchemas = ref<AppSchema[]>([])
@@ -909,7 +906,7 @@ const startDownload = () => {
   const provider = getSchemaServerProvider();
   downloadFromServer.value = !!provider;
   if (provider) {
-    schemaFormats.value = getSchemaFormats();
+    schemaFormats.value = getSchemaProtocolFormats();
     const savedFormat = localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] || '';
     selectedFormat.value = schemaFormats.value.includes(savedFormat) ? savedFormat : (schemaFormats.value[0] || '');
   }

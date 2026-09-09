@@ -2,9 +2,9 @@
   <el-container class="main main-panel">
     <el-header style="height: fit-content; width: 100%;">
       <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
-        <schema-view style="width: 200px;" v-model="state.namespace" in-form type="system.schema.namespace.type" no-label></schema-view>
-        <schema-view style="width: 200px;" v-model="state.type" in-form type="system.schema.node.kind" no-label></schema-view>
-        <schema-view style="width: 200px;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
+        <schema-view style="width: 200px;margin-right: 1rem;" v-model="state.namespace" in-form type="system.schema.namespace.type" no-label></schema-view>
+        <schema-view style="width: 200px;margin-right: 1rem;" v-model="state.type" in-form type="system.schema.node.kind" no-label></schema-view>
+        <schema-view style="width: 200px;margin-right: 1rem;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
         <el-button type="primary" @click="handleNew()">{{ _L["frontend.view.new"] }}</el-button>
         <!-- download -->
@@ -85,7 +85,7 @@
         <el-main>
           <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!" label-position="left" style="width: 100%; height: 90%;" label-width="300px" >
             <div class="draw-view">
-              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" debug :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :debug="isDebug"  :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -160,6 +160,7 @@ import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
 import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW } from 'schema-node-app'
 import { logger } from '../utility/logger'
+import { subscribeDebugMode } from '../utility/debug'
 
 const schemas = ref<NodeSchema[]>([]);
 const tableHeaderCellStyle = {
@@ -167,6 +168,11 @@ const tableHeaderCellStyle = {
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
 };
+
+const isDebug = ref(false);
+const debugHandler = subscribeDebugMode((debug) => {
+  isDebug.value = debug
+}, true)
 
 const schemaTypeOrder: Record<string, number> = {
   [SCHEMA_KIND_NAMESPACE]:1,
@@ -408,6 +414,9 @@ const confirmNameSpace = async () => {
           return
         }
         data.loadState = (data.loadState ?? 0) | SchemaLoadState.Service
+        closeNamespaceEditor()
+        showNamespaceEditor.value = false
+        return refresh()
       }
       catch (ex: any) {
         if (ex && ex.status === 403) {

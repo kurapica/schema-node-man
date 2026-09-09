@@ -1,4 +1,6 @@
 ﻿{
+  "frontend.debug": "调试模式",
+  
   "frontend.design.enumintvalueinfo.value": "枚举值",
   "frontend.design.enumintvalueinfo.name": "枚举名",
   "frontend.design.enumintvalueinfo.disable": "停用",

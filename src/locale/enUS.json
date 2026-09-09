@@ -1,4 +1,6 @@
 ﻿{
+  "frontend.debug": "Debug Mode",
+  
   "frontend.design.enumintvalueinfo.value": "Value",
   "frontend.design.enumintvalueinfo.name": "Name",
   "frontend.design.enumintvalueinfo.disable": "Disabled",

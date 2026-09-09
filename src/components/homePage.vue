@@ -4,6 +4,12 @@
             <nav-header></nav-header>
             <p style="position: absolute; top: 0rem; right: 2rem">
                 <el-switch
+                    v-model="isDebug"
+                    :active-text="_L['frontend.debug']"
+                    @change="setDebugMode"
+                    style="margin-right: 2rem"
+                />
+                <el-switch
                     v-model="isDark"
                     :active-text="_L['frontend.dark']"
                     :inactive-text="_L['frontend.light']"
@@ -46,10 +52,11 @@ import { getSchemaSite, setSchemaSite } from "../schema/provider/schemaServerPro
 import { getFrontendAuth, saveFrontendAuth } from "../utility/auth"
 import { schemaView } from "schema-node-vue-view"
 import { FrontendAuth } from "../schema/auth.js"
+import { setDebugMode, subscribeDebugMode } from "../utility/debug.js"
 
 const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'
 
-// 主题切换
+// Theme switch
 const isDark = ref(localStorage.getItem('themeMode') === 'dark')
 const applyTheme = (mode: 'dark' | 'light') => {
     document.documentElement.setAttribute('data-theme', mode)
@@ -62,6 +69,12 @@ const toggleTheme = () => {
     applyTheme(mode)
     localStorage.setItem('themeMode', mode)
 }
+
+// Debug Mode
+const isDebug = ref(false)
+subscribeDebugMode((debugMode) => isDebug.value = debugMode, true)
+
+// Life Cycle
 onMounted(() => {
     const mode = (localStorage.getItem('themeMode') || 'light') as 'dark' | 'light'
     applyTheme(mode)

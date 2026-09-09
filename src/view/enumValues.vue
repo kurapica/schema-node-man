@@ -1,5 +1,5 @@
 <template>
-  <table-view :node="node" :in-form="inForm" :text="text" operWidth="200" :readonly="readOnly" v-bind="$attrs">
+  <table-view :node="node" :in-form="inForm" :text="text" operWidth="200" :readonly="readOnly" :debug="debug" v-bind="$attrs">
     <template #operator="{ row, index }">
       <template v-if="!readOnly">
         <a href="javascript:void(0)" v-if="!isflags && index" @click="arrayNode.moveRow(index, index - 1)">{{
@@ -19,17 +19,17 @@
     direction="rtl" size="100%" append-to-body :before-close="onSubValueEditorClose">
     <el-container class="main" style="height: 80vh;">
       <el-main>
-        <table-view v-if="subListNode" :key="subListNode.id" :node="(subListNode as ArrayNode)" :in-form="inForm"
-          :text="text" :readonly="readOnly" operWidth="200">
+        <table-view :key="node.id" :node="node" :in-form="inForm"
+          :text="text" :readonly="readOnly" :debug="debug" :header-cell-style="tableHeaderCellStyle" operWidth="200">
           <template #operator="{ row, index }">
             <template v-if="!readOnly">
               <a href="javascript:void(0)" v-if="index" @click="swapSubListRow(index, index - 1)">{{
                 _L["frontend.view.moveup"] }}</a>
-              <a href="javascript:void(0)" v-if="customEnum || ((row as StructNode).getAccessValue('value')! as DataNode)!.readonly"
+              <a href="javascript:void(0)" v-if="customEnum || ((row as StructNode).getAccessValue('value') as DataNode)?.readonly"
                 style="padding-left: 1rem;" @click="delSubListRow(index)">{{ _L["DEL"] }}</a>
             </template>
             <a href="javascript:void(0)"
-              v-if="(cascade.length > subListStack.length + 1) && ((row as StructNode).getAccessValue('value')! as DataNode)!.readonly"
+              v-if="(cascade.length > subListStack.length + 1) && ((row as StructNode).getAccessValue('value') as DataNode)?.readonly"
               style="padding-left: 1rem;" @click="nextCascade(row)">{{ _L(cascade[subListStack.length + 1] ||
               "frontend.view.nextlevel") }}</a>
           </template>
@@ -50,13 +50,19 @@
 <script setup lang="ts">
 import { saveStorageSchema } from '../schema';
 import { ElMessage } from 'element-plus';
-import { ArrayNode, combinePaths, DataNode, deepClone, Disable, EnumNode, EnumType, EnumValueType, getNodeType, LocaleString, ReadOnly, SchemaLoadState, StringNode, StructNode } from 'schema-node-core';
+import { ArrayNode, combinePaths, DataNode, deepClone, Disable, EnumNode, EnumType, EnumValueType, getNodeType, LocaleString, ReadOnly, SchemaLoadState, StringNode, StructNode, StructType } from 'schema-node-core';
 import { _L, tableView } from 'schema-node-vue-view'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import { subscribeAncestorProperty } from '../../../schema-node-vue-view/src/utility/toolset';
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider';
 
-const props = defineProps<{ node: ArrayNode, inForm?: any, text?: any, readonly?: boolean }>()
+const tableHeaderCellStyle = {
+  backgroundColor: 'var(--app-surface-muted)',
+  color: 'var(--app-text)',
+  borderColor: 'var(--app-border)'
+};
+
+const props = defineProps<{ node: ArrayNode, inForm?: any, text?: any, readonly?: boolean, debug?: boolean }>()
 const arrayNode = toRaw(props.node)
 
 const cascade = ref<LocaleString[]>([])
@@ -69,34 +75,29 @@ const subs: Function[] = []
 
 // sub list
 const showSubList = ref(false)
-const subListStack: { value: any, display?: LocaleString, data?: any[] }[] = reactive([])
-const subListNode = ref<ArrayNode | null>(null)
+const subListStack: { origin?: any,  data?: any, value?: any, display?: LocaleString }[] = reactive([])
 
 const nextCascade = async (row: StructNode) => {
   const { value, display } = row.rawValue as { value: any, display: LocaleString | undefined };
-  if (subListStack.length)
-    subListStack[subListStack.length - 1].data = subListNode.value?.value as any[]
-
-  // new stack
-  const newStack = { value, display }
-  subListStack.push(newStack)
+  subListStack.push({ origin: arrayNode.original, data: arrayNode.value, value, display }); // save current stack
 
   // get sub list
   const enumNode = (await getNodeType(enumName.value) as EnumType)!;
   const access = await enumNode.getEnumEntryAccess(value);
   const sublist = (access?.length ? access[access.length - 1].children : undefined) ?? [];
-  subListNode.value?.dispose()
-  subListNode.value = arrayNode.type.create([...sublist], arrayNode.parent) as ArrayNode;
+
+  arrayNode.setValue(sublist);
+  arrayNode.confirm();
   showSubList.value = true
 }
 
-const swapSubListRow = (x: number, y: number) => toRaw(subListNode.value)?.moveRow(x, y)
-const delSubListRow = (x: number) => toRaw(subListNode.value)?.delRows(x)
+const swapSubListRow = (x: number, y: number) => arrayNode.moveRow(x, y)
+const delSubListRow = (x: number) => arrayNode.delRows(x)
 
 const saveSubList = async () => {
-  const stack = subListStack[subListStack.length - 1]
+  const stack = subListStack[subListStack.length - 1];
   const serverProvider = getSchemaServerProvider()
-  const data = deepClone(subListNode.value?.value || [])
+  const data = deepClone(arrayNode.value || [])
   if (serverProvider && customEnum.value) {
     const res = await serverProvider.saveEnumSubList(enumName.value, stack.value, data)
     if (!res) {
@@ -104,7 +105,8 @@ const saveSubList = async () => {
       return
     }
     // force reload enum node
-    return await getNodeType(enumName.value, undefined, undefined, true);
+    await getNodeType(enumName.value, undefined, undefined, true);
+    return closeSubList()
   }
 
   const enumType = await getNodeType(enumName.value) as EnumType;
@@ -115,18 +117,13 @@ const saveSubList = async () => {
 
 // close sub list editor
 const closeSubList = () => {
-  subListStack.pop()
+  const stack = subListStack.pop();
 
-  if (subListStack.length) {
-    subListNode.value?.dispose()
-    subListNode.value = arrayNode.type.create([...subListStack[subListStack.length - 1].data!], arrayNode.parent) as ArrayNode;
-    showSubList.value = true
-  }
-  else {
-    showSubList.value = false
-    subListNode.value?.dispose()
-    subListNode.value = null
-  }
+  arrayNode.value = stack?.origin;
+  arrayNode.confirm();
+  arrayNode.value = stack?.data;
+
+  showSubList.value = subListStack.length > 0
 }
 
 const onSubValueEditorClose = async (done: Function) => {
@@ -158,7 +155,7 @@ onMounted(async () => {
       isflags.value = valueTypefield.getValue() === EnumValueType.Flags
     }, true))
 
-  subs.push(subscribeAncestorProperty(arrayNode, ReadOnly, (values: boolean[]) => readOnly.value = props.readonly || values.some(v => v), true))
+  subs.push(subscribeAncestorProperty(arrayNode, ReadOnly, (values: boolean[]) => readOnly.value = values.some(v => v), true))
   subs.push(subscribeAncestorProperty(arrayNode, Disable, (values: boolean[]) => disabled.value = values.some(v => v), true))
 })
 
