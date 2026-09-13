@@ -89,6 +89,7 @@ import relationsView from "../view/relations.vue";
 import namespaceView from '../view/namespace.vue';
 import funcView from '../view/func.vue';
 import callArgsView from '../view/callArgs.vue';
+import waterFallView from '../view/waterFallView.vue';
 
 regSchemaTypeView(`${NS_SYSTEM_SCHEMA_ENUM}.values`, enumValuesView);
 regSchemaTypeView(`${NS_SYSTEM_SCHEMA_STRUCT}.fields`, structFields);
@@ -96,6 +97,7 @@ regSchemaTypeView(`${NS_SYSTEM_SCHEMA_RELATION}.schemas`, relationsView);
 regSchemaTypeView(NS_SYSTEM_SCHEMA_NODE_TYPE, namespaceView);
 regSchemaTypeView(`${NS_SYSTEM_SCHEMA_FUNC}.schema`, funcView);
 regSchemaTypeView(`${NS_SYSTEM_LIST}<${NS_SYSTEM_SCHEMA_FUNC_CALL_ARG}>`, callArgsView); 
+regSchemaTypeView(`${NS_SYSTEM_LIST}<${NS_SYSTEM_SCHEMA_FUNC}.funccall>`, waterFallView);
 
 /*
 import namespaceView from "./view/namespaceView.vue";

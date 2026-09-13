@@ -14,7 +14,6 @@ import { initSchemaRuntime, logger as schemaLogger, LogLevel, setLanguage } from
 import { logger as viewLogger } from 'schema-node-vue-view'
 import { logger } from './utility/logger'
 import { reloadStorageSchemas } from './schema'
-import { reloadStorageAppSchemas } from './appSchema'
 import { setSchemaSite } from './schema/provider/schemaServerProvider'
 
 const app = createApp(App)
@@ -34,7 +33,6 @@ if (localStorage["lang"])
 
 // schema init
 reloadStorageSchemas()
-reloadStorageAppSchemas()
 if (document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true') {
     setSchemaSite(document.querySelector('meta[name="schema-api-base-url"]')?.getAttribute('content') || '/schema')
 }

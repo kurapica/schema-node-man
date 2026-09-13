@@ -85,7 +85,7 @@
         <el-main>
           <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!" label-position="left" style="width: 100%; height: 90%;" label-width="300px" >
             <div class="draw-view">
-              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :debug="isDebug"  :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.Expand2" text="left" :debug="isDebug"  :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -127,14 +127,9 @@
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <template v-if="currRow?.usedBy?.length">
-            <h3>{{ _L["system.schema.def.schematype"] }}</h3>
-            <hr />
             <ul>
               <li v-for="type in currRow?.usedBy" :key="type">
-                <schema-view :config="{
-                  type: 'system.schema.type.any',
-                  readonly: true
-                }" :value="type" text="left"></schema-view>
+                <schema-view type="system.schema.node.type" :value="type"  readonly text="left"/>
               </li>
             </ul>
             <br />
@@ -242,13 +237,17 @@ const refresh = async () => {
       if (schemaTypeOrder[a.kind] > schemaTypeOrder[b.kind]) return 1;
       return a.name < b.name ? -1 : 1;
     })
+    for (let schema of temp) {
+      if (schema.kind !== SCHEMA_KIND_NAMESPACE) continue;
+      await getNodeType(getNodeSchemaName(schema));
+    }
     schemas.value = temp;
   }
 }
 
 watch(state, refresh, { immediate: true })
 
-const isSchemaDeletable = (schema: NodeSchema) => !((schema.loadState || 0) & SchemaLoadState.System) && !getCachedNodeType(getNodeSchemaName(schema))?.isUsed
+const isSchemaDeletable = (schema: NodeSchema) => !((schema.loadState || 0) & SchemaLoadState.System) && !schema.usedBy?.length && !getCachedNodeType(getNodeSchemaName(schema))?.isUsed
 
 //#region Schema Edit
 
@@ -402,8 +401,6 @@ const confirmNameSpace = async () => {
     return
   }
 
-  logger.verbose("[Save][Schema]", getNodeSchemaName(data), data)
-
   if (!schema || ((schema.loadState ?? 0) & SchemaLoadState.Service)) {
     const provider = getSchemaServerProvider()
     if (provider) {
@@ -414,6 +411,10 @@ const confirmNameSpace = async () => {
           return
         }
         data.loadState = (data.loadState ?? 0) | SchemaLoadState.Service
+
+        const namespace = (await getNodeType(data.namespace ?? '')) as INamespaceNodeType
+        namespace?.saveSubNodeSchema(data)
+
         closeNamespaceEditor()
         showNamespaceEditor.value = false
         return refresh()

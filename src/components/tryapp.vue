@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts" setup>
-import { addAppTarget } from "../appSchema";
+import { addAppTarget } from "../utility/auth";
 import { ElMessage, type ElForm } from "element-plus"
 import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, IAppInteractionWorkflow } from "schema-node-app";
 import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, InVisible, isNull, StructNode, StructType, ValueType, Visible } from "schema-node-core";

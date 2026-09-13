@@ -1,6 +1,6 @@
 import { setSchemaApiHeaders } from "schema-node-app"
 import { FrontendAuth } from "../schema/auth"
-import { deepClone } from "schema-node-core"
+import { deepClone, isNull } from "schema-node-core"
 
 // auth
 let auth: FrontendAuth = { savestorage: false, headers: [] }
@@ -24,4 +24,19 @@ export function saveFrontendAuth(authData: FrontendAuth) {
     }
     auth = authData ? deepClone(authData) : { savestorage: false, headers: [] }
     setSchemaApiHeaders(auth.headers || [])
+}
+
+export function addAppTarget(app: string, target: string) {
+  if (isNull(app) || isNull(target)) return;
+
+  let appTargets = JSON.parse(localStorage["schema_app_targets"] || "{}");
+  if (isNull(appTargets) || typeof appTargets !== "object") appTargets = {};
+
+  let targets: string[] = appTargets[app] || [];
+  if (!Array.isArray(targets)) targets = [];
+  if (!targets.includes(target)) {
+    targets.unshift(target);
+    appTargets[app] = targets;
+    localStorage["schema_app_targets"] = JSON.stringify(appTargets);
+  }
 }
