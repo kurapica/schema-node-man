@@ -5,11 +5,11 @@
         <schema-view style="width: 200px;margin-right: 0.5rem;" v-model="state.app" in-form type="system.schema.app.type" no-label/>
         <schema-view style="width: 200px;margin-right: 0.5rem;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
-        <el-button type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
+        <el-button v-if="isNewAppAble" type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
         <!-- download -->
         <template v-if="!downloading">
           <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
-          <el-upload style="padding-left:1rem;" :before-upload="uploadSchema" :limit="1" :show-file-list="false">
+          <el-upload v-if="isNewAppAble" style="padding-left:1rem;" :before-upload="uploadSchema" :limit="1" :show-file-list="false">
             <el-button type="success">{{ _L["frontend.view.upload"] }}</el-button>
           </el-upload>
         </template>
@@ -34,12 +34,12 @@
             <span v-else>{{ scope.row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
+        <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']" min-width="150">
           <template #default="scope">
             {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
           </template>
         </el-table-column>
-        <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
+        <el-table-column align="left" prop="desc" :label="_L['system.schema.prop.common.description']" min-width="150">
           <template #default="scope">
             {{ _L(scope.row.description) }}
           </template>
@@ -121,7 +121,7 @@
                 <span v-else>{{ scope.row.name }}</span>
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
+            <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']" min-width="150">
               <template #default="scope">
                 {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
               </template>
@@ -131,7 +131,7 @@
                 <schema-view :value="scope.row.type" readonly type="system.schema.node.type" text="left"></schema-view>
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
+            <el-table-column align="left" prop="desc" :label="_L['system.schema.prop.common.description']" min-width="150">
               <template #default="scope">
                 {{ _L(scope.row.description) }}
               </template>
@@ -181,7 +181,7 @@
           <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appFieldNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :node="(appFieldNode as StructNode)" :in-form="SchemaNodeFormType.Expand" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -204,21 +204,21 @@
         <el-main>
           <el-table :data="workflows" style="width: 100%; height: 65vh;" :border="true" header-align="left"
             :header-cell-style="tableHeaderCellStyle">
-            <el-table-column align="left" prop="name" :label="_L['system.schema.def.app.workflow.schema.name']"
+            <el-table-column align="left" prop="name" :label="_L['system.schema.app.workflow.schema.name']"
               min-width="120" />
-            <el-table-column align="left" prop="display" :label="_L['system.schema.def.app.workflow.schema.display']"
+            <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']"
               min-width="150">
               <template #default="scope">
                 {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="desc" :label="_L['system.schema.def.app.workflow.schema.desc']"
+            <el-table-column align="left" prop="desc" :label="_L['system.schema.prop.common.description']"
               min-width="150">
               <template #default="scope">
-                {{ _L(scope.row.desc) }}
+                {{ _L(scope.row.description) }}
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="active" :label="_L['system.schema.def.app.workflow.schema.active']"
+            <el-table-column align="left" prop="active" :label="_L['system.schema.app.workflow.schema.active']"
               min-width="120">
               <template #default="scope">
                 <schema-view v-model="scope.row.active" :config="{
@@ -306,19 +306,21 @@
 
 <script setup lang="ts">
 import { Delete } from '@element-plus/icons-vue'
-import { reactive, watch, ref, nextTick } from 'vue'
+import { reactive, watch, ref, nextTick, toRaw } from 'vue'
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
 import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly, SystemDefined } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema, SchemaUpdate } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema, SchemaCreate, SchemaUpdate } from 'schema-node-app'
 import { subscribeDebugMode } from '../utility/debug'
-import { fa } from 'element-plus/es/locale/index.mjs'
+import { logger } from '../utility/logger.js'
 
 //#region View
 const isDebug = ref(false)
 subscribeDebugMode((debug) => isDebug.value = debug, true)
+
+const isNewAppAble = ref(true)
 
 const tableHeaderCellStyle = {
   backgroundColor: 'var(--app-surface-muted)',
@@ -376,6 +378,7 @@ const refresh = async () => {
   appSchemas.value = [];
   await nextTick();
   appSchemas.value = subApps;
+  isNewAppAble.value = appType?.getPropertyValue(SchemaCreate) ?? false;
 }
 
 watch(state, refresh, { immediate: true })
@@ -398,7 +401,7 @@ const handleNew = async () => {
   localStorage["schema_new_app"] = state.app
 
   const appSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP}.schema`) as StructType;
-  appNode.value = appSchemaType!.create({}) as StructNode;
+  appNode.value = appSchemaType!.create({ container: state.app }) as StructNode;
   showAppEditor.value = true
 
   const displayField = appNode.value!.getAccessValue("display") as StructNode;
@@ -418,7 +421,6 @@ const handleNew = async () => {
 const handleEdit = async (row: any, readonly?: boolean) => {
   isNewApp = false;
   const appType = await getAppType(getAppSchemaName(row));
-  console.warn(row, appType);
   if (!appType) return;
 
   const appSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP}.schema`) as StructType;
@@ -461,7 +463,15 @@ const confirmApp = async () => {
   const res = await editorRef.value?.validate();
   if (!res || !appNode.value?.isValid) return;///
 
-  const data = appNode.value.submitValue as AppSchema;
+  const node = toRaw(appNode.value!)
+  if (!node.isValid) {
+    for(const n of node.getErrorNodes())
+      logger.error(n)
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
+  
+  const data = node.submitValue as AppSchema;
   const appType = await getAppType(getAppSchemaName(data));
 
   if (isNewApp && appType) {
@@ -488,7 +498,10 @@ const confirmApp = async () => {
     return
   }
 
-  saveAppSchema(data)
+  if (isNewApp)
+    await getAppType(data.container ?? '', true);
+  else
+    await getAppType(getAppSchemaName(data), true);
   closeAppEditor()
   showAppEditor.value = false
   return refresh()
@@ -645,7 +658,15 @@ const confirmField = async () => {
   const res = await fieldEditorRef.value?.validate();
   if (!res || !appFieldNode.value?.isValid) return;
 
-  const data = appFieldNode.value.submitValue as AppFieldSchema;
+  const node = toRaw(appFieldNode.value!)
+  if (!node.isValid) {
+    for(const n of node.getErrorNodes())
+      logger.error(n)
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
+  
+  const data = node.submitValue as AppFieldSchema;
   const appType = await getAppType(currApp!);
   if (!appType) return;
 
@@ -668,7 +689,7 @@ const confirmField = async () => {
     return;
   }
 
-  await appType.saveField(data);
+  await getAppType(appType.name, true);
   fields.value = Array.from(appType.getFields().map(f => f.getFieldSchema() as AppFieldSchema))
   closeFieldEditor()
   showAppFieldEditor.value = false
@@ -781,7 +802,16 @@ const confirmWorkflow = async () => {
     ElMessage.error(appWorkflowNode.value?.error);
     return;
   }
-  const data = appWorkflowNode.value.submitValue as AppWorkflowSchema;
+
+  const node = toRaw(appWorkflowNode.value!)
+  if (!node.isValid) {
+    for(const n of node.getErrorNodes())
+      logger.error(n)
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
+
+  const data = node.submitValue as AppWorkflowSchema;
   const appType = await getAppType(currApp!)
   if (!appType) return
     const provider = getSchemaServerProvider();
@@ -959,14 +989,13 @@ watch(selectedFormat, (val) => {
   localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] = val;
 })
 
-const uploadSchema = (file: File) => {
-  file.text().then(text => {
-    const data = JSON.parse(text);
-    if (Array.isArray(data)) {
-      saveAppSchema(data);
-      return refresh();
-    }
-  })
+const uploadSchema = async (file: File) => {
+  const text = await file.text();
+  const data = JSON.parse(text);
+  if (Array.isArray(data)) {
+    // @TODO
+    return refresh();
+  }
   return false
 }
 

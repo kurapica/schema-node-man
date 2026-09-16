@@ -1,7 +1,7 @@
-import { AppScopeType, NS_SYSTEM_SCHEMA_APP } from "schema-node-app";
-import { ArgName, AsSuggest, buildFuncCall, Call, InVisible, isNull, Meta, NS_SYSTEM_INTRINSIC, NS_SYSTEM_LIST, NS_SYSTEM_STRING, Relation, Require, SchemaType, UpLimitString, WhiteList } from "schema-node-core";
+import { AppScopeType, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_REFLECT_APP } from "schema-node-app";
+import { ArgName, AsSuggest, buildFuncCall, Call, InVisible, isNull, Meta, NS_SYSTEM_INTRINSIC, NS_SYSTEM_LIST, NS_SYSTEM_STRING, OfSchema, Relation, Require, Return, SCHEMA_KIND_FUNCTION, SchemaType, UpLimitString, WhiteList } from "schema-node-core";
 
-@Meta(SchemaType, `${NS_SYSTEM_SCHEMA_APP}.frontend.apptarget`)
+@Meta(SchemaType, 'frontend.apptarget')
 class AppTargetMeta {
   /** The allowed applications */
   @Meta(SchemaType, `${NS_SYSTEM_LIST}<${NS_SYSTEM_STRING}>`)
@@ -19,15 +19,17 @@ class AppTargetMeta {
   @Meta(UpLimitString, 64)
   @Meta(Require, true)
   @Meta(AsSuggest, true)
-  @Relation(InVisible, Call, buildFuncCall(`${NS_SYSTEM_SCHEMA_APP}.isscopepolicy`, '@app', AppScopeType.SystemLevel))
+  @Relation(InVisible, Call, buildFuncCall(`${NS_SYSTEM_SCHEMA_REFLECT_APP}.isscopepolicy`, '@app', AppScopeType.SystemLevel))
+  @Relation(WhiteList, Call, buildFuncCall(`frontend.method.getapptargets`, '@app'))
   target!: string;
 }
 
-@Meta(SchemaType, `${NS_SYSTEM_SCHEMA_APP}.frontend.method`)
+@Meta(SchemaType, 'frontend.method')
+@Meta(OfSchema, SCHEMA_KIND_FUNCTION)
 class FrontendMethods {
   /** Get the application targets */
-  @Meta(SchemaType, `${NS_SYSTEM_SCHEMA_APP}.frontend.method.getapptargets`)
-  static appgetapptargets(
+  @Meta(Return, `${NS_SYSTEM_LIST}<${NS_SYSTEM_STRING}>`)
+  static getapptargets(
     @Meta(ArgName, "app")
     @Meta(SchemaType, `${NS_SYSTEM_SCHEMA_APP}.type`)
     app: string) {

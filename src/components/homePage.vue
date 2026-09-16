@@ -17,6 +17,7 @@
                     style="margin-right: 2rem"
                 />
                 <el-input v-if="!isEmbedded" v-model="url" :placeholder="_L['frontend.server.url']" style="display:inline;margin-right: 2rem" @change="saveServer"></el-input>
+                <a href="/" v-else style="margin-right: 1rem;">{{ _L["frontend.server.url"] }}</a>
                 <a href="javascript:void(0)" v-if="isEmbedded || url" style="margin-right: 2rem;" @click="openAuth">{{_L["frontend.auth"]}}</a>
                 <a href="javascript:void(0)" @click="toggle('enUS')" :class="lang =='enUS' ? 'active' : 'deactive'">EN</a>
                 |
