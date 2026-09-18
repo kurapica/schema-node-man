@@ -6,7 +6,7 @@
         <schema-view style="width: 200px;margin-right: 1rem;" v-model="state.type" in-form type="system.schema.node.kind" no-label></schema-view>
         <schema-view style="width: 200px;margin-right: 1rem;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
-        <el-button type="primary" @click="handleNew()">{{ _L["frontend.view.new"] }}</el-button>
+        <el-button v-if="isNewSchema" type="primary" @click="handleNew()">{{ _L["frontend.view.new"] }}</el-button>
         <!-- download -->
         <template v-if="!downloading">
           <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
@@ -55,12 +55,12 @@
             <el-button v-else type="success" @click="handleEdit(scope.row, true)">
               {{ _L["frontend.view.view"] }}
             </el-button>
-            <el-button type="warning"
-              v-if="!((scope.row.loadState || 0) & SchemaLoadState.System) || scope.row.kind === SCHEMA_KIND_NAMESPACE"
+            <el-button type="warning" v-if="isSchemaUpdatable(scope.row)"
               @click="handleEdit(scope.row, false)">
               {{ _L["frontend.view.edit"] }}
             </el-button>
-            <el-popconfirm v-if="isSchemaDeletable(scope.row)" :title="_L['frontend.view.confirmdelete']"
+            <el-popconfirm v-if="isSchemaDeletable(scope.row)" 
+              :title="_L['frontend.view.confirmdelete']"
               :confirm-button-text="_L['YES']" :cancel-button-text="_L['NO']" :icon="Delete"
               @confirm="handleDelete(scope.row)">
               <template #reference>
@@ -147,13 +147,13 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw } from 'vue'
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
-import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName } from 'schema-node-core'
+import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName, NS_SYSTEM } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
 import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
-import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW } from 'schema-node-app'
+import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW, SchemaCreate } from 'schema-node-app'
 import { logger } from '../utility/logger'
 import { subscribeDebugMode } from '../utility/debug'
 
@@ -168,6 +168,8 @@ const isDebug = ref(false);
 const debugHandler = subscribeDebugMode((debug) => {
   isDebug.value = debug
 }, true)
+
+const isNewSchema = ref(true);
 
 const schemaTypeOrder: Record<string, number> = {
   [SCHEMA_KIND_NAMESPACE]:1,
@@ -237,17 +239,22 @@ const refresh = async () => {
       if (schemaTypeOrder[a.kind] > schemaTypeOrder[b.kind]) return 1;
       return a.name < b.name ? -1 : 1;
     })
-    for (let schema of temp) {
+    for (let i = 0; i < temp.length; i++) {
+      const schema = temp[i];
       if (schema.kind !== SCHEMA_KIND_NAMESPACE) continue;
       await getNodeType(getNodeSchemaName(schema));
     }
     schemas.value = temp;
+    isNewSchema.value = nodeType.name ? nodeType.getPropertyValue(SchemaCreate) !== false : (await getNodeType(NS_SYSTEM))?.getPropertyValue(SchemaCreate) !== false;
   }
+  else
+    isNewSchema.value = false
 }
 
 watch(state, refresh, { immediate: true })
 
-const isSchemaDeletable = (schema: NodeSchema) => !((schema.loadState || 0) & SchemaLoadState.System) && !schema.usedBy?.length && !getCachedNodeType(getNodeSchemaName(schema))?.isUsed
+const isSchemaUpdatable = (schema: NodeSchema) => ((schema.loadState || 0) & (SchemaLoadState.FrontEnd)) || (!((schema.loadState || 0) & SchemaLoadState.System) || ((schema.loadState || 0) & SchemaLoadState.Service) && schema.kind === SCHEMA_KIND_NAMESPACE) && (schema as any).schemaUpdate !== false; 
+const isSchemaDeletable = (schema: NodeSchema) => !((schema.loadState || 0) & SchemaLoadState.System) && !schema.usedBy?.length && !getCachedNodeType(getNodeSchemaName(schema))?.isUsed && (schema as any).schemaDelete !== false;
 
 //#region Schema Edit
 
@@ -338,7 +345,8 @@ const handleEdit = async (row: any, readonly?: boolean) => {
 
 // delete
 const handleDelete = async (row: any) => {
-  const nodeType = await getNodeType(getNodeSchemaName(row));
+  const name =getNodeSchemaName(row)
+  const nodeType = await getNodeType(name);
 
   if (nodeType?.isUsed || (nodeType?.loadState ?? 0) & SchemaLoadState.System) {
     ElMessage.error(_L.value["frontend.view.cantdelschema"])
@@ -348,7 +356,7 @@ const handleDelete = async (row: any) => {
     const provider = getSchemaServerProvider()
     if (provider) {
       try {
-        const res = await provider.deleteSchema(row.name)
+        const res = await provider.deleteSchema(name)
         if (!res) {
           ElMessage.error(_L.value["frontend.view.error"])
           return
@@ -365,7 +373,7 @@ const handleDelete = async (row: any) => {
       }
     }
   }
-  removeStorageSchema(getNodeSchemaName(row));
+  removeStorageSchema(name);
   (nodeType?.namespace as INamespaceNodeType)?.removeSubNodeSchema(row.name);
   return refresh();
 }

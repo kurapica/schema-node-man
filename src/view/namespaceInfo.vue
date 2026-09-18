@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Attach, DataNode, Display, getCachedNodeType, getNodeSchemaName, getNodeType, INamespaceNodeType, isEmpty, LocaleString, NodeSchema, NS_SYSTEM_SCHEMA_NODE, ReadOnly, ScalarNode, SchemaLoadState, StructNode, StructType } from 'schema-node-core';
+import { Attach, DataNode, Display, getCachedNodeType, getNodeSchemaName, getNodeType, INamespaceNodeType, InVisible, isEmpty, LocaleString, NodeSchema, NS_SYSTEM_SCHEMA_NODE, ReadOnly, ScalarNode, SchemaLoadState, StructNode, StructType, Visible } from 'schema-node-core';
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view';
 import { onMounted, onUnmounted, ref, shallowRef, toRaw } from 'vue';
 import { ElForm, ElMessage } from 'element-plus'
@@ -65,7 +65,7 @@ const show = async() => {
   showNode.value = node
   const nodes: DataNode[] = [];
   for (let f of node.fields) {
-    if (blacklist.includes(f.name!) || isEmpty(f.rawValue)) continue;
+    if (blacklist.includes(f.name!) || isEmpty(f.rawValue) || f.getPropertyValue(InVisible) || f.getPropertyValue(Visible) === false) continue;
 
     const attach = f.type.getPropertyValue(Attach) as string;
     if (attach && attach !== type.kind) continue;

@@ -181,7 +181,7 @@
           <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appFieldNode as StructNode)" :in-form="SchemaNodeFormType.Expand" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :debug="isDebug" :node="(appFieldNode as StructNode)" :in-form="SchemaNodeFormType.Expand" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -229,7 +229,7 @@
             </el-table-column>
             <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="400">
               <template #header>
-                <a href="javascript:void(0)" @click="handleWorkflowNew"
+                <a href="javascript:void(0)" v-if="isFieldAddable" @click="handleWorkflowNew"
                   style="text-decoration: underline; color: lightseagreen;">
                   {{ _L["frontend.view.new"] }}
                 </a>
@@ -271,7 +271,7 @@
           <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appWorkflowNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
+              <schema-view :debug="isDebug" :node="(appWorkflowNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -308,13 +308,14 @@
 import { Delete } from '@element-plus/icons-vue'
 import { reactive, watch, ref, nextTick, toRaw } from 'vue'
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
-import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly, SystemDefined } from 'schema-node-core'
+import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly } from 'schema-node-core'
 import { ElForm, ElMessage } from 'element-plus'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, saveAppSchema, SchemaCreate, SchemaUpdate } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate, SchemaUpdate } from 'schema-node-app'
 import { subscribeDebugMode } from '../utility/debug'
 import { logger } from '../utility/logger.js'
+import { fa } from 'element-plus/es/locale/index.mjs'
 
 //#region View
 const isDebug = ref(false)
@@ -378,7 +379,7 @@ const refresh = async () => {
   appSchemas.value = [];
   await nextTick();
   appSchemas.value = subApps;
-  isNewAppAble.value = appType?.getPropertyValue(SchemaCreate) ?? false;
+  isNewAppAble.value = appType?.getPropertyValue(SchemaCreate) !== false;
 }
 
 watch(state, refresh, { immediate: true })
@@ -530,7 +531,7 @@ const showFields = async (row: any) => {
   const appType = await getAppType(getAppSchemaName(row));
   appTitle.value = _L.value(appType?.getProperty(Display)?.getValue<LocaleString>() ?? appType?.name ?? "");
   fields.value = Array.from(appType?.getFields().map(f => f.getFieldSchema() as AppFieldSchema) ?? []);
-  isFieldAddable = appType?.getPropertyValue(SchemaUpdate) ?? false;
+  isFieldAddable = appType?.getPropertyValue(SchemaCreate) ?? false;
   showFieldList.value = true
 }
 
