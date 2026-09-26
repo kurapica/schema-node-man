@@ -79,11 +79,9 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, DataNode, debounce, Display, FuncExp, FunctionNode, FunctionType, getNodeType, isNull, NS_SYSTEM_LIST, ReadOnly, Require, SCHEMA_KIND_ARRAY, splitString, ValueType } from 'schema-node-core'
+import { _LS, DataNode, debounce, Display, FuncExp, FunctionNode, FunctionType, getNodeType, isNull, NS_SYSTEM_LIST, ReadOnly,  SCHEMA_KIND_ARRAY, splitString, ValueType } from 'schema-node-core'
 import { onMounted, onUnmounted, reactive, ref, shallowRef, toRaw } from 'vue'
-import { SchemaNodeFormType } from '../../../schema-node-vue-view/src/enum/formType';
-import { subscribeAncestorProperty } from '../../../schema-node-vue-view/src/utility/toolset';
-import { _L, getSubNodeFormType } from 'schema-node-vue-view';
+import { _L, getSubNodeFormType, SchemaNodeFormType, subscribeAncestorProperty } from 'schema-node-vue-view';
 import { schemaView } from 'schema-node-vue-view';
 
 defineOptions({ inheritAttrs: false })

@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Attach, DataNode, Display, getCachedNodeType, getNodeSchemaName, getNodeType, INamespaceNodeType, InVisible, isEmpty, LocaleString, NodeSchema, NS_SYSTEM_SCHEMA_NODE, ReadOnly, ScalarNode, SchemaLoadState, StructNode, StructType, Visible } from 'schema-node-core';
+import { Attach, DataNode, Display, getCachedNodeType, getNodeSchemaName, getNodeType, INamespaceNodeType, InVisible, isEmpty, LocaleString, NodeSchema, NS_SYSTEM_SCHEMA_NODE, ScalarNode, SchemaLoadState, StructNode, StructType, Visible } from 'schema-node-core';
 import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view';
 import { onMounted, onUnmounted, ref, shallowRef, toRaw } from 'vue';
 import { ElForm, ElMessage } from 'element-plus'

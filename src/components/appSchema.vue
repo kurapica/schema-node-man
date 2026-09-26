@@ -39,11 +39,6 @@
             {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
           </template>
         </el-table-column>
-        <el-table-column align="left" prop="desc" :label="_L['system.schema.prop.common.description']" min-width="150">
-          <template #default="scope">
-            {{ _L(scope.row.description) }}
-          </template>
-        </el-table-column>
         <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="440">
           <template #header>
             <a href="javascript:void(0)" v-if="state.app" @click="goback" style="text-decoration: underline; color: lightseagreen;">
@@ -121,19 +116,14 @@
                 <span v-else>{{ scope.row.name }}</span>
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']" min-width="150">
-              <template #default="scope">
-                {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
-              </template>
-            </el-table-column>
             <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
               <template #default="scope">
                 <schema-view :value="scope.row.type" readonly type="system.schema.node.type" text="left"></schema-view>
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="desc" :label="_L['system.schema.prop.common.description']" min-width="150">
+            <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']" min-width="150">
               <template #default="scope">
-                {{ _L(scope.row.description) }}
+                {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
               </template>
             </el-table-column>
             <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="400">
@@ -315,7 +305,6 @@ import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider
 import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate, SchemaUpdate } from 'schema-node-app'
 import { subscribeDebugMode } from '../utility/debug'
 import { logger } from '../utility/logger.js'
-import { fa } from 'element-plus/es/locale/index.mjs'
 
 //#region View
 const isDebug = ref(false)
@@ -530,6 +519,8 @@ const showFields = async (row: any) => {
   currApp = getAppSchemaName(row);
   const appType = await getAppType(getAppSchemaName(row));
   appTitle.value = _L.value(appType?.getProperty(Display)?.getValue<LocaleString>() ?? appType?.name ?? "");
+  fields.value = [];
+  await nextTick();
   fields.value = Array.from(appType?.getFields().map(f => f.getFieldSchema() as AppFieldSchema) ?? []);
   isFieldAddable = appType?.getPropertyValue(SchemaCreate) ?? false;
   showFieldList.value = true

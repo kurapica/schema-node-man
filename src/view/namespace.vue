@@ -2,6 +2,7 @@
   <section style="width: 100%;min-width: 120px;display: flex;">
     <span v-if="state.readonly && text">
       <el-popover
+        v-if="isDebug"
         :ref="(el) => (node as any).popperRef = el"
         placement="left"
         :title="`${node.value}`"
@@ -14,6 +15,9 @@
             <span style="width: 100%; display: inline-block;">{{ state.display }}</span>
         </template>
       </el-popover>
+      <template v-else>
+        {{ state.display }}
+      </template>
     </span>
     <template v-else>
       <input-view
@@ -26,6 +30,7 @@
       >
         <template #default="{ node }">
           <el-popover
+            v-if="isDebug"
             :ref="(el) => node.popperRef = el"
             placement="left"
             :title="node.value"
@@ -38,6 +43,9 @@
                 <span style="width: 100%; display: inline-block;">{{ node.label }}</span>
             </template>
           </el-popover>
+          <template v-else>
+            {{ node.label }}
+          </template>
         </template>
       </input-view>
       <span v-if="genericNodes.length">&lt;</span>
@@ -63,10 +71,11 @@
 
 <script lang="ts" setup>
 import { buildFuncCall, debounce, Display, getNodeType, isNull, LocaleString, NODE_SELF, NS_SYSTEM_SCHEMA_NODE_VALUE_TYPE, NS_SYSTEM_SCHEMA_REFLECT_TYPE, ReadOnly, splitGenericParams, StringNode, StringType, Valid } from 'schema-node-core'
-import { isRef, nextTick, onMounted, onUnmounted, reactive, shallowRef, toRaw, useSlots } from 'vue'
+import { onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, useSlots } from 'vue'
 import { schemaView, inputView, subscribeAncestorProperty, _L } from 'schema-node-vue-view';
 import namespaceInfo from './namespaceInfo.vue';
 import { ElPopover } from 'element-plus';
+import { subscribeDebugMode } from '../utility/debug.js';
 
 // ── Template ──────────────────────────────────────────────────────
 const props = defineProps<{
@@ -81,6 +90,11 @@ const props = defineProps<{
 
   debug?: boolean
 }>()
+
+
+//#region View
+const isDebug = ref(false)
+const debugSub = subscribeDebugMode((debug) => isDebug.value = debug, true)
 
 // slots
 const slots = useSlots()
@@ -224,5 +238,6 @@ onUnmounted(() => {
   if (mainNode.value != node) mainNode.value.dispose();
   genericNodes.value.forEach(i => i.dispose());
   subs.forEach(sub => sub());
+  debugSub();
 })
 </script>

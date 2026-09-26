@@ -95,7 +95,7 @@ const dataProvider = getAppSchemaProvider()
 const enableAppData = dataProvider ? true : false
 const manualWorkflows = ref<IAppInteractionWorkflow[]>([])
 
-const isDebug = ref(false)
+const isDebug = ref(true)
 subscribeDebugMode((debug) => isDebug.value = debug, true)
 
 // app target node

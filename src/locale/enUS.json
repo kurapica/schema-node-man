@@ -171,6 +171,7 @@
   "frontend.header.key": "Key",
   "frontend.header.value": "Value",
   "frontend.auth": "Auth Config",
+  "frontend.auth.headers": "Http Header",
   "frontend.auth.savestorage": "Local Storage",
   "frontend.light": "Light",
   "frontend.dark": "Dark",

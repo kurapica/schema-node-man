@@ -19,7 +19,7 @@ import { setSchemaSite } from './schema/provider/schemaServerProvider'
 const app = createApp(App)
 
 // logger
-const logLevel = LogLevel.VERBOSE;
+const logLevel = LogLevel.INFO;
 schemaLogger.setLevel(logLevel)
 viewLogger.setLevel(logLevel)
 logger.setLevel(logLevel)

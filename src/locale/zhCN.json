@@ -169,6 +169,7 @@
   "frontend.header.key": "键",
   "frontend.header.value": "值",
   "frontend.auth": "认证配置",
+  "frontend.auth.headers": "Http头",
   "frontend.auth.savestorage": "本地存储",
   "frontend.light": "浅色",
   "frontend.dark": "深色",

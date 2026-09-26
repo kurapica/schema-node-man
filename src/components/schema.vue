@@ -422,6 +422,7 @@ const confirmNameSpace = async () => {
 
         const namespace = (await getNodeType(data.namespace ?? '')) as INamespaceNodeType
         namespace?.saveSubNodeSchema(data)
+        await getNodeType(getNodeSchemaName(data), undefined, undefined, true);
 
         closeNamespaceEditor()
         showNamespaceEditor.value = false

@@ -50,10 +50,9 @@
 <script setup lang="ts">
 import { saveStorageSchema } from '../schema';
 import { ElMessage } from 'element-plus';
-import { ArrayNode, combinePaths, DataNode, deepClone, Disable, EnumNode, EnumType, EnumValueType, getNodeType, LocaleString, ReadOnly, SchemaLoadState, StringNode, StructNode, StructType } from 'schema-node-core';
-import { _L, tableView } from 'schema-node-vue-view'
+import { ArrayNode, combinePaths, DataNode, deepClone, Disable, EnumNode, EnumType, EnumValueType, getNodeType, LocaleString, ReadOnly, SchemaLoadState, StringNode, StructNode } from 'schema-node-core';
+import { _L, tableView, subscribeAncestorProperty } from 'schema-node-vue-view'
 import { onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
-import { subscribeAncestorProperty } from '../../../schema-node-vue-view/src/utility/toolset';
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider';
 
 const tableHeaderCellStyle = {

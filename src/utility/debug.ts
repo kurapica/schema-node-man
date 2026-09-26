@@ -4,9 +4,8 @@ let debugMode = localStorage.getItem('debugMode') === 'true';
 const debugModeObserver = new Observable<[boolean]>();
 
 export function subscribeDebugMode(observer: (debugMode: boolean) => void, immediate?: boolean): Function {
-  const handler = debugModeObserver.subscribe((debugMode) => observer(debugMode));
   if (immediate) observer(debugMode);
-  return handler;
+  return debugModeObserver.subscribe((debugMode) => observer(debugMode));
 }
 
 export function setDebugMode(debugMode: boolean): void {
