@@ -124,7 +124,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw, nextTick, onUnmounted } from 'vue'
 import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-node-vue-view'
-import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName, NS_SYSTEM } from 'schema-node-core'
+import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName, NS_SYSTEM, deepClone } from 'schema-node-core'
 import { ElForm, ElMessage, ElTable } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
@@ -466,14 +466,13 @@ const tryit = () => {
 //#region Copy Schema
 
 const copySchema = async () => {
-  const schema = namespaceNode.value?.submitValue as NodeSchema;
+  const schema = deepClone(namespaceNode.value?.submitValue as NodeSchema);
   if (!schema) return;
 
   closeNamespaceEditor();
   showNamespaceEditor.value = false;
-  await new Promise(resolve => setTimeout(resolve, 200)); // wait drawer close animation
+  await new Promise(resolve => setTimeout(resolve, 50)); // wait drawer close animation
 
-  const name = `${schema.name}_copy`;
   schema.name = "";
   localStorage["schema_new_namespace"] = state.namespace;
 
