@@ -60,7 +60,7 @@
     </el-main>
 
     <el-drawer v-model="showInteraction" :title="_L(getPropertyValue(interactionWorkflow!, Display) || '')" direction="rtl" size="80%"
-      append-to-body>
+      append-to-body destroy-on-close>
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <schema-view :debug="isDebug" v-if="interactionData" :key="interactionData.id" :node="interactionData as any" :in-form="SchemaNodeFormType.ExpandAll"

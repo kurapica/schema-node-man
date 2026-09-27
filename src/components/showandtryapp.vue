@@ -1,7 +1,8 @@
 <template>
   <section>
       <el-button type="success" @click="showtryit = true">{{ _L["frontend.view.clicktotry"] }}</el-button>
-      <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit']" direction="rtl" size="100%" append-to-body>
+      <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit']" direction="rtl" size="100%" append-to-body
+        destroy-on-close>
           <el-container class="main tryapp-panel" style="height: 80vh;">
               <el-main>
                   <el-tabs v-model="activeTab">
@@ -20,7 +21,7 @@
                       </div>
                   </el-form>
                   <tryapp v-if="activeTab === 0" :app="app" :skin="skin"></tryapp>
-                  <el-table v-if="activeTab === 2" :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
+                  <el-table ref="tableRef" v-if="activeTab === 2" :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
                       header-align="left" 
                       :header-cell-style="tableHeaderCellStyle">
                       <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120" />
@@ -51,10 +52,11 @@
 
 <script setup lang="ts">
 import tryapp from './tryapp.vue'
-import { ref, watch } from 'vue'
-import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
+import { onUnmounted, ref, watch } from 'vue'
+import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-node-vue-view'
 import { getNodeType, ReadOnly, StructNode, StructType } from 'schema-node-core';
 import { AppFieldSchema, getCachedAppType, NS_SYSTEM_SCHEMA_APP } from 'schema-node-app';
+import { ElTable } from 'element-plus';
 
 const props = defineProps<{ app: string, skin?: string }>()
 const activeTab = ref(0)
@@ -66,6 +68,8 @@ const tableHeaderCellStyle = {
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
 }
+const tableRef = ref<InstanceType<typeof ElTable> | null>(null)
+useElTableMemoryFix(tableRef)
 
 const fieldRowClassName = (data: any) => {
   const { row } = data

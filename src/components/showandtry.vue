@@ -1,7 +1,8 @@
 <template>
     <section>
         <el-button type="success" @click="showtryit = true">{{ _L["frontend.view.clicktotry"] }}</el-button>
-        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit']" direction="rtl" size="100%" append-to-body>
+        <el-drawer v-model="showtryit" :title="_L['frontend.nav.tryit']" direction="rtl" size="100%" append-to-body
+          destroy-on-close>
             <el-container class="main theme-panel" style="height: 80vh;">
                 <el-main>
                     <template v-if="isnamespace">

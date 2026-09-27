@@ -21,7 +21,7 @@
       </el-form>
     </el-header>
     <el-main>
-      <el-table :data="schemas" style="width: 100%; height: 70vh;" :border="true" header-align="left"
+      <el-table ref="tableRef" :data="schemas" style="width: 100%; height: 70vh;" :border="true" header-align="left"
         :header-cell-style="tableHeaderCellStyle" @selection-change="handleSelection">
         <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
@@ -80,30 +80,15 @@
 
     <!-- namespace editor -->
     <el-drawer v-model="showNamespaceEditor" :title="operation" direction="rtl" size="100%" append-to-body
-      @closed="closeNamespaceEditor">
-      <el-container class="main" style="height: 80vh;">
+      destroy-on-close @close="closeNamespaceEditor">
+      <el-container v-if="namespaceNode" class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="namespaceNode" ref="editorRef" :model="namespaceNode.rawValue!" label-position="left" style="width: 100%; height: 90%;" label-width="300px" >
+          <el-form ref="editorRef" :model="namespaceNode.rawValue!" label-position="left" style="width: 100%; height: 90%;" label-width="300px" >
             <div class="draw-view">
               <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.Expand2" text="left" :debug="isDebug"  :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
-        </el-main>
-        <el-footer>
-          <br />
-          <template v-if="namespaceNode?.readonly">
-            <el-button v-if="tryitTypes.includes((namespaceNode.rawValue! as any).kind)" type="primary" @click="tryit">{{
-              _L["frontend.view.tryit"] }}</el-button>
-            <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button>
-            <el-button v-if="currRow?.usedBy?.length" @click="showViewRef = true"
-              style="float:right" type="info">{{ _L["frontend.view.viewref"] }}</el-button>
-            <el-button type="warning" @click="copySchema">{{ _L["frontend.view.copyschema"] }}</el-button>
-          </template>
-          <template v-else>
-            <el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button>
-            <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
-          </template>
-        </el-footer>
+        </el-main><el-footer style="padding-top: 1rem;"><template v-if="namespaceNode?.readonly"><el-button v-if="tryitTypes.includes((namespaceNode.rawValue! as any).kind)" type="primary" @click="tryit">{{_L["frontend.view.tryit"] }}</el-button><el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button><el-button v-if="currRow?.usedBy?.length" @click="showViewRef = true" style="float:right" type="info">{{ _L["frontend.view.viewref"] }}</el-button><el-button type="warning" @click="copySchema">{{ _L["frontend.view.copyschema"] }}</el-button></template><template v-else><el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button><el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button></template></el-footer>
       </el-container>
     </el-drawer>
 
@@ -114,16 +99,13 @@
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <tryit-view :type="tryittype"></tryit-view>
-        </el-main>
-        <el-footer>
-          <br />
-          <el-button @click="showtryit = false">{{ _L["frontend.view.close"] }}</el-button>
-        </el-footer>
+        </el-main><el-footer style="padding-top: 1rem;"><el-button @click="showtryit = false">{{ _L["frontend.view.close"] }}</el-button></el-footer>
       </el-container>
     </el-drawer>
 
     <!-- View ref -->
-    <el-drawer v-model="showViewRef" :title="_L['frontend.view.viewref']" direction="rtl" size="40%" append-to-body>
+    <el-drawer v-model="showViewRef" :title="_L['frontend.view.viewref']" direction="rtl" size="40%" append-to-body
+      destroy-on-close>
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <template v-if="currRow?.usedBy?.length">
@@ -132,23 +114,18 @@
                 <schema-view type="system.schema.node.type" :value="type"  readonly text="left"/>
               </li>
             </ul>
-            <br />
           </template>
-        </el-main>
-        <el-footer>
-          <br />
-          <el-button @click="showViewRef = false">{{ _L["frontend.view.close"] }}</el-button>
-        </el-footer>
+        </el-main><el-footer style="padding-top: 1rem;"><el-button @click="showViewRef = false">{{ _L["frontend.view.close"] }}</el-button></el-footer>
       </el-container>
     </el-drawer>
   </el-container>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref, toRaw } from 'vue'
-import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
+import { reactive, watch, ref, toRaw, nextTick, onUnmounted } from 'vue'
+import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-node-vue-view'
 import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName, NS_SYSTEM } from 'schema-node-core'
-import { ElForm, ElMessage } from 'element-plus'
+import { ElForm, ElMessage, ElTable } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
 import tryitView from './tryit.vue'
@@ -163,11 +140,17 @@ const tableHeaderCellStyle = {
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
 };
+const tableRef = ref<InstanceType<typeof ElTable> | null>(null)
+useElTableMemoryFix(tableRef)
 
 const isDebug = ref(false);
 const debugHandler = subscribeDebugMode((debug) => {
   isDebug.value = debug
 }, true)
+
+onUnmounted(() => {
+  debugHandler()
+})
 
 const isNewSchema = ref(true);
 
@@ -452,12 +435,18 @@ const confirmNameSpace = async () => {
 }
 
 // close
-const closeNamespaceEditor = () => {
+const closeNamespaceEditor = async () => {
   namesapceWatchHandler.forEach(watcher => watcher())
   namesapceWatchHandler.splice(0, namesapceWatchHandler.length)
-  namespaceNode.value?.dispose()
+  const node = namespaceNode.value
   namespaceNode.value = undefined
   currRow.value = null
+  await nextTick()
+  try {
+    node?.dispose()
+  } catch {
+    // pass
+  }
 }
 
 //#endregion

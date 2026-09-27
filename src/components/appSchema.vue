@@ -81,7 +81,7 @@
 
     <!-- app editor -->
     <el-drawer v-model="showAppEditor" :title="operation" direction="rtl" size="100%" append-to-body
-      @closed="closeAppEditor">
+      destroy-on-close @close="closeAppEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <el-form v-if="appNode" ref="editorRef" :model="appNode.rawValue!" label-width="160" label-position="left"
@@ -105,10 +105,11 @@
     </el-drawer>
 
     <!-- field list -->
-    <el-drawer v-model="showFieldList" :title="appTitle" direction="rtl" size="100%" append-to-body>
+    <el-drawer v-model="showFieldList" :title="appTitle" direction="rtl" size="100%" append-to-body
+      destroy-on-close>
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-table :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
+          <el-table ref="fieldTableRef" :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
             header-align="left" :header-cell-style="tableHeaderCellStyle">
             <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
               <template #default="scope">
@@ -165,7 +166,7 @@
 
     <!-- field editor -->
     <el-drawer v-model="showAppFieldEditor" :title="appFieldOper" direction="rtl" size="100%" append-to-body
-      @closed="closeFieldEditor">
+      destroy-on-close @close="closeFieldEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawValue!" label-width="160"
@@ -189,10 +190,11 @@
     </el-drawer>
 
     <!-- workflow list -->
-    <el-drawer v-model="showWorkflowList" :title="appTitle" direction="rtl" size="100%" append-to-body>
+    <el-drawer v-model="showWorkflowList" :title="appTitle" direction="rtl" size="100%" append-to-body
+      destroy-on-close>
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-table :data="workflows" style="width: 100%; height: 65vh;" :border="true" header-align="left"
+          <el-table ref="workflowTableRef" :data="workflows" style="width: 100%; height: 65vh;" :border="true" header-align="left"
             :header-cell-style="tableHeaderCellStyle">
             <el-table-column align="left" prop="name" :label="_L['system.schema.app.workflow.schema.name']"
               min-width="120" />
@@ -254,8 +256,8 @@
     </el-drawer>
 
     <!-- workflow editor -->
-    <el-drawer v-model="showWorkflowEditor" :title="appWorkflowOper" direction="rtl" size="100%" append-to-body
-      @closed="closeWorkflowEditor">
+    <el-drawer v-model="showWorkflowEditor" :title="appWorkflowOper" direction="rtl" size="100%" append-to-body destroy-on-close
+      @close="closeWorkflowEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
           <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawValue!" label-width="160"
@@ -296,10 +298,10 @@
 
 <script setup lang="ts">
 import { Delete } from '@element-plus/icons-vue'
-import { reactive, watch, ref, nextTick, toRaw } from 'vue'
-import { _L, SchemaNodeFormType, schemaView } from 'schema-node-vue-view'
+import { reactive, watch, ref, nextTick, toRaw, onUnmounted } from 'vue'
+import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-node-vue-view'
 import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly } from 'schema-node-core'
-import { ElForm, ElMessage } from 'element-plus'
+import { ElForm, ElMessage, ElTable } from 'element-plus'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
 import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate, SchemaUpdate } from 'schema-node-app'
@@ -888,7 +890,13 @@ const tryit = () => {
 //#region Download
 
 const downloading = ref(false);
-const appTableRef = ref<any>();
+const appTableRef = ref<InstanceType<typeof ElTable> | null>(null);
+const fieldTableRef = ref<InstanceType<typeof ElTable> | null>(null);
+const workflowTableRef = ref<InstanceType<typeof ElTable> | null>(null);
+useElTableMemoryFix(appTableRef);
+useElTableMemoryFix(fieldTableRef);
+useElTableMemoryFix(workflowTableRef);
+
 const schemaFormats = ref<string[]>([]);
 const selectedFormat = ref<string>('');
 const downloadFromServer = ref(false);

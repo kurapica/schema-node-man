@@ -27,7 +27,7 @@
             </g>
         </svg>
         <el-drawer v-model="showWorkflowNode" :title="workflowNodeDisplay" direction="rtl" size="80%" append-to-body
-            @closed="closeWorkflowNode">
+            @close="closeWorkflowNode">
             <el-container class="main" style="height: 80vh;">
                 <el-main>
                     <schema-view v-if="workflowNode" :key="workflowNode.guid" :node="workflowNode.node as any"
