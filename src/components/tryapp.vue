@@ -79,7 +79,7 @@
 <script lang="ts" setup>
 import { addAppTarget } from "../utility/auth";
 import { ElMessage, type ElForm } from "element-plus"
-import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, IAppInteractionWorkflow } from "schema-node-app";
+import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, getAppType, IAppInteractionWorkflow } from "schema-node-app";
 import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, InVisible, isNull, StructNode, StructType, ValueType, Visible } from "schema-node-core";
 import { schemaView, _L, SchemaNodeFormType } from "schema-node-vue-view"
 import { onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
@@ -122,6 +122,7 @@ const tableHeaderCellStyle = {
 
 const loadData = async () => {
   if (!appTargetNode.value) return
+  
   try {
     const target = (appTargetNode.value.getAccessValue("target")! as DataNode).rawValue as string
     if (!issystemlevel.value && isNull(target)) return
@@ -138,6 +139,9 @@ const loadData = async () => {
       schemaOnly: true,
       workflow: true
     })
+    
+    showref.value = Array.from(appNode.value!.viewFields).length ? true : false
+    showoutput.value = Array.from(appNode.value!.deriveFields).length ? true : false
     
     // visible check
     statusWatcher.forEach(f => f())
@@ -291,17 +295,9 @@ const turnOffWorkflow = async (workflow: string) => {
 }
 
 onMounted(async () => {
-  appNode.value = await getAppNode({
-    app: props.app,
-    target: "",
-    fields: [],
-    schemaOnly: true
-  })
-  showref.value = Array.from(appNode.value!.viewFields).length ? true : false
-  showoutput.value = Array.from(appNode.value!.deriveFields).length ? true : false
   if (!enableAppData) return
 
-  issystemlevel.value = appNode.value?.appType.scopeType === AppScopeType.SystemLevel
+  issystemlevel.value = (await getAppType(props.app))?.scopeType === AppScopeType.SystemLevel
 
   // visible check
   statusWatcher.forEach(f => f())
