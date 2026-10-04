@@ -32,7 +32,7 @@
         </el-table-column>
         <el-table-column align="center" prop="type" :label="_L['frontend.view.type']" width="150">
           <template #default="scope">
-            {{ _L['system.schema.kind.' + scope.row.kind] }}
+            {{ _L['system.schema.node.kind.' + scope.row.kind] }}
           </template>
         </el-table-column>
         <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
@@ -274,7 +274,7 @@ const handleNew = async (copySchema?: NodeSchema) => {
     // attach kind on the struct type is the node schema kind
     const attachKind = nodeType.getProperty(Attach);
     if (!attachKind?.hasValue) continue;
-    const kind = attachKind.getValue<string>()?.split(".")[0];
+    const kind = attachKind.getValue<string>()?.split(".")[1];
     if (kind && nodeKinds.includes(kind)) 
       whiteList.push(kind);
   }
