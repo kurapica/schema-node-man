@@ -298,13 +298,13 @@
 
 <script setup lang="ts">
 import { Delete } from '@element-plus/icons-vue'
-import { reactive, watch, ref, nextTick, toRaw, onUnmounted } from 'vue'
+import { reactive, watch, ref, nextTick, toRaw } from 'vue'
 import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-node-vue-view'
-import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly } from 'schema-node-core'
+import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly, isEmpty } from 'schema-node-core'
 import { ElForm, ElMessage, ElTable } from 'element-plus'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate, SchemaUpdate } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaApiBaseUrl, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate, SchemaUpdate } from 'schema-node-app'
 import { subscribeDebugMode } from '../utility/debug'
 import { logger } from '../utility/logger.js'
 
@@ -312,8 +312,7 @@ import { logger } from '../utility/logger.js'
 const isDebug = ref(false)
 subscribeDebugMode((debug) => isDebug.value = debug, true)
 
-const isNewAppAble = ref(true)
-
+const isNewAppAble = ref(!isEmpty(getSchemaApiBaseUrl()))
 const tableHeaderCellStyle = {
   backgroundColor: 'var(--app-surface-muted)',
   color: 'var(--app-text)',
@@ -370,7 +369,7 @@ const refresh = async () => {
   appSchemas.value = [];
   await nextTick();
   appSchemas.value = subApps;
-  isNewAppAble.value = appType?.getPropertyValue(SchemaCreate) !== false;
+  isNewAppAble.value = !isEmpty(getSchemaApiBaseUrl()) && appType?.getPropertyValue(SchemaCreate) !== false;
 }
 
 watch(state, refresh, { immediate: true })

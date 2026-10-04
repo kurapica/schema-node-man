@@ -1,6 +1,6 @@
 export * from './auth'
 export * from './apptarget'
-import { getCachedNodeType, getNodeSchemaName, NamespaceType, NodeSchema, NS_SYSTEM_LIST, NS_SYSTEM_SCHEMA_ENUM, NS_SYSTEM_SCHEMA_FUNC, NS_SYSTEM_SCHEMA_FUNC_CALL_ARG, NS_SYSTEM_SCHEMA_NODE_TYPE, NS_SYSTEM_SCHEMA_RELATION, NS_SYSTEM_SCHEMA_STRUCT, saveNodeSchema, SCHEMA_KIND_NAMESPACE, SchemaLoadState } from "schema-node-core";
+import { getCachedNodeType, getNodeSchemaName, NamespaceType, NODE_KIND_NAMESPACE, NodeSchema, NS_SYSTEM_LIST, NS_SYSTEM_SCHEMA_ENUM, NS_SYSTEM_SCHEMA_FUNC, NS_SYSTEM_SCHEMA_FUNC_CALL_ARG, NS_SYSTEM_SCHEMA_NODE_TYPE, NS_SYSTEM_SCHEMA_RELATION, NS_SYSTEM_SCHEMA_STRUCT, saveNodeSchema, SchemaLoadState } from "schema-node-core";
 
 // reload schemas from storage
 export function reloadStorageSchemas() {
@@ -74,7 +74,7 @@ export function saveAllCustomSchemaToStroage(root: string = "") {
   schema?.getSubNodeSchemas()?.forEach((s: NodeSchema) => {
     if ((s.loadState || 0) & SchemaLoadState.FrontEnd) {
       saveStorageSchema(s);
-      if (s.kind === SCHEMA_KIND_NAMESPACE)
+      if (s.kind === NODE_KIND_NAMESPACE)
         saveAllCustomSchemaToStroage(getNodeSchemaName(s));
     }
   });

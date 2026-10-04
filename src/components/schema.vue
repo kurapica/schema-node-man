@@ -49,7 +49,7 @@
             <span v-else>{{ _L["frontend.view.oper"] }}</span>
           </template>
           <template #default="scope">
-            <el-button v-if="scope.row.kind === SCHEMA_KIND_NAMESPACE" type="info"
+            <el-button v-if="scope.row.kind === NODE_KIND_NAMESPACE" type="info"
               @click="choose(scope.row)">{{ _L["frontend.view.down"] }}
             </el-button>
             <el-button v-else type="success" @click="handleEdit(scope.row, true)">
@@ -124,13 +124,13 @@
 <script setup lang="ts">
 import { reactive, watch, ref, toRaw, nextTick, onUnmounted } from 'vue'
 import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-node-vue-view'
-import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, SCHEMA_KIND_NAMESPACE, SCHEMA_KIND_BOOL, SCHEMA_KIND_STRING, SCHEMA_KIND_INT, SCHEMA_KIND_DECIMAL, SCHEMA_KIND_DATE, SCHEMA_KIND_ENUM, SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY, SCHEMA_KIND_FUNCTION, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, BlackList, SCHEMA_KIND_OBJECT, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, SCHEMA_KIND_PROPERTY, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, getPropertyName, NS_SYSTEM, deepClone } from 'schema-node-core'
+import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, NS_SYSTEM, deepClone, Entry, EnumProperty, EnumSchema, setPropertyValue, NODE_KIND_NAMESPACE, NODE_KIND_ARRAY, NODE_KIND_BOOL, NODE_KIND_DATE, NODE_KIND_DECIMAL, NODE_KIND_ENUM, NODE_KIND_FUNCTION, NODE_KIND_INT, NODE_KIND_OBJECT, NODE_KIND_STRING, NODE_KIND_STRUCT } from 'schema-node-core'
 import { ElForm, ElMessage, ElTable } from 'element-plus'
-import { clearAllStorageSchemas, removeStorageSchema, saveAllCustomSchemaToStroage, saveStorageSchema } from '../schema'
+import { clearAllStorageSchemas, removeStorageSchema, saveStorageSchema } from '../schema'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
 import tryitView from './tryit.vue'
 import { Delete } from '@element-plus/icons-vue'
-import { SCHEMA_KIND_EVENT, SCHEMA_KIND_WORKFLOW, SchemaCreate } from 'schema-node-app'
+import { NODE_KIND_EVENT, NODE_KIND_WORKFLOW, SchemaCreate } from 'schema-node-app'
 import { logger } from '../utility/logger'
 import { subscribeDebugMode } from '../utility/debug'
 
@@ -155,22 +155,22 @@ onUnmounted(() => {
 const isNewSchema = ref(true);
 
 const schemaTypeOrder: Record<string, number> = {
-  [SCHEMA_KIND_NAMESPACE]:1,
-  [SCHEMA_KIND_OBJECT]: 2,
-  [SCHEMA_KIND_BOOL]: 3,
-  [SCHEMA_KIND_INT]: 4,
-  [SCHEMA_KIND_DECIMAL]: 5,
-  [SCHEMA_KIND_STRING]: 6,
-  [SCHEMA_KIND_DATE]: 7,
-  [SCHEMA_KIND_ENUM]: 8,
-  [SCHEMA_KIND_STRUCT]: 9,
-  [SCHEMA_KIND_ARRAY]: 10,
-  [SCHEMA_KIND_FUNCTION]: 11,
-  [SCHEMA_KIND_EVENT]: 12,
-  [SCHEMA_KIND_WORKFLOW]: 13,
+  [NODE_KIND_NAMESPACE]:1,
+  [NODE_KIND_OBJECT]: 2,
+  [NODE_KIND_BOOL]: 3,
+  [NODE_KIND_INT]: 4,
+  [NODE_KIND_DECIMAL]: 5,
+  [NODE_KIND_STRING]: 6,
+  [NODE_KIND_DATE]: 7,
+  [NODE_KIND_ENUM]: 8,
+  [NODE_KIND_STRUCT]: 9,
+  [NODE_KIND_ARRAY]: 10,
+  [NODE_KIND_FUNCTION]: 11,
+  [NODE_KIND_EVENT]: 12,
+  [NODE_KIND_WORKFLOW]: 13,
 };
 
-const tryitTypes = [SCHEMA_KIND_STRUCT, SCHEMA_KIND_ARRAY];
+const tryitTypes = [NODE_KIND_STRUCT, NODE_KIND_ARRAY];
 
 const state = reactive({
   namespace: "",
@@ -224,7 +224,7 @@ const refresh = async () => {
     })
     for (let i = 0; i < temp.length; i++) {
       const schema = temp[i];
-      if (schema.kind !== SCHEMA_KIND_NAMESPACE) continue;
+      if (schema.kind !== NODE_KIND_NAMESPACE) continue;
       await getNodeType(getNodeSchemaName(schema));
     }
     schemas.value = temp;
@@ -236,7 +236,7 @@ const refresh = async () => {
 
 watch(state, refresh, { immediate: true })
 
-const isSchemaUpdatable = (schema: NodeSchema) => ((schema.loadState || 0) & (SchemaLoadState.FrontEnd)) || (!((schema.loadState || 0) & SchemaLoadState.System) || ((schema.loadState || 0) & SchemaLoadState.Service) && schema.kind === SCHEMA_KIND_NAMESPACE) && (schema as any).schemaUpdate !== false; 
+const isSchemaUpdatable = (schema: NodeSchema) => ((schema.loadState || 0) & (SchemaLoadState.FrontEnd)) || (!((schema.loadState || 0) & SchemaLoadState.System) || ((schema.loadState || 0) & SchemaLoadState.Service) && schema.kind === NODE_KIND_NAMESPACE) && (schema as any).schemaUpdate !== false; 
 const isSchemaDeletable = (schema: NodeSchema) => !((schema.loadState || 0) & SchemaLoadState.System) && !schema.usedBy?.length && !getCachedNodeType(getNodeSchemaName(schema))?.isUsed && (schema as any).schemaDelete !== false;
 
 //#region Schema Edit
@@ -260,7 +260,7 @@ const handleNew = async (copySchema?: NodeSchema) => {
 
   const typeField = namespaceNode.value.getAccessValue("kind") as EnumNode
   const nodeKinds = (await (await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.kind`) as EnumType).getEnumEntryAccess())[0].children?.map(c => c.value) ?? [];
-  const whiteList: string[] = [SCHEMA_KIND_NAMESPACE];
+  const whiteList: string[] = [NODE_KIND_NAMESPACE];
   for (const propCtor of getSchemaKindPropertyTypes(SCHEMA_KIND_NODE)) {
     // pass readonly node schema kind
     const readonly = getMetaProperty(propCtor, ReadOnly);
@@ -492,13 +492,27 @@ const startDownload = () => {
 }
 
 const handleSelection = (val: any[]) => {
-  selections = val.map((v: any) => v.name)
+  selections = val.map(getNodeSchemaName)
 }
 
-const download = () => {
+const download = async () => {
   if (!selections.length) return
-  const name = selections.length > 1 ? "system.schema.json" : `${selections[0]}.json`
-  const content = JSON.stringify(selections.map(getCachedNodeType).map(s => s?.getNodeSchema()), null, 2)
+  const name = selections.length > 1 ? "schema.json" : `${selections[0]}.json`
+  const schemas = []
+  
+  for(const selection of selections) {
+    const nodeType = await getNodeType(selection);
+    if (nodeType) {
+      const schema = nodeType.getNodeSchema();
+      if (nodeType instanceof EnumType) {
+        const enumSchema = getPropertyValue(schema, EnumProperty) as EnumSchema;
+        await fillEnumValues(nodeType, enumSchema.values ?? []);
+        setPropertyValue(schema, EnumProperty, enumSchema);
+      }
+      schemas.push(schema);
+    }
+  }
+  const content = JSON.stringify(schemas, null, 2)
 
   // download
   const blob = new Blob([content], { type: 'application/octet-stream' })
@@ -514,15 +528,61 @@ const download = () => {
 }
 
 const uploadSchema = (file: File) => {
-  file.text().then(text => {
+  file.text().then(async (text) => {
     const data = JSON.parse(text)
     if (Array.isArray(data)) {
-      saveNodeSchema(data, SchemaLoadState.FrontEnd)
-      saveAllCustomSchemaToStroage()
+      const provider = getSchemaServerProvider()
+      if (provider){
+        try {
+          for(const schema of data) {
+            const res = await provider.saveSchema(schema)
+            if (!res) {
+              ElMessage.error(_L.value["frontend.view.error"])
+              return
+            }
+            
+            const namespace = (await getNodeType(schema.namespace ?? '')) as INamespaceNodeType;
+            namespace?.saveSubNodeSchema(schema);
+            await getNodeType(getNodeSchemaName(schema), undefined, undefined, true);
+          }
+
+          return refresh()
+        }
+        catch (ex: any) {
+          if (ex && ex.status === 403) {
+            ElMessage.error(_L.value["frontend.view.nopermission"])
+            return
+          }
+          ElMessage.error(_L.value["frontend.view.error"])
+          console.error(ex)
+          return
+        }
+      }
+
+      for(const schema of data) {
+        schema.loadState = (schema.loadState ?? 0) | SchemaLoadState.FrontEnd;
+        saveNodeSchema(schema);
+        const namespace = (await getNodeType(schema.namespace ?? '')) as INamespaceNodeType;
+        namespace?.saveSubNodeSchema(schema);
+        saveStorageSchema(schema);
+      }
       return refresh()
     }
   })
   return false
+}
+
+const fillEnumValues = async (enumType: EnumType, entries: Entry<string>[]) => {
+  for(const entry of entries) {
+    if (entry.hasChildren && !entry.children?.length) {
+      const access = await enumType.getEnumEntryAccess(entry.value);
+      const children = access.length ? access[access.length - 1].children : [];
+      if (children?.length) {
+        entry.children = children;
+        await fillEnumValues(enumType, children);
+      }
+    }
+  }
 }
 
 //#endregion

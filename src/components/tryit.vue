@@ -7,7 +7,7 @@
       :in-form="SchemaNodeFormType.ExpandAll"
       v-model="data"
       :skin="skin"
-      debug
+      :debug="isDebug"
       :header-cell-style="tableHeaderCellStyle"
     ></schema-view>
     <el-form-item>
@@ -23,7 +23,8 @@
 import { _LS } from "schema-node-core"
 import { ElForm } from "element-plus"
 import { schemaView, _L, SchemaNodeFormType } from "schema-node-vue-view"
-import { ref } from "vue"
+import { onUnmounted, ref } from "vue"
+import { subscribeDebugMode } from "../utility/debug";
 
 defineProps<{ type: string, skin?: string }>()
 const data = ref(null)
@@ -34,4 +35,9 @@ const tableHeaderCellStyle = {
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
 };
+const isDebug = ref(true)
+const handler = subscribeDebugMode((debug) => isDebug.value = debug, true)
+
+onUnmounted(handler)
+
 </script>

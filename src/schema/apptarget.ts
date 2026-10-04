@@ -1,5 +1,5 @@
 import { AppScopeType, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_REFLECT_APP } from "schema-node-app";
-import { ArgName, AsSuggest, buildFuncCall, Call, InVisible, isNull, Meta, NS_SYSTEM_INTRINSIC, NS_SYSTEM_LIST, NS_SYSTEM_STRING, OfSchema, Relation, Require, Return, SCHEMA_KIND_FUNCTION, SchemaType, UpLimitString, WhiteList } from "schema-node-core";
+import { ArgName, AsSuggest, buildFuncCall, Call, InVisible, isNull, Meta, NS_SYSTEM_INTRINSIC, NS_SYSTEM_LIST, NS_SYSTEM_STRING, OfNodeKind, Relation, Require, Return, NODE_KIND_FUNCTION, SchemaType, UpLimitString, WhiteList } from "schema-node-core";
 
 @Meta(SchemaType, 'frontend.apptarget')
 class AppTargetMeta {
@@ -25,7 +25,7 @@ class AppTargetMeta {
 }
 
 @Meta(SchemaType, 'frontend.method')
-@Meta(OfSchema, SCHEMA_KIND_FUNCTION)
+@Meta(OfNodeKind, NODE_KIND_FUNCTION)
 class FrontendMethods {
   /** Get the application targets */
   @Meta(Return, `${NS_SYSTEM_LIST}<${NS_SYSTEM_STRING}>`)

@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { _LS, DataNode, debounce, Display, FuncExp, FunctionNode, FunctionType, getNodeType, isNull, NS_SYSTEM_LIST, ReadOnly,  SCHEMA_KIND_ARRAY, splitString, ValueType } from 'schema-node-core'
+import { _LS, DataNode, debounce, Display, FuncExp, FunctionNode, FunctionType, getNodeType, isNull, NS_SYSTEM_LIST, ReadOnly,  NODE_KIND_ARRAY, splitString, ValueType } from 'schema-node-core'
 import { onMounted, onUnmounted, reactive, ref, shallowRef, toRaw } from 'vue'
 import { _L, getSubNodeFormType, SchemaNodeFormType, subscribeAncestorProperty } from 'schema-node-vue-view';
 import { schemaView } from 'schema-node-vue-view';
@@ -204,7 +204,7 @@ onMounted(() => {
       const arg = args.at(i);
       const argType = arg?.getAccessValue('type')?.getValue() as string ?? '';
       let valType = argType ? await getNodeType(argType) as ValueType : undefined;
-      if (valType && arg?.getAccessValue('variadic')?.getValue() as boolean && valType.kind !== SCHEMA_KIND_ARRAY)
+      if (valType && arg?.getAccessValue('variadic')?.getValue() as boolean && valType.kind !== NODE_KIND_ARRAY)
         valType = await getNodeType(`${NS_SYSTEM_LIST}<${valType.name}>`) as ValueType;
 
       let input = inputNodes[i];
