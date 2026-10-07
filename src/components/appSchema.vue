@@ -60,7 +60,7 @@
               @click="showFields(scope.row)">
               {{ _L["frontend.view.fields"] }}
             </el-button>
-            <el-button v-if="(scope.row.hasFields || scope.row.fields?.length) && enableWorkflow" type="warning"
+            <el-button v-if="false && (scope.row.hasFields || scope.row.fields?.length) && enableWorkflow" type="warning"
               @click="showWorkflows(scope.row)">
               {{ _L["frontend.view.workflow"] }}
             </el-button>
