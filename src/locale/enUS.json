@@ -1,9 +1,6 @@
-﻿import { importLanguage } from "schema-node";
-import enUSJson from "./enUS.json";
-
-importLanguage("enUS", {
-  ...enUSJson,
-
+﻿{
+  "frontend.debug": "Debug Mode",
+  
   "frontend.design.enumintvalueinfo.value": "Value",
   "frontend.design.enumintvalueinfo.name": "Name",
   "frontend.design.enumintvalueinfo.disable": "Disabled",
@@ -81,10 +78,6 @@ importLanguage("enUS", {
   "frontend.design.appfieldrelation.func": "Association function",
   "frontend.design.appfieldrelation.args": "Association parameters",
   "frontend.design.appfieldrelations": "App field association list",
-
-  //#endregion
-
-  //#region Frontend
 
   "frontend.nav.introduce": "Introduction",
   "frontend.nav.tryit": "Try It",
@@ -178,6 +171,7 @@ importLanguage("enUS", {
   "frontend.header.key": "Key",
   "frontend.header.value": "Value",
   "frontend.auth": "Auth Config",
+  "frontend.auth.headers": "Http Header",
   "frontend.auth.savestorage": "Local Storage",
   "frontend.light": "Light",
   "frontend.dark": "Dark",
@@ -191,7 +185,5 @@ importLanguage("enUS", {
 
   "frontend.view.schemanameexists": "Schema name already exists",
   "frontend.view.appnameexists": "App name already exists",
-  "frontend.view.selectnamespace": "Please select a type",
-
-  //#endregion
-});
+  "frontend.view.selectnamespace": "Please select a type"
+}

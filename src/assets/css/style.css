@@ -154,3 +154,11 @@ a:hover {
 button {
   background-color: #f9f9f9;
 }
+
+.el-message {
+  z-index: 9999 !important;
+}
+.el-popover__popper {
+  max-height: 100%;
+  overflow-y: auto;
+}

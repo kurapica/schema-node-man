@@ -2,20 +2,14 @@
   <el-container class="main main-panel">
     <el-header style="height: fit-content; width: 100%;">
       <el-form :model="state" style="display: flex;" hide-required-asterisk inline>
-        <schema-view v-model="state.app" in-form :config="{
-          type: 'system.schema.app',
-          display: _LS('system.schema.app')
-        }"></schema-view>
-        <schema-view v-model="state.keyword" in-form :config="{
-          type: 'system.string',
-          display: _LS('frontend.view.keyword')
-        }"></schema-view>
+        <schema-view style="width: 200px;margin-right: 0.5rem;" v-model="state.app" in-form type="system.schema.app.type" no-label/>
+        <schema-view style="width: 200px;margin-right: 0.5rem;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
-        <el-button type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
+        <el-button v-if="isNewAppAble" type="primary" @click="handleNew">{{ _L["frontend.view.new"] }}</el-button>
         <!-- download -->
         <template v-if="!downloading">
           <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
-          <el-upload style="padding-left:1rem;" :before-upload="uploadSchema" :limit="1" :show-file-list="false">
+          <el-upload v-if="isNewAppAble" style="padding-left:1rem;" :before-upload="uploadSchema" :limit="1" :show-file-list="false">
             <el-button type="success">{{ _L["frontend.view.upload"] }}</el-button>
           </el-upload>
         </template>
@@ -35,25 +29,19 @@
         <el-table-column v-if="downloading" type="selection" width="55"></el-table-column>
         <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
           <template #default="scope">
-            <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{
+            <span v-if="scope.row.error" style="color:red">{{
               scope.row.name }}</span>
             <span v-else>{{ scope.row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
+        <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']" min-width="150">
           <template #default="scope">
             {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
           </template>
         </el-table-column>
-        <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
-          <template #default="scope">
-            {{ _L(scope.row.desc) }}
-          </template>
-        </el-table-column>
         <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="440">
           <template #header>
-            <a href="javascript:void(0)" v-if="state.app" @click="goback"
-              style="text-decoration: underline; color: lightseagreen;">
+            <a href="javascript:void(0)" v-if="state.app" @click="goback" style="text-decoration: underline; color: lightseagreen;">
               {{ _L["frontend.view.return"] }}
             </a>
             <span v-else>{{ _L["frontend.view.oper"] }}</span>
@@ -62,7 +50,7 @@
             <el-button type="info" @click="handleEdit(scope.row, true)">
               {{ _L["frontend.view.view"] }}
             </el-button>
-            <el-button type="success" @click="handleEdit(scope.row, false)">
+            <el-button v-if="scope.row.schemaUpdate" type="success" @click="handleEdit(scope.row, false)">
               {{ _L["frontend.view.edit"] }}
             </el-button>
             <el-button v-if="!scope.row.hasFields && !scope.row.fields?.length" type="info" @click="choose(scope.row)">
@@ -72,12 +60,12 @@
               @click="showFields(scope.row)">
               {{ _L["frontend.view.fields"] }}
             </el-button>
-            <el-button v-if="(scope.row.hasFields || scope.row.fields?.length) && enableWorkflow" type="warning"
+            <el-button v-if="false && (scope.row.hasFields || scope.row.fields?.length) && enableWorkflow" type="warning"
               @click="showWorkflows(scope.row)">
               {{ _L["frontend.view.workflow"] }}
             </el-button>
             <el-popconfirm
-              v-if="!scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length && !scope.row.workflows?.length"
+              v-if="scope.row.schemaDelete && !scope.row.hasApps && !scope.row.apps?.length && !scope.row.hasFields && !scope.row.fields?.length && !scope.row.workflows?.length"
               :title="_L['frontend.view.confirmdelete']" :confirm-button-text="_L['YES']" :cancel-button-text="_L['NO']"
               :icon="Delete" @confirm="handleDelete(scope.row)">
               <template #reference>
@@ -90,20 +78,16 @@
         </el-table-column>
       </el-table>
     </el-main>
-    <el-footer>
-      <el-button type="danger" @click="clearAllStorageAppSchemas" style="position: absolute;right: 3rem;">{{
-        _L["frontend.view.clearcustomapps"] }}</el-button>
-    </el-footer>
 
     <!-- app editor -->
     <el-drawer v-model="showAppEditor" :title="operation" direction="rtl" size="100%" append-to-body
-      @closed="closeAppEditor">
+      destroy-on-close @close="closeAppEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="appNode" ref="editorRef" :model="appNode.rawData" label-width="160" label-position="left"
+          <el-form v-if="appNode" ref="editorRef" :model="appNode.rawValue!" label-width="160" label-position="left"
             style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
+              <schema-view :debug="isDebug" :node="(appNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -121,54 +105,46 @@
     </el-drawer>
 
     <!-- field list -->
-    <el-drawer v-model="showFieldList" :title="appTitle" direction="rtl" size="100%" append-to-body>
+    <el-drawer v-model="showFieldList" :title="appTitle" direction="rtl" size="100%" append-to-body
+      destroy-on-close>
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-table :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
+          <el-table ref="fieldTableRef" :data="fields" :row-class-name="fieldRowClassName" style="width: 100%; height: 65vh;" :border="true"
             header-align="left" :header-cell-style="tableHeaderCellStyle">
             <el-table-column align="left" prop="name" :label="_L['frontend.view.name']" min-width="120">
               <template #default="scope">
-                <span v-if="scope.row.status && scope.row.status != SchemaNodeStatus.Ready" style="color:red">{{
-                  scope.row.name }}</span>
+                <span v-if="scope.row.error" style="color:red">{{ scope.row.name }}</span>
                 <span v-else>{{ scope.row.name }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column align="left" prop="display" :label="_L['frontend.view.display']" min-width="150">
-              <template #default="scope">
-                {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
               </template>
             </el-table-column>
             <el-table-column align="left" prop="type" :label="_L['frontend.view.type']" min-width="120">
               <template #default="scope">
-                <schema-view v-model="scope.row.type" :config="{
-                  type: 'system.schema.type.rule.value',
-                  readonly: true
-                }" plain-text="left"></schema-view>
+                <schema-view :value="scope.row.type" readonly type="system.schema.node.type" text="left"></schema-view>
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="desc" :label="_L['frontend.view.desc']" min-width="150">
+            <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']" min-width="150">
               <template #default="scope">
-                {{ _L(scope.row.desc) }}
+                {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
               </template>
             </el-table-column>
             <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="400">
               <template #header>
-                <a href="javascript:void(0)" @click="handleFieldNew"
+                <a href="javascript:void(0)" v-if="isFieldAddable" @click="handleFieldNew"
                   style="text-decoration: underline; color: lightseagreen;">
                   {{ _L["frontend.view.new"] }}
                 </a>
               </template>
               <template #default="scope">
-                <el-button type="info" @click="handleFieldEdit(scope.row, true)">
+                <el-button type="info" v-if="scope.row.schemaRead" @click="handleFieldEdit(scope.row, true)">
                   {{ _L["frontend.view.view"] }}
                 </el-button>
-                <el-button type="success" @click="handleFieldEdit(scope.row, false)">
+                <el-button type="success" v-if="scope.row.schemaUpdate" @click="handleFieldEdit(scope.row, false)">
                   {{ _L["frontend.view.edit"] }}
                 </el-button>
-                <el-button v-if="scope.$index > 0" type="warning" @click="moveFieldUp(scope.row)">
+                <el-button v-if="scope.$index > 0 && scope.row.schemaUpdate" type="warning" @click="moveFieldUp(scope.row)">
                   {{ _L["frontend.view.moveup"] }}
                 </el-button>
-                <el-popconfirm :title="_L['frontend.view.confirmdelete']" :confirm-button-text="_L['YES']"
+                <el-popconfirm v-if="scope.row.schemaDelete" :title="_L['frontend.view.confirmdelete']" :confirm-button-text="_L['YES']"
                   :cancel-button-text="_L['NO']" :icon="Delete" @confirm="handleFieldDelete(scope.row)">
                   <template #reference>
                     <el-button type="danger">
@@ -190,13 +166,13 @@
 
     <!-- field editor -->
     <el-drawer v-model="showAppFieldEditor" :title="appFieldOper" direction="rtl" size="100%" append-to-body
-      @closed="closeFieldEditor">
+      destroy-on-close @close="closeFieldEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawData" label-width="160"
+          <el-form v-if="appFieldNode" ref="fieldEditorRef" :model="appFieldNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appFieldNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
+              <schema-view :debug="isDebug" :node="(appFieldNode as StructNode)" :in-form="SchemaNodeFormType.Expand" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -214,37 +190,38 @@
     </el-drawer>
 
     <!-- workflow list -->
-    <el-drawer v-model="showWorkflowList" :title="appTitle" direction="rtl" size="100%" append-to-body>
+    <el-drawer v-model="showWorkflowList" :title="appTitle" direction="rtl" size="100%" append-to-body
+      destroy-on-close>
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-table :data="workflows" style="width: 100%; height: 65vh;" :border="true" header-align="left"
+          <el-table ref="workflowTableRef" :data="workflows" style="width: 100%; height: 65vh;" :border="true" header-align="left"
             :header-cell-style="tableHeaderCellStyle">
-            <el-table-column align="left" prop="name" :label="_L['system.schema.def.app.workflow.schema.name']"
+            <el-table-column align="left" prop="name" :label="_L['system.schema.app.workflow.schema.name']"
               min-width="120" />
-            <el-table-column align="left" prop="display" :label="_L['system.schema.def.app.workflow.schema.display']"
+            <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']"
               min-width="150">
               <template #default="scope">
                 {{ _L(scope.row.display?.key ? scope.row.display : scope.row.name) }}
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="desc" :label="_L['system.schema.def.app.workflow.schema.desc']"
+            <el-table-column align="left" prop="desc" :label="_L['system.schema.prop.common.description']"
               min-width="150">
               <template #default="scope">
-                {{ _L(scope.row.desc) }}
+                {{ _L(scope.row.description) }}
               </template>
             </el-table-column>
-            <el-table-column align="left" prop="active" :label="_L['system.schema.def.app.workflow.schema.active']"
+            <el-table-column align="left" prop="active" :label="_L['system.schema.app.workflow.schema.active']"
               min-width="120">
               <template #default="scope">
                 <schema-view v-model="scope.row.active" :config="{
                   type: NS_SYSTEM_BOOL,
                   readonly: true
-                }" plain-text="left"></schema-view>
+                }" text="left"></schema-view>
               </template>
             </el-table-column>
             <el-table-column align="left" header-align="center" :label="_L['frontend.view.oper']" width="400">
               <template #header>
-                <a href="javascript:void(0)" @click="handleWorkflowNew"
+                <a href="javascript:void(0)" v-if="isFieldAddable" @click="handleWorkflowNew"
                   style="text-decoration: underline; color: lightseagreen;">
                   {{ _L["frontend.view.new"] }}
                 </a>
@@ -279,14 +256,14 @@
     </el-drawer>
 
     <!-- workflow editor -->
-    <el-drawer v-model="showWorkflowEditor" :title="appWorkflowOper" direction="rtl" size="100%" append-to-body
-      @closed="closeWorkflowEditor">
+    <el-drawer v-model="showWorkflowEditor" :title="appWorkflowOper" direction="rtl" size="100%" append-to-body destroy-on-close
+      @close="closeWorkflowEditor">
       <el-container class="main" style="height: 80vh;">
         <el-main>
-          <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawData" label-width="160"
+          <el-form v-if="appWorkflowNode" ref="workflowEditorRef" :model="appWorkflowNode.rawValue!" label-width="160"
             label-position="left" style="width: 100%; height: 90%;">
             <div class="draw-view">
-              <schema-view :node="(appWorkflowNode as StructNode)" in-form="expandall" plain-text="left"></schema-view>
+              <schema-view :debug="isDebug" :node="(appWorkflowNode as StructNode)" :in-form="SchemaNodeFormType.ExpandAll" text="left" :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
         </el-main>
@@ -321,25 +298,29 @@
 
 <script setup lang="ts">
 import { Delete } from '@element-plus/icons-vue'
-import { reactive, watch, ref, toRaw } from 'vue'
+import { reactive, watch, ref, nextTick, toRaw } from 'vue'
+import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-node-vue-view'
+import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, StringNode, LocaleString, Display, getPropertyValue, Disable, deepClone, ReadOnly, isEmpty } from 'schema-node-core'
+import { ElForm, ElMessage, ElTable } from 'element-plus'
+import tryapp from './tryapp.vue'
+import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaApiBaseUrl, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate, SchemaUpdate } from 'schema-node-app'
+import { subscribeDebugMode } from '../utility/debug'
+import { logger } from '../utility/logger.js'
 
+//#region View
+const isDebug = ref(false)
+subscribeDebugMode((debug) => isDebug.value = debug, true)
+
+const isNewAppAble = ref(!isEmpty(getSchemaApiBaseUrl()))
 const tableHeaderCellStyle = {
   backgroundColor: 'var(--app-surface-muted)',
   color: 'var(--app-text)',
   borderColor: 'var(--app-border)'
 }
-import { _L, schemaView } from 'schema-node-vueview'
-import { _LS, type IAppSchema, type IAppFieldSchema, SchemaNodeStatus, getAppSchema, isNull, StructNode, jsonClone, registerAppSchema, removeAppSchema, SchemaLoadState, getAppCachedSchema, type IAppWorkflowSchema, NS_SYSTEM_BOOL, getSchemaFormats } from 'schema-node'
-import { ElForm, ElMessage } from 'element-plus'
-import { appSchemaToJson, clearAllStorageAppSchemas, removeStorageAppSchema, saveAllCustomAppSchemaToStroage, saveStorageAppSchema } from '../appSchema'
-import tryapp from './tryapp.vue'
-import { getSchemaServerProvider } from '../schemaServerProvider'
-
-//#region View
 
 const enableWorkflow = getSchemaServerProvider() ? true : false
-
-const appSchemas = ref<IAppSchema[]>([])
+const appSchemas = ref<AppSchema[]>([])
 
 const state = reactive({
   app: "",
@@ -360,12 +341,10 @@ if (localStorage["schema_man_appsearch"]) {
 }
 
 const reset = () => {
-  if (!isNull(state.keyword)) {
+  if (!isNull(state.keyword))
     state.keyword = ""
-  }
-  else {
+  else
     state.app = ""
-  }
 }
 
 const goback = () => {
@@ -373,14 +352,24 @@ const goback = () => {
   state.app = paths.slice(0, paths.length - 1).join(".")
 }
 
-const choose = (schema: IAppSchema) => {
+const choose = (schema: AppSchema) => {
   state.app = schema.name
 }
 
 const refresh = async () => {
-  localStorage["schema_man_appsearch"] = JSON.stringify(state)
-  const appSchema = await getAppSchema(state.app || "")
-  appSchemas.value = appSchema?.apps ? [...appSchema.apps] : []
+  localStorage["schema_man_appsearch"] = JSON.stringify(state);
+  const appType = await getAppType(state.app || "");
+  const subApps = appType ? Array.from(appType.getSubAppSchemas()) : [];
+  for (const app of subApps) {
+    const appType = await getAppType(getAppSchemaName(app));
+    if (!appType) continue;
+    app.hasFields = appType.hasFields;
+    app.hasApps = appType.hasSubApps;
+  }
+  appSchemas.value = [];
+  await nextTick();
+  appSchemas.value = subApps;
+  isNewAppAble.value = !isEmpty(getSchemaApiBaseUrl()) && appType?.getPropertyValue(SchemaCreate) !== false;
 }
 
 watch(state, refresh, { immediate: true })
@@ -394,7 +383,7 @@ const showAppEditor = ref(false)
 const appNode = ref<StructNode | undefined>(undefined)
 const operation = ref("")
 
-let appWatchHandler: Function | null = null
+let appWatchHandler: Function[] = []
 let isNewApp = false
 
 // create
@@ -402,92 +391,108 @@ const handleNew = async () => {
   isNewApp = true
   localStorage["schema_new_app"] = state.app
 
-  appNode.value = new StructNode({
-    type: "system.schema.def.app.schema",
-  }, {})
+  const appSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP}.schema`) as StructType;
+  appNode.value = appSchemaType!.create({ container: state.app }) as StructNode;
   showAppEditor.value = true
 
-  appWatchHandler = appNode.value.subscribe(() => {
-    operation.value = _L.value["frontend.view.new"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
-  }, true)
+  const displayField = appNode.value!.getAccessValue("display") as StructNode;
+  const containerField = appNode.value!.getAccessValue("container") as StringNode;
+  const nameField = appNode.value!.getAccessValue("name") as StringNode;
+  
+  const refreshOperation = () => {
+    operation.value = _L.value["frontend.view.new"] + " " + _L.value(displayField.value as LocaleString ?? getAppSchemaName(appNode.value?.rawValue as AppSchema) ?? "")
+  }
+
+  appWatchHandler.push(displayField.subscribe(refreshOperation));
+  appWatchHandler.push(containerField.subscribe(refreshOperation));
+  appWatchHandler.push(nameField.subscribe(refreshOperation, true));
 }
 
 // update
 const handleEdit = async (row: any, readonly?: boolean) => {
-  isNewApp = false
-  const schema = await getAppSchema(row.name)
-  appNode.value = new StructNode({
-    type: "system.schema.def.app.schema",
-    readonly
-  }, jsonClone(schema))
-  showAppEditor.value = true
+  isNewApp = false;
+  const appType = await getAppType(getAppSchemaName(row));
+  if (!appType) return;
 
-  if (readonly) {
-    operation.value = _L.value["frontend.view.view"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
+  const appSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP}.schema`) as StructType;
+  appNode.value = appSchemaType!.create(appType.getAppSchema()) as StructNode;
+  if (readonly) appNode.value!.setPropertyValue(ReadOnly, true)
+
+  const displayField = appNode.value!.getAccessValue("display") as StructNode;
+  const containerField = appNode.value!.getAccessValue("container") as StringNode;
+  const nameField = appNode.value!.getAccessValue("name") as StringNode;
+  
+  const refreshOperation = () => {
+    operation.value = _L.value[readonly ? "frontend.view.view" : "frontend.view.edit" ] + " " + _L.value(displayField.value as LocaleString ?? getAppSchemaName(appNode.value?.rawValue as AppSchema) ?? "")
   }
-  else {
-    appWatchHandler = appNode.value.subscribe(() => {
-      operation.value = _L.value["frontend.view.edit"] + " " + (_L.value(appNode.value?.data.display) || appNode.value?.data.name || "")
-    }, true)
-  }
+
+  appWatchHandler.push(displayField.subscribe(refreshOperation));
+  appWatchHandler.push(containerField.subscribe(refreshOperation));
+  appWatchHandler.push(nameField.subscribe(refreshOperation, true));
+
+  showAppEditor.value = true
 }
 
 // delete
-const handleDelete = (row: any) => {
-  if ((row.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      const res = provider.deleteAppSchema(row.name)
-      if (!res) {
-        ElMessage.error(_L.value["frontend.view.cantdelapp"])
-        return
-      }
-    }
+const handleDelete = async (row: any) => {
+  const appType = await getAppType(getAppSchemaName(row))
+  if (!appType) return;
+
+  const provider = getSchemaServerProvider();
+  if (!provider) return;
+  const res = provider.deleteAppSchema(row.name);
+  if (!res) {
+    ElMessage.error(_L.value["frontend.view.cantdelapp"]);
+    return;
   }
-  removeStorageAppSchema(row.name)
-  removeAppSchema(row.name)
-  return refresh()
+  appType.container?.removeSubAppSchema(row.name);
+  return refresh();
 }
 
 // save
 const confirmApp = async () => {
-  const res = await editorRef.value?.validate()
-  if (!res || !appNode.value?.valid) return
+  const res = await editorRef.value?.validate();
+  if (!res || !appNode.value?.isValid) return;///
 
-  if (!appNode.value?.valid) return
-  const data = jsonClone(toRaw(appNode.value.data))
-  const schema = getAppCachedSchema(data.name)
+  const node = toRaw(appNode.value!)
+  if (!node.isValid) {
+    for(const n of node.getErrorNodes())
+      logger.error(n)
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
+  
+  const data = node.submitValue as AppSchema;
+  const appType = await getAppType(getAppSchemaName(data));
 
-  if (isNewApp && (schema || await getAppSchema(data.name))) {
+  if (isNewApp && appType) {
     ElMessage.error(_L.value["frontend.view.appnameexists"])
     return
   }
 
-  if (!schema || ((schema.loadState || 0) & SchemaLoadState.Server)) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      try {
-        const res = await provider.saveAppSchema(data)
-        if (!res) {
-          ElMessage.error(_L.value["frontend.view.error"])
-          return
-        }
-        data.loadState = (data.loadState || 0) | SchemaLoadState.Server
-      }
-      catch (ex: any) {
-        if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
-        }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
-      }
+  const provider = getSchemaServerProvider()
+  if (!provider) return;
+  try {
+    const res = await provider.saveAppSchema(data)
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
     }
   }
+  catch (ex: any) {
+    if (ex && ex.status === 403) {
+      ElMessage.error(_L.value["frontend.view.nopermission"])
+      return
+    }
+    ElMessage.error(_L.value["frontend.view.error"])
+    console.error(ex)
+    return
+  }
 
-  registerAppSchema([data], data.loadState)
-  saveStorageAppSchema(data)
+  if (isNewApp)
+    await getAppType(data.container ?? '', true);
+  else
+    await getAppType(getAppSchemaName(data), true);
   closeAppEditor()
   showAppEditor.value = false
   return refresh()
@@ -495,10 +500,10 @@ const confirmApp = async () => {
 
 // close
 const closeAppEditor = () => {
-  if (appWatchHandler) appWatchHandler()
+  appWatchHandler.forEach(handler => handler())
+  appWatchHandler = []
   appNode.value?.dispose()
   appNode.value = undefined
-  appWatchHandler = null
 }
 
 //#endregion
@@ -506,23 +511,27 @@ const closeAppEditor = () => {
 //#region Field 
 
 const showFieldList = ref(false)
-const fields = ref<IAppFieldSchema[]>([])
+const fields = ref<AppFieldSchema[]>([])
 const appTitle = ref("")
 let currApp: string | null = null
+let isFieldAddable = false;
 
 const showFields = async (row: any) => {
-  currApp = row.name
-  const appSchema = await getAppSchema(row.name)
-  appTitle.value = _L.value(appSchema?.display) || appSchema?.name || ""
-  fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  currApp = getAppSchemaName(row);
+  const appType = await getAppType(getAppSchemaName(row));
+  appTitle.value = _L.value(appType?.getProperty(Display)?.getValue<LocaleString>() ?? appType?.name ?? "");
+  fields.value = [];
+  await nextTick();
+  fields.value = Array.from(appType?.getFields().map(f => f.getFieldSchema() as AppFieldSchema) ?? []);
+  isFieldAddable = appType?.getPropertyValue(SchemaCreate) ?? false;
   showFieldList.value = true
 }
 
-const fieldRowClassName = (data: any) => {
+const fieldRowClassName = (data: { row: AppFieldSchema }) => {
   const { row } = data
-  if (row.disable) return 'disable-row'
-  if (row.func) return 'push-row'
-  if (row.frontend) return 'frontend-row'
+  if (getPropertyValue(row, Disable)) return 'disable-row'
+  if (getPropertyValue(row, DataDerive)) return 'push-row'
+  if (!getPropertyValue(row, EnableStorage)) return 'frontend-row'
   return '';
 }
 
@@ -533,162 +542,158 @@ const showAppFieldEditor = ref(false)
 const appFieldNode = ref<StructNode | undefined>(undefined)
 const appFieldOper = ref("")
 
-let appFieldWatchHandler: Function | null = null
+let appFieldWatchHandler: Function[] = []
 
 // create
 const handleFieldNew = async () => {
-  appFieldNode.value = new StructNode({
-    type: "system.schema.def.app.field.schema",
-  }, { app: currApp! })
-  showAppFieldEditor.value = true
+  const appFieldSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_FIELD}.schema`) as StructType;
+  appFieldNode.value = appFieldSchemaType.create({ app: currApp! } as AppFieldSchema) as StructNode;
 
-  appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-    appFieldOper.value = _L.value["frontend.view.new"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
-  }, true)
+  const displayField = appFieldNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appFieldNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appFieldOper.value = _L.value["frontend.view.new"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
+  appFieldWatchHandler.push(displayField.subscribe(refreshOper));
+  appFieldWatchHandler.push(nameField.subscribe(refreshOper, true));
+  showAppFieldEditor.value = true
 }
 
 // update
 const handleFieldEdit = async (row: any, readonly?: boolean) => {
-  appFieldNode.value = new StructNode({
-    type: "system.schema.def.app.field.schema",
-    readonly
-  }, jsonClone(toRaw(row)))
+  const appFieldSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_FIELD}.schema`) as StructType;
+  appFieldNode.value = appFieldSchemaType.create(deepClone(row)) as StructNode;
+  if (readonly) appFieldNode.value.setPropertyValue(ReadOnly, true);
+
   showAppFieldEditor.value = true
 
+  const displayField = appFieldNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appFieldNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appFieldOper.value = _L.value[readonly ? "frontend.view.view" : "frontend.view.edit"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
   if (readonly) {
-    appFieldOper.value = _L.value["frontend.view.view"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
+    refreshOper();
   }
   else {
-    appFieldWatchHandler = appFieldNode.value.subscribe(() => {
-      appFieldOper.value = _L.value["frontend.view.edit"] + " " + (_L.value(appFieldNode.value?.data.display) || appFieldNode.value?.data.name || "")
-    }, true)
+    appFieldWatchHandler.push(displayField.subscribe(refreshOper));
+    appFieldWatchHandler.push(nameField.subscribe(refreshOper, true));
   }
 }
 
 // delete
 const handleFieldDelete = async (row: any) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.fields) return
+  const appType = await getAppType(currApp!)
+  const field = appType?.getField(row.name)
+  if (!field) return
 
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      try {
-        const res = provider.deleteAppFieldSchema(appSchema.name, row.name)
-        if (!res) {
-          ElMessage.error(_L.value["frontend.view.error"])
-          return
-        }
-      }
-      catch (ex: any) {
-        if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
-        }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
-      }
+  const provider = getSchemaServerProvider()
+  if (!provider) return;
+  try {
+    const res = provider.deleteAppFieldSchema(appType!.name, row.name)
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
     }
   }
+  catch (ex: any) {
+    if (ex && ex.status === 403) {
+      ElMessage.error(_L.value["frontend.view.nopermission"])
+      return
+    }
+    ElMessage.error(_L.value["frontend.view.error"])
+    console.error(ex)
+    return
+  }
 
-  const idx = appSchema.fields.findIndex(f => f.name === row.name)
-  if (idx! >= 0) {
-    appSchema.fields.splice(idx, 1)
-    saveStorageAppSchema(appSchema)
-    fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  if (appType) {
+    appType.removeField(field.name);
+    fields.value = Array.from(appType.getFields().map(f => f.getFieldSchema() as AppFieldSchema));
   }
 }
 
 // move up
 const moveFieldUp = async (row: any) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.fields) return
+  const appType = await getAppType(currApp!)
+  if (!appType) return;
 
-  const idx = appSchema.fields.findIndex(f => f.name === row.name)
-  if (idx <= 0) return
-  const temp = appSchema.fields[idx - 1]
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      try {
-        const res = provider.swapAppFieldSchema(appSchema.name, row.name, temp.name)
-        if (!res) {
-          ElMessage.error(_L.value["frontend.view.error"])
-          return
-        }
-      }
-      catch (ex: any) {
-        if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
-        }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
-      }
+  const index = fields.value.findIndex(f => f.name === row.name);
+  if (index < 1) return;
+  const other = fields.value[index - 1].name;
+
+  const provider = getSchemaServerProvider()
+  if (!provider) return;
+  try {
+    const res = provider.swapAppFieldSchema(appType.name, row.name, other)
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
     }
   }
+  catch (ex: any) {
+    if (ex && ex.status === 403) {
+      ElMessage.error(_L.value["frontend.view.nopermission"])
+      return
+    }
+    ElMessage.error(_L.value["frontend.view.error"])
+    console.error(ex)
+    return
+  }
 
-  appSchema.fields[idx - 1] = appSchema.fields[idx]
-  appSchema.fields[idx] = temp
-  saveStorageAppSchema(appSchema)
-  fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  appType.swapField(row.name, other)
+  fields.value = Array.from(appType.getFields().map(f => f.getFieldSchema() as AppFieldSchema))
 }
 
 // save
 const confirmField = async () => {
-  const res = await fieldEditorRef.value?.validate()
-  if (!res || !appFieldNode.value?.valid) return
+  const res = await fieldEditorRef.value?.validate();
+  if (!res || !appFieldNode.value?.isValid) return;
 
-  if (!appFieldNode.value?.valid) return
-  const data = jsonClone(toRaw(appFieldNode.value.data))
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema) return
+  const node = toRaw(appFieldNode.value!)
+  if (!node.isValid) {
+    for(const n of node.getErrorNodes())
+      logger.error(n)
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
+  
+  const data = node.submitValue as AppFieldSchema;
+  const appType = await getAppType(currApp!);
+  if (!appType) return;
 
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      try {
-        const res = await provider.saveAppFieldSchema(appSchema.name, data)
-        if (!res) {
-          ElMessage.error(_L.value["frontend.view.error"])
-          return
-        }
-      }
-      catch (ex: any) {
-        if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
-        }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
-      }
+  const provider = getSchemaServerProvider();
+  if (!provider) return;
+  try {
+    const res = await provider.saveAppFieldSchema(appType.name, data);
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"]);
+      return;
     }
   }
-
-  if (!appSchema.fields) appSchema.fields = []
-  const idx = appSchema.fields.findIndex(f => f.name === data.name)
-  if (idx! >= 0) {
-    appSchema.fields[idx] = data
+  catch (ex: any) {
+    if (ex && ex.status === 403) {
+      ElMessage.error(_L.value["frontend.view.nopermission"]);
+      return;
+    }
+    ElMessage.error(_L.value["frontend.view.error"]);
+    console.error(ex);
+    return;
   }
-  else {
-    appSchema.fields.push(data)
-  }
 
-  saveStorageAppSchema(appSchema)
-  fields.value = appSchema?.fields ? [...appSchema.fields] : []
+  await getAppType(appType.name, true);
+  fields.value = Array.from(appType.getFields().map(f => f.getFieldSchema() as AppFieldSchema))
   closeFieldEditor()
   showAppFieldEditor.value = false
 }
 
 // close
 const closeFieldEditor = () => {
-  if (appFieldWatchHandler) appFieldWatchHandler()
+  appFieldWatchHandler.forEach(handler => handler())
+  appFieldWatchHandler = []
   appFieldNode.value?.dispose()
   appFieldNode.value = undefined
-  appFieldWatchHandler = null
 
   // forece refresh
   refresh()
@@ -700,166 +705,171 @@ const closeFieldEditor = () => {
 
 //#region Workflows
 
-const showWorkflowList = ref(false)
-const workflows = ref<IAppWorkflowSchema[]>([])
+const showWorkflowList = ref(false);
+const workflows = ref<AppWorkflowSchema[]>([]);
 const showWorkflows = async (row: any) => {
-  currApp = row.name
-  const appSchema = await getAppSchema(row.name)
-  appTitle.value = _L.value(appSchema?.display) || appSchema?.name || ""
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+  currApp = getAppSchemaName(row);
+  const appType = (await getAppType(currApp!))!
+  appTitle.value = _L.value(appType.getProperty(Display)?.getValue<LocaleString>()) || appType?.name || ""
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
   showWorkflowList.value = true
 }
 
 //#region Workflow Edit
 
-const workflowEditorRef = ref<InstanceType<typeof ElForm>>()
-const showWorkflowEditor = ref(false)
-const appWorkflowNode = ref<StructNode | undefined>(undefined)
-const appWorkflowOper = ref("")
-let appWorkflowWatchHandler: Function | null = null
+const workflowEditorRef = ref<InstanceType<typeof ElForm>>();
+const showWorkflowEditor = ref(false);
+const appWorkflowNode = ref<StructNode | undefined>(undefined);
+const appWorkflowOper = ref("");
+let appWorkflowWatchHandler: Function[] = []
 
 // create
 const handleWorkflowNew = async () => {
-  appWorkflowNode.value = new StructNode({
-    type: "system.schema.def.app.workflow.schema",
-  }, { app: currApp! })
-  showWorkflowEditor.value = true
+  const appWorkflowSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_WORKFLOW}.schema`) as StructType;
+  appWorkflowNode.value = appWorkflowSchemaType.create({ app: currApp! }) as StructNode;
 
-  appWorkflowWatchHandler = appWorkflowNode.value.subscribe(() => {
-    appWorkflowOper.value = _L.value["frontend.view.new"] + " " + (_L.value(appWorkflowNode.value?.data.display) || appWorkflowNode.value?.data.name || "")
-  }, true)
+  const displayField = appWorkflowNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appWorkflowNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appWorkflowOper.value = _L.value["frontend.view.new"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
+  appWorkflowWatchHandler.push(displayField.subscribe(refreshOper));
+  appWorkflowWatchHandler.push(nameField.subscribe(refreshOper, true));
+  showWorkflowEditor.value = true
 }
 
 // update
 const handleWorkflowEdit = async (row: any, readonly?: boolean) => {
-  appWorkflowNode.value = new StructNode({
-    type: "system.schema.def.app.workflow.schema",
-    readonly
-  }, jsonClone(toRaw(row)))
+  const appWorkflowSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_APP_WORKFLOW}.schema`) as StructType;
+  appWorkflowNode.value = appWorkflowSchemaType.create(deepClone(row)) as StructNode;
+  if (readonly) appWorkflowNode.value.setPropertyValue(ReadOnly, true);
+
   showWorkflowEditor.value = true
+
+  const displayField = appWorkflowNode.value?.getAccessValue("display") as StructNode;
+  const nameField = appWorkflowNode.value?.getAccessValue("name") as StringNode;
+  const refreshOper = () => {
+    appWorkflowOper.value = _L.value[readonly ? "frontend.view.view" : "frontend.view.edit"] + " " + (_L.value(displayField.value as LocaleString) || nameField.value || "")
+  }
+
+  if (readonly) {
+    refreshOper();
+  }
+  else {
+    appWorkflowWatchHandler.push(displayField.subscribe(refreshOper));
+    appWorkflowWatchHandler.push(nameField.subscribe(refreshOper, true));
+  }
 }
 
 // delete
 const handleWorkflowDelete = async (row: any) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.workflows) return
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      try {
-        const res = provider.deleteAppWorkflowSchema(appSchema.name, row.name)
-        if (!res) {
-          ElMessage.error(_L.value["frontend.view.error"])
-          return
-        }
-      }
-      catch (ex: any) {
-        if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
-        }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
-      }
+  const appType = await getAppType(currApp!)
+  if (!appType) return
+  const provider = getSchemaServerProvider()
+  if (!provider) return;
+  try {
+    const res = provider.deleteAppWorkflowSchema(appType.name, row.name)
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
     }
   }
-  appSchema.workflows = appSchema.workflows.filter(w => w.name !== row.name)
-  saveStorageAppSchema(appSchema)
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+  catch (ex: any) {
+    if (ex && ex.status === 403) {
+      ElMessage.error(_L.value["frontend.view.nopermission"])
+      return
+    }
+    ElMessage.error(_L.value["frontend.view.error"])
+    console.error(ex)
+    return
+  }
+  appType.removeWorkflow(row.name)
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
 }
 
 // save
 const confirmWorkflow = async () => {
-  const res = await workflowEditorRef.value?.validate()
-  if (!res || !appWorkflowNode.value?.valid) {
-    ElMessage.error(appWorkflowNode.value?.error)
+  const res = await workflowEditorRef.value?.validate();
+  if (!res || !appWorkflowNode.value?.isValid) {
+    ElMessage.error(appWorkflowNode.value?.error);
+    return;
+  }
+
+  const node = toRaw(appWorkflowNode.value!)
+  if (!node.isValid) {
+    for(const n of node.getErrorNodes())
+      logger.error(n)
+    ElMessage.error(_L.value["frontend.view.error"])
     return
   }
-  if (!appWorkflowNode.value?.valid) return
-  const data = jsonClone(toRaw(appWorkflowNode.value.data))
-  console.log("workflow data:", data)
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema) return
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      try {
-        // save workflow schema
-        if (data.name && data.name !== appSchema.name) {
-          const res = await provider.saveAppWorkflowSchema(appSchema.name, data)
-          if (!res) {
-            ElMessage.error(_L.value["frontend.view.error"])
-            return
-          }
-        }
-      }
-      catch (ex: any) {
-        if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
-        }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
-      }
+
+  const data = node.submitValue as AppWorkflowSchema;
+  const appType = await getAppType(currApp!)
+  if (!appType) return
+    const provider = getSchemaServerProvider();
+    if (!provider) return;
+  try {
+    // save workflow schema
+    const res = await provider.saveAppWorkflowSchema(appType.name, data);
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"]);
+      return;
     }
   }
-  if (!appSchema.workflows) appSchema.workflows = []
-  const idx = appSchema.workflows.findIndex(w => w.name === data.name)
-  if (idx! >= 0) {
-    appSchema.workflows[idx] = data
+  catch (ex: any) {
+    if (ex && ex.status === 403) {
+      ElMessage.error(_L.value["frontend.view.nopermission"]);
+      return;
+    }
+    ElMessage.error(_L.value["frontend.view.error"]);
+    console.error(ex);
+    return;
   }
-  else {
-    appSchema.workflows.push(data)
-  }
-  saveStorageAppSchema(appSchema)
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+
+  await appType.saveWorkflow(data);
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema));
   closeWorkflowEditor()
   showWorkflowEditor.value = false
 }
 
 // close
 const closeWorkflowEditor = () => {
-  if (appWorkflowWatchHandler) appWorkflowWatchHandler()
-  appWorkflowNode.value?.dispose()
-  appWorkflowNode.value = undefined
-  appWorkflowWatchHandler = null
+  appWorkflowWatchHandler.forEach(h => h());
+  appWorkflowWatchHandler = [];
+  appWorkflowNode.value?.dispose();
+  appWorkflowNode.value = undefined;
 }
 
 // toggle
 const toggleWorkflow = async (row: any, active: boolean) => {
-  const appSchema = await getAppSchema(currApp!)
-  if (!appSchema?.workflows) return
-  if ((appSchema.loadState || 0) & SchemaLoadState.Server) {
-    const provider = getSchemaServerProvider()
-    if (provider) {
-      try {
-        // toggle workflow schema
-        if (row.name && row.name !== appSchema.name) {
-          const res = provider.toggleAppWorkflowSchema(appSchema.name, row.name, active)
-          if (!res) {
-            ElMessage.error(_L.value["frontend.view.error"])
-            return
-          }
-        }
-      }
-      catch (ex: any) {
-        if (ex && ex.status === 403) {
-          ElMessage.error(_L.value["frontend.view.nopermission"])
-          return
-        }
-        ElMessage.error(_L.value["frontend.view.error"])
-        console.error(ex)
-        return
-      }
+  const appType = await getAppType(currApp!)
+  if (!appType) return
+  const provider = getSchemaServerProvider()
+  if (!provider) return;
+  try {
+    // toggle workflow schema
+    const res = provider.toggleAppWorkflowSchema(appType.name, row.name, active)
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
     }
   }
-  const idx = appSchema.workflows.findIndex(w => w.name === row.name)
-  if (idx! >= 0)
-    appSchema.workflows[idx].active = active
-  saveStorageAppSchema(appSchema)
-  workflows.value = appSchema?.workflows ? [...appSchema.workflows] : []
+  catch (ex: any) {
+    if (ex && ex.status === 403) {
+      ElMessage.error(_L.value["frontend.view.nopermission"])
+      return
+    }
+    ElMessage.error(_L.value["frontend.view.error"])
+    console.error(ex)
+    return
+  }
+  
+  const data = appType.getWorkflow(row.name)?.getWorkflowSchema();
+  if (!data) return
+  data.active = active;
+  appType.saveWorkflow(data);
+  workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
 }
 
 //#endregion
@@ -878,108 +888,113 @@ const tryit = () => {
 
 //#region Download
 
-const downloading = ref(false)
-const appTableRef = ref<any>()
-const schemaFormats = ref<string[]>([])
-const selectedFormat = ref<string>('')
-const downloadFromServer = ref(false)
-const APP_SCHEMA_DOWNLOAD_FORMAT_KEY = "schema_man_app_download_format"
-let selections: string[] = []
+const downloading = ref(false);
+const appTableRef = ref<InstanceType<typeof ElTable> | null>(null);
+const fieldTableRef = ref<InstanceType<typeof ElTable> | null>(null);
+const workflowTableRef = ref<InstanceType<typeof ElTable> | null>(null);
+useElTableMemoryFix(appTableRef);
+useElTableMemoryFix(fieldTableRef);
+useElTableMemoryFix(workflowTableRef);
+
+const schemaFormats = ref<string[]>([]);
+const selectedFormat = ref<string>('');
+const downloadFromServer = ref(false);
+const APP_SCHEMA_DOWNLOAD_FORMAT_KEY = "schema_man_app_download_format";
+let selections: string[] = [];
 
 const startDownload = () => {
-  selections = []
-  appTableRef.value?.clearSelection?.()
+  selections = [];
+  appTableRef.value?.clearSelection?.();
 
-  const provider = getSchemaServerProvider()
-  downloadFromServer.value = !!provider
+  const provider = getSchemaServerProvider();
+  downloadFromServer.value = !!provider;
   if (provider) {
-    schemaFormats.value = getSchemaFormats()
-    const savedFormat = localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] || ''
-    selectedFormat.value = schemaFormats.value.includes(savedFormat) ? savedFormat : (schemaFormats.value[0] || '')
+    schemaFormats.value = getSchemaProtocolFormats();
+    const savedFormat = localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] || '';
+    selectedFormat.value = schemaFormats.value.includes(savedFormat) ? savedFormat : (schemaFormats.value[0] || '');
   }
   else {
-    schemaFormats.value = []
-    selectedFormat.value = ''
+    schemaFormats.value = [];
+    selectedFormat.value = '';
   }
 
-  downloading.value = true
+  downloading.value = true;
 }
 
 const handleSelection = (val: any[]) => {
-  const selectedRows = val || []
+  const selectedRows = val || [];
   if (!selectedRows.length) {
-    selections = []
+    selections = [];
     return
   }
 
-  const row = selectedRows[selectedRows.length - 1]
+  const row = selectedRows[selectedRows.length - 1];
   if (selectedRows.length > 1 && appTableRef.value) {
-    appTableRef.value.clearSelection()
-    appTableRef.value.toggleRowSelection(row, true)
+    appTableRef.value.clearSelection();
+    appTableRef.value.toggleRowSelection(row, true);
   }
-  selections = [row.name]
+  selections = [row.name];
 }
 
 const download = async () => {
   if (!selections.length) {
-    ElMessage.error(_L.value["frontend.view.error"])
-    return
+    ElMessage.error(_L.value["frontend.view.error"]);
+    return;
   }
 
-  const appName = selections[0]
-  const provider = getSchemaServerProvider()
+  const appName = selections[0];
+  const provider = getSchemaServerProvider();
 
   if (provider && downloadFromServer.value) {
     if (!selectedFormat.value) {
-      ElMessage.error(_L.value["frontend.view.error"])
-      return
+      ElMessage.error(_L.value["frontend.view.error"]);
+      return;
     }
 
     try {
-      await provider.loadAppSchema(appName, true, selectedFormat.value)
-      downloading.value = false
+      await provider.getAppSchema(appName, true, selectedFormat.value);
+      downloading.value = false;
     }
     catch (ex: any) {
       if (ex && ex.status === 403) {
-        ElMessage.error(_L.value["frontend.view.nopermission"])
-        return
+        ElMessage.error(_L.value["frontend.view.nopermission"]);
+        return;
       }
-      ElMessage.error(_L.value["frontend.view.error"])
-      console.error(ex)
+      ElMessage.error(_L.value["frontend.view.error"]);
+      console.error(ex);
+      return;
     }
-    return
+    return;
   }
 
-  const name = `${appName}.json`
-  const content = JSON.stringify(selections.map(getAppCachedSchema).map(s => appSchemaToJson(s!)), null, 2)
+  const name = `${appName}.json`;
+  const content = JSON.stringify(selections.map(s => getExportAppSchema(s!)), null, 2);
 
   // download
-  const blob = new Blob([content], { type: 'application/octet-stream' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+  const blob = new Blob([content], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 
-  downloading.value = false
+  downloading.value = false;
 }
 
 watch(selectedFormat, (val) => {
-  if (!val) return
-  localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] = val
+  if (!val) return;
+  localStorage[APP_SCHEMA_DOWNLOAD_FORMAT_KEY] = val;
 })
 
-const uploadSchema = (file: File) => {
-  file.text().then(text => {
-    const data = JSON.parse(text)
-    if (Array.isArray(data)) {
-      registerAppSchema(data, SchemaLoadState.Custom)
-      saveAllCustomAppSchemaToStroage()
-      return refresh()
-    }
-  })
+const uploadSchema = async (file: File) => {
+  const text = await file.text();
+  const data = JSON.parse(text);
+  if (Array.isArray(data)) {
+    // @TODO
+    return refresh();
+  }
   return false
 }
 

@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import './style.css'
+import './assets/css/style.css'
 import App from './App.vue'
 import locale from 'element-plus/es/locale/lang/zh-cn'
 import ElementPlus from "element-plus"
@@ -8,15 +8,24 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import 'element-plus/dist/index.css'
 import { routes } from './routes'
 import Markdown from './components/markdown.vue'
-import "./assets/locale/zhCN"
-import "./assets/locale/enUS"
-import "./auth"
-import { setLanguage } from 'schema-node'
+import "./utility/locale"
+import "./utility/auth"
+import { initSchemaRuntime, logger as schemaLogger, LogLevel, setLanguage } from 'schema-node-core'
+import { logger as viewLogger } from 'schema-node-vue-view'
+import { logger } from './utility/logger'
 import { reloadStorageSchemas } from './schema'
-import { reloadStorageAppSchemas } from './appSchema'
-import { setSchemaSite } from './schemaServerProvider'
+import { setSchemaSite } from './schema/provider/schemaServerProvider'
 
 const app = createApp(App)
+
+// logger
+const logLevel = LogLevel.INFO;
+schemaLogger.setLevel(logLevel)
+viewLogger.setLevel(logLevel)
+logger.setLevel(logLevel)
+
+// init shema runtime
+initSchemaRuntime()
 
 // language
 if (localStorage["lang"])
@@ -24,7 +33,6 @@ if (localStorage["lang"])
 
 // schema init
 reloadStorageSchemas()
-reloadStorageAppSchemas()
 if (document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true') {
     setSchemaSite(document.querySelector('meta[name="schema-api-base-url"]')?.getAttribute('content') || '/schema')
 }

@@ -4,6 +4,12 @@
             <nav-header></nav-header>
             <p style="position: absolute; top: 0rem; right: 2rem">
                 <el-switch
+                    v-model="isDebug"
+                    :active-text="_L['frontend.debug']"
+                    @change="setDebugMode"
+                    style="margin-right: 2rem"
+                />
+                <el-switch
                     v-model="isDark"
                     :active-text="_L['frontend.dark']"
                     :inactive-text="_L['frontend.light']"
@@ -11,6 +17,7 @@
                     style="margin-right: 2rem"
                 />
                 <el-input v-if="!isEmbedded" v-model="url" :placeholder="_L['frontend.server.url']" style="display:inline;margin-right: 2rem" @change="saveServer"></el-input>
+                <a href="/" v-else style="margin-right: 1rem;">{{ _L["frontend.server.url"] }}</a>
                 <a href="javascript:void(0)" v-if="isEmbedded || url" style="margin-right: 2rem;" @click="openAuth">{{_L["frontend.auth"]}}</a>
                 <a href="javascript:void(0)" @click="toggle('enUS')" :class="lang =='enUS' ? 'active' : 'deactive'">EN</a>
                 |
@@ -25,7 +32,7 @@
         <el-drawer v-model="showAuth" :title="_L['frontend.auth']" direction="rtl" size="80%" append-to-body>
             <el-container class="main" style="height: 80vh;">
                 <el-main>
-                    <schema-view v-if="authNode" :key="authNode.guid" :node="(authNode as StructNode)" :plainText="false" />
+                    <schema-view v-if="authNode" :key="authNode.id" :node="(authNode as StructNode)" :plainText="false" />
                 </el-main>
                 <el-footer>
                     <br/>
@@ -40,15 +47,17 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue"
 import NavHeader from "./navHeader.vue"
-import { setLanguage, getLanguage, StructNode } from "schema-node"
-import { _L } from "schema-node-vueview"
-import { getSchemaSite, setSchemaSite } from "../schemaServerProvider"
-import { getFrontendAuth, saveFrontendAuth } from "../auth"
-import { schemaView } from "schema-node-vueview"
+import { setLanguage, getLanguage, StructNode, getNodeType, StructType } from "schema-node-core"
+import { _L } from "schema-node-vue-view"
+import { getSchemaSite, setSchemaSite } from "../schema/provider/schemaServerProvider"
+import { getFrontendAuth, saveFrontendAuth } from "../utility/auth"
+import { schemaView } from "schema-node-vue-view"
+import { FrontendAuth } from "../schema/auth.js"
+import { setDebugMode, subscribeDebugMode } from "../utility/debug.js"
 
 const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'
 
-// 主题切换
+// Theme switch
 const isDark = ref(localStorage.getItem('themeMode') === 'dark')
 const applyTheme = (mode: 'dark' | 'light') => {
     document.documentElement.setAttribute('data-theme', mode)
@@ -61,6 +70,12 @@ const toggleTheme = () => {
     applyTheme(mode)
     localStorage.setItem('themeMode', mode)
 }
+
+// Debug Mode
+const isDebug = ref(false)
+subscribeDebugMode((debugMode) => isDebug.value = debugMode, true)
+
+// Life Cycle
 onMounted(() => {
     const mode = (localStorage.getItem('themeMode') || 'light') as 'dark' | 'light'
     applyTheme(mode)
@@ -80,13 +95,14 @@ const saveServer = () => setSchemaSite(url.value)
 const showAuth = ref(false)
 const authNode = ref<StructNode | null>(null)
 const openAuth = async () => {
-    authNode.value?.dispose()
-    authNode.value = null
-    showAuth.value = true
-    authNode.value = new StructNode({ type: "frontend.auth" }, getFrontendAuth())
+    authNode.value?.dispose();
+    authNode.value = null;
+    showAuth.value = true;
+    const type = await getNodeType('frontend.auth') as StructType;
+    authNode.value = type.create(getFrontendAuth()) as StructNode;
 }
 const saveAuth = () => {
-    saveFrontendAuth(authNode.value?.data)
+    saveFrontendAuth(authNode.value?.submitValue as FrontendAuth)
     showAuth.value = false
     authNode.value?.dispose()
     authNode.value = null
