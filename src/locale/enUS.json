@@ -185,5 +185,6 @@
 
   "frontend.view.schemanameexists": "Schema name already exists",
   "frontend.view.appnameexists": "App name already exists",
-  "frontend.view.selectnamespace": "Please select a type"
+  "frontend.view.selectnamespace": "Please select a type",
+  "frontend.view.invalidfile": "Invalid file"
 }

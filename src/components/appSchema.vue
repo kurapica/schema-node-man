@@ -991,9 +991,30 @@ watch(selectedFormat, (val) => {
 const uploadSchema = async (file: File) => {
   const text = await file.text();
   const data = JSON.parse(text);
-  if (Array.isArray(data)) {
-    // @TODO
-    return refresh();
+  if (typeof data !== "object" || !data.name) {
+    ElMessage.error(_L.value["frontend.view.invalidfile"]);
+    return false;
+  }
+  
+  const provider = getSchemaServerProvider();
+
+  if (provider) {
+    try {
+      await provider.saveAppSchema(data);
+    }
+    catch (ex: any) {
+      if (ex && ex.status === 403) {
+        ElMessage.error(_L.value["frontend.view.nopermission"]);
+        return;
+      }
+      ElMessage.error(_L.value["frontend.view.invalidfile"]);
+      console.error(ex);
+      return;
+    }
+    
+    await getAppType(data.container, true);
+    refresh();
+    return false;
   }
   return false
 }

@@ -182,5 +182,6 @@
   "frontend.view.manualworkflows": "手动工作流",
   "frontend.view.schemanameexists": "类型名称已存在",
   "frontend.view.appnameexists": "应用名称已存在",
-  "frontend.view.selectnamespace": "请选择类型"
+  "frontend.view.selectnamespace": "请选择类型",
+  "frontend.view.invalidfile": "无效的文件"
 }
