@@ -58,7 +58,7 @@ import { setDebugMode, subscribeDebugMode } from "../utility/debug.js"
 const isEmbedded = document.querySelector('meta[name="schema-embedded"]')?.getAttribute('content') === 'true'
 
 // Theme switch
-const isDark = ref(localStorage.getItem('themeMode') === 'dark')
+const isDark = ref(localStorage.getItem('themeMode') !== 'light')
 const applyTheme = (mode: 'dark' | 'light') => {
     document.documentElement.setAttribute('data-theme', mode)
     document.documentElement.classList.toggle('dark', mode === 'dark')
@@ -77,7 +77,7 @@ subscribeDebugMode((debugMode) => isDebug.value = debugMode, true)
 
 // Life Cycle
 onMounted(() => {
-    const mode = (localStorage.getItem('themeMode') || 'light') as 'dark' | 'light'
+    const mode = (localStorage.getItem('themeMode') || 'dark') as 'dark' | 'light'
     applyTheme(mode)
     isDark.value = mode === 'dark'
 })

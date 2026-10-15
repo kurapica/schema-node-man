@@ -60,7 +60,7 @@
               @click="showFields(scope.row)">
               {{ _L["frontend.view.fields"] }}
             </el-button>
-            <el-button v-if="false && (scope.row.hasFields || scope.row.fields?.length) && enableWorkflow" type="warning"
+            <el-button v-if="(scope.row.hasFields || scope.row.fields?.length) && enableWorkflow" type="warning"
               @click="showWorkflows(scope.row)">
               {{ _L["frontend.view.workflow"] }}
             </el-button>
@@ -227,16 +227,16 @@
                 </a>
               </template>
               <template #default="scope">
-                <el-button type="info" @click="handleWorkflowEdit(scope.row, true)">
+                <el-button type="info" v-if="scope.row.schemaRead" @click="handleWorkflowEdit(scope.row, true)">
                   {{ _L["frontend.view.view"] }}
                 </el-button>
-                <el-button type="warning" @click="toggleWorkflow(scope.row, !scope.row.active)">
+                <el-button type="warning" v-if="scope.row.schemaUpdate" @click="toggleWorkflow(scope.row, !scope.row.active)">
                   {{ scope.row.active ? _L["DEACTIVE"] : _L["ACTIVE"] }}
                 </el-button>
-                <el-button type="success" @click="handleWorkflowEdit(scope.row, false)">
+                <el-button type="success" v-if="scope.row.schemaUpdate" @click="handleWorkflowEdit(scope.row, false)">
                   {{ _L["frontend.view.edit"] }}
                 </el-button>
-                <el-popconfirm :title="_L['frontend.view.confirmdelete']" :confirm-button-text="_L['YES']"
+                <el-popconfirm v-if="scope.row.schemaDelete"  :title="_L['frontend.view.confirmdelete']" :confirm-button-text="_L['YES']"
                   :cancel-button-text="_L['NO']" :icon="Delete" @confirm="handleWorkflowDelete(scope.row)">
                   <template #reference>
                     <el-button type="danger">
@@ -304,7 +304,7 @@ import { _LS, isNull, StructNode, NS_SYSTEM_BOOL, getNodeType, StructType, Strin
 import { ElForm, ElMessage, ElTable } from 'element-plus'
 import tryapp from './tryapp.vue'
 import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
-import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppType, getExportAppSchema, getSchemaApiBaseUrl, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate, SchemaUpdate } from 'schema-node-app'
+import { AppFieldSchema, AppSchema, AppWorkflowSchema, DataDerive, EnableStorage, getAppSchemaName, getAppSchemaProvider, getAppType, getExportAppSchema, getSchemaApiBaseUrl, getSchemaProtocolFormats, NS_SYSTEM_SCHEMA_APP, NS_SYSTEM_SCHEMA_APP_FIELD, NS_SYSTEM_SCHEMA_APP_WORKFLOW, SchemaCreate } from 'schema-node-app'
 import { subscribeDebugMode } from '../utility/debug'
 import { logger } from '../utility/logger.js'
 
@@ -712,6 +712,7 @@ const showWorkflows = async (row: any) => {
   const appType = (await getAppType(currApp!))!
   appTitle.value = _L.value(appType.getProperty(Display)?.getValue<LocaleString>()) || appType?.name || ""
   workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
+  isFieldAddable = appType?.getPropertyValue(SchemaCreate) ?? false;
   showWorkflowList.value = true
 }
 
@@ -849,7 +850,7 @@ const toggleWorkflow = async (row: any, active: boolean) => {
   if (!provider) return;
   try {
     // toggle workflow schema
-    const res = provider.toggleAppWorkflowSchema(appType.name, row.name, active)
+    const res = await provider.toggleAppWorkflowSchema(appType.name, row.name, active)
     if (!res) {
       ElMessage.error(_L.value["frontend.view.error"])
       return
@@ -869,6 +870,8 @@ const toggleWorkflow = async (row: any, active: boolean) => {
   if (!data) return
   data.active = active;
   appType.saveWorkflow(data);
+  workflows.value = [];
+  await nextTick();
   workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema))
 }
 
@@ -943,7 +946,7 @@ const download = async () => {
   }
 
   const appName = selections[0];
-  const provider = getSchemaServerProvider();
+  const provider = getAppSchemaProvider();
 
   if (provider && downloadFromServer.value) {
     if (!selectedFormat.value) {

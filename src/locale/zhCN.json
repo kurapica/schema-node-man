@@ -1,4 +1,6 @@
 ﻿{
+  "ACTIVE": "激活",
+  "DEACTIVE": "停用",
   "frontend.debug": "调试模式",
   
   "frontend.design.enumintvalueinfo.value": "枚举值",
