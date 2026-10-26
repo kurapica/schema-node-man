@@ -20,7 +20,7 @@
     "marked": "^15.0.5",
     "process": "^0.11.10",
     "rollup-plugin-copy": "^3.5.0",
-    "schema-node-core": "^2.0.10",
+    "schema-node-core": "^2.0.11",
     "schema-node-app": "^2.0.5",
     "schema-node-vue-view": "^2.0.4",
     "showdown": "^2.1.0",

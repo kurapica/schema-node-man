@@ -1,25 +1,20 @@
-﻿{
+{
   "ACTIVE": "激活",
   "DEACTIVE": "停用",
   "frontend.debug": "调试模式",
-  
   "frontend.design.enumintvalueinfo.value": "枚举值",
   "frontend.design.enumintvalueinfo.name": "枚举名",
   "frontend.design.enumintvalueinfo.disable": "停用",
-
   "frontend.design.enumflagvalueinfo.value": "枚举值",
   "frontend.design.enumflagvalueinfo.name": "枚举名",
   "frontend.design.enumflagvalueinfo.disable": "停用",
-
   "frontend.design.structfldfuncarg": "结构体字段函数参数",
   "frontend.design.structfldfuncarg.label": "名称",
   "frontend.design.structfldfuncarg.type": "参数类型",
   "frontend.design.structfldfuncarg.name": "字段名",
   "frontend.design.structfldfuncarg.value": "值",
-
   "frontend.design.enumflagvalueinfo": "枚举标志位字段信息",
   "frontend.design.enumintvalueinfo": "枚举整型字段信息",
-
   "frontend.design.appgetfieldtype": "获取应用字段类型",
   "frontend.design.appiscombineenable": "判定应用字段数据合并规则是否启用",
   "frontend.design.appiscombinesenable": "判定应用字段数据合并规则列表是否启用",
@@ -28,25 +23,21 @@
   "frontend.design.genarraydisplay": "生成数组显示文本",
   "frontend.design.getscalarorenumtype": "获取基础数据类型或枚举类型",
   "frontend.design.gettypedisplayorname": "获取类型显示名或名称",
-
   "frontend.design.pushfunctype": "推送函数类型",
   "frontend.design.namespaceinput": "命名空间录入用",
   "frontend.design.reltarfield": "关联目标字段",
   "frontend.design.reltarfield.ele": "数组元素",
-
   "frontend.design.calcnextflag": "计算下一个标志位",
   "frontend.design.getenuminfostype": "获取枚举值值列表定义类型",
   "frontend.design.getenumrootcascade": "获取枚举值根植的级联层数",
   "frontend.design.isenumroot": "存在枚举值根植",
   "frontend.design.getroottype": "获取根值类型",
-
   "frontend.design.getrelationfuncreturn": "获取关联所需的结果类型",
   "frontend.design.getstructindexfields": "获取结构体可作为索引的字段列表",
   "frontend.design.getrelationwhitelist": "获取可用的关联类型",
   "frontend.design.getstructfieldtype": "获取结构体字段类型",
   "frontend.design.getstructfieldtypebytype": "基于类型获取结构体字段类型",
   "frontend.design.getstructnumbervaluefields": "获取结构体数值字段列表",
-
   "frontend.design.isscalartype": "是基础数据类型",
   "frontend.design.isscalarenumtype": "是基础或枚举值类型",
   "frontend.design.iscascadeenumtype": "是级联枚举值类型",
@@ -56,12 +47,10 @@
   "frontend.design.notstructarraytype": "非结构体或结构体数组类型",
   "frontend.design.getenumcascadewhitelist": "获取级联名称白名单",
   "frontend.design.getwhiteblacklisttype": "获取黑白名单类型",
-
   "frontend.design.getcalltypewhitelist": "获取函数调用类型白名单",
   "frontend.design.getfuncroot": "基于返回值和调用类型获取函数返回值",
   "frontend.design.getexpvaluetype": "获取表达式值类型",
   "frontend.design.hideexpvalue": "是否隐藏表达式的值",
-
   "frontend.design.appaccessfld": "访问字段",
   "frontend.design.appinput": "应用名(输入用)",
   "frontend.design.appfieldvalarg": "参数",
@@ -78,13 +67,11 @@
   "frontend.design.appfieldrelation.func": "关联函数",
   "frontend.design.appfieldrelation.args": "关联参数",
   "frontend.design.appfieldrelations": "应用字段数据关联列表",
-
   "frontend.nav.introduce": "介绍",
   "frontend.nav.tryit": "尝试",
   "frontend.nav.type": "类型管理",
   "frontend.nav.app": "应用管理",
   "frontend.server.url": "Schema服务地址",
-
   "frontend.view.keyword": "关键字",
   "frontend.view.reset": "重置",
   "frontend.view.name": "名称",
@@ -149,7 +136,6 @@
   "frontend.view.turnoffworkflow": "终止",
   "frontend.view.turnoffworkflowfailed": "终止工作流失败",
   "frontend.view.turnoffworkflowsuccess": "终止工作流成功",
-
   "frontend.catalog": "目录",
   "frontend.catalog.01.intro": "01. 简介",
   "frontend.catalog.02.namespace": "02. 命名空间",
@@ -165,7 +151,6 @@
   "frontend.catalog.10.app.push": "2. 字段推送",
   "frontend.catalog.10.app.ref": "3. 字段引用",
   "frontend.catalog.10.app.main": "4. 主应用",
-
   "frontend": "前端用",
   "frontend.header": "Http头",
   "frontend.header.key": "键",
@@ -175,15 +160,40 @@
   "frontend.auth.savestorage": "本地存储",
   "frontend.light": "浅色",
   "frontend.dark": "深色",
-
   "frontend.apptarget": "应用及目标",
   "frontend.apptarget.app": "应用",
   "frontend.apptarget.target": "目标",
   "frontend.appgetapptargets": "获取目标列表",
-
   "frontend.view.manualworkflows": "手动工作流",
   "frontend.view.schemanameexists": "类型名称已存在",
   "frontend.view.appnameexists": "应用名称已存在",
   "frontend.view.selectnamespace": "请选择类型",
-  "frontend.view.invalidfile": "无效的文件"
+  "frontend.view.invalidfile": "无效的文件",
+  "frontend.ai.title": "AI Schema 助手",
+  "frontend.ai.open": "AI 助手",
+  "frontend.ai.placeholder": "描述要创建或修改的 Schema，Enter 发送，Shift+Enter 换行…",
+  "frontend.ai.send": "发送",
+  "frontend.ai.stop": "停止",
+  "frontend.ai.reset": "新对话",
+  "frontend.ai.close": "关闭",
+  "frontend.ai.thinking": "思考中…",
+  "frontend.ai.empty": "向 AI 描述你的 Schema 需求。打开一个类型后再对话，AI 会以当前编辑内容为基础。",
+  "frontend.ai.you": "你",
+  "frontend.ai.assistant": "AI",
+  "frontend.ai.apply": "应用到编辑器",
+  "frontend.ai.applied": "已应用到编辑器（尚未保存）",
+  "frontend.ai.applying": "应用中…",
+  "frontend.ai.candidate.create": "新建",
+  "frontend.ai.candidate.update": "修改",
+  "frontend.ai.candidate.valid": "验证通过",
+  "frontend.ai.candidate.invalid": "验证失败",
+  "frontend.ai.changes": "变更内容",
+  "frontend.ai.errors": "验证错误",
+  "frontend.ai.warnings": "提示",
+  "frontend.ai.preview": "查看完整 Schema",
+  "frontend.ai.nochange": "本次回复没有 Schema 变更",
+  "frontend.ai.dirty": "AI 变更未保存",
+  "frontend.ai.error": "请求失败",
+  "frontend.ai.aborted": "已停止",
+  "frontend.ai.appliedbutton": "已应用"
 }

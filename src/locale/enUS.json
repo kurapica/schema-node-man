@@ -1,46 +1,35 @@
-﻿{
+{
   "frontend.debug": "Debug Mode",
-  
   "frontend.design.enumintvalueinfo.value": "Value",
   "frontend.design.enumintvalueinfo.name": "Name",
   "frontend.design.enumintvalueinfo.disable": "Disabled",
-
   "frontend.design.enumflagvalueinfo.value": "Value",
   "frontend.design.enumflagvalueinfo.name": "Name",
   "frontend.design.enumflagvalueinfo.disable": "Disabled",
-
   "frontend.design.structfldfuncarg": "Struct Field Func Arg",
   "frontend.design.structfldfuncarg.label": "Label",
   "frontend.design.structfldfuncarg.type": "Arg Type",
   "frontend.design.structfldfuncarg.name": "Field Name",
   "frontend.design.structfldfuncarg.value": "Value",
-
   "frontend.design.enumflagvalueinfo": "Enum Flag Value Info",
   "frontend.design.enumintvalueinfo": "Enum Int Value Info",
-
   "frontend.design.appgetfieldtype": "Get App Field Type",
-  "frontend.design.appiscombineenable":
-    "Determine if App Field Data Combine Rule is Enabled",
-  "frontend.design.appiscombinesenable":
-    "Determine if App Field Data Combine Rules List is Enabled",
-  "frontend.design.appistrackpushenable":
-    "Determine if App Field Track Push is Enabled",
+  "frontend.design.appiscombineenable": "Determine if App Field Data Combine Rule is Enabled",
+  "frontend.design.appiscombinesenable": "Determine if App Field Data Combine Rules List is Enabled",
+  "frontend.design.appistrackpushenable": "Determine if App Field Track Push is Enabled",
   "frontend.design.apphasfields": "Has App Fields",
   "frontend.design.genarraydisplay": "Generate Array Display Text",
   "frontend.design.getscalarorenumtype": "Get Scalar or Enum Type",
   "frontend.design.gettypedisplayorname": "Get Type Display or Name",
-
   "frontend.design.pushfunctype": "Push Function Type",
   "frontend.design.namespaceinput": "Namespace Input",
   "frontend.design.reltarfield": "Related Target Field",
   "frontend.design.reltarfield.ele": "Array Element",
-
   "frontend.design.calcnextflag": "Calculate Next Flag",
   "frontend.design.getenuminfostype": "Get Enum Info Type",
   "frontend.design.getenumrootcascade": "Gets the cascade level for enum root",
   "frontend.design.getroottype": "Gets the type for root",
   "frontend.design.isenumroot": "Has enum root",
-
   "frontend.design.getrelationfuncreturn": "Get Relation Return Type",
   "frontend.design.getstructindexfields": "Get Indexable Struct Fields",
   "frontend.design.getrelationwhitelist": "Get Available Relation Types",
@@ -56,12 +45,10 @@
   "frontend.design.notstructarraytype": "Non-Struct or Struct-Array Type",
   "frontend.design.getenumcascadewhitelist": "Get Cascade Name Whitelist",
   "frontend.design.getwhiteblacklisttype": "Get white/black list type",
-
   "frontend.design.getcalltypewhitelist": "Gets the exp call types",
   "frontend.design.getfuncroot": "Gets the function return type by call type",
   "frontend.design.getexpvaluetype": "Gets the type for exp value",
   "frontend.design.hideexpvalue": "Hide the exp value",
-
   "frontend.design.appaccessfld": "Access Field",
   "frontend.design.appinput": "App(Input)",
   "frontend.design.appfieldvalarg": "Parameter",
@@ -78,13 +65,11 @@
   "frontend.design.appfieldrelation.func": "Association function",
   "frontend.design.appfieldrelation.args": "Association parameters",
   "frontend.design.appfieldrelations": "App field association list",
-
   "frontend.nav.introduce": "Introduction",
   "frontend.nav.tryit": "Try It",
   "frontend.nav.type": "Type Management",
   "frontend.nav.app": "App Management",
   "frontend.server.url": "Schema Services Url",
-
   "frontend.view.keyword": "Keyword",
   "frontend.view.reset": "Reset",
   "frontend.view.name": "Name",
@@ -149,7 +134,6 @@
   "frontend.view.turnoffworkflow": "Turn Off",
   "frontend.view.turnoffworkflowfailed": "Turn Off Workflow Failed",
   "frontend.view.turnoffworkflowsuccess": "Turn Off Workflow Successfully",
-
   "frontend.catalog": "Catalog",
   "frontend.catalog.01.intro": "01. Intro",
   "frontend.catalog.02.namespace": "02. Namespace",
@@ -165,7 +149,6 @@
   "frontend.catalog.10.app.push": "2. Push",
   "frontend.catalog.10.app.ref": "3. Ref",
   "frontend.catalog.10.app.main": "4. Main App",
-
   "frontend": "Frontend Only",
   "frontend.header": "Http Header",
   "frontend.header.key": "Key",
@@ -175,16 +158,40 @@
   "frontend.auth.savestorage": "Local Storage",
   "frontend.light": "Light",
   "frontend.dark": "Dark",
-
   "frontend.apptarget": "App and Target",
   "frontend.apptarget.app": "App",
   "frontend.apptarget.target": "Target",
   "frontend.appgetapptargets": "Get Target List",
-
   "frontend.view.manualworkflows": "Manual Workflows",
-
   "frontend.view.schemanameexists": "Schema name already exists",
   "frontend.view.appnameexists": "App name already exists",
   "frontend.view.selectnamespace": "Please select a type",
-  "frontend.view.invalidfile": "Invalid file"
+  "frontend.view.invalidfile": "Invalid file",
+  "frontend.ai.title": "AI Schema Assistant",
+  "frontend.ai.open": "AI Assistant",
+  "frontend.ai.placeholder": "Describe the schema to create or change. Enter to send, Shift+Enter for a new line…",
+  "frontend.ai.send": "Send",
+  "frontend.ai.stop": "Stop",
+  "frontend.ai.reset": "New Chat",
+  "frontend.ai.close": "Close",
+  "frontend.ai.thinking": "Thinking…",
+  "frontend.ai.empty": "Describe your schema needs. Open a type first and the assistant will use the current editor content as a base.",
+  "frontend.ai.you": "You",
+  "frontend.ai.assistant": "AI",
+  "frontend.ai.apply": "Apply to editor",
+  "frontend.ai.applied": "Applied to the editor (not saved)",
+  "frontend.ai.applying": "Applying…",
+  "frontend.ai.candidate.create": "Create",
+  "frontend.ai.candidate.update": "Update",
+  "frontend.ai.candidate.valid": "Validated",
+  "frontend.ai.candidate.invalid": "Validation failed",
+  "frontend.ai.changes": "Changes",
+  "frontend.ai.errors": "Validation errors",
+  "frontend.ai.warnings": "Warnings",
+  "frontend.ai.preview": "Show full schema",
+  "frontend.ai.nochange": "The reply did not contain a schema change",
+  "frontend.ai.dirty": "AI changes not saved",
+  "frontend.ai.error": "Request failed",
+  "frontend.ai.aborted": "Stopped",
+  "frontend.ai.appliedbutton": "Applied"
 }

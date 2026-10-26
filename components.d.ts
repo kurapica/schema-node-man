@@ -9,8 +9,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppSchema: typeof import('./src/components/appSchema.vue')['default']
+    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
+    ElCollapse: typeof import('element-plus/es')['ElCollapse']
+    ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElFooter: typeof import('element-plus/es')['ElFooter']
@@ -29,6 +32,7 @@ declare module 'vue' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
+    ElTag: typeof import('element-plus/es')['ElTag']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     HomePage: typeof import('./src/components/homePage.vue')['default']
     Introduce: typeof import('./src/components/introduce.vue')['default']
@@ -37,6 +41,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Schema: typeof import('./src/components/schema.vue')['default']
+    SchemaChatPanel: typeof import('./src/components/schemaChatPanel.vue')['default']
     Showandtry: typeof import('./src/components/showandtry.vue')['default']
     Showandtryapp: typeof import('./src/components/showandtryapp.vue')['default']
     Tryapp: typeof import('./src/components/tryapp.vue')['default']

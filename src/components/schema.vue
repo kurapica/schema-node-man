@@ -7,6 +7,7 @@
         <schema-view style="width: 200px;margin-right: 1rem;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
         <el-button v-if="isNewSchema" type="primary" @click="handleNew()">{{ _L["frontend.view.new"] }}</el-button>
+        <el-button v-if="hasServer" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
         <!-- download -->
         <template v-if="!downloading">
           <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
@@ -88,8 +89,30 @@
               <schema-view :node="(namespaceNode as StructNode)" :in-form="SchemaNodeFormType.Expand2" text="left" :debug="isDebug"  :header-cell-style="tableHeaderCellStyle"></schema-view>
             </div>
           </el-form>
-        </el-main><el-footer style="padding-top: 1rem;"><template v-if="namespaceNode?.readonly"><el-button v-if="tryitTypes.includes((namespaceNode.rawValue! as any).kind)" type="primary" @click="tryit">{{_L["frontend.view.tryit"] }}</el-button><el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button><el-button v-if="currRow?.usedBy?.length" @click="showViewRef = true" style="float:right" type="info">{{ _L["frontend.view.viewref"] }}</el-button><el-button type="warning" @click="copySchema">{{ _L["frontend.view.copyschema"] }}</el-button></template><template v-else><el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button><el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button></template></el-footer>
+        </el-main>
+        <el-footer style="padding-top: 1rem;">
+          <template v-if="namespaceNode?.readonly">
+            <el-button v-if="tryitTypes.includes((namespaceNode.rawValue! as any).kind)" type="primary" @click="tryit">{{_L["frontend.view.tryit"] }}</el-button>
+            <el-button v-if="hasServer" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
+            <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button>
+            <el-button v-if="currRow?.usedBy?.length" @click="showViewRef = true" style="float:right" type="info">{{ _L["frontend.view.viewref"] }}</el-button>
+            <el-button type="warning" @click="copySchema">{{ _L["frontend.view.copyschema"] }}</el-button>
+          </template>
+          <template v-else>
+            <el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button>
+            <el-button v-if="hasServer" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
+            <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
+            <el-tag v-if="isDirty" type="warning" effect="plain" style="margin-left: 1rem;">{{ _L["frontend.ai.dirty"] }}</el-tag>
+          </template>
+        </el-footer>
       </el-container>
+    </el-drawer>
+
+    <!-- AI schema assistant -->
+    <el-drawer v-model="showAiChat" :title="_L['frontend.ai.title']" direction="rtl" size="560px" append-to-body>
+      <schema-chat-panel :visible="showAiChat" :context-provider="getAiContext"
+        :apply-candidate="applyAiCandidate" style="height: calc(100vh - 120px);"
+        @close="showAiChat = false" />
     </el-drawer>
 
     <!-- try it -->
@@ -127,12 +150,16 @@ import { _L, SchemaNodeFormType, schemaView, useElTableMemoryFix } from 'schema-
 import { _LS, StructNode, isNull, SchemaLoadState, EnumNode, NodeSchema, getNodeSchemaName, getNodeType, NamespaceType, matchKeyworkInLocaleString, getPropertyValue, Display, StructType, NS_SYSTEM_SCHEMA_NODE, ScalarNode, LocaleString, ReadOnly, getCachedNodeType, saveNodeSchema, INamespaceNodeType, EnumType, getSchemaKindPropertyTypes, SCHEMA_KIND_NODE, getMetaProperty, PropertyValueType, Attach, WhiteList, NS_SYSTEM, deepClone, Entry, EnumProperty, EnumSchema, setPropertyValue, NODE_KIND_NAMESPACE, NODE_KIND_ARRAY, NODE_KIND_BOOL, NODE_KIND_DATE, NODE_KIND_DECIMAL, NODE_KIND_ENUM, NODE_KIND_FUNCTION, NODE_KIND_INT, NODE_KIND_OBJECT, NODE_KIND_STRING, NODE_KIND_STRUCT } from 'schema-node-core'
 import { ElForm, ElMessage, ElTable } from 'element-plus'
 import { clearAllStorageSchemas, removeStorageSchema, saveStorageSchema } from '../schema'
-import { getSchemaServerProvider } from '../schema/provider/schemaServerProvider'
+import { getSchemaServerProvider, getSchemaSite } from '../schema/provider/schemaServerProvider'
 import tryitView from './tryit.vue'
+import schemaChatPanel from './schemaChatPanel.vue'
 import { Delete } from '@element-plus/icons-vue'
 import { NODE_KIND_EVENT, NODE_KIND_WORKFLOW, SchemaCreate } from 'schema-node-app'
 import { logger } from '../utility/logger'
 import { subscribeDebugMode } from '../utility/debug'
+import { getCandidateSchema } from '../ai/schemaChatApi'
+import type { SchemaChangeCandidate, SchemaChatContext } from '../ai/schemaChatApi'
+import { checkCandidate } from '../ai/schemaCandidate'
 
 const schemas = ref<NodeSchema[]>([]);
 const tableHeaderCellStyle = {
@@ -153,6 +180,7 @@ onUnmounted(() => {
 })
 
 const isNewSchema = ref(true);
+const hasServer = !!getSchemaSite();
 
 const schemaTypeOrder: Record<string, number> = {
   [NODE_KIND_NAMESPACE]:1,
@@ -213,6 +241,7 @@ const choose = (schema: NodeSchema) => {
 const refresh = async () => {
   localStorage["schema_man_search"] = JSON.stringify(state);
   const nodeType = await getNodeType(state.namespace || "");
+  console.log(nodeType)
   if (nodeType instanceof NamespaceType) {
     let temp: NodeSchema[] = Array.from(nodeType.getSubNodeSchemas().filter(p => !p.name.includes("<")));
     if (state.type) temp = temp.filter(p => p.kind === state.type);
@@ -230,8 +259,10 @@ const refresh = async () => {
     schemas.value = temp;
     isNewSchema.value = nodeType.name ? nodeType.getPropertyValue(SchemaCreate) !== false : (await getNodeType(NS_SYSTEM))?.getPropertyValue(SchemaCreate) !== false;
   }
-  else
+  else {
     isNewSchema.value = false
+    schemas.value = [];
+  }
 }
 
 watch(state, refresh, { immediate: true })
@@ -250,9 +281,90 @@ let isNewType = false
 
 const namesapceWatchHandler: Function[] = []
 
+//#region AI assistant
+
+const showAiChat = ref(false)
+const isDirty = ref(false)
+const isReadonlyEditor = ref(false)
+
+const openAiChat = () => {
+  showAiChat.value = true
+}
+
+const getAiContext = (): SchemaChatContext => {
+  const node = namespaceNode.value
+  if (!node) return { isNew: true }
+
+  const schema = node.submitValue as NodeSchema | undefined
+  return {
+    target: schema?.name ? getNodeSchemaName(schema) : undefined,
+    currentSchema: schema ? deepClone(schema) : undefined,
+    isNew: isNewType,
+  }
+}
+
+const applyAiCandidate = async (change: SchemaChangeCandidate): Promise<{ ok: boolean, error?: string }> => {
+  const checked = checkCandidate(change)
+  if (!checked.ok) return { ok: false, error: checked.error }
+
+  const candidate = getCandidateSchema(change)
+  if (!candidate) return { ok: false, error: _L.value["frontend.view.error"] }
+
+  try {
+    const nodeSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.schema`) as StructType
+    if (!nodeSchemaType) throw new Error("The node schema editor type is not available.")
+
+    const wasReadonly = isReadonlyEditor.value
+
+    // Build the new editor node first. If the candidate cannot be loaded, the existing editor
+    // content is left untouched and the caller gets the error.
+    const node = nodeSchemaType.create(deepClone(candidate)) as StructNode
+    if (wasReadonly) node.setPropertyValue(ReadOnly, false)
+
+    // Replace the editor node through the same loader used by the editor, so every field,
+    // relation, function and type view is rebuilt instead of assigning a raw JSON object.
+    // Wait for the old editor node to be unmounted (nextTick inside closeNamespaceEditor)
+    // before assigning the new node; otherwise schema-view keeps its old instance and does not
+    // re-render the new fields.
+    await closeNamespaceEditor()
+    namespaceNode.value = node
+    isNewType = change.operation === 'create'
+    isReadonlyEditor.value = false
+    showNamespaceEditor.value = true
+    await nextTick()
+
+    const displayField = node.getAccessValue("display") as StructNode
+    const namespaceField = node.getAccessValue("namespace") as ScalarNode
+    const nameField = node.getAccessValue("name") as ScalarNode
+
+    const refreshOperation = () => {
+      const display = displayField?.value as LocaleString | undefined
+      operation.value = _L.value[isNewType ? "frontend.view.new" : "frontend.view.edit"] + " " + _L.value(display ?? getNodeSchemaName(node.rawValue as NodeSchema) ?? "")
+    }
+    refreshOperation()
+    if (displayField) namesapceWatchHandler.push(displayField.subscribe(refreshOperation))
+    if (namespaceField) namesapceWatchHandler.push(namespaceField.subscribe(refreshOperation))
+    if (nameField) namesapceWatchHandler.push(nameField.subscribe(refreshOperation))
+
+    // The candidate lives only in the editor memory. The user must still press save.
+    isDirty.value = true
+    await nextTick()
+    showAiChat.value = false
+    return { ok: true }
+  }
+  catch (ex: any) {
+    logger.error(ex)
+    return { ok: false, error: ex?.message || _L.value["frontend.view.error"] }
+  }
+}
+
+//#endregion
+
 // create
 const handleNew = async (copySchema?: NodeSchema) => {
   isNewType = true
+  isReadonlyEditor.value = false
+  isDirty.value = false
   localStorage["schema_new_namespace"] = state.namespace
 
   const nodeSchemaType = await getNodeType(`${NS_SYSTEM_SCHEMA_NODE}.schema`) as StructType;
@@ -300,6 +412,8 @@ const handleNew = async (copySchema?: NodeSchema) => {
 const currRow = ref<NodeSchema | null>(null)
 const handleEdit = async (row: any, readonly?: boolean) => {
   isNewType = false
+  isReadonlyEditor.value = !!readonly
+  isDirty.value = false
   currRow.value = row
   const schema = (await getNodeType(getNodeSchemaName(row)))?.getNodeSchema();
 
@@ -427,6 +541,7 @@ const confirmNameSpace = async () => {
 
   const namespace = (await getNodeType(data.namespace ?? '')) as INamespaceNodeType
   namespace?.saveSubNodeSchema(data)
+  saveNodeSchema(data, SchemaLoadState.FrontEnd)
 
   saveStorageSchema(data)
   closeNamespaceEditor()
@@ -447,6 +562,8 @@ const closeNamespaceEditor = async () => {
   } catch {
     // pass
   }
+  isReadonlyEditor.value = false
+  isDirty.value = false
 }
 
 //#endregion
