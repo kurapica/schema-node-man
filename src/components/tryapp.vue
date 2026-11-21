@@ -79,7 +79,7 @@
 <script lang="ts" setup>
 import { addAppTarget } from "../utility/auth";
 import { ElMessage, type ElForm } from "element-plus"
-import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, getAppType, IAppInteractionWorkflow } from "schema-node-app";
+import { AppNode, AppScopeType, getAppNode, getAppSchemaProvider, getAppType, IAppInteractionWorkflow, type WorkflowSchema } from "schema-node-app";
 import { DataNode, Display, generateGuid, getNodeType, getPropertyValue, InVisible, isNull, StructNode, StructType, ValueType, Visible } from "schema-node-core";
 import { schemaView, _L, SchemaNodeFormType } from "schema-node-vue-view"
 import { onMounted, onUnmounted, reactive, ref, toRaw } from "vue"
@@ -228,9 +228,16 @@ const startWorkflow = async (name: string, data: any = undefined) => {
     if (isNull(target)) return
 
     const workflow = manualWorkflows.value.find(wf => wf.name === name)
-    if (!workflow?.nodes?.length) return
+    if (!workflow) return
 
-    const payloadType = workflow.nodes[0].payload
+    // The app workflow only references a workflow type; the steps live on that type's definition.
+    const workflowType = await getNodeType(workflow.type)
+    const definition = workflowType
+      ? getPropertyValue<WorkflowSchema>(workflowType.getNodeSchema(), "workflow")
+      : undefined
+    if (!definition?.steps?.length) return
+
+    const payloadType = definition.steps[0].payload
     if (isNull(data) && !isNull(payloadType)) {
       const payload = await getNodeType(payloadType) as ValueType;
       if (payload instanceof StructType && Array.from(payload.getFields()).length > 2) {

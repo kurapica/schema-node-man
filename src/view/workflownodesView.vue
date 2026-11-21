@@ -1,6 +1,9 @@
 <template>
     <el-container>
-        <svg :style="{ width: state.svgWidth, height: state.svgHeight, display: 'block', 'margin-left': 'auto', 'margin-right': 'auto' }"
+        <el-button v-if="!state.readonly && !state.length" @click="addWorkflowNode()">
+            +
+        </el-button>
+        <svg v-else :style="{ width: state.svgWidth, height: state.svgHeight, display: 'block', 'margin-left': 'auto', 'margin-right': 'auto' }"
             xmlns="http://www.w3.org/2000/svg" version="1.1">
             <g v-for="(level, levelIndex) in displayLevels" :key="`level-${levelIndex}`">
                 <g v-for="node in level" :key="node.guid">
@@ -50,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { WorkflowType, WorkflowNode } from 'schema-node-app'
+import { WorkflowNodeType, WorkflowNode } from 'schema-node-app'
 import { Delete } from '@element-plus/icons-vue'
 import { ArrayNode, getNodeType, LocaleString, ReadOnly, StructNode } from 'schema-node-core'
 import { _L, SchemaNodeFormType, schemaView, subscribeAncestorProperty } from 'schema-node-vue-view'
@@ -114,11 +117,13 @@ const refreshWorkflows = async () => {
         }
         return undefined
     }
+
+    state.length = arrayNode.length;
     
     for (let i = 0; i < arrayNode.length; i++) {
         const n = arrayNode.at(i) as WorkflowNode
         const { name, type, display, previous, payload } = n.rawValue as any
-        const workflowType = type ? await getNodeType(type) as WorkflowType : undefined
+        const workflowType = type ? await getNodeType(type) as WorkflowNodeType : undefined
 
         const wfNode: IWorkflowNode = {
             guid: n.id,
@@ -225,7 +230,6 @@ const workflowNodeDisplay = ref("")
 const workflowNode = ref<IWorkflowNode | null>(null)
 
 const openWorkflowNode = async (node: IWorkflowNode) => {
-    const n = node.node
     workflowNode.value = node
     showWorkflowNode.value = true
 }
@@ -236,8 +240,18 @@ const closeWorkflowNode = () => {
     refreshWorkflows()
 }
 
-const addWorkflowNode = async (parentNode: IWorkflowNode) => {
+const addWorkflowNode = async (parentNode: IWorkflowNode | undefined) => {
     if (state.readonly) return
+
+    if (!parentNode) {
+        // add initial node
+        const newNode = arrayNode.addRow() as StructNode
+        newNode.value = {
+            name: `start`
+        }
+        await refreshWorkflows()
+        return
+    }
 
     const index = arrayNode.indexOf(parentNode.node)
     const newNode = arrayNode.addRow() as StructNode
@@ -253,7 +267,7 @@ const addWorkflowNode = async (parentNode: IWorkflowNode) => {
 }
 
 const deleteNode = () => {
-    const node = workflowNode.value?.node
+    const node = toRaw(workflowNode.value?.node)
     if (!node) return
 
     const index = arrayNode.indexOf(node as WorkflowNode)
@@ -267,16 +281,7 @@ const deleteNode = () => {
 
 let stateHandler: Function | undefined =  subscribeAncestorProperty(arrayNode, ReadOnly, (values: boolean[]) => state.readonly = values.some(v => v), true)
 
-onMounted(() => {
-    if (!arrayNode.length && !state.readonly) {
-        // add initial node
-        const newNode = arrayNode.addRow() as StructNode
-        newNode.value = {
-            name: `start`
-        }
-    }
-    refreshWorkflows();
-})
+onMounted(refreshWorkflows)
 
 onUnmounted(() => {
     if (stateHandler) stateHandler()

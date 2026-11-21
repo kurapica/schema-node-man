@@ -24,58 +24,58 @@
             <span v-if="item.streaming && item.text" class="schema-chat__cursor">▍</span>
           </div>
 
-          <div v-if="item.response?.toolCalls?.length" class="schema-chat__tools">
-            <el-tag v-for="tool in item.response.toolCalls" :key="tool" size="small" effect="plain" type="info">
+          <div v-if="item.result?.toolCalls?.length" class="schema-chat__tools">
+            <el-tag v-for="tool in item.result.toolCalls" :key="tool" size="small" effect="plain" type="info">
               {{ tool }}
             </el-tag>
           </div>
 
           <el-alert v-if="item.error" :title="item.error" type="error" :closable="false" show-icon class="schema-chat__alert" />
 
-          <div v-if="item.response?.change" class="schema-chat__candidate">
+          <div v-if="item.result?.change" class="schema-chat__candidate">
             <div class="schema-chat__candidate-head">
-              <el-tag size="small" :type="item.response.change.operation === 'create' ? 'success' : 'warning'">
-                {{ item.response.change.operation === "create" ? _L["frontend.ai.candidate.create"] : _L["frontend.ai.candidate.update"] }}
+              <el-tag size="small" :type="item.result.change.operation === 'create' ? 'success' : 'warning'">
+                {{ item.result.change.operation === "create" ? _L["frontend.ai.candidate.create"] : _L["frontend.ai.candidate.update"] }}
               </el-tag>
-              <span class="schema-chat__candidate-name">{{ getCandidateFullName(item.response.change) }}</span>
-              <el-tag size="small" :type="item.response.change.isValid ? 'success' : 'danger'">
-                {{ item.response.change.isValid ? _L["frontend.ai.candidate.valid"] : _L["frontend.ai.candidate.invalid"] }}
+              <span class="schema-chat__candidate-name">{{ getCandidateFullName(item.result.change) }}</span>
+              <el-tag size="small" :type="item.result.change.isValid ? 'success' : 'danger'">
+                {{ item.result.change.isValid ? _L["frontend.ai.candidate.valid"] : _L["frontend.ai.candidate.invalid"] }}
               </el-tag>
             </div>
 
-            <div v-if="item.response.change.summary" class="schema-chat__candidate-summary">
-              {{ item.response.change.summary }}
+            <div v-if="item.result.change.summary" class="schema-chat__candidate-summary">
+              {{ item.result.change.summary }}
             </div>
 
-            <div v-if="item.response.change.changes?.length" class="schema-chat__section">
+            <div v-if="item.result.change.changes?.length" class="schema-chat__section">
               <div class="schema-chat__section-title">{{ _L["frontend.ai.changes"] }}</div>
               <ul class="schema-chat__change-list">
-                <li v-for="change in item.response.change.changes" :key="change">{{ change }}</li>
+                <li v-for="change in item.result.change.changes" :key="change">{{ change }}</li>
               </ul>
             </div>
 
-            <div v-if="item.response.change.errors?.length" class="schema-chat__section">
+            <div v-if="item.result.change.errors?.length" class="schema-chat__section">
               <div class="schema-chat__section-title">{{ _L["frontend.ai.errors"] }}</div>
-              <el-alert v-for="(error, index) in item.response.change.errors" :key="index"
+              <el-alert v-for="(error, index) in item.result.change.errors" :key="index"
                 :title="(error.path ? error.path + ': ' : '') + error.message" type="error" :closable="false" show-icon
                 class="schema-chat__alert" />
             </div>
 
-            <div v-if="item.response.change.warnings?.length" class="schema-chat__section">
+            <div v-if="item.result.change.warnings?.length" class="schema-chat__section">
               <div class="schema-chat__section-title">{{ _L["frontend.ai.warnings"] }}</div>
-              <el-alert v-for="(warning, index) in item.response.change.warnings" :key="index" :title="warning"
+              <el-alert v-for="(warning, index) in item.result.change.warnings" :key="index" :title="warning"
                 type="warning" :closable="false" show-icon class="schema-chat__alert" />
             </div>
 
             <el-collapse class="schema-chat__preview">
               <el-collapse-item :title="_L['frontend.ai.preview']" :name="item.id">
-                <pre>{{ formatCandidateSchema(item.response.change) }}</pre>
+                <pre>{{ formatCandidateSchema(item.result.change) }}</pre>
               </el-collapse-item>
             </el-collapse>
 
             <div class="schema-chat__apply">
               <el-button type="primary" size="small" :loading="item.applying"
-                :disabled="!item.response.change.isValid || item.applied" @click="applyCandidate(item)">
+                :disabled="!item.result.change.isValid || item.applied" @click="applyCandidate(item)">
                 {{ item.applied ? _L["frontend.ai.appliedbutton"] : (item.applying ? _L["frontend.ai.applying"] : _L["frontend.ai.apply"]) }}
               </el-button>
               <span v-if="item.applied" class="schema-chat__applied-hint">{{ _L["frontend.ai.applied"] }}</span>
@@ -101,12 +101,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from "vue"
 import { _L } from "schema-node-vue-view"
-import {
-  chatSchema,
-  SchemaChatStreamUnavailableError,
-  streamSchemaChat,
-} from "../ai/schemaChatApi"
-import type { SchemaChangeCandidate, SchemaChatContext, SchemaChatResponse } from "../ai/schemaChatApi"
+import type { AIChat, AIChatRequest, AIChatResult, AIChatTarget } from "../ai/aiChat"
 import { checkCandidate, formatCandidateSchema, getCandidateFullName } from "../ai/schemaCandidate"
 
 interface ChatItem {
@@ -114,7 +109,7 @@ interface ChatItem {
   role: "user" | "assistant"
   text: string
   streaming?: boolean
-  response?: SchemaChatResponse
+  result?: AIChatResult
   error?: string
   applied?: boolean
   applying?: boolean
@@ -122,8 +117,9 @@ interface ChatItem {
 
 const props = defineProps<{
   visible: boolean
-  contextProvider: () => SchemaChatContext | Promise<SchemaChatContext>
-  applyCandidate: (change: SchemaChangeCandidate) => Promise<{ ok: boolean, error?: string }>
+  aiChat: AIChat
+  contextProvider: () => AIChatTarget | Promise<AIChatTarget>
+  applyResult: (result: AIChatResult) => Promise<{ ok: boolean, error?: string }>
 }>()
 
 const emit = defineEmits<{ (e: "close"): void }>()
@@ -153,8 +149,8 @@ const scrollToBottom = async () => {
 const refreshContextLabel = async () => {
   try {
     const context = await props.contextProvider()
-    const schema = context.currentSchema as any
-    contextLabel.value = context.target || (schema?.name ? `${schema.namespace ? schema.namespace + "." : ""}${schema.name}` : "")
+    const schema = context.schema as any
+    contextLabel.value = context.name || (schema?.name ? `${schema.namespace ? schema.namespace + "." : ""}${schema.name}` : "")
   } catch {
     contextLabel.value = ""
   }
@@ -180,7 +176,7 @@ const send = async () => {
   const text = input.value.trim()
   if (!text || sending.value) return
 
-  let context: SchemaChatContext = {}
+  let context: AIChatTarget = {}
   try {
     context = await props.contextProvider()
   } catch (ex: any) {
@@ -196,47 +192,37 @@ const send = async () => {
   sending.value = true
   abortController = new AbortController()
 
-  const request = {
-    message: text,
+  const request: AIChatRequest = {
+    userContent: text,
     conversationId: conversationId.value,
-    target: context.target,
-    currentSchema: context.currentSchema,
-    isNew: context.isNew,
+    target: context,
   }
 
   let streamed = ""
   try {
-    let response: SchemaChatResponse
-    try {
-      response = await streamSchemaChat(request, {
-        signal: abortController.signal,
-        onConversation: (id) => { conversationId.value = id },
-        onDelta: (delta) => {
-          streamed += delta
-          assistantItem.text = streamed
-          void scrollToBottom()
-        },
-      })
-    } catch (ex: any) {
-      if (!(ex instanceof SchemaChatStreamUnavailableError)) throw ex
-
-      // The host did not map the streaming endpoint; use the regular schema API instead.
-      response = await chatSchema(request)
-    }
+    const result = await props.aiChat.chat(request, {
+      signal: abortController.signal,
+      onConversation: (id) => { conversationId.value = id },
+      onDelta: (delta) => {
+        streamed += delta
+        assistantItem.text = streamed
+        void scrollToBottom()
+      },
+    })
 
     if (abortController?.signal.aborted) {
       assistantItem.streaming = false
       return
     }
 
-    conversationId.value = response.conversationId || conversationId.value
+    conversationId.value = result.conversationId || conversationId.value
     assistantItem.streaming = false
-    assistantItem.response = response
-    assistantItem.text = response.message || streamed
-    if (response.kind === "error" && !assistantItem.error) {
-      assistantItem.error = response.message || _L.value["frontend.ai.error"]
+    assistantItem.result = result
+    assistantItem.text = result.message || streamed
+    if (result.kind === "error" && !assistantItem.error) {
+      assistantItem.error = result.message || _L.value["frontend.ai.error"]
     }
-    if (response.kind === "chat" && !assistantItem.text) {
+    if (result.kind === "chat" && !assistantItem.text) {
       assistantItem.text = _L.value["frontend.ai.nochange"]
     }
   } catch (ex: any) {
@@ -254,10 +240,10 @@ const send = async () => {
 }
 
 const applyCandidate = async (item: ChatItem) => {
-  const change = item.response?.change
-  if (!change) return
+  const result = item.result
+  if (!result?.schema) return
 
-  const checked = checkCandidate(change)
+  const checked = checkCandidate(result.change)
   if (!checked.ok) {
     item.error = checked.error
     return
@@ -266,9 +252,9 @@ const applyCandidate = async (item: ChatItem) => {
   item.applying = true
   item.error = undefined
   try {
-    const result = await props.applyCandidate(change)
-    if (result.ok) item.applied = true
-    else item.error = result.error || _L.value["frontend.ai.error"]
+    const applied = await props.applyResult(result)
+    if (applied.ok) item.applied = true
+    else item.error = applied.error || _L.value["frontend.ai.error"]
   } catch (ex: any) {
     item.error = errorText(ex)
   } finally {

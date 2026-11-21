@@ -198,6 +198,8 @@
             :header-cell-style="tableHeaderCellStyle">
             <el-table-column align="left" prop="name" :label="_L['system.schema.app.workflow.schema.name']"
               min-width="120" />
+            <el-table-column align="left" prop="type" :label="_L['system.schema.app.workflow.schema.type']"
+              min-width="150" />
             <el-table-column align="left" prop="display" :label="_L['system.schema.prop.common.display']"
               min-width="150">
               <template #default="scope">
@@ -648,8 +650,18 @@ const moveFieldUp = async (row: any) => {
 
 // save
 const confirmField = async () => {
-  const res = await fieldEditorRef.value?.validate();
-  if (!res || !appFieldNode.value?.isValid) return;
+  try
+  {
+    const res = await fieldEditorRef.value!.validate();
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
+    }
+  }
+  catch (ex: any) {
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
+  }
 
   const node = toRaw(appFieldNode.value!)
   if (!node.isValid) {
@@ -791,10 +803,17 @@ const handleWorkflowDelete = async (row: any) => {
 
 // save
 const confirmWorkflow = async () => {
-  const res = await workflowEditorRef.value?.validate();
-  if (!res || !appWorkflowNode.value?.isValid) {
-    ElMessage.error(appWorkflowNode.value?.error);
-    return;
+  try
+  {
+    const res = await workflowEditorRef.value!.validate();
+    if (!res) {
+      ElMessage.error(_L.value["frontend.view.error"])
+      return
+    }
+  }
+  catch (ex: any) {
+    ElMessage.error(_L.value["frontend.view.error"])
+    return
   }
 
   const node = toRaw(appWorkflowNode.value!)
@@ -828,7 +847,7 @@ const confirmWorkflow = async () => {
     return;
   }
 
-  await appType.saveWorkflow(data);
+  await getAppType(appType.name, true);  
   workflows.value = Array.from(appType.getWorkflows().map(w => w.getWorkflowSchema() as AppWorkflowSchema));
   closeWorkflowEditor()
   showWorkflowEditor.value = false
@@ -936,7 +955,7 @@ const handleSelection = (val: any[]) => {
     appTableRef.value.clearSelection();
     appTableRef.value.toggleRowSelection(row, true);
   }
-  selections = [row.name];
+  selections = [getAppSchemaName(row)];
 }
 
 const download = async () => {

@@ -2,32 +2,10 @@ import { getLanguage } from "schema-node-core"
 import type { NodeSchema } from "schema-node-core"
 import { getSchemaApiBaseUrl, postSchemaApi } from "schema-node-app"
 import { getFrontendAuth } from "../utility/auth"
+import type { AIChatResultKind, AIChatTurn, SchemaChangeCandidate } from "./aiChat"
 
 /** The result kind returned by the schema assistant. */
-export type SchemaChatResultKind = "chat" | "schemaChange" | "validationFailed" | "error"
-
-/** A validation problem reported by the server. */
-export interface SchemaValidationError {
-    code: string
-    message: string
-    path?: string
-}
-
-/** A schema change candidate returned by the assistant. */
-export interface SchemaChangeCandidate {
-    operation: "create" | "update" | string
-    targetName: string
-    /** The typed node schema. */
-    schema?: NodeSchema
-    /** The normalized node schema JSON, preferred for applying. */
-    normalized?: NodeSchema
-    summary?: string
-    isValid: boolean
-    errors: SchemaValidationError[]
-    warnings: string[]
-    /** Backend computed changed JSON paths. */
-    changes: string[]
-}
+export type SchemaChatResultKind = AIChatResultKind
 
 /** The assistant response. */
 export interface SchemaChatResponse {
@@ -53,6 +31,17 @@ export interface SchemaChatContext {
 export interface ChatSchemaRequest extends SchemaChatContext {
     message: string
     conversationId?: string
+    /** An optional extra system instruction. */
+    systemContent?: string
+    /** Concrete validation errors from the previous attempt. */
+    validationFeedback?: string
+    /** Optional turns for a stateless caller. */
+    history?: AIChatTurn[]
+    /** Per-turn overrides for the configured model. */
+    modelId?: string
+    temperature?: number
+    maxTokens?: number
+    timeoutSeconds?: number
 }
 
 /** The streaming callbacks. */

@@ -7,7 +7,7 @@
         <schema-view style="width: 200px;margin-right: 1rem;" v-model="state.keyword" in-form type="system.string" :props="{ display: _LS('frontend.view.keyword') }" no-label></schema-view>
         <el-button type="info" @click="reset">{{ _L["frontend.view.reset"] }}</el-button>
         <el-button v-if="isNewSchema" type="primary" @click="handleNew()">{{ _L["frontend.view.new"] }}</el-button>
-        <el-button v-if="hasServer" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
+        <el-button v-if="hasServer && hasAiChat" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
         <!-- download -->
         <template v-if="!downloading">
           <el-button type="success" @click="startDownload">{{ _L["frontend.view.download"] }}</el-button>
@@ -93,14 +93,14 @@
         <el-footer style="padding-top: 1rem;">
           <template v-if="namespaceNode?.readonly">
             <el-button v-if="tryitTypes.includes((namespaceNode.rawValue! as any).kind)" type="primary" @click="tryit">{{_L["frontend.view.tryit"] }}</el-button>
-            <el-button v-if="hasServer" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
+            <el-button v-if="hasServer && hasAiChat" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
             <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.close"] }}</el-button>
             <el-button v-if="currRow?.usedBy?.length" @click="showViewRef = true" style="float:right" type="info">{{ _L["frontend.view.viewref"] }}</el-button>
             <el-button type="warning" @click="copySchema">{{ _L["frontend.view.copyschema"] }}</el-button>
           </template>
           <template v-else>
             <el-button type="primary" @click="confirmNameSpace">{{ _L["frontend.view.save"] }}</el-button>
-            <el-button v-if="hasServer" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
+            <el-button v-if="hasServer && hasAiChat" type="primary" plain @click="openAiChat">{{ _L["frontend.ai.open"] }}</el-button>
             <el-button @click="showNamespaceEditor = false">{{ _L["frontend.view.cancel"] }}</el-button>
             <el-tag v-if="isDirty" type="warning" effect="plain" style="margin-left: 1rem;">{{ _L["frontend.ai.dirty"] }}</el-tag>
           </template>
@@ -110,8 +110,8 @@
 
     <!-- AI schema assistant -->
     <el-drawer v-model="showAiChat" :title="_L['frontend.ai.title']" direction="rtl" size="560px" append-to-body>
-      <schema-chat-panel :visible="showAiChat" :context-provider="getAiContext"
-        :apply-candidate="applyAiCandidate" style="height: calc(100vh - 120px);"
+      <schema-chat-panel :visible="showAiChat" :ai-chat="defaultAIChat" :context-provider="getAiContext"
+        :apply-result="applyAiResult" style="height: calc(100vh - 120px);"
         @close="showAiChat = false" />
     </el-drawer>
 
@@ -154,11 +154,12 @@ import { getSchemaServerProvider, getSchemaSite } from '../schema/provider/schem
 import tryitView from './tryit.vue'
 import schemaChatPanel from './schemaChatPanel.vue'
 import { Delete } from '@element-plus/icons-vue'
-import { NODE_KIND_EVENT, NODE_KIND_WORKFLOW, SchemaCreate } from 'schema-node-app'
+import { NODE_KIND_EVENT, NODE_KIND_WORKFLOW, SchemaCreate, ensureSchemaApiProtocol, hasSchemaFeature } from 'schema-node-app'
 import { logger } from '../utility/logger'
 import { subscribeDebugMode } from '../utility/debug'
 import { getCandidateSchema } from '../ai/schemaChatApi'
-import type { SchemaChangeCandidate, SchemaChatContext } from '../ai/schemaChatApi'
+import type { AIChatResult, AIChatTarget } from '../ai/aiChat'
+import { defaultAIChat } from '../ai/webApiAIChat'
 import { checkCandidate } from '../ai/schemaCandidate'
 
 const schemas = ref<NodeSchema[]>([]);
@@ -181,6 +182,22 @@ onUnmounted(() => {
 
 const isNewSchema = ref(true);
 const hasServer = !!getSchemaSite();
+
+// The AI assistant entry is gated twice: a configured server is an existing condition, and the
+// server must also declare the "ai_chat" feature in its protocol response. The check stays
+// generic so upcoming features use the same mechanism.
+const hasAiChat = ref(hasSchemaFeature("ai_chat"));
+
+const refreshAiChatFeature = async () => {
+  if (!hasServer) {
+    hasAiChat.value = false;
+    return;
+  }
+  await ensureSchemaApiProtocol();
+  hasAiChat.value = hasSchemaFeature("ai_chat");
+};
+
+void refreshAiChatFeature();
 
 const schemaTypeOrder: Record<string, number> = {
   [NODE_KIND_NAMESPACE]:1,
@@ -241,7 +258,6 @@ const choose = (schema: NodeSchema) => {
 const refresh = async () => {
   localStorage["schema_man_search"] = JSON.stringify(state);
   const nodeType = await getNodeType(state.namespace || "");
-  console.log(nodeType)
   if (nodeType instanceof NamespaceType) {
     let temp: NodeSchema[] = Array.from(nodeType.getSubNodeSchemas().filter(p => !p.name.includes("<")));
     if (state.type) temp = temp.filter(p => p.kind === state.type);
@@ -291,23 +307,24 @@ const openAiChat = () => {
   showAiChat.value = true
 }
 
-const getAiContext = (): SchemaChatContext => {
+const getAiContext = (): AIChatTarget => {
   const node = namespaceNode.value
   if (!node) return { isNew: true }
 
   const schema = node.submitValue as NodeSchema | undefined
   return {
-    target: schema?.name ? getNodeSchemaName(schema) : undefined,
-    currentSchema: schema ? deepClone(schema) : undefined,
+    name: schema?.name ? getNodeSchemaName(schema) : undefined,
+    schema: schema ? deepClone(schema) : undefined,
     isNew: isNewType,
   }
 }
 
-const applyAiCandidate = async (change: SchemaChangeCandidate): Promise<{ ok: boolean, error?: string }> => {
+const applyAiResult = async (result: AIChatResult): Promise<{ ok: boolean, error?: string }> => {
+  const change = result.change
   const checked = checkCandidate(change)
   if (!checked.ok) return { ok: false, error: checked.error }
 
-  const candidate = getCandidateSchema(change)
+  const candidate = result.schema ?? getCandidateSchema(change)
   if (!candidate) return { ok: false, error: _L.value["frontend.view.error"] }
 
   try {
@@ -328,7 +345,7 @@ const applyAiCandidate = async (change: SchemaChangeCandidate): Promise<{ ok: bo
     // re-render the new fields.
     await closeNamespaceEditor()
     namespaceNode.value = node
-    isNewType = change.operation === 'create'
+    isNewType = change?.operation === 'create'
     isReadonlyEditor.value = false
     showNamespaceEditor.value = true
     await nextTick()

@@ -1,5 +1,6 @@
 import { combinePaths } from "schema-node-core"
-import { getCandidateSchema, SchemaChangeCandidate } from "./schemaChatApi"
+import { getCandidateSchema } from "./schemaChatApi"
+import type { SchemaChangeCandidate } from "./aiChat"
 
 /** The result of checking a candidate before applying it to the editor. */
 export interface CandidateCheckResult {
