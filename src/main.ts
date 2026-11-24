@@ -12,6 +12,7 @@ import "./utility/locale"
 import "./utility/auth"
 import { initSchemaRuntime, logger as schemaLogger, LogLevel, setLanguage } from 'schema-node-core'
 import { logger as viewLogger } from 'schema-node-vue-view'
+import 'schema-node-app-view'
 import { logger } from './utility/logger'
 import { reloadStorageSchemas } from './schema'
 import { setSchemaSite } from './schema/provider/schemaServerProvider'
